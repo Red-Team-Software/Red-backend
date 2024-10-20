@@ -1,0 +1,12 @@
+services:
+  #!rabbitmq
+  rabbitmq:
+    image: rabbitmq
+    container_name: GoDeliRed_rabbitmq
+    restart: always
+    ports:
+      - 5670:5672
+      - 15670:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
