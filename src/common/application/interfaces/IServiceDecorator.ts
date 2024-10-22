@@ -1,4 +1,4 @@
-import { Result } from "src/common/domain/result-handler/result";
+import { Result } from "src/common/utils/result-handler/result";
 import { IService, IServiceRequestDto, IServiceResponseDto } from "./IService";
 
 export abstract class IServiceDecorator<

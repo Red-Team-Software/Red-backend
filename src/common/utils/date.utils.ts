@@ -1,5 +1,5 @@
 import { BadRequestException } from "../domain/exceptions";
-import { Result } from "../domain/result-handler/result";
+import { Result } from "./result-handler/result";
 
 export function parseISODate(isoString: string): Result<Date> {
 	try {

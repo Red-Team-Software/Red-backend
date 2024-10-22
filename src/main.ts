@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import * as morgan from 'morgan';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { envs } from './config/envs/envs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -34,6 +35,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.listen(3000);
+  // await app.listen(envs.port);
+  // console.log(envs)
 }
 bootstrap();

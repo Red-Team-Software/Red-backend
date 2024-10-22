@@ -1,0 +1,14 @@
+# Databases 
+./database
+
+# Dependencies
+./dist
+./node_modules
+
+# Versioning and metadata
+.git
+.gitignore
+
+# Environment (contains sensitive data)
+.env.template
+.env
