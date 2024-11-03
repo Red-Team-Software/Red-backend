@@ -1,7 +1,6 @@
-import { NotifierDto } from "../notification-handler/dto/entry/entry";
 import { Result } from "../../utils/result-handler/result";
-import { NotifierResponse } from "./dto/response/response";
+import { PushNotifierDto } from "./dto/entry/push-notifier.dto";
 
-export interface INotifier {
-    notify(token: string): Promise<Result<NotifierDto>>;
+export interface IPushNotifier {
+    sendNotificationByToken(data: PushNotifierDto): Promise<Result<string>>;
 }
