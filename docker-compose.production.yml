@@ -63,6 +63,22 @@ services:
     volumes:
       - ./database/postgres:/var/lib/postgresql/data
 
+  #! red team backend
+  red-team-backend:
+    depends_on:
+      - rabbitmq
+      - mongo
+      - postgres
+    build: .
+    ports:
+      - ${PORT}:3000
+    container_name: GoDeliRed_backend
+    restart: always
+    env_file:
+      - .env.production
+    networks:
+      - red-team
+
 networks:
   red-team:
       driver: bridge

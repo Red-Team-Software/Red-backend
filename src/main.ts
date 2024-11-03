@@ -7,8 +7,7 @@ import { envs } from './config/envs/envs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  const globlaPrefix = 'api/v1';
+  const globlaPrefix = 'api';
 
   app.setGlobalPrefix(globlaPrefix);
 
@@ -35,7 +34,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // await app.listen(envs.port);
+  await app.listen(envs.port);
   // console.log(envs)
 }
 bootstrap();

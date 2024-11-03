@@ -1,0 +1,35 @@
+import { Result } from "src/common/utils/result-handler/result";
+import { IServiceDecorator } from "../services/decorator/IServiceDecorator";
+import { IAuditRepository } from "../repositories/audit.repository";
+import { IService, IServiceRequestDto, IServiceResponseDto } from "../services";
+
+export class AuditDecorator<
+	I extends IServiceRequestDto,
+	O extends IServiceResponseDto,
+> extends IServiceDecorator<I, O> {
+	private logger: IAuditRepository;
+
+	constructor(decoratee: IService<I, O>, logger: IAuditRepository) {
+		super(decoratee);
+		this.logger = logger;
+	}
+
+	async execute(service: I): Promise<Result<O>> {
+		let r = await this.decoratee.execute(service);
+
+		if (r.isSuccess) {
+			await this.logger.saveLog(
+				"Time: " +
+					new Date() +
+					" | Service: " +
+					this.decoratee.name +
+					" | InputData: " +
+					service.dataToString() +
+					" | ResponseData: " +
+					r.getValue().dataToString()
+			);
+		}
+
+		return r;
+	}
+}

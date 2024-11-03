@@ -1,8 +1,8 @@
 import { Inject } from "@nestjs/common";
-import { IEventPublisher } from "src/common/application/events/event-publisher.abstract";
-import { DomainEvent } from "src/common/domain/domain-event";
+import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
+import { DomainEvent } from "src/common/domain/domain-event/domain-event";
 import { Channel } from "amqplib";
-import { IEventSubscriber } from "src/common/application/events/event-subscriber.interface";
+import { IEventSubscriber } from "src/common/application/events/event-subscriber/event-subscriber.interface";
 
 export class RabbitMQEventPublisher extends IEventPublisher {
 	private readonly exchangeName = "logs"; // Nombre del exchange

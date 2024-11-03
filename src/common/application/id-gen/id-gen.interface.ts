@@ -1,3 +1,3 @@
-export interface IIdGen {
-    genId(): Promise<string>;
+export interface IIdGen <T> {
+    genId(): Promise<T>;
 }

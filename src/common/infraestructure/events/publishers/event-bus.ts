@@ -1,5 +1,5 @@
-import { IEventPublisher } from "src/common/application/events/event-publisher.abstract";
-import { DomainEvent } from "src/common/domain/domain-event";
+import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
+import { DomainEvent } from "src/common/domain/domain-event/domain-event";
 
 export class EventBus extends IEventPublisher {
 	constructor() {
