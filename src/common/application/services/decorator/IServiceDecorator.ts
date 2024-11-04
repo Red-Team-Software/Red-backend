@@ -1,16 +1,16 @@
 import { Result } from "src/common/utils/result-handler/result";
 import { IServiceRequestDto } from "../dto/request/service-request-dto.interface";
 import { IServiceResponseDto } from "../dto/response/service-request-dto.interface";
-import { IService } from "../IService";
+import { IApplicationService } from "../application.service.interface";
 
 export abstract class IServiceDecorator<
 	I extends IServiceRequestDto,
 	O extends IServiceResponseDto,
-> implements IService<I, O>
+> implements IApplicationService<I, O>
 {
-	protected readonly decoratee: IService<I, O>;
+	protected readonly decoratee: IApplicationService<I, O>;
 
-	constructor(decoratee: IService<I, O>) {
+	constructor(decoratee: IApplicationService<I, O>) {
 		this.decoratee = decoratee;
 	}
 

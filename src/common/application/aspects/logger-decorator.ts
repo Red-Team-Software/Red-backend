@@ -1,10 +1,8 @@
 import { Result } from "src/common/utils/result-handler/result";
-import {
-	IService,
-} from "../services/IService";
 import { IServiceDecorator } from "../services/decorator/IServiceDecorator";
 import { ILogger } from "../logger/logger.interface";
 import { IServiceRequestDto, IServiceResponseDto } from "../services";
+import { IApplicationService } from "../services/application.service.interface";
 
 export class LoggerDecorator<
 	I extends IServiceRequestDto,
@@ -12,7 +10,7 @@ export class LoggerDecorator<
 > extends IServiceDecorator<I, O> {
 	private readonly logger: ILogger;
 
-	constructor(decoratee: IService<I, O>, logger: ILogger) {
+	constructor(decoratee: IApplicationService<I, O>, logger: ILogger) {
 		super(decoratee);
 		this.logger = logger;
 	}

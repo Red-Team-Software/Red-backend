@@ -1,7 +1,7 @@
 import { Result } from "src/common/utils/result-handler/result";
 import { IServiceDecorator } from "../services/decorator/IServiceDecorator";
 import { IAuditRepository } from "../repositories/audit.repository";
-import { IService, IServiceRequestDto, IServiceResponseDto } from "../services";
+import { IApplicationService, IServiceRequestDto, IServiceResponseDto } from "../services";
 
 export class AuditDecorator<
 	I extends IServiceRequestDto,
@@ -9,7 +9,7 @@ export class AuditDecorator<
 > extends IServiceDecorator<I, O> {
 	private logger: IAuditRepository;
 
-	constructor(decoratee: IService<I, O>, logger: IAuditRepository) {
+	constructor(decoratee: IApplicationService<I, O>, logger: IAuditRepository) {
 		super(decoratee);
 		this.logger = logger;
 	}

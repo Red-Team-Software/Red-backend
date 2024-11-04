@@ -1,4 +1,4 @@
 export interface IMapper<D, O> {
-	toPersistence(domainEntity: D): O;
-	toDomain(infraEstructure: O): D;
+	fromPersistencetoDomain(infraEstructure: O):Promise<D>;
+	fromDomaintoPersistence(domainEntity: D): Promise<O>;
 }
