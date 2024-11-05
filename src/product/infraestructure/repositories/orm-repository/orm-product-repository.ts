@@ -6,20 +6,30 @@ import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { ProductID } from "src/product/domain/value-object/product-id";
 import { ProductName } from "src/product/domain/value-object/product-name";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
+import { OrmProductMapper } from "../../mapper/orm-mapper/orm-product-mapper";
+import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
+import { OrmProductImage } from "../../entities/orm-entities/orm-product-image";
 
 
 export class OrmProductRepository extends Repository<OrmProductEntity> implements IProductRepository{
 
     private mapper:IMapper <Product,OrmProductEntity>
+    private readonly ormProductImageRepository: Repository<OrmProductImage>
+
 
     constructor(dataSource:DataSource){
         super( OrmProductEntity, dataSource.createEntityManager() )
+        this.mapper=new OrmProductMapper(new UuidGen())
+        this.ormProductImageRepository=dataSource.getRepository( OrmProductImage )
     }
 
     async createProduct(product: Product): Promise<Result<Product>> {
         try{
             const entry=await this.mapper.fromDomaintoPersistence(product)
             const response= await this.save(entry)
+            for (const image of entry.images ){
+                this.ormProductImageRepository.save(image)
+            }
             return Result.success(product)
         }catch(e){
             return Result.fail( new Error('Create product unsucssessfully') )
@@ -56,8 +66,18 @@ export class OrmProductRepository extends Repository<OrmProductEntity> implement
             return Result.fail( new Error('Find product unsucssessfully'))
         }    
     }
-    findProductByName(ProductName: ProductName): Promise<Result<Product[]>> {
+    async findProductByName(ProductName: ProductName): Promise<Result<Product[]>> {
         throw new Error("Method not implemented.");
     }
-    
+
+    async verifyProductExistenceByName(ProductName: ProductName): Promise<Result<boolean>> {
+        try{
+            const account = await this.findOneBy({name:ProductName.Value})
+            if(account) return Result.success(true)
+                return Result.success(false)
+        }
+        catch(e){
+            return Result.fail( new Error('Find product by name unsucssessfully'))
+        }    
+    }
 }

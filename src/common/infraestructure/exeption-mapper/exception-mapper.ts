@@ -1,10 +1,12 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
-import { Exception, ExeptionType } from "src/common/domain/exceptions";
+import { Exception, ExeptionType } from "../exceptions";
+import { log } from "console";
 
 export class ExceptionMapper {
 	private constructor() {}
 
-	static toHttp(error: Exception) {
+	static toHttp(error: Error) {
+		// log(error)
 		try {
 			if (error instanceof Exception) {
 				switch (error.getType()) {
@@ -37,7 +39,7 @@ export class ExceptionMapper {
 			}
 		} catch (error) {
 			return new HttpException(
-				"Error del server y no capturado: " + error,
+				"Error not handeled and captured" + error,
 				HttpStatus.NOT_IMPLEMENTED
 			);
 		}

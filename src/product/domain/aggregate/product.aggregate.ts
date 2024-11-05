@@ -6,6 +6,7 @@ import { ProductName } from "../value-object/product-name";
 import { ProductStock } from "../value-object/product-stock";
 import { ProductRegistered } from "../domain-events/product-registered";
 import { ProductImage } from "../value-object/product-image";
+import { ProductPrice } from "../value-object/product-price";
 
 export class Product extends AggregateRoot <ProductID>{
     protected when(event: DomainEvent): void {
@@ -27,7 +28,8 @@ export class Product extends AggregateRoot <ProductID>{
         private productCaducityDate:ProductCaducityDate,
         private productName:ProductName,
         private productStock:ProductStock,
-        private productImages:ProductImage[]
+        private productImages:ProductImage[],
+        private productPrice:ProductPrice
     ){
         super(productId)
     }
@@ -38,7 +40,8 @@ export class Product extends AggregateRoot <ProductID>{
         productCaducityDate:ProductCaducityDate,
         productName:ProductName,
         productStock:ProductStock,
-        productImages:ProductImage[]
+        productImages:ProductImage[],
+        productPrice:ProductPrice
     ):Product{
         const product = new Product(
             productId,
@@ -46,7 +49,8 @@ export class Product extends AggregateRoot <ProductID>{
             productCaducityDate,
             productName,
             productStock,
-            productImages
+            productImages,
+            productPrice
         )
         product.when(
             ProductRegistered.create(
@@ -55,7 +59,8 @@ export class Product extends AggregateRoot <ProductID>{
                 productCaducityDate,
                 productName,
                 productStock,
-                productImages
+                productImages,
+                productPrice
             )
         )
         return product
@@ -66,7 +71,8 @@ export class Product extends AggregateRoot <ProductID>{
         productCaducityDate:ProductCaducityDate,
         productName:ProductName,
         productStock:ProductStock,
-        productImages:ProductImage[]
+        productImages:ProductImage[],
+        productPrice:ProductPrice
     ):Product{
         const product = new Product(
             productId,
@@ -74,7 +80,8 @@ export class Product extends AggregateRoot <ProductID>{
             productCaducityDate,
             productName,
             productStock,
-            productImages
+            productImages,
+            productPrice
         )
         product.validateState()
         return product
@@ -84,4 +91,5 @@ export class Product extends AggregateRoot <ProductID>{
     get ProductName():ProductName{return this.productName}
     get ProductStock():ProductStock{return this.productStock}
     get ProductImages():ProductImage[]{return this.productImages}
+    get ProductPrice():ProductPrice{return this.productPrice}
 }

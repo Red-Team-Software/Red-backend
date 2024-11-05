@@ -1,8 +1,8 @@
 import { Result } from "src/common/utils/result-handler/result";
-import { IServiceDecorator } from "../services/decorator/IServiceDecorator";
-import { ILogger } from "../logger/logger.interface";
-import { IServiceRequestDto, IServiceResponseDto } from "../services";
-import { IApplicationService } from "../services/application.service.interface";
+import { IServiceDecorator } from "../../services/decorator/IServiceDecorator";
+import { ILogger } from "../../logger/logger.interface";
+import { IServiceRequestDto, IServiceResponseDto } from "../../services";
+import { IApplicationService } from "../../services/application.service.interface";
 
 export class LoggerDecorator<
 	I extends IServiceRequestDto,
@@ -17,22 +17,19 @@ export class LoggerDecorator<
 
 	async execute(input: I): Promise<Result<O>> {
 		const r = await this.decoratee.execute(input);
-
-		if (!r.isSuccess) {
-			// Adaptar esto a loggear por texto no es tan complejo, me parece raro que sea solo loggear por consola
+		if (!r.isSuccess()) {
 			this.logger.errorLog(
 				this.decoratee.name,
-				`Error execute: Error: ${r.getError()} -- `,
-				input.dataToString()
+				`Error execute: Error: ${r.getError} -- `,
+				JSON.stringify(input)
 			);
 		} else {
 			this.logger.successLog(
 				this.decoratee.name,
 				`Successful execute: -- `,
-				input.dataToString()
+				JSON.stringify(input)
 			);
 		}
-
 		return r;
 	}
 }

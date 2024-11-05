@@ -6,4 +6,5 @@ export interface CreateProductApplicationRequestDTO extends IServiceRequestDto {
     caducityDate: Date,
     stock: number
     images:string[]
+    price:number
 }

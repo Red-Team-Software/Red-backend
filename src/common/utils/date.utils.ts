@@ -1,4 +1,4 @@
-import { BadRequestException } from "../domain/exceptions";
+import { BadRequestException } from "../infraestructure/exceptions";
 import { Result } from "./result-handler/result";
 
 export function parseISODate(isoString: string): Result<Date> {

@@ -4,4 +4,5 @@ export interface IProduct{
     desciption: string,
     caducityDate: Date,
     stock: number
+    price:number
 }

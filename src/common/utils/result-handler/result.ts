@@ -7,11 +7,11 @@ export class Result<T> {
 		this.error = error;
 	}
 
-	public getValue(): T {
+	get getValue(): T {
 		return this.value;
 	}
 
-	public getError(): Error {
+	get getError(): Error {
 		return this.error;
 	}
 

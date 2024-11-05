@@ -1,7 +1,7 @@
 import { Result } from "src/common/utils/result-handler/result";
-import { IServiceDecorator } from "../services/decorator/IServiceDecorator";
-import { IAuditRepository } from "../repositories/audit.repository";
-import { IApplicationService, IServiceRequestDto, IServiceResponseDto } from "../services";
+import { IServiceDecorator } from "../../services/decorator/IServiceDecorator";
+import { IAuditRepository } from "../../repositories/audit.repository";
+import { IApplicationService, IServiceRequestDto, IServiceResponseDto } from "../../services";
 
 export class AuditDecorator<
 	I extends IServiceRequestDto,
@@ -24,9 +24,9 @@ export class AuditDecorator<
 					" | Service: " +
 					this.decoratee.name +
 					" | InputData: " +
-					service.dataToString() +
+					JSON.stringify(service)+
 					" | ResponseData: " +
-					r.getValue().dataToString()
+					JSON.stringify
 			);
 		}
 

@@ -4,6 +4,7 @@ import { ProductDescription } from '../value-object/product-description';
 import { ProductID } from '../value-object/product-id';
 import { ProductImage } from '../value-object/product-image';
 import { ProductName } from '../value-object/product-name';
+import { ProductPrice } from '../value-object/product-price';
 import { ProductStock } from '../value-object/product-stock';
 export class ProductRegistered extends DomainEvent {
     serialize(): string {
@@ -15,7 +16,8 @@ export class ProductRegistered extends DomainEvent {
         productCaducityDate:ProductCaducityDate,
         productName:ProductName,
         productStock:ProductStock,
-        productImage:ProductImage[]
+        productImage:ProductImage[],
+        productPrice:ProductPrice
     ){
         return new ProductRegistered(
             productId,
@@ -23,7 +25,8 @@ export class ProductRegistered extends DomainEvent {
             productCaducityDate,
             productName,
             productStock,
-            productImage
+            productImage,
+            productPrice
         )
     }
     constructor(
@@ -32,7 +35,8 @@ export class ProductRegistered extends DomainEvent {
         public productCaducityDate:ProductCaducityDate,
         public productName:ProductName,
         public productStock:ProductStock,
-        public productImage:ProductImage[]
+        public productImage:ProductImage[],
+        public productPrice:ProductPrice
     ){
         super()
     }

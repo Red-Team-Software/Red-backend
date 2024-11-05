@@ -1,6 +1,6 @@
 import { Result } from "src/common/utils/result-handler/result";
 import { IServiceRequestDto } from "../dto/request/service-request-dto.interface";
-import { IServiceResponseDto } from "../dto/response/service-request-dto.interface";
+import { IServiceResponseDto } from "../dto/response/service-response-dto.interface";
 import { IApplicationService } from "../application.service.interface";
 
 export abstract class IServiceDecorator<

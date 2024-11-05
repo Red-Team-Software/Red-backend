@@ -12,6 +12,8 @@ import { ProductName } from "src/product/domain/value-object/product-name";
 import { ProductStock } from "src/product/domain/value-object/product-stock";
 import { ProductImage } from "src/product/domain/value-object/product-image";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
+import { ProductPrice } from "src/product/domain/value-object/product-price";
+import { log } from "console";
 
 export class CreateProductApplicationService extends IApplicationService 
 <CreateProductApplicationRequestDTO,CreateProductApplicationResponseDTO> {
@@ -24,13 +26,22 @@ export class CreateProductApplicationService extends IApplicationService
         super()
     }
     async execute(command: CreateProductApplicationRequestDTO): Promise<Result<CreateProductApplicationResponseDTO>> {
+        let search=await this.productRepository.verifyProductExistenceByName(ProductName.create(command.name))
+        if (!search.isSuccess())
+            return Result.fail(new Error('Error during creation of product'))
+
+        if (search.getValue) 
+            return Result.fail(new Error('Error during creation of product name already exist'))
+        
+        let id=await this.idGen.genId()
         let product=Product.RegisterProduct(
-            ProductID.create(await this.idGen.genId()),
+            ProductID.create(id),
             ProductDescription.create(command.desciption),
             ProductCaducityDate.create(command.caducityDate),
             ProductName.create(command.name),
             ProductStock.create(command.stock),
-            command.images.map((image)=>ProductImage.create(image))
+            command.images.map((image)=>ProductImage.create(image)),
+            ProductPrice.create(command.price)
         )
         let result=await this.productRepository.createProduct(product)
         if (!result.isSuccess()) 

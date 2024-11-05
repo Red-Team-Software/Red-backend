@@ -3,5 +3,6 @@ export interface CreateProductInfraestructureRequestDTO{
     desciption: string,
     caducityDate: Date,
     stock: number
-    images:string[]
+    images:string[],
+    price:number
 }

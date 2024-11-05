@@ -10,6 +10,7 @@ export interface IProductRepository {
     updateProduct( product: Product ): Promise<Result<Product>>
     findProductById( id: ProductID ): Promise<Result<Product>>
     findProductByName(ProductName: ProductName): Promise<Result<Product[]>>
+    verifyProductExistenceByName(ProductName: ProductName): Promise<Result<boolean>> 
     // addCategoryToProduct(category:ProductCategory,id:ProductId):Promise<Result<Product>>
     // deleteCategoryIntoProduct(category:ProductCategory,ProductId:ProductId):Promise<Result<Product>>
 }
