@@ -13,6 +13,9 @@ import { ProductStock } from "src/product/domain/value-object/product-stock";
 import { ProductImage } from "src/product/domain/value-object/product-image";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { ProductPrice } from "src/product/domain/value-object/product-price";
+import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface";
+import { TypeFile } from "src/common/application/file-uploader/enums/type-file.enum";
+import { FileUploaderResponseDTO } from "src/common/application/file-uploader/dto/response/file-uploader-response-dto";
 import { log } from "console";
 
 export class CreateProductApplicationService extends IApplicationService 
@@ -21,34 +24,50 @@ export class CreateProductApplicationService extends IApplicationService
     constructor(
         private readonly eventPublisher: IEventPublisher,
         private readonly productRepository:IProductRepository,
-        private readonly idGen:IIdGen<string>
+        private readonly idGen:IIdGen<string>,
+        private readonly fileUploader:IFileUploader
     ){
         super()
     }
     async execute(command: CreateProductApplicationRequestDTO): Promise<Result<CreateProductApplicationResponseDTO>> {
         let search=await this.productRepository.verifyProductExistenceByName(ProductName.create(command.name))
+
         if (!search.isSuccess())
             return Result.fail(new Error('Error during creation of product'))
 
         if (search.getValue) 
             return Result.fail(new Error('Error during creation of product name already exist'))
-        
+
+        let uploaded:FileUploaderResponseDTO[]=[]
+        for (const image of command.images){
+            let idImage=await this.idGen.genId()
+            let imageuploaded=await this.fileUploader.uploadFile(image,TypeFile.image,idImage)
+            
+            if(!imageuploaded.isSuccess())
+                return Result.fail(new Error('Error during creation of product uploading the images'))
+            
+            uploaded.push(imageuploaded.getValue)
+        }
+
         let id=await this.idGen.genId()
         let product=Product.RegisterProduct(
             ProductID.create(id),
-            ProductDescription.create(command.desciption),
+            ProductDescription.create(command.description),
             ProductCaducityDate.create(command.caducityDate),
             ProductName.create(command.name),
             ProductStock.create(command.stock),
-            command.images.map((image)=>ProductImage.create(image)),
+            uploaded.map((image)=>ProductImage.create(image.url)),
             ProductPrice.create(command.price)
         )
         let result=await this.productRepository.createProduct(product)
         if (!result.isSuccess()) 
             return Result.fail(new Error('Error during creation of product'))
         this.eventPublisher.publish(product.pullDomainEvents())
-        
-        return Result.success(command)
+        let response:CreateProductApplicationResponseDTO={
+            ...command,
+            images:product.ProductImages.map(image=>image.Value)
+        }
+        return Result.success(response)
     }
 
 }

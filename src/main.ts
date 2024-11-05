@@ -4,6 +4,7 @@ import * as morgan from 'morgan';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { envs } from './config/envs/envs';
+import { json } from 'express'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -34,6 +35,7 @@ async function bootstrap() {
     credentials: true,
   });
 
+  app.use(json({ limit: '20mb' }));
   await app.listen(envs.port);
   // console.log(envs)
 }

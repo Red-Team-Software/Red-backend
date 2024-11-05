@@ -6,7 +6,7 @@ export class ExceptionMapper {
 	private constructor() {}
 
 	static toHttp(error: Error) {
-		// log(error)
+		log(error)
 		try {
 			if (error instanceof Exception) {
 				switch (error.getType()) {

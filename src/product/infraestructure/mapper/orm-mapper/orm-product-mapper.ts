@@ -18,14 +18,20 @@ export class OrmProductMapper implements IMapper <Product,OrmProductEntity>{
     ){}
 
     async fromDomaintoPersistence(domainEntity: Product): Promise<OrmProductEntity> {
-        let id=await this.idGen.genId()
+        let ormImages:OrmProductImage[]=[]
+        for (const image of domainEntity.ProductImages){
+            ormImages.push(
+                OrmProductImage.create(await this.idGen.genId(),image.Value,domainEntity.getId().Value)
+            )
+        }
+
         let data:OrmProductEntity={
             id:domainEntity.getId().Value,
             name: domainEntity.ProductName.Value,
             desciption: domainEntity.ProductDescription.Value,
             caducityDate: domainEntity.ProductCaducityDate.Value,
             stock: domainEntity.ProductStock.Value,
-            images:domainEntity.ProductImages.map((productImage)=>OrmProductImage.create(id,productImage.Value)),
+            images: ormImages,
             price:domainEntity.ProductPrice.Value
         }
         return data

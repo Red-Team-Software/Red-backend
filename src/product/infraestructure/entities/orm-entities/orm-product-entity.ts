@@ -18,7 +18,8 @@ export class OrmProductEntity implements IProduct{
         desciption: string,
         caducityDate: Date,
         stock: number,
-        price: number
+        price: number,
+        images:OrmProductImage[],
     ): OrmProductEntity
     {
         const product = new OrmProductEntity()
@@ -28,6 +29,7 @@ export class OrmProductEntity implements IProduct{
         product.caducityDate=caducityDate
         product.stock=stock
         product.price=price
+        product.images=images
         return product
     }
 }

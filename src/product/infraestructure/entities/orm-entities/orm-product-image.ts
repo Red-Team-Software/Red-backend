@@ -9,15 +9,17 @@ export class OrmProductImage implements IProductImage
     id: string
     @Column( 'varchar' ) image: string
     @ManyToOne( () => OrmProductEntity ) @JoinColumn( { name: 'product_id' } ) product: OrmProductEntity
-    
+    @Column( 'varchar' ) product_id: string
     static create ( 
         id: string,
         image:string,
+        product_id:string
     ): OrmProductImage
     {
         const activityImage = new OrmProductImage()
         activityImage.id=id
         activityImage.image=image
+        activityImage.product_id=product_id
         return activityImage
     }
 

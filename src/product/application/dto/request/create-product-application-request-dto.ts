@@ -2,9 +2,9 @@ import { IServiceRequestDto } from "src/common/application/services"
 
 export interface CreateProductApplicationRequestDTO extends IServiceRequestDto {
     name: string,
-    desciption: string,
+    description: string,
     caducityDate: Date,
     stock: number
-    images:string[]
+    images:Buffer[]
     price:number
 }

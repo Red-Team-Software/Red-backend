@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Logger, Post } from '@nestjs/common';
+import { Body, Controller, FileTypeValidator, Get, Logger, ParseFilePipe, Post, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { IProductRepository } from 'src/product/domain/repository/product.interface.repositry';
 import { OrmProductRepository } from '../repositories/orm-repository/orm-product-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
@@ -10,6 +10,8 @@ import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
 import { UuidGen } from 'src/common/infraestructure/id-gen/uuid-gen';
 import { LoggerDecorator } from 'src/common/application/aspects/logger-decorator/logger-decorator';
 import { NestLogger } from 'src/common/infraestructure/logger/nest-logger';
+import { CloudinaryService } from 'src/common/infraestructure/file-uploader/cloudinary-uploader';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 
 @Controller('product')
@@ -24,20 +26,27 @@ export class ProductController {
   }
 
   @Post('create')
-  async createProduct(@Body() entry: CreateProductInfraestructureRequestDTO) {
-
-
+  @UseInterceptors(FilesInterceptor('images'))  
+  async createProduct(@Body() entry: CreateProductInfraestructureRequestDTO,
+  @UploadedFiles(
+    new ParseFilePipe({
+      validators: [new FileTypeValidator({
+        fileType:/(jpeg|.jpg|.png)$/
+      }),
+      ]
+    }),
+  ) images: Express.Multer.File[]) {
+    
     let service= new ExceptionDecorator(
-        new LoggerDecorator(
           new CreateProductApplicationService(
             new EventBus(),
             this.ormProductRepo,
-            this.idGen
+            this.idGen,
+            new CloudinaryService()
           ),
-          new NestLogger(new Logger())
-        )
       )
-    let response= await service.execute({userId:'none',...entry})
+      let buffers=images.map(image=>image.buffer)
+    let response= await service.execute({userId:'none',...entry,images:buffers})
     return response.getValue
   }
 }
