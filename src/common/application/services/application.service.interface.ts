@@ -10,5 +10,5 @@ export abstract class IApplicationService<
 		return this.constructor.name;
 	}
 
-	abstract execute(command: I): Promise<Result<O>>; //Acción singular que realiza el servicio
+	abstract execute(data: I): Promise<Result<O>>; //Acción singular que realiza el servicio
 }

@@ -1,7 +1,7 @@
 import { IApplicationService } from "src/common/application/services/application.service.interface";
 import { Result } from "src/common/utils/result-handler/result";
-import { CreateProductApplicationRequestDTO } from "../dto/request/create-product-application-request-dto";
-import { CreateProductApplicationResponseDTO } from "../dto/response/create-product-application-response-dto";
+import { CreateProductApplicationRequestDTO } from "../../dto/request/create-product-application-request-dto";
+import { CreateProductApplicationResponseDTO } from "../../dto/response/create-product-application-response-dto";
 import { IProductRepository } from "src/product/domain/repository/product.interface.repositry";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
@@ -16,7 +16,6 @@ import { ProductPrice } from "src/product/domain/value-object/product-price";
 import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface";
 import { TypeFile } from "src/common/application/file-uploader/enums/type-file.enum";
 import { FileUploaderResponseDTO } from "src/common/application/file-uploader/dto/response/file-uploader-response-dto";
-import { log } from "console";
 
 export class CreateProductApplicationService extends IApplicationService 
 <CreateProductApplicationRequestDTO,CreateProductApplicationResponseDTO> {
