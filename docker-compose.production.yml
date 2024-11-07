@@ -32,20 +32,6 @@ services:
       - ./database/mongo:/data/db  
     networks:
       - red-team
-  #!mongoexpress (Para verse desde localhost)
-  mongo-express:
-    image: mongo-express:1.0.2-18-alpine3.19
-    container_name: GoDeliRed_mongoexpress
-    restart: always
-    ports:
-      - 8081:8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_DB_USER_NAME}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_DB_USER_PASSWORD}
-      ME_CONFIG_MONGODB_URL: ${MONGOEXPRESS_DB_HOST}
-      ME_CONFIG_BASICAUTH: false
-    networks:
-      - red-team
       
   #!postgres db
   postgres:

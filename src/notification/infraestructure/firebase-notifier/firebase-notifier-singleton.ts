@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
 import { PushNotifierRequestDto } from 'src/common/application/notification-handler/dto/request/push-notifier-request-dto';
 import { IPushNotifier } from 'src/common/application/notification-handler/notification-interface';
+import { BadRequestException } from 'src/common/infraestructure/infraestructure-exception';
 import { Result } from 'src/common/utils/result-handler/result';
 import { envs } from 'src/config/envs/envs';
 
@@ -39,7 +40,7 @@ export class FirebaseNotifier implements IPushNotifier {
             if ( e.ErrorCode == "messaging/registration-token-not-registered" ) {
                 // DELETE TOKEN USER
             }           
-            return Result.fail<string>(new Error('error-sending-push'))
+            return Result.fail<string>(new BadRequestException())
         } 
     }
 

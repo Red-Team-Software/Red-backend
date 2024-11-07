@@ -27,7 +27,10 @@ interface EnvVars {
     FIREBASE_AUTH_PROVIDER:string,
     FIREBASE_CLIENT:string,
     FIREBASE_DOMAIN:string,
-    STRIPE_PRIVATE_KEY:string
+    STRIPE_PRIVATE_KEY:string,
+    CLOUDINARY_CLOUD_NAME:string,
+    CLOUDINARY_API_KEY:string,
+    CLOUDINARY_API_SECRET:string	
 }
 
 const envsSchema = joi.object({
@@ -56,7 +59,10 @@ const envsSchema = joi.object({
     FIREBASE_AUTH_PROVIDER:joi.string().required(),
     FIREBASE_CLIENT:joi.string().required(),
     FIREBASE_DOMAIN:joi.string().required(),
-    STRIPE_PRIVATE_KEY:joi.string().required()
+    STRIPE_PRIVATE_KEY:joi.string().required(),
+    CLOUDINARY_CLOUD_NAME:joi.string().required(),
+    CLOUDINARY_API_KEY:joi.string().required(),
+    CLOUDINARY_API_SECRET:joi.string().required()
 }).unknown(true);
 
 const {error, value} = envsSchema.validate(process.env);
@@ -90,5 +96,8 @@ export const envs = {
     FIREBASE_AUTH_PROVIDER:envVars.FIREBASE_AUTH_PROVIDER,
     FIREBASE_CLIENT:envVars.FIREBASE_CLIENT,
     FIREBASE_DOMAIN:envVars.FIREBASE_DOMAIN,
-    STRIPE_PRIVATE_KEY:envVars.STRIPE_PRIVATE_KEY
+    STRIPE_PRIVATE_KEY:envVars.STRIPE_PRIVATE_KEY,
+    CLOUDINARY_CLOUD_NAME:envVars.CLOUDINARY_CLOUD_NAME,
+    CLOUDINARY_API_KEY:envVars.CLOUDINARY_API_KEY,
+    CLOUDINARY_API_SECRET:envVars.CLOUDINARY_API_SECRET
 }
