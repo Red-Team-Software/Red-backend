@@ -9,6 +9,7 @@ import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { OrmProductMapper } from "../../mapper/orm-mapper/orm-product-mapper";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { OrmProductImage } from "../../entities/orm-entities/orm-product-image";
+import { NotFoundException, PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 
 
 export class OrmProductRepository extends Repository<OrmProductEntity> implements IProductRepository{
@@ -32,7 +33,7 @@ export class OrmProductRepository extends Repository<OrmProductEntity> implement
             }
             return Result.success(product)
         }catch(e){
-            return Result.fail( new Error('Create product unsucssessfully') )
+            return Result.fail( new PersistenceException('Create product unsucssessfully') )
         }
     }
     async deleteProductById(id: ProductID): Promise<Result<ProductID>> {
@@ -40,7 +41,7 @@ export class OrmProductRepository extends Repository<OrmProductEntity> implement
             const result = this.delete({ id: id.Value })   
             return Result.success(id) 
         } catch (e) {
-            return Result.fail(new Error('Delete product unsucssessfully'))
+            return Result.fail(new PersistenceException('Delete product unsucssessfully'))
         }
     }
     async updateProduct(product: Product): Promise<Result<Product>> {
@@ -49,7 +50,7 @@ export class OrmProductRepository extends Repository<OrmProductEntity> implement
             const result = await this.save(persis)
             return Result.success(product)
         } catch (e) {
-            return Result.fail(new Error('Update product unsucssessfully'))
+            return Result.fail(new PersistenceException('Update product unsucssessfully'))
         }
     }
     async findProductById(id: ProductID): Promise<Result<Product>> {
@@ -57,13 +58,13 @@ export class OrmProductRepository extends Repository<OrmProductEntity> implement
             const ormActivity=await this.findOneBy({id:id.Value})
             
             if(!ormActivity)
-                return Result.fail( new Error('Find product unsucssessfully'))
+                return Result.fail( new NotFoundException('Find product unsucssessfully'))
 
             const activity=await this.mapper.fromPersistencetoDomain(ormActivity)
             
             return Result.success(activity)
         }catch(e){
-            return Result.fail( new Error('Find product unsucssessfully'))
+            return Result.fail( new NotFoundException('Find product unsucssessfully'))
         }    
     }
     async findProductByName(ProductName: ProductName): Promise<Result<Product[]>> {
@@ -77,7 +78,7 @@ export class OrmProductRepository extends Repository<OrmProductEntity> implement
                 return Result.success(false)
         }
         catch(e){
-            return Result.fail( new Error('Find product by name unsucssessfully'))
+            return Result.fail( new NotFoundException('Find product by name unsucssessfully'))
         }    
     }
 }

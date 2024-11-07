@@ -1,4 +1,4 @@
-import { BadRequestException } from "../infraestructure/exceptions";
+import { BadRequestException } from "../infraestructure/infraestructure-exception";
 import { Result } from "./result-handler/result";
 
 export function parseISODate(isoString: string): Result<Date> {
@@ -7,9 +7,7 @@ export function parseISODate(isoString: string): Result<Date> {
 		return Result.success<Date>(date);
 	} catch (error) {
 		return Result.fail<Date>(
-			new BadRequestException(
-				"Invalid date format, you must provide an ISO date"
-			)
+			new BadRequestException()
 		);
 	}
 }

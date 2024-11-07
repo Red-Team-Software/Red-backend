@@ -8,6 +8,7 @@ import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { OrmProductImage } from "../../entities/orm-entities/orm-product-image";
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
 import { FindAllProductsApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-application-request-dto";
+import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { log } from "console";
 
 
@@ -25,6 +26,7 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
 
     async findAllProducts(criteria:FindAllProductsApplicationRequestDTO ): Promise<Result<Product[]>>
     {
+        log(criteria)
         try{
             const ormProducts=await this.find({
                 take:criteria.perPage,
@@ -35,7 +37,7 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             })
 
             if(ormProducts.length===0)
-                return Result.fail( new Error('Find products unsucssessfully'))
+                return Result.fail( new NotFoundException('products empty please try again'))
 
             const products:Product[]=[]
             for (const product of ormProducts){
@@ -43,7 +45,7 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             }
             return Result.success(products)
         }catch(e){
-            return Result.fail( new Error('Find products unsucssessfully'))
+            return Result.fail( new NotFoundException('products empty please try again'))
         }
     }
      

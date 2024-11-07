@@ -52,7 +52,7 @@ export class Product extends AggregateRoot <ProductID>{
             productImages,
             productPrice
         )
-        product.when(
+        product.apply(
             ProductRegistered.create(
                 productId,
                 productDescription,

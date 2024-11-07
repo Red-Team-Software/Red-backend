@@ -6,7 +6,7 @@ import { Result } from "src/common/utils/result-handler/result"
 import { NotFoundProductApplicationException } from "../../application-exepction/not-found-product-application-exception"
 
 
-export class FindAllProductsApplicationService extends 
+export class FindProductsAndComboApplicationService extends 
 IApplicationService<FindAllProductsApplicationRequestDTO,FindAllProductsApplicationResponseDTO[]>{
     constructor(
         private readonly queryProductRepository:IQueryProductRepository

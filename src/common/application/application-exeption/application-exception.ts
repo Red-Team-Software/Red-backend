@@ -1,10 +1,9 @@
 import { BaseException } from "src/common/utils/base-exception";
 import { BaseExceptionEnum } from "src/common/utils/enum/base-exception.enum";
 
-export abstract class DomainException extends BaseException {
+export class ApplicationException extends BaseException {
     constructor(msg: string) {
         super(msg);
-        this.type=BaseExceptionEnum.DOMAIN_EXCEPTION
-        // Object.setPrototypeOf(this, DomainException.prototype);
+        this.type=BaseExceptionEnum.APPLICATION_EXCEPTION
     }
 }

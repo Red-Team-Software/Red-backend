@@ -1,47 +1,51 @@
-import { HttpException, HttpStatus } from "@nestjs/common";
-import { log } from "console";
-import { ExeptionType, InfraesctructureException } from "../exceptions";
+import { BadRequestException, ConflictException, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { InfraesctructureException } from "../infraestructure-exception";
+import { ExeptionInfraestructureType } from "../infraestructure-exception/enum/exceptions-infraestructure-type.enums";
+import { BaseException } from "src/common/utils/base-exception";
+import { BaseExceptionEnum } from "src/common/utils/enum/base-exception.enum";
 
 export class ExceptionMapper {
 	private constructor() {}
 
-	static toHttp(error: Error) {
-		log(error)
-		try {
-			if (error instanceof InfraesctructureException) {
-				switch (error.getType()) {
-					case ExeptionType.BAD_REQUEST:
-						return new HttpException(error.message, HttpStatus.BAD_REQUEST);
-					case ExeptionType.CONFLICT:
-						return new HttpException(error.message, HttpStatus.CONFLICT);
-					case ExeptionType.NOT_FOUND:
-						return new HttpException(error.message, HttpStatus.NOT_FOUND);
-					case ExeptionType.PERSISTENCE:
-						return new HttpException(
-							error.message,
-							HttpStatus.INTERNAL_SERVER_ERROR
-						);
-					case ExeptionType.UNAUTHORIZED:
-						return new HttpException(error.message, HttpStatus.UNAUTHORIZED);
-					case ExeptionType.DOMAIN_VALIDATION:
-						return new HttpException(error.message, HttpStatus.BAD_REQUEST);
-					default:
-						return new HttpException(
-							"Error not handeled",
-							HttpStatus.NOT_IMPLEMENTED
-						);
-				}
-			} else {
-				return new HttpException(
-					"Error not handeled " + error,
-					HttpStatus.NOT_IMPLEMENTED
-				);
+	private static handleDomainException(error:BaseException,message:string):void{
+		console.log(error)
+		throw new BadRequestException(message)
+	}
+	private static handleApplicationException(error:BaseException,message:string):void{
+
+		throw new BadRequestException(message)
+	}
+	private static handleInfraestructureException(error:BaseException,message:string):void{
+		if (error instanceof InfraesctructureException){
+			switch (error.getInfraestructureType()) {
+				case ExeptionInfraestructureType.BAD_REQUEST:
+					throw new BadRequestException(message)
+				case ExeptionInfraestructureType.CONFLICT:
+					throw new ConflictException(message);
+				case ExeptionInfraestructureType.NOT_FOUND:
+					throw new NotFoundException(message);
+				case ExeptionInfraestructureType.PERSISTENCE:
+					throw new InternalServerErrorException( message);
+				case ExeptionInfraestructureType.UNAUTHORIZED:
+					throw new UnauthorizedException(message);
+				default:
+					throw new InternalServerErrorException("Unesxpected Infraestrcuture Error not handeled");
 			}
-		} catch (error) {
-			return new HttpException(
-				"Error not handeled and captured" + error,
-				HttpStatus.NOT_IMPLEMENTED
-			);
 		}
+		throw new InternalServerErrorException("Unexpected Infraestructure error");
+	}
+	static toHttp(error: BaseException, message:string): void{
+		console.log(JSON.stringify(error))
+		try {
+			if (error.Type==BaseExceptionEnum.APPLICATION_EXCEPTION)
+				this.handleApplicationException(error,message)
+			if (error.Type==BaseExceptionEnum.DOMAIN_EXCEPTION)
+				this.handleDomainException(error,message)
+			if (error.Type==BaseExceptionEnum.INFRAESTRUCTURE_EXCEPTION)
+				this.handleInfraestructureException(error,message)
+			throw new InternalServerErrorException("Unexpected error");
+		} catch (err) {
+			throw new InternalServerErrorException("Unexpected error not handled");
+		}		
 	}
 }

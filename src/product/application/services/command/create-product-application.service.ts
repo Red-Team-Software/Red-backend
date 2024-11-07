@@ -16,6 +16,9 @@ import { ProductPrice } from "src/product/domain/value-object/product-price";
 import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface";
 import { TypeFile } from "src/common/application/file-uploader/enums/type-file.enum";
 import { FileUploaderResponseDTO } from "src/common/application/file-uploader/dto/response/file-uploader-response-dto";
+import { ErrorCreatingProductApplicationException } from "../../application-exepction/error-creating-product-application-exception";
+import { ErrorNameAlreadyApplicationException } from "../../application-exepction/error-name-already-exist-application-exception";
+import { ErrorUploadingImagesApplicationException } from "../../application-exepction/error-uploading-images-application-exception";
 
 export class CreateProductApplicationService extends IApplicationService 
 <CreateProductApplicationRequestDTO,CreateProductApplicationResponseDTO> {
@@ -32,10 +35,10 @@ export class CreateProductApplicationService extends IApplicationService
         let search=await this.productRepository.verifyProductExistenceByName(ProductName.create(command.name))
 
         if (!search.isSuccess())
-            return Result.fail(new Error('Error during creation of product'))
+            return Result.fail(new ErrorCreatingProductApplicationException())
 
         if (search.getValue) 
-            return Result.fail(new Error('Error during creation of product name already exist'))
+            return Result.fail(new ErrorNameAlreadyApplicationException())
 
         let uploaded:FileUploaderResponseDTO[]=[]
         for (const image of command.images){
@@ -43,7 +46,7 @@ export class CreateProductApplicationService extends IApplicationService
             let imageuploaded=await this.fileUploader.uploadFile(image,TypeFile.image,idImage)
             
             if(!imageuploaded.isSuccess())
-                return Result.fail(new Error('Error during creation of product uploading the images'))
+                return Result.fail(new ErrorUploadingImagesApplicationException())
             
             uploaded.push(imageuploaded.getValue)
         }
@@ -60,7 +63,7 @@ export class CreateProductApplicationService extends IApplicationService
         )
         let result=await this.productRepository.createProduct(product)
         if (!result.isSuccess()) 
-            return Result.fail(new Error('Error during creation of product'))
+            return Result.fail(new ErrorCreatingProductApplicationException())
         this.eventPublisher.publish(product.pullDomainEvents())
         let response:CreateProductApplicationResponseDTO={
             ...command,
