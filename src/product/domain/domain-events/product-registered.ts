@@ -6,6 +6,7 @@ import { ProductImage } from '../value-object/product-image';
 import { ProductName } from '../value-object/product-name';
 import { ProductPrice } from '../value-object/product-price';
 import { ProductStock } from '../value-object/product-stock';
+import { ProductWeigth } from '../value-object/product-weigth';
 export class ProductRegistered extends DomainEvent {
     serialize(): string {
         return ''
@@ -17,7 +18,8 @@ export class ProductRegistered extends DomainEvent {
         productName:ProductName,
         productStock:ProductStock,
         productImage:ProductImage[],
-        productPrice:ProductPrice
+        productPrice:ProductPrice,
+        productWeigth:ProductWeigth
     ){
         return new ProductRegistered(
             productId,
@@ -26,7 +28,8 @@ export class ProductRegistered extends DomainEvent {
             productName,
             productStock,
             productImage,
-            productPrice
+            productPrice,
+            productWeigth
         )
     }
     constructor(
@@ -36,7 +39,8 @@ export class ProductRegistered extends DomainEvent {
         public productName:ProductName,
         public productStock:ProductStock,
         public productImage:ProductImage[],
-        public productPrice:ProductPrice
+        public productPrice:ProductPrice,
+        public productWeigth:ProductWeigth
     ){
         super()
     }

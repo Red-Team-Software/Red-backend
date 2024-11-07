@@ -8,7 +8,6 @@ export class ExceptionMapper {
 	private constructor() {}
 
 	private static handleDomainException(error:BaseException,message:string):void{
-		console.log(error)
 		throw new BadRequestException(message)
 	}
 	private static handleApplicationException(error:BaseException,message:string):void{
@@ -35,17 +34,13 @@ export class ExceptionMapper {
 		throw new InternalServerErrorException("Unexpected Infraestructure error");
 	}
 	static toHttp(error: BaseException, message:string): void{
-		console.log(JSON.stringify(error))
-		try {
+		console.log('error mpper',JSON.stringify(error))
 			if (error.Type==BaseExceptionEnum.APPLICATION_EXCEPTION)
 				this.handleApplicationException(error,message)
 			if (error.Type==BaseExceptionEnum.DOMAIN_EXCEPTION)
 				this.handleDomainException(error,message)
 			if (error.Type==BaseExceptionEnum.INFRAESTRUCTURE_EXCEPTION)
 				this.handleInfraestructureException(error,message)
-			throw new InternalServerErrorException("Unexpected error");
-		} catch (err) {
-			throw new InternalServerErrorException("Unexpected error not handled");
-		}		
+			throw new InternalServerErrorException("Unexpected error");	
 	}
 }

@@ -30,7 +30,10 @@ IApplicationService<FindAllProductsApplicationRequestDTO,FindAllProductsApplicat
                 productDescription:product.ProductDescription.Value,
                 productName:product.ProductName.Value,
                 productImages:product.ProductImages.map(image=>image.Value),
-                productPrice:product.ProductPrice.Value
+                productPrice:product.ProductPrice.Price,
+                productCurrency:product.ProductPrice.Currency,
+                productWeigth:product.ProductWeigth.Weigth,
+                productMeasurement:product.ProductWeigth.Measure
             })
         })
         return Result.success(responseDto)

@@ -19,6 +19,7 @@ import { FileUploaderResponseDTO } from "src/common/application/file-uploader/dt
 import { ErrorCreatingProductApplicationException } from "../../application-exepction/error-creating-product-application-exception";
 import { ErrorNameAlreadyApplicationException } from "../../application-exepction/error-name-already-exist-application-exception";
 import { ErrorUploadingImagesApplicationException } from "../../application-exepction/error-uploading-images-application-exception";
+import { ProductWeigth } from "src/product/domain/value-object/product-weigth";
 
 export class CreateProductApplicationService extends IApplicationService 
 <CreateProductApplicationRequestDTO,CreateProductApplicationResponseDTO> {
@@ -59,7 +60,8 @@ export class CreateProductApplicationService extends IApplicationService
             ProductName.create(command.name),
             ProductStock.create(command.stock),
             uploaded.map((image)=>ProductImage.create(image.url)),
-            ProductPrice.create(command.price)
+            ProductPrice.create(command.price,command.currency.toLowerCase()),
+            ProductWeigth.create(command.weigth,command.measurement)
         )
         let result=await this.productRepository.createProduct(product)
         if (!result.isSuccess()) 
