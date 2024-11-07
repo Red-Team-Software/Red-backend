@@ -46,5 +46,5 @@ jobs:
       env:
         NEW_VERSION: ${{ steps.version.outputs.version  }}
       run: |
-        docker push -t c102002/red-team:$NEW_VERSION
-        docker push -t c102002/red-team:latest
+        docker push c102002/red-team:$NEW_VERSION
+        docker push c102002/red-team:latest
