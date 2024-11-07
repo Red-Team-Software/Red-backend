@@ -1,7 +1,7 @@
-import { ExeptionType } from "./";
-import { Exception } from "./exception";
+import { ExeptionType } from "./exceptions-type.enums";
+import { InfraesctructureException } from "./infraestructure.exception";
 
-export class ConflictException extends Exception {
+export class ConflictException extends InfraesctructureException {
 	constructor(message: string) {
 		super(message);
 		this.type = ExeptionType.CONFLICT;

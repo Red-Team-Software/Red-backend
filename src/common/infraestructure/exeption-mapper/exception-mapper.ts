@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
-import { Exception, ExeptionType } from "../exceptions";
 import { log } from "console";
+import { ExeptionType, InfraesctructureException } from "../exceptions";
 
 export class ExceptionMapper {
 	private constructor() {}
@@ -8,7 +8,7 @@ export class ExceptionMapper {
 	static toHttp(error: Error) {
 		log(error)
 		try {
-			if (error instanceof Exception) {
+			if (error instanceof InfraesctructureException) {
 				switch (error.getType()) {
 					case ExeptionType.BAD_REQUEST:
 						return new HttpException(error.message, HttpStatus.BAD_REQUEST);
