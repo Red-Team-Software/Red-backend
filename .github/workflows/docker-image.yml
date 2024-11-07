@@ -29,7 +29,7 @@ jobs:
       env:
         DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        NEW_VERSION: ${{ steps.version }}
+        NEW_VERSION: ${{ steps.version.outputs.version  }}
       run: |
         echo "Trying Login ..."
         echo "New version $NEW_VERSION uploading"
