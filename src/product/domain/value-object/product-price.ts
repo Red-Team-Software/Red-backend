@@ -24,6 +24,7 @@ export class ProductPrice implements ValueObject<ProductPrice> {
     }
 
     private constructor(price:number,currency:string){
+        currency=currency.toLowerCase()
         if (price<=0) throw new InvalidProductPriceException()
         if ( 
             ProductCurrencyEnum.bsf != currency &&
