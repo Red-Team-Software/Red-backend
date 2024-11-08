@@ -26,7 +26,6 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
 
     async findAllProducts(criteria:FindAllProductsApplicationRequestDTO ): Promise<Result<Product[]>>
     {
-        log(criteria)
         try{
             const ormProducts=await this.find({
                 take:criteria.perPage,

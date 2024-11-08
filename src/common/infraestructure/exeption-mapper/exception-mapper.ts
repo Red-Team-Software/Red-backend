@@ -34,7 +34,6 @@ export class ExceptionMapper {
 		throw new InternalServerErrorException("Unexpected Infraestructure error");
 	}
 	static toHttp(error: BaseException, message:string): void{
-		console.log('error mpper',JSON.stringify(error))
 			if (error.Type==BaseExceptionEnum.APPLICATION_EXCEPTION)
 				this.handleApplicationException(error,message)
 			if (error.Type==BaseExceptionEnum.DOMAIN_EXCEPTION)

@@ -66,7 +66,7 @@ export class CreateProductApplicationService extends IApplicationService
         let result=await this.productRepository.createProduct(product)
         if (!result.isSuccess()) 
             return Result.fail(new ErrorCreatingProductApplicationException())
-        this.eventPublisher.publish(product.pullDomainEvents())
+        await this.eventPublisher.publish(product.pullDomainEvents())
         let response:CreateProductApplicationResponseDTO={
             ...command,
             images:product.ProductImages.map(image=>image.Value)

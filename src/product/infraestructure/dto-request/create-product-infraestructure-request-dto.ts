@@ -15,7 +15,7 @@ export class CreateProductInfraestructureRequestDTO{
     @MinLength( 3 )
     description: string
 
-    @ApiProperty( { required: true, default: '2024-11-6' })
+    @ApiProperty( { required: true, default: '2024-11-06' })
     @IsDateString()
     caducityDate: Date
 

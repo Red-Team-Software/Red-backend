@@ -1,7 +1,7 @@
 services:
   #!rabbitmq
   rabbitmq:
-    image: rabbitmq:4.0.2
+    image: rabbitmq:4.0-management
     container_name: GoDeliRed_rabbitmq
     restart: always
     ports:
