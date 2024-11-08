@@ -1,7 +1,7 @@
 import { AggregateRoot, DomainEvent } from "src/common/domain";
-import { CategoryID } from "../value-object/category-id";
+import { CategoryId } from "../value-object/category-id";
 
-export class Category extends AggregateRoot <CategoryID>{
+export class Category extends AggregateRoot <CategoryId>{
 
     protected when(event: DomainEvent): void {
         // reacciona al evento de dominio
