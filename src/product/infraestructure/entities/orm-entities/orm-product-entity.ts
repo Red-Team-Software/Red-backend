@@ -4,6 +4,7 @@ import { OrmProductImage } from "./orm-product-image";
 
 @Entity('product')
 export class OrmProductEntity implements IProduct{
+
     @PrimaryColumn({type:"uuid"}) id:string
     @Column( 'varchar', { unique: true }   ) name: string
     @Column( 'varchar' ) desciption: string
@@ -11,6 +12,9 @@ export class OrmProductEntity implements IProduct{
     @OneToMany( () => OrmProductImage,   image => image.product,{ eager: true }) images: OrmProductImage[]   
     @Column( 'integer' ) stock: number
     @Column( 'integer' ) price: number
+    @Column( 'varchar' ) currency: string;
+    @Column( 'integer' ) weigth: number;
+    @Column( 'varchar' ) measurament: string;
 
     static create ( 
         id:string,
@@ -20,6 +24,9 @@ export class OrmProductEntity implements IProduct{
         stock: number,
         price: number,
         images:OrmProductImage[],
+        currency:string,
+        weigth:number,
+        measurament:string,
     ): OrmProductEntity
     {
         const product = new OrmProductEntity()
@@ -30,6 +37,9 @@ export class OrmProductEntity implements IProduct{
         product.stock=stock
         product.price=price
         product.images=images
+        product.currency=currency
+        product.weigth=weigth
+        product.measurament=measurament
         return product
     }
 }

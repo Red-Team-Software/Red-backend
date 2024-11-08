@@ -3,15 +3,18 @@ import { ConfigModule } from '@nestjs/config';
 import { RabbitMQModule } from './config/rabbitmq/rabbitmq.module';
 import { ProductController } from './product/infraestructure/controller/product.controller';
 import { CloudinaryProvider } from './common/infraestructure/providers/cloudinary.provider';
+import { NotificationModule } from './notification/infraestructure/notification.module';
+import { CategoryController } from './category/infraestructure/controller/category.controller';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    RabbitMQModule
+    RabbitMQModule,
+    NotificationModule
   ],
-  controllers: [ProductController],
+  controllers: [ProductController,CategoryController],
   providers:[CloudinaryProvider]
 })
 export class AppModule {}
