@@ -16,19 +16,19 @@ export class OrmBundleEntity implements IBundle{
     @Column( 'varchar' ) currency: string;
     @Column( 'integer' ) weigth: number;
     @Column( 'varchar' ) measurament: string;
-    // @ManyToMany(()=>OrmProductEntity, {eager:true})
-    // @JoinTable({
-    //     name: "bundle_product",
-    //     joinColumn: {
-    //         name: "bundle_id",
-    //         referencedColumnName: "id"
-    //     },
-    //     inverseJoinColumn: {
-    //         name: "product_id",
-    //         referencedColumnName: "id"
-    //     }
-    // })
-    // products: OrmProductEntity[];
+    @ManyToMany(()=>OrmProductEntity, {eager:true})
+    @JoinTable({
+        name: "bundle_product",
+        joinColumn: {
+            name: "bundle_id",
+            referencedColumnName: "id"
+        },
+        inverseJoinColumn: {
+            name: "product_id",
+            referencedColumnName: "id"
+        }
+    })
+    products: OrmProductEntity[];
 
     static create ( 
         id:string,
@@ -41,19 +41,21 @@ export class OrmBundleEntity implements IBundle{
         currency:string,
         weigth:number,
         measurament:string,
+        products: OrmProductEntity[]
     ): OrmBundleEntity
     {
-        const product = new OrmBundleEntity()
-        product.id=id
-        product.name=name
-        product.desciption=desciption
-        product.caducityDate=caducityDate
-        product.stock=stock
-        product.price=price
-        product.images=images
-        product.currency=currency
-        product.weigth=weigth
-        product.measurament=measurament
-        return product
+        const bundle = new OrmBundleEntity()
+        bundle.id=id
+        bundle.name=name
+        bundle.desciption=desciption
+        bundle.caducityDate=caducityDate
+        bundle.stock=stock
+        bundle.price=price
+        bundle.images=images
+        bundle.currency=currency
+        bundle.weigth=weigth
+        bundle.measurament=measurament
+        bundle.products=products
+        return bundle
     }
 }

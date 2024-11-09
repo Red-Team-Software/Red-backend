@@ -1,6 +1,6 @@
 import { IServiceResponseDto } from "src/common/application/services"
 
-export interface CreateProductApplicationResponseDTO extends IServiceResponseDto {
+export interface CreateBundleApplicationResponseDTO extends IServiceResponseDto {
     name: string,
     description: string,
     caducityDate: Date,
@@ -10,4 +10,5 @@ export interface CreateProductApplicationResponseDTO extends IServiceResponseDto
     currency:string
     weigth:number
     measurement:string
+    productId:string[]
 }

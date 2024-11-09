@@ -19,14 +19,21 @@ import { FindAllProductsInfraestructureRequestDTO } from '../dto-request/find-al
 import { PaginationRequestDTO } from 'src/common/application/services/dto/request/pagination-request-dto';
 import { RabbitMQEventPublisher } from 'src/common/infraestructure/events/publishers/rabbittMq.publisher';
 import { Channel } from 'amqplib';
+import { FindAllProductsAndBundlesInfraestructureRequestDTO } from '../dto-request/find-all-products-and-bundles-infraestructure-request-dto';
+import { FindAllProductsAndComboApplicationService } from 'src/product/application/services/query/find-all-product-and-combo-by-name-application.service';
+import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
+import { OrmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository';
+import { FindAllProductsbyNameApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-and-combos-request-dto';
 
 
 @Controller('product')
 export class ProductController {
 
+  //todo modulo seatrch para este 
   private readonly ormProductRepo:IProductRepository
   private readonly idGen: IIdGen<string> 
   private readonly ormProductQueryRepo:IQueryProductRepository
+  private readonly ormBundleQueryRepo:IQueryBundleRepository
   
   constructor(
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -34,6 +41,7 @@ export class ProductController {
     this.idGen= new UuidGen()
     this.ormProductRepo= new OrmProductRepository(PgDatabaseSingleton.getInstance())
     this.ormProductQueryRepo= new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
+    this.ormBundleQueryRepo= new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
   }
 
   @Post('create')
@@ -75,6 +83,29 @@ export class ProductController {
         new LoggerDecorator(
           new FindAllProductsApplicationService(
             this.ormProductQueryRepo
+          ),
+          new NestLogger(new Logger())
+        )
+      )
+    let response= await service.execute({...pagination})
+    return response.getValue
+  }
+
+  @Get('all-product-bundle')
+  async getAllProductsAndBundles(@Query() entry:FindAllProductsAndBundlesInfraestructureRequestDTO){
+
+    if(!entry.page)
+      entry.page=1
+    if(!entry.perPage)
+      entry.perPage=10
+
+    const pagination:FindAllProductsbyNameApplicationRequestDTO={userId:'none',page:entry.page, perPage:entry.perPage,name:entry.term}
+
+    let service= new ExceptionDecorator(
+        new LoggerDecorator(
+          new FindAllProductsAndComboApplicationService(
+            this.ormProductQueryRepo,
+            this.ormBundleQueryRepo
           ),
           new NestLogger(new Logger())
         )

@@ -1,8 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { Transform, Type } from "class-transformer"
-import { IsOptional, IsPositive } from "class-validator";
+import { IsOptional, IsPositive, IsString } from "class-validator";
 
-export class FindAllProductsInfraestructureRequestDTO{
+export class FindAllProductsAndBundlesInfraestructureRequestDTO{
   @ApiProperty( { required: false, default: 1, minimum: 1 })
   @IsOptional()
   @IsPositive()
@@ -14,4 +14,8 @@ export class FindAllProductsInfraestructureRequestDTO{
   @IsPositive()
   @Transform(({ value }) => { return Number(value); })  
   perPage?: number
+
+  @ApiProperty( { required: true })
+  @IsString()
+  term:string
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Inject, ParseFilePipe, Post, UploadedFiles, UseInterceptors } from "@nestjs/common"
+import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common"
 import { FilesInterceptor } from "@nestjs/platform-express/multer"
 import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
@@ -9,17 +9,29 @@ import { RabbitMQEventPublisher } from "src/common/infraestructure/events/publis
 import { Channel } from "amqplib"
 import { CreateBundleApplicationService } from "src/bundle/application/services/command/create-bundle-application.service"
 import { CloudinaryService } from "src/common/infraestructure/file-uploader/cloudinary-uploader"
+import { OrmBundleRepository } from "../repositories/orm-repository/orm-bundle-repository"
+import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton"
+import { PaginationRequestDTO } from "src/common/application/services/dto/request/pagination-request-dto"
+import { LoggerDecorator } from "src/common/application/aspects/logger-decorator/logger-decorator"
+import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository"
+import { OrmBundleQueryRepository } from "../repositories/orm-repository/orm-bundle-query-repository"
+import { NestLogger } from "src/common/infraestructure/logger/nest-logger"
+import { FindAllBundlesInfraestructureRequestDTO } from "../dto-request/find-all-bundle-infraestructure-request-dto"
+import { FindAllBundlesApplicationService } from "src/bundle/application/services/query/find-all-bundles-application.service"
 
 @Controller('bundle')
 export class BundleController {
 
   private readonly ormBundletRepo:IBundleRepository
+  private readonly ormQueryBundletRepo:IQueryBundleRepository
   private readonly idGen: IIdGen<string> 
   
   constructor(
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
   ) {
+    this.ormBundletRepo=new OrmBundleRepository(PgDatabaseSingleton.getInstance())
     this.idGen= new UuidGen()
+    this.ormQueryBundletRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
   }
 
   @Post('create')
@@ -47,25 +59,25 @@ export class BundleController {
     return response.getValue
   }
 
-//   @Get('all')
-//   async getAllProducts(@Query() entry:FindAllProductsInfraestructureRequestDTO){
+  @Get('all')
+  async getAllProducts(@Query() entry:FindAllBundlesInfraestructureRequestDTO){
 
-//     if(!entry.page)
-//       entry.page=1
-//     if(!entry.perPage)
-//       entry.perPage=10
+    if(!entry.page)
+      entry.page=1
+    if(!entry.perPage)
+      entry.perPage=10
 
-//     const pagination:PaginationRequestDTO={userId:'none',page:entry.page, perPage:entry.perPage}
+    const pagination:PaginationRequestDTO={userId:'none',page:entry.page, perPage:entry.perPage}
 
-//     let service= new ExceptionDecorator(
-//         new LoggerDecorator(
-//           new FindAllProductsApplicationService(
-//             this.ormProductQueryRepo
-//           ),
-//           new NestLogger(new Logger())
-//         )
-//       )
-//     let response= await service.execute({...pagination})
-//     return response.getValue
-//   }
+    let service= new ExceptionDecorator(
+        new LoggerDecorator(
+          new FindAllBundlesApplicationService(
+            this.ormQueryBundletRepo
+          ),
+          new NestLogger(new Logger())
+        )
+      )
+    let response= await service.execute({...pagination})
+    return response.getValue
+  }
 }

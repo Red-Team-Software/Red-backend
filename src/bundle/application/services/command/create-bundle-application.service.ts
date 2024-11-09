@@ -8,7 +8,6 @@ import { BundlePrice } from "src/bundle/domain/value-object/bundle-price"
 import { BundleStock } from "src/bundle/domain/value-object/bundle-stock"
 import { BundleWeigth } from "src/bundle/domain/value-object/bundle-weigth"
 import { CreateBundleApplicationRequestDTO } from "../../dto/request/create-bundle-application-request-dto"
-import { CreateProductApplicationResponseDTO } from "../../dto/response/create-product-application-response-dto"
 import { ErrorCreatingBundleApplicationException } from "../../application-exeption/error-creating-bundle-application-exception"
 import { ErrorNameAlreadyApplicationException } from "../../application-exeption/error-name-already-exist-application-exception"
 import { ErrorUploadingImagesApplicationException } from "../../application-exeption/error-uploading-images-application-exception"
@@ -21,9 +20,10 @@ import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { ProductID } from "src/product/domain/value-object/product-id"
 import { Result } from "src/common/utils/result-handler/result"
 import { TypeFile } from "src/common/application/file-uploader/enums/type-file.enum"
+import { CreateBundleApplicationResponseDTO } from "../../dto/response/create-bundles-application-response-dto"
 
 export class CreateBundleApplicationService extends IApplicationService 
-<CreateBundleApplicationRequestDTO,CreateProductApplicationResponseDTO> {
+<CreateBundleApplicationRequestDTO,CreateBundleApplicationResponseDTO> {
 
     constructor(
         private readonly eventPublisher: IEventPublisher,
@@ -33,7 +33,7 @@ export class CreateBundleApplicationService extends IApplicationService
     ){
         super()
     }
-    async execute(command: CreateBundleApplicationRequestDTO): Promise<Result<CreateProductApplicationResponseDTO>> {
+    async execute(command: CreateBundleApplicationRequestDTO): Promise<Result<CreateBundleApplicationResponseDTO>> {
         
         let search=await this.bunldeRepository.verifyBundleExistenceByName(BundleName.create(command.name))
 
@@ -73,7 +73,7 @@ export class CreateBundleApplicationService extends IApplicationService
     
         await this.eventPublisher.publish(bundle.pullDomainEvents())
     
-        let response:CreateProductApplicationResponseDTO={
+        let response:CreateBundleApplicationResponseDTO={
             ...command,
             images:bundle.BundleImages.map(image=>image.Value)
         }

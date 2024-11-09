@@ -12,13 +12,20 @@ import { IMapper } from "src/common/application/mappers/mapper.interface"
 import { OrmBundleEntity } from "../../entities/orm-entities/orm-bundle-entity"
 import { OrmBundleImage } from "src/Bundle/infraestructure/entities/orm-entities/orm-Bundle-image"
 import { ProductID } from "src/product/domain/value-object/product-id"
+import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity"
+import { DataSource, Repository } from "typeorm"
+import { NotFoundException } from "@nestjs/common"
 
 
-export class OrmbBundleMapper implements IMapper <Bundle,OrmBundleEntity>{
+export class OrmBundleMapper implements IMapper <Bundle,OrmBundleEntity>{
 
+    private readonly ormProductRepository:Repository<OrmProductEntity>
     constructor(
+        dataSource:DataSource,
         private readonly idGen:IIdGen<string>
-    ){}
+    ){
+        this.ormProductRepository=dataSource.getRepository(OrmProductEntity)
+    }
 
     async fromDomaintoPersistence(domainEntity: Bundle): Promise<OrmBundleEntity> {
         let ormImages:OrmBundleImage[]=[]
@@ -26,6 +33,15 @@ export class OrmbBundleMapper implements IMapper <Bundle,OrmBundleEntity>{
             ormImages.push(
                 OrmBundleImage.create(await this.idGen.genId(),image.Value,domainEntity.getId().Value)
             )
+        }
+
+        let products:OrmProductEntity[]=[]
+
+        for (const id of domainEntity.ProductId){
+            let product=await this.ormProductRepository.findOneBy({id:id.Value})
+            if(!product)
+                throw new NotFoundException('Find product id not registered')
+            products.push(product)
         }
 
         let data:OrmBundleEntity={
@@ -38,7 +54,8 @@ export class OrmbBundleMapper implements IMapper <Bundle,OrmBundleEntity>{
             price:domainEntity.BundlePrice.Price,
             currency:domainEntity.BundlePrice.Currency,
             weigth:domainEntity.BundleWeigth.Weigth,
-            measurament:domainEntity.BundleWeigth.Measure
+            measurament:domainEntity.BundleWeigth.Measure,
+            products
         }
         return data
     }
@@ -53,9 +70,8 @@ export class OrmbBundleMapper implements IMapper <Bundle,OrmBundleEntity>{
             infraEstructure.images.map((ormimage)=>BundleImage.create(ormimage.image)),
             BundlePrice.create(infraEstructure.price,infraEstructure.currency),
             BundleWeigth.create(infraEstructure.weigth,infraEstructure.measurament),
-            infraEstructure.images.map(product=>ProductID.create(product.id))
+            infraEstructure.products.map(product=>ProductID.create(product.id))
         )
-        //TODO Hacerlo con blog y unirlo en un many to many
         return bundle
     }
 }

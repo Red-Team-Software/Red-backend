@@ -68,7 +68,16 @@ export class OrmProductRepository extends Repository<OrmProductEntity> implement
         }    
     }
     async findProductByName(ProductName: ProductName): Promise<Result<Product[]>> {
-        throw new Error("Method not implemented.");
+        try{
+            const product = await this.findBy({name:ProductName.Value})
+            if(product.length==0) 
+                return Result.fail( new NotFoundException('Find product by name unsucssessfully they are 0 registered'))
+            let domain=product.map(async infraestrcuture=>await this.mapper.fromPersistencetoDomain(infraestrcuture))
+            return Result.success(await Promise.all(domain))
+        }
+        catch(e){
+            return Result.fail( new NotFoundException('Find product by name unsucssessfully'))
+        }         
     }
 
     async verifyProductExistenceByName(ProductName: ProductName): Promise<Result<boolean>> {

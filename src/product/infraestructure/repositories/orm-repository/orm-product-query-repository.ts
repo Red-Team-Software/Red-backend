@@ -10,18 +10,39 @@ import { IQueryProductRepository } from "src/product/application/query-repositor
 import { FindAllProductsApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-application-request-dto";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { log } from "console";
+import { FindAllProductsbyNameApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-and-combos-request-dto";
 
 
 export class OrmProductQueryRepository extends Repository<OrmProductEntity> implements IQueryProductRepository{
 
     private mapper:IMapper <Product,OrmProductEntity>
-    private readonly ormProductImageRepository: Repository<OrmProductImage>
-
 
     constructor(dataSource:DataSource){
         super( OrmProductEntity, dataSource.createEntityManager() )
         this.mapper=new OrmProductMapper(new UuidGen())
-        this.ormProductImageRepository=dataSource.getRepository( OrmProductImage )
+    }
+    async findAllProductsByName(criteria: FindAllProductsbyNameApplicationRequestDTO): Promise<Result<Product[]>> {
+        try{
+            const ormProducts=await this.find({
+                take:criteria.perPage,
+                skip:criteria.page,
+                where:{
+                    stock:MoreThan(0),
+                    name:criteria.name
+                }
+            })
+
+            if(ormProducts.length===0)
+                return Result.fail( new NotFoundException('products empty please try again'))
+
+            const products:Product[]=[]
+            for (const product of ormProducts){
+                products.push(await this.mapper.fromPersistencetoDomain(product))
+            }
+            return Result.success(products)
+        }catch(e){
+            return Result.fail( new NotFoundException('products empty please try again'))
+        }
     }
 
     async findAllProducts(criteria:FindAllProductsApplicationRequestDTO ): Promise<Result<Product[]>>
