@@ -48,21 +48,23 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
     async findAllBundlesByName(criteria: FindAllBundlesbyNameApplicationRequestDTO): Promise<Result<Bundle[]>> {
         {
             try{
+
                 let ormBundle = await this.createQueryBuilder( 'bundle' )
                 .innerJoinAndSelect('bundle.products',
                     'bundle_product'
                 )
-                .where('LOWER(bundle.name) LIKE :title', { name: `%${ criteria.name.toLowerCase().trim() }%` })
+                .leftJoinAndSelect('bundle.images','bundle_image')
+                .where('LOWER(bundle.name) LIKE :name', { name: `%${ criteria.name.toLowerCase().trim() }%` })
+                .andWhere('bundle.stock > :stock', { stock: 0})
                 .orderBy( 'bundle.caducityDate', 'DESC' )
+                .skip(criteria.page)
+                .take(criteria.perPage)
                 .getMany()
 
-                // console.log(ormBundle)
-
-                ormBundle=ormBundle.slice( criteria.page, criteria.perPage )
 
                 if(ormBundle.length==0)
                     return Result.fail( new NotFoundException('bundles not foudnd please try again'))
-    
+
                 const bundles:Bundle[]=[]
                 for (const bundle of ormBundle){
                     bundles.push(await this.mapper.fromPersistencetoDomain(bundle))

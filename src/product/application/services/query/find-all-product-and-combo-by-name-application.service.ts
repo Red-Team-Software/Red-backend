@@ -22,15 +22,13 @@ IApplicationService<FindAllProductsbyNameApplicationRequestDTO,FindAllProductsAn
 
         let responsebundle=await this.queryBundleRepository.findAllBundlesByName(data)
 
-        let responseproduct=await this.queryProductRepository.findAllProductsByName(data)
-
-        // console.log(responsebundle)
-        if(!responseproduct.isSuccess())
-            return Result.fail(new NotFoundProductApplicationException())
-
-        
         if(!responsebundle.isSuccess())
             return Result.fail(new NotFoundBundleApplicationException())
+
+        let responseproduct=await this.queryProductRepository.findAllProductsByName(data)
+
+        if(!responseproduct.isSuccess())
+            return Result.fail(new NotFoundProductApplicationException())
         
         let products=responseproduct.getValue
         let bundles=responsebundle.getValue

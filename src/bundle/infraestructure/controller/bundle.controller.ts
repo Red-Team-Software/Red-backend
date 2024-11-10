@@ -18,6 +18,9 @@ import { OrmBundleQueryRepository } from "../repositories/orm-repository/orm-bun
 import { NestLogger } from "src/common/infraestructure/logger/nest-logger"
 import { FindAllBundlesInfraestructureRequestDTO } from "../dto-request/find-all-bundle-infraestructure-request-dto"
 import { FindAllBundlesApplicationService } from "src/bundle/application/services/query/find-all-bundles-application.service"
+import { FindAllBundlesbyNameApplicationRequestDTO } from "src/bundle/application/dto/request/find-all-bundles-by-name-application-request-dto"
+import { FindAllBundlesByNameInfraestructureRequestDTO } from "../dto-request/find-all-bundle-by-name-infraestructure-request-dto"
+import { FindAllBundlesByNameApplicationService } from "src/bundle/application/services/query/find-all-bundles-by-name-application.service"
 
 @Controller('bundle')
 export class BundleController {
@@ -36,7 +39,7 @@ export class BundleController {
 
   @Post('create')
   @UseInterceptors(FilesInterceptor('images'))  
-  async createProduct(@Body() entry: CreateBundleInfraestructureRequestDTO,
+  async createBundle(@Body() entry: CreateBundleInfraestructureRequestDTO,
   @UploadedFiles(
     new ParseFilePipe({
       validators: [new FileTypeValidator({
@@ -59,8 +62,36 @@ export class BundleController {
     return response.getValue
   }
 
+  @Get('all-name')
+  async getAllBundlesByName(@Query() entry:FindAllBundlesByNameInfraestructureRequestDTO){
+
+    if(!entry.page)
+      entry.page=1
+    if(!entry.perPage)
+      entry.perPage=10
+
+    const pagination:FindAllBundlesbyNameApplicationRequestDTO={
+      userId:'none',
+      page:entry.page,
+      perPage:entry.perPage,
+      name:entry.term
+    }
+
+    let service= new ExceptionDecorator(
+      new LoggerDecorator(
+        new FindAllBundlesByNameApplicationService(
+          this.ormQueryBundletRepo
+        ),
+        new NestLogger(new Logger())
+      )
+    )
+  let response= await service.execute({...pagination})
+  return response.getValue
+
+
+  }
   @Get('all')
-  async getAllProducts(@Query() entry:FindAllBundlesInfraestructureRequestDTO){
+  async getAllBundles(@Query() entry:FindAllBundlesInfraestructureRequestDTO){
 
     if(!entry.page)
       entry.page=1

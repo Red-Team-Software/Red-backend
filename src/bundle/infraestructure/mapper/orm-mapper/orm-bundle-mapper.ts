@@ -10,11 +10,11 @@ import { BundleWeigth } from "src/bundle/domain/value-object/bundle-weigth"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { IMapper } from "src/common/application/mappers/mapper.interface"
 import { OrmBundleEntity } from "../../entities/orm-entities/orm-bundle-entity"
-import { OrmBundleImage } from "src/Bundle/infraestructure/entities/orm-entities/orm-Bundle-image"
 import { ProductID } from "src/product/domain/value-object/product-id"
 import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity"
 import { DataSource, Repository } from "typeorm"
 import { NotFoundException } from "@nestjs/common"
+import { OrmBundleImage } from "../../entities/orm-entities/orm-bundle-image"
 
 
 export class OrmBundleMapper implements IMapper <Bundle,OrmBundleEntity>{
