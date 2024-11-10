@@ -8,7 +8,7 @@ export class HereMapsSingelton{
     }
 
     public static getInstance(): HereMapsSingelton {
-        if (!HereMapsSingelton.instance) HereMapsSingelton.instance = new HereMapsSingelton(envs.HERE_API_KEY);
+        if (!HereMapsSingelton.instance) HereMapsSingelton.instance = new HereMapsSingelton(envs.HERE_MAP_API_KEY);
         return HereMapsSingelton.instance;
     }
 }
