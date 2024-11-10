@@ -7,4 +7,7 @@ export interface CreateProductApplicationRequestDTO extends IServiceRequestDto {
     stock: number
     images:Buffer[]
     price:number
+    currency:string
+    weigth:number
+    measurement:string
 }

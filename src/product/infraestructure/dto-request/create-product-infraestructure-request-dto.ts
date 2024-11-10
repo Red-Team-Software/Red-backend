@@ -4,6 +4,7 @@ import { ArrayMinSize, IsArray, IsBase64, isBase64, IsDate, IsDateString, IsNega
 
 export class CreateProductInfraestructureRequestDTO{
 
+  
     @ApiProperty( { required: true, default: 'lechuga' })
     @IsString()
     @MinLength( 3 )
@@ -14,7 +15,7 @@ export class CreateProductInfraestructureRequestDTO{
     @MinLength( 3 )
     description: string
 
-    @ApiProperty( { required: true, default: '2024-11-6' })
+    @ApiProperty( { required: true, default: '2024-11-06' })
     @IsDateString()
     caducityDate: Date
 
@@ -34,8 +35,18 @@ export class CreateProductInfraestructureRequestDTO{
       })
     price:number
 
-    // @ApiProperty( { required: true, default: 'usd' })
-    // @IsString()
-    // @MinLength( 3 )
-    // currency: string
+    @ApiProperty( { required: true, default: 'usd' })
+    @IsString()
+    currency: string
+
+    @ApiProperty( { required: true, default: '100' })
+    @IsPositive()
+    @Transform(({ value }) => {
+      return Number(value);
+    })
+    weigth: number
+
+    @ApiProperty( { required: true, default: 'kg' })
+    @IsString()
+    measurement: string
 }

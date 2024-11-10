@@ -5,5 +5,8 @@ export interface FindAllProductsApplicationResponseDTO extends IServiceResponseD
     productDescription:string,
     productName:string,
     productImages:string[],
-    productPrice:number
+    productPrice:number,
+    productCurrency:string
+    productWeigth:number
+    productMeasurement:string
 }

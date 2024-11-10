@@ -10,6 +10,7 @@ import { ProductImage } from "src/product/domain/value-object/product-image";
 import { OrmProductImage } from "../../entities/orm-entities/orm-product-image";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { ProductPrice } from "src/product/domain/value-object/product-price";
+import { ProductWeigth } from "src/product/domain/value-object/product-weigth";
 
 export class OrmProductMapper implements IMapper <Product,OrmProductEntity>{
 
@@ -32,7 +33,10 @@ export class OrmProductMapper implements IMapper <Product,OrmProductEntity>{
             caducityDate: domainEntity.ProductCaducityDate.Value,
             stock: domainEntity.ProductStock.Value,
             images: ormImages,
-            price:domainEntity.ProductPrice.Value
+            price:domainEntity.ProductPrice.Price,
+            currency:domainEntity.ProductPrice.Currency,
+            weigth:domainEntity.ProductWeigth.Weigth,
+            measurament:domainEntity.ProductWeigth.Measure
         }
         return data
     }
@@ -45,7 +49,8 @@ export class OrmProductMapper implements IMapper <Product,OrmProductEntity>{
             ProductName.create(infraEstructure.name),
             ProductStock.create(infraEstructure.stock),
             infraEstructure.images.map((ormimage)=>ProductImage.create(ormimage.image)),
-            ProductPrice.create(infraEstructure.price)
+            ProductPrice.create(infraEstructure.price,infraEstructure.currency),
+            ProductWeigth.create(infraEstructure.weigth,infraEstructure.measurament)
         )
         return product
     }

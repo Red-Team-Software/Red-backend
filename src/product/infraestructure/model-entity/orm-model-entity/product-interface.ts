@@ -5,4 +5,7 @@ export interface IProduct{
     caducityDate: Date,
     stock: number
     price:number
+    currency:string
+    weigth:number
+    measurament:string
 }
