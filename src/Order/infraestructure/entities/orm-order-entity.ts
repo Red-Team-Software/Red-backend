@@ -17,6 +17,9 @@ export class OrmOrderEntity implements IOrderInterface {
     @Column('integer')
     totalAmount: number;
 
+    @Column('string')
+    direction: string;
+
     @OneToOne( () => OrmOrderPayEntity, (pay) => pay.id)
     @JoinColumn()
     pay?: OrmOrderPayEntity;

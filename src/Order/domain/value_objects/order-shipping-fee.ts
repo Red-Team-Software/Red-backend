@@ -1,4 +1,5 @@
 import { ValueObject } from "src/common/domain";
+import { NegativeOrderShippingFeeException } from "../exception/negative-order-shipping-fee-exception";
 
 export class OrderShippingFee extends ValueObject<OrderShippingFee> {
     private fee: number;
@@ -6,7 +7,7 @@ export class OrderShippingFee extends ValueObject<OrderShippingFee> {
     constructor(fee: number) {
         super();
  
-        //if(!fee) { throw new EmptyOrderShippingFeeException('No se pudo obtener un Id de curso') /* throw DomainException NullCourseId */}
+        if(fee<0) { throw new NegativeOrderShippingFeeException('El shipping de la orden no puede ser negativo') /* throw DomainException NullCourseId */}
 
         this.fee = fee;
     }

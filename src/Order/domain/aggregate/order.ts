@@ -17,6 +17,7 @@ export class Order extends AggregateRoot<OrderId>{
     private orderCreatedDate: OrderCreatedDate;
     private totalAmount: OrderTotalAmount;
     private orderReciviedDate?: OrderReciviedDate;
+    //private directionOrder: OrderProductId[];
     private products?: OrderProductId[];
     private bundles?: OrderBundleId[];
     private orderReport?: OrderReportId;

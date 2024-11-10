@@ -1,12 +1,18 @@
 import { ValueObject } from "src/common/domain";
+import { InvalidOrderStateException } from "../exception/invalid-order-state-exception";
+import { OrderStateEnum } from "./enum/order-enum-state";
 
 export class OrderState extends ValueObject<OrderState> {
     private state: string;
 
     constructor(state: string) {
         super();
- 
-        //if(!state) { throw new EmptyOrderStateException('No se pudo obtener un Id de curso') /* throw DomainException NullCourseId */}
+
+        if( OrderStateEnum.delivered != state 
+            && OrderStateEnum.ongoing != state 
+            && OrderStateEnum.cancelled != state 
+            && OrderStateEnum.wainting != state
+        ) { throw new InvalidOrderStateException('El estado proporcionado no es un estado de orden')}  
 
         this.state = state;
     }

@@ -1,4 +1,5 @@
 import { ValueObject } from "src/common/domain";
+import { InvalidOrderIdException } from "../exception/invalid-order-id-exception";
 
 export class OrderId extends ValueObject<OrderId> {
     private value: string;
@@ -6,7 +7,8 @@ export class OrderId extends ValueObject<OrderId> {
     constructor(value: string) {
         super();
 
-        //if(!value) { throw new EmptyOrderIdException('No se pudo obtener un Id de curso') /* throw DomainException NullCourseId */}
+        const regex = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
+        if (!regex.test(value)) { throw new InvalidOrderIdException('El id proporcionado no es Uuid')}
 
         this.value = value;
     }

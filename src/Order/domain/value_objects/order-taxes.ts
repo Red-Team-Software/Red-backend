@@ -1,12 +1,14 @@
 import { ValueObject } from "src/common/domain";
+import { NegativeOrderTaxException } from "../exception/negative-order-tax-exception";
 
 export class OrderTaxes extends ValueObject<OrderTaxes> {
     private tax: number;
 
     constructor(tax: number) {
         super();
- 
-        //if(!tax) { throw new EmptyOrderTaxesException('No se pudo obtener un Id de curso') /* throw DomainException NullCourseId */}
+
+        if(tax<0) { throw new NegativeOrderTaxException('Los taxes de la orden no puede ser negativos')}
+
 
         this.tax = tax;
     }

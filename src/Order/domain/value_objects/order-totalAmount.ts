@@ -1,13 +1,23 @@
 import { ValueObject } from "src/common/domain";
+import { NegativeOrderTotalAmountException } from "../exception/negative-order-total-amount-exception";
+import { OrderCurrencyEnum } from "./enum/order-enum-currency-total-amoun";
+import { InvalidCurrencyOrderTotalAmountException } from "../exception/invalid-currency-total-amount-order-exception";
 
 export class OrderTotalAmount extends ValueObject<OrderTotalAmount> {
     private amount: number;
+    private currency: string;
 
-    constructor(amount: number) {
+    constructor(amount: number, currency: string) {
         super();
  
-        //if(!amount) { throw new EmptyOrderTotalAmountException('No se pudo obtener un Id de curso') /* throw DomainException NullCourseId */}
+        if(amount<0) { throw new NegativeOrderTotalAmountException('El monto de la orden no puede ser negativo')}
+        if(OrderCurrencyEnum.bsf != currency &&
+            OrderCurrencyEnum.usd != currency &&
+            OrderCurrencyEnum.eur != currency 
+        ) { throw new InvalidCurrencyOrderTotalAmountException('La moneda no puede ser nula')}
 
+
+        this.currency = currency;
         this.amount = amount;
     }
 
@@ -15,11 +25,15 @@ export class OrderTotalAmount extends ValueObject<OrderTotalAmount> {
         return this.amount == obj.amount;
     }
 
-    get OrderTotalAmount() {
+    get OrderAmount() {
         return this.amount;
     }
 
-    public static create(amount: number): OrderTotalAmount {
-        return new OrderTotalAmount(amount);
+    get OrderCurrency() {
+        return this.currency;
+    }
+
+    public static create(amount: number, currency: string): OrderTotalAmount {
+        return new OrderTotalAmount(amount, currency);
     }
 }

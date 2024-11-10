@@ -27,13 +27,15 @@ export class PayOrderAplicationService implements IApplicationService<OrderPayRe
         try{
             let shippingFee = this.calculateShippingFee.calculateShippingFee();
 
-            let amount = new OrderTotalAmount(data.amount);
+            let amount = new OrderTotalAmount(data.amount, data.currency);
 
             let taxes = this.calculateTaxesFee.calculateTaxesFee(amount);
 
-            let total = new OrderTotalAmount(amount.OrderTotalAmount + (await shippingFee).OrderShippingFee + taxes.OrderTaxes);
+            let monto = amount.OrderAmount + (await shippingFee).OrderShippingFee + taxes.OrderTaxes;
 
-            let orderPayment = new OrderPayment(total.OrderTotalAmount, data.currency, data.paymentMethod);
+            let total = new OrderTotalAmount(monto, data.currency);
+
+            let orderPayment = new OrderPayment(total.OrderAmount, total.OrderCurrency, data.paymentMethod);
 
             let response = await this.payOrder.createPayment(orderPayment);
 
