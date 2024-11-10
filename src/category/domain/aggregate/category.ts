@@ -4,7 +4,7 @@ import { AggregateRoot } from 'src/common/domain/aggregate-root/aggregate-root';
 import { CategoryId } from '../value-object/category-id';
 import { CategoryName } from '../value-object/category-name';
 import { ProductID } from 'src/Product/domain/value-object/product-id';
-import { ComboId } from 'src/Combo/domain/value-object/combo-id';
+//import { ComboId } from 'src/Combo/domain/value-object/combo-id';
 import { CategoryCreated } from '../domain-events/category-created';
 import { ProductAddedToCategory } from '../domain-events/product-added-to-category';
 import { ComboAddedToCategory } from '../domain-events/combo-added-to-category';
@@ -13,7 +13,7 @@ import { DomainEvent } from 'src/common/domain/domain-event/domain-event';
 export class Category extends AggregateRoot<CategoryId> {
     private readonly name: CategoryName;
     private products: ProductID[] = [];
-    private combos: ComboId[] = [];
+//    private combos: ComboId[] = [];
 
     private constructor(id: CategoryId, name: CategoryName) {
         super(id);
@@ -32,12 +32,12 @@ export class Category extends AggregateRoot<CategoryId> {
         }
     }
 
-    addCombo(comboId: ComboId): void {
+ /*   addCombo(comboId: ComboId): void {
         if (!this.combos.find(c => c.equals(comboId))) {
             this.combos.push(comboId);
             this.addEvent(ComboAddedToCategory.create(this.getId(), comboId)); // Usar getId()
         }
-    }
+    }*/
 
     private addEvent(event: DomainEvent): void {
         this.events.push(event);
@@ -67,7 +67,7 @@ export class Category extends AggregateRoot<CategoryId> {
         return this.products;
     }
 
-    getCombos(): ComboId[] {
+    /*getCombos(): ComboId[] {
         return this.combos;
-    }
+    }*/
 }
