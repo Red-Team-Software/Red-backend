@@ -5,8 +5,7 @@ export class CategoryId implements ValueObject<CategoryId> {
     private readonly id: string
 
     equals(valueObject: CategoryId): boolean {
-        if (this.Value===valueObject.Value) return true
-        return false
+        return this.Value===valueObject.Value
     }
     
     get Value(){ return this.id }
