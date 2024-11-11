@@ -7,7 +7,7 @@ export const rabbitMQProvider: Provider = {
 	useFactory: async (configService: ConfigService) => {
 		const url = configService.get<string>("RABBITMQ_URL");
 		const connection = await amqp.connect(url);
-		return connection.createChannel();
+		return await connection.createChannel();
 	},
 	inject: [ConfigService],
 };

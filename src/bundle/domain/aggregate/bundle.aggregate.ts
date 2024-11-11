@@ -1,0 +1,126 @@
+import { AggregateRoot, DomainEvent, Entity } from "src/common/domain";
+
+import { BundleRegistered } from "../domain-events/bundle-registered";
+import { BundleId } from "../value-object/bundle-id";
+import { BundleDescription } from "../value-object/bundle-description";
+import { BundleCaducityDate } from "../value-object/bundle-caducity-date";
+import { BundleName } from "../value-object/bundle-name";
+import { BundleStock } from "../value-object/bundle-stock";
+import { BundleImage } from "../value-object/bundle-image";
+import { BundlePrice } from "../value-object/bundle-price";
+import { BundleWeigth } from "../value-object/bundle-weigth";
+import { ProductID } from "src/product/domain/value-object/product-id";
+import { InvalidBundleException } from "../domain-exceptions/invalid-bundle-exception";
+
+export class Bundle extends AggregateRoot <BundleId>{
+    protected when(event: DomainEvent): void {
+        switch (event.getEventName){
+            case 'BundleRegistered':
+                const bundleRegistered: BundleRegistered = event as BundleRegistered
+                this.bundleDescription = bundleRegistered.bundleDescription
+                this.bundleCaducityDate = bundleRegistered.bundleCaducityDate
+                this.bundleName = bundleRegistered.bundleName
+                this.bundleStock = bundleRegistered.bundleStock
+                this.bundleImages= bundleRegistered.bundleImages
+                this.bundlePrice= bundleRegistered.bundlePrice
+                this.bundleWeigth= bundleRegistered.bundleWeigth
+        }
+    }
+    protected validateState(): void {
+        if (! this.bundleDescription ||
+        ! this.bundleDescription ||
+        ! this.bundleCaducityDate ||
+        ! this.bundleName ||
+        ! this.bundleStock ||
+        ! this.bundleImages ||
+        ! this.bundlePrice ||
+        ! this.bundleWeigth ||
+        this.productId.length<2)
+        throw new InvalidBundleException()
+    }
+    private constructor(
+        bundleId:BundleId,
+        private bundleDescription:BundleDescription,
+        private bundleCaducityDate:BundleCaducityDate,
+        private bundleName:BundleName,
+        private bundleStock:BundleStock,
+        private bundleImages:BundleImage[],
+        private bundlePrice:BundlePrice,
+        private bundleWeigth:BundleWeigth,
+        private productId:ProductID[]
+    ){
+        super(bundleId)
+    }
+
+    static Registerbundle(
+        bundleId:BundleId,
+        bundleDescription:BundleDescription,
+        bundleCaducityDate:BundleCaducityDate,
+        bundleName:BundleName,
+        bundleStock:BundleStock,
+        bundleImages:BundleImage[],
+        bundlePrice:BundlePrice,
+        bundleWeigth:BundleWeigth,
+        productId:ProductID[]
+
+    ):Bundle{
+        const bundle = new Bundle(
+            bundleId,
+            bundleDescription,
+            bundleCaducityDate,
+            bundleName,
+            bundleStock,
+            bundleImages,
+            bundlePrice,
+            bundleWeigth,
+            productId
+        )
+        bundle.apply(
+            BundleRegistered.create(
+                bundleId,
+                bundleDescription,
+                bundleCaducityDate,
+                bundleName,
+                bundleStock,
+                bundleImages,
+                bundlePrice,
+                bundleWeigth,
+                productId
+            )
+        )
+        return bundle
+    }
+    static initializeAggregate(
+        bundleId:BundleId,
+        bundleDescription:BundleDescription,
+        bundleCaducityDate:BundleCaducityDate,
+        bundleName:BundleName,
+        bundleStock:BundleStock,
+        bundleImages:BundleImage[],
+        bundlePrice:BundlePrice,
+        bundleWeigth:BundleWeigth,
+        productId:ProductID[]
+    ):Bundle{
+        const bundle = new Bundle(
+            bundleId,
+            bundleDescription,
+            bundleCaducityDate,
+            bundleName,
+            bundleStock,
+            bundleImages,
+            bundlePrice,
+            bundleWeigth,
+            productId
+        )
+        bundle.validateState()
+        return bundle
+    }
+    get BundleDescription():BundleDescription{return this.bundleDescription}
+    get BundleCaducityDate():BundleCaducityDate{return this.bundleCaducityDate}
+    get BundleName():BundleName{return this.bundleName}
+    get BundleStock():BundleStock{return this.bundleStock}
+    get BundleImages():BundleImage[]{return this.bundleImages}
+    get BundlePrice():BundlePrice{return this.bundlePrice}
+    get BundleWeigth():BundleWeigth{return this.bundleWeigth}
+    get ProductId():ProductID[]{return this.productId}
+}

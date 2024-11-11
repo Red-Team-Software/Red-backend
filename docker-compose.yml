@@ -1,7 +1,7 @@
 services:
   #!rabbitmq
   rabbitmq:
-    image: rabbitmq:4.0.2
+    image: rabbitmq:4.0-management
     container_name: GoDeliRed_rabbitmq
     restart: always
     ports:
@@ -44,6 +44,8 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_DB_USER_PASSWORD}
       ME_CONFIG_MONGODB_URL: ${MONGOEXPRESS_DB_HOST}
       ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - mongo
     networks:
       - red-team
       

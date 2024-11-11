@@ -29,6 +29,9 @@ importers:
       '@nestjs/typeorm':
         specifier: ^10.0.2
         version: 10.0.2(@nestjs/common@9.4.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/core@9.4.3(@nestjs/common@9.4.3(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.14)(rxjs@7.8.1))(@nestjs/microservices@9.4.3)(@nestjs/platform-express@9.4.3)(reflect-metadata@0.1.14)(rxjs@7.8.1))(reflect-metadata@0.1.14)(rxjs@7.8.1)(typeorm@0.3.20(pg@8.13.1)(ts-node@10.9.2(@types/node@18.15.11)(typescript@4.9.5)))
+      '@types/amqplib':
+        specifier: ^0.10.5
+        version: 0.10.5
       amqp-connection-manager:
         specifier: ^4.1.14
         version: 4.1.14(amqplib@0.10.4)
@@ -796,6 +799,9 @@ packages:
 
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
+
+  '@types/amqplib@0.10.5':
+    resolution: {integrity: sha512-/cSykxROY7BWwDoi4Y4/jLAuZTshZxd8Ey1QYa/VaXriMotBDoou7V/twJiOSHzU6t1Kp1AHAUXGCgqq+6DNeg==}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -4443,6 +4449,10 @@ snapshots:
   '@tsconfig/node14@1.0.3': {}
 
   '@tsconfig/node16@1.0.4': {}
+
+  '@types/amqplib@0.10.5':
+    dependencies:
+      '@types/node': 18.15.11
 
   '@types/babel__core@7.20.5':
     dependencies:

@@ -1,9 +1,10 @@
 import { IServiceResponseDto } from "src/common/application/services";
 
 export interface FindAllProductsApplicationResponseDTO extends IServiceResponseDto {
-    productId:string,
-    productDescription:string,
-    productName:string,
-    productImages:string[],
-    productPrice:number
+    id:string,
+    description:string,
+    name:string,
+    images:string[],
+    price:number,
+    currency:string,
 }

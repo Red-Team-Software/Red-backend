@@ -1,3 +1,4 @@
+import { envs } from "src/config/envs/envs";
 import { DataSource, getMetadataArgsStorage } from "typeorm";
 
 export class PgDatabaseSingleton {
@@ -6,6 +7,12 @@ export class PgDatabaseSingleton {
     static getInstance(): DataSource {
         if (!PgDatabaseSingleton.instance) {
             PgDatabaseSingleton.instance = new DataSource({
+                ssl: envs.NODE_ENV === 'production',
+                extra: {
+                  ssl: envs.NODE_ENV === 'production'
+                        ? { rejectUnauthorized: false }
+                        : null,
+                },
                 type: "postgres",
                 host: process.env.POSTGRES_DB_HOST,
                 port: +process.env.POSTGRES_DB_PORT,
