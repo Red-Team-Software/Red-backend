@@ -24,16 +24,14 @@ export class CalculateShippingFeeHereMaps implements ICalculateShippingFee {
 
         const ucabCoords = "10.4944,-66.8901";
 
-        const url = `https://router.hereapi.com/v8/routes?origin=${UserCoords}&destination=${ucabCoords}&return=summary&transportMode=car&apiKey=${this.hereMap}`;
+        const url = `https://router.hereapi.com/v8/routes?origin=${UserCoords}&destination=${ucabCoords}&return=summary&transportMode=car&apiKey=${this.hereMap.getapiKey()}`;
 
         let response = await fetch(url);
         if (!response.ok)  Result.fail(new BadRequestException());
         let data = await response.json();
         let distance = data.routes[0].sections[0].summary.length;
         if (typeof distance !== 'number') distance = Number(distance);
-
-        //console.log(`La distancia entre ${origind} y ${destinationd} es de ${distance} metros.`);
-        let monto = distance * 0.05;  
+        let monto = distance * 0.005;  
         return Result.success(OrderShippingFee.create(monto));
 
     }

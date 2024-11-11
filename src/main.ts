@@ -36,7 +36,7 @@ async function bootstrap() {
   });
 
   app.use(json({ limit: '20mb' }));
-  await app.listen(envs.port);
+  await app.listen(3900);
   // console.log(envs)
 }
 bootstrap();

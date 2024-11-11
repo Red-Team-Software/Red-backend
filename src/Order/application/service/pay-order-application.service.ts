@@ -10,9 +10,12 @@ import { OrderTotalAmount } from 'src/Order/domain/value_objects/order-totalAmou
 import { IPaymentService } from 'src/Order/domain/domain-services/payment-interface';
 import { OrderPayment } from 'src/Order/domain/value_objects/order-payment';
 import { OrderDirection } from 'src/Order/domain/value_objects/order-direction';
+import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
+import { ErrorCreatingPaymentApplicationException } from '../application-exception/error-creating-payment-application.exception';
+import { ErrorObtainingTaxesApplicationException } from '../application-exception/error-obtaining-taxes.application.exception';
 
 
-export class PayOrderAplicationService implements IApplicationService<OrderPayRequestDto,OrderPayResponseDto>{
+export class PayOrderAplicationService extends IApplicationService<OrderPayRequestDto,OrderPayResponseDto>{
     
     constructor(
         private readonly eventPublisher: IEventPublisher,
@@ -21,35 +24,33 @@ export class PayOrderAplicationService implements IApplicationService<OrderPayRe
         private readonly payOrder: IPaymentService
         //private readonly ormOrderRepository
     ){
-        //super()
+        super()
     }
     
     async execute(data: OrderPayRequestDto): Promise<Result<OrderPayResponseDto>> {
-        try{
+
             let orderDirection = OrderDirection.create(data.lat, data.long);
 
             let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
 
+            if (!shippingFee.isSuccess) return Result.fail(new ErrorObtainingShippingFeeApplicationException('Error obtaining shipping fee'));
+
             let amount = OrderTotalAmount.create(data.amount, data.currency);
 
-            let taxes = this.calculateTaxesFee.calculateTaxesFee(amount);
+            let taxes = await this.calculateTaxesFee.calculateTaxesFee(amount);
 
-            let monto = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.OrderTaxes;
-
+            if (!taxes.isSuccess) return Result.fail(new ErrorObtainingTaxesApplicationException('Error obtaining taxes'));
+            
+            let monto = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.getValue.OrderTaxes;
+            
             let total = OrderTotalAmount.create(monto, data.currency);
-
+            
             let orderPayment = OrderPayment.create(total.OrderAmount, total.OrderCurrency, data.paymentMethod);
 
             let response = await this.payOrder.createPayment(orderPayment);
 
-            return Result.success(new OrderPayResponseDto());
+            if (!response.isSuccess) return Result.fail(new ErrorCreatingPaymentApplicationException('Error during creation of payment'));
 
-        }catch(error){
-            return Result.fail(error);
-        }
-    }
-    
-    get name(): string {
-        throw new Error('Method not implemented.');
+            return Result.success(new OrderPayResponseDto(response.getValue));
     }
 }

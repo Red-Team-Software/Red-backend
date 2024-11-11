@@ -4,8 +4,7 @@ import { OrderPayment } from "../../domain/value_objects/order-payment";
 import { IPaymentService } from "../../domain/domain-services/payment-interface";
 import { Result } from "src/common/utils/result-handler/result";
 
-
-export class StripeConnection implements IPaymentService {    
+export class PaymentOrderImplementation implements IPaymentService {    
     private stripe: StripeSingelton;
     
     constructor(
@@ -15,18 +14,6 @@ export class StripeConnection implements IPaymentService {
     }
 
     async createPayment(pay: OrderPayment): Promise<Result<boolean>> {
-
-        try{
-            const payment = await this.stripe.stripeInstance.paymentIntents.create({
-                amount: pay.Amount,
-                currency: pay.Currency,
-                payment_method: pay.PaymentMethod,
-                
-            });
-            return Result.success(true);
-        } catch (error) {
-            return Result.fail(error);
-        }
-        
+        return Result.success(true); 
     }
 }

@@ -5,12 +5,12 @@ import { PaymentEntryDto } from "../dto/payment-entry-dto";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { ExceptionDecorator } from "src/common/application/aspects/exeption-decorator/exception-decorator";
-import { PayOrderAplicationService } from "src/Order/aplication/service/pay-order-application.service";
+import { PayOrderAplicationService } from "src/Order/application/service/pay-order-application.service";
 import { EventBus } from "src/common/infraestructure/events/publishers/event-bus";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IApplicationService } from "src/common/application/services";
-import { OrderPayRequestDto } from "src/Order/aplication/dto/request/order-pay-request-dto";
-import { OrderPayResponseDto } from "src/Order/aplication/dto/response/order-pay-response-dto";
+import { OrderPayRequestDto } from "src/Order/application/dto/request/order-pay-request-dto";
+import { OrderPayResponseDto } from "src/Order/application/dto/response/order-pay-response-dto";
 import { LoggerDecorator } from "src/common/application/aspects/logger-decorator/logger-decorator";
 import { ICalculateShippingFee } from "src/Order/domain/domain-services/calculate-shippping-fee.interfafe";
 import { ICalculateTaxesFee } from "src/Order/domain/domain-services/calculate-taxes-fee.interface";
@@ -21,6 +21,7 @@ import { StripeConnection } from "../domain-service/stripe_adapter";
 import { NestLogger } from "src/common/infraestructure/logger/nest-logger";
 import { CalculateShippingFeeHereMaps } from "../domain-service/calculate-shipping-here-maps";
 import { HereMapsSingelton } from '../../../payments/infraestructure/here-maps-singleton';
+import { PaymentOrderImplementation } from "../domain-service/payment-order-implementation";
 
 @ApiTags('Order')
 @Controller('order')
@@ -37,6 +38,7 @@ export class OrderController {
     //Aplication services
     private readonly payOrderService: IApplicationService<OrderPayRequestDto,OrderPayResponseDto>;
 
+
     constructor() {
         this.idGen = new UuidGen();
         this.stripeSingleton = StripeSingelton.getInstance();
@@ -44,10 +46,10 @@ export class OrderController {
         this.hereMapsSingelton = HereMapsSingelton.getInstance(); 
         this.calculateShipping = new CalculateShippingFeeHereMaps(this.hereMapsSingelton);
         this.calculateTax = new CalculateTaxesFeeImplementation();
-        this.paymentConnection = new StripeConnection(this.stripeSingleton);
+        this.paymentConnection = new PaymentOrderImplementation(this.stripeSingleton);
     
         //Pay Service
-        let payOrderService = new ExceptionDecorator(
+        this.payOrderService = new ExceptionDecorator(
             new LoggerDecorator(
                 new PayOrderAplicationService(
                     this.eventBus,
@@ -58,6 +60,7 @@ export class OrderController {
                 new NestLogger(new Logger())
             )
         )
+
     }
 
     
@@ -68,23 +71,25 @@ export class OrderController {
         let payment: OrderPayRequestDto = {
             userId: 'none',
             ...data}
+
         
         let response = await this.payOrderService.execute(payment);
         
-        return response.getValue;
+        return response.getValue.paymentState;
     }
 
     @Post('/pay')
     async realize(@Body() data: PaymentEntryDto) {
         
         try{
+
             return await this.stripeSingleton.stripeInstance.paymentIntents.create({
                 amount: data.amount,
                 currency: data.currency,
-                payment_method: data.paymentMethod,
-                payment_method_types: [data.paymentMethod],
-                confirmation_method: 'manual',  
-                confirm: true,
+                payment_method: 'pm_card_threeDSecureOptional',
+                payment_method_types: ['card'],
+                confirmation_method: 'automatic',
+                capture_method: 'automatic',
             });
             //return await payment;
         } catch (error) {
