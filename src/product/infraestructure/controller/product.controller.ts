@@ -24,6 +24,8 @@ import { FindAllProductsAndComboApplicationService } from 'src/product/applicati
 import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
 import { OrmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository';
 import { FindAllProductsbyNameApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-and-combos-request-dto';
+import { FindProductByIdInfraestructureRequestDTO } from '../dto-request/find-product-by-id-infraestructure-request-dto';
+import { FindProductByIdApplicationService } from 'src/product/application/services/query/find-product-by-id-application.service';
 
 
 @Controller('product')
@@ -111,6 +113,21 @@ export class ProductController {
         )
       )
     let response= await service.execute({...pagination})
+    return response.getValue
+  }
+
+  @Get('')
+  async getProductById(@Query() entry:FindProductByIdInfraestructureRequestDTO){
+
+    let service= new ExceptionDecorator(
+        new LoggerDecorator(
+          new FindProductByIdApplicationService(
+            this.ormProductRepo
+          ),
+          new NestLogger(new Logger())
+        )
+      )
+    let response= await service.execute({userId:'none',...entry})
     return response.getValue
   }
 }

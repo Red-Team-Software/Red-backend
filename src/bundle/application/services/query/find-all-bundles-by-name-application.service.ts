@@ -27,12 +27,12 @@ IApplicationService<FindAllBundlesbyNameApplicationRequestDTO,FindAllBundlesbyNa
 
         bundles.forEach((bundle)=>{
             responseDto.push({
-                bundleId:bundle.getId().Value,
-                bundleDescription:bundle.BundleDescription.Value,
-                bundleName:bundle.BundleName.Value,
-                bundleImages:bundle.BundleImages.map(image=>image.Value),
-                bundlePrice:bundle.BundlePrice.Price,
-                bundleCurrency:bundle.BundlePrice.Currency,
+                id:bundle.getId().Value,
+                description:bundle.BundleDescription.Value,
+                name:bundle.BundleName.Value,
+                images:bundle.BundleImages.map(image=>image.Value),
+                price:bundle.BundlePrice.Price,
+                currency:bundle.BundlePrice.Currency,
             })
         })
         return Result.success(responseDto)

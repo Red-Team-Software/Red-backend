@@ -21,6 +21,8 @@ import { FindAllBundlesApplicationService } from "src/bundle/application/service
 import { FindAllBundlesbyNameApplicationRequestDTO } from "src/bundle/application/dto/request/find-all-bundles-by-name-application-request-dto"
 import { FindAllBundlesByNameInfraestructureRequestDTO } from "../dto-request/find-all-bundle-by-name-infraestructure-request-dto"
 import { FindAllBundlesByNameApplicationService } from "src/bundle/application/services/query/find-all-bundles-by-name-application.service"
+import { FindBundleByIdInfraestructureRequestDTO } from "../dto-request/find-bundle-by-id-infraestructure-request-dto"
+import { FindBundleByIdApplicationService } from "src/bundle/application/services/query/find-bundle-by-id-application.service"
 
 @Controller('bundle')
 export class BundleController {
@@ -109,6 +111,21 @@ export class BundleController {
         )
       )
     let response= await service.execute({...pagination})
+    return response.getValue
+  }
+
+  @Get('')
+  async getBundleById(@Query() entry:FindBundleByIdInfraestructureRequestDTO){
+
+    let service= new ExceptionDecorator(
+        new LoggerDecorator(
+          new FindBundleByIdApplicationService(
+            this.ormBundletRepo
+          ),
+          new NestLogger(new Logger())
+        )
+      )
+    let response= await service.execute({userId:'none',...entry})
     return response.getValue
   }
 }

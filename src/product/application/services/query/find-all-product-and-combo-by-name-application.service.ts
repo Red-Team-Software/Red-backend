@@ -40,23 +40,23 @@ IApplicationService<FindAllProductsbyNameApplicationRequestDTO,FindAllProductsAn
 
         products.forEach((p)=>{
             responseDto.product.push({
-                productId:p.getId().Value,
-                productDescription:p.ProductDescription.Value,
-                productName:p.ProductName.Value,
-                productImages:p.ProductImages.map(image=>image.Value),
-                productPrice:p.ProductPrice.Price,
-                productCurrency:p.ProductPrice.Currency
+                id:p.getId().Value,
+                description:p.ProductDescription.Value,
+                name:p.ProductName.Value,
+                images:p.ProductImages.map(image=>image.Value),
+                price:p.ProductPrice.Price,
+                currency:p.ProductPrice.Currency
             })
         })
 
         bundles.forEach((b)=>{
             responseDto.bundle.push({
-                bunldleId:b.getId().Value,
-                bunldleDescription:b.BundleDescription.Value,
-                bunldleName:b.BundleName.Value,
-                bunldleImages:b.BundleImages.map(image=>image.Value),
-                bunldlePrice:b.BundlePrice.Price,
-                bunldleCurrency:b.BundlePrice.Currency
+                id:b.getId().Value,
+                description:b.BundleDescription.Value,
+                name:b.BundleName.Value,
+                images:b.BundleImages.map(image=>image.Value),
+                price:b.BundlePrice.Price,
+                currency:b.BundlePrice.Currency
             })
         })
 
