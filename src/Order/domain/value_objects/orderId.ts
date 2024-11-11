@@ -4,7 +4,7 @@ import { InvalidOrderIdException } from "../exception/invalid-order-id-exception
 export class OrderId extends ValueObject<OrderId> {
     private value: string;
 
-    constructor(value: string) {
+    private constructor(value: string) {
         super();
 
         const regex = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
@@ -17,7 +17,7 @@ export class OrderId extends ValueObject<OrderId> {
         return this.value == obj.value;
     }
 
-    get OrderId() {
+    get orderId() {
         return this.value;
     }
 

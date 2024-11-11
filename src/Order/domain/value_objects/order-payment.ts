@@ -8,7 +8,7 @@ export class OrderPayment extends ValueObject<OrderPayment> {
     private currency: string;
     private paymentMethod: string;
 
-    constructor(amount: number, currency: string, paymentMethod: string) {
+    private constructor(amount: number, currency: string, paymentMethod: string) {
         super();
  
         if(amount<0) { throw new NegativePaymentAmountException('El monto del pago no puede ser negativo')}

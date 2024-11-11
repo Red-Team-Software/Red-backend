@@ -16,4 +16,10 @@ export class PaymentEntryDto {
 
     @IsString()
     paymentMethod: string;
+
+    @IsNumber()
+    lat: number;
+
+    @IsNumber()
+    long: number;
 }

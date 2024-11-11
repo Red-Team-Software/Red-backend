@@ -7,7 +7,7 @@ export class OrderTotalAmount extends ValueObject<OrderTotalAmount> {
     private amount: number;
     private currency: string;
 
-    constructor(amount: number, currency: string) {
+    private constructor(amount: number, currency: string) {
         super();
  
         if(amount<0) { throw new NegativeOrderTotalAmountException('El monto de la orden no puede ser negativo')}
@@ -22,7 +22,11 @@ export class OrderTotalAmount extends ValueObject<OrderTotalAmount> {
     }
 
     equals(obj: OrderTotalAmount): boolean {
-        return this.amount == obj.amount;
+        if( 
+            obj.currency == this.currency 
+            && obj.amount == this.amount
+        ) return true;
+        return false;
     }
 
     get OrderAmount() {

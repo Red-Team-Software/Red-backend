@@ -10,14 +10,15 @@ import { OrderReportId } from "../value_objects/order-reportId";
 import { OrderPayment } from "../value_objects/order-payment";
 import { OrderRegistered } from "../domain-events/order-registered";
 import { PayOrder } from "../domain-events/pay-order";
+import { OrderDirection } from "../value_objects/order-direction";
 
 export class Order extends AggregateRoot<OrderId>{
     
     private orderState: OrderState;
     private orderCreatedDate: OrderCreatedDate;
     private totalAmount: OrderTotalAmount;
+    private orderDirection: OrderDirection;
     private orderReciviedDate?: OrderReciviedDate;
-    //private directionOrder: OrderProductId[];
     private products?: OrderProductId[];
     private bundles?: OrderBundleId[];
     private orderReport?: OrderReportId;
@@ -28,6 +29,7 @@ export class Order extends AggregateRoot<OrderId>{
             this.orderState = event.orderState;
             this.orderCreatedDate = event.orderCreateDate;
             this.totalAmount = event.totalAmount;
+            this.orderDirection = event.orderDirection;
             this.orderReciviedDate = event.orderReciviedDate;
             this.products = event.products;
             this.bundles = event.bundles;
@@ -51,9 +53,10 @@ export class Order extends AggregateRoot<OrderId>{
         orderState: OrderState,
         orderCreatedDate: OrderCreatedDate,
         totalAmount: OrderTotalAmount,
-        orderReciviedDate?: OrderReciviedDate,
+        orderDirection: OrderDirection,
         products?: OrderProductId[],
         bundles?: OrderBundleId[],
+        orderReciviedDate?: OrderReciviedDate,
         orderReport?: OrderReportId,
         orderPayment?: OrderPayment
     ) {
@@ -65,9 +68,10 @@ export class Order extends AggregateRoot<OrderId>{
         orderState: OrderState,
         orderCreatedDate: OrderCreatedDate,
         totalAmount: OrderTotalAmount,
-        orderReciviedDate?: OrderReciviedDate,
+        orderDirection: OrderDirection,
         products?: OrderProductId[],
         bundles?: OrderBundleId[],
+        orderReciviedDate?: OrderReciviedDate,
         orderReport?: OrderReportId,
         orderPayment?: OrderPayment
     ): Order {
@@ -76,9 +80,10 @@ export class Order extends AggregateRoot<OrderId>{
             orderState,
             orderCreatedDate,
             totalAmount,
-            orderReciviedDate,
+            orderDirection,
             products,
             bundles,
+            orderReciviedDate,
             orderReport,
             orderPayment
         );
@@ -88,9 +93,10 @@ export class Order extends AggregateRoot<OrderId>{
                 orderState,
                 orderCreatedDate,
                 totalAmount,
-                orderReciviedDate,
+                orderDirection,
                 products,
                 bundles,
+                orderReciviedDate,
                 orderReport,
                 orderPayment
             )
@@ -104,6 +110,7 @@ export class Order extends AggregateRoot<OrderId>{
         orderState: OrderState,
         orderCreateDate: OrderCreatedDate,
         totalAmount: OrderTotalAmount,
+        orderDirection: OrderDirection,
         orderReciviedDate?: OrderReciviedDate,
         products?: OrderProductId[],
         bundles?: OrderBundleId[],
@@ -116,9 +123,10 @@ export class Order extends AggregateRoot<OrderId>{
             orderState,
             orderCreateDate,
             totalAmount,
-            orderReciviedDate,
+            orderDirection,
             products,
             bundles,
+            orderReciviedDate,
             orderReport,
             orderPayment
         );
@@ -160,6 +168,10 @@ export class Order extends AggregateRoot<OrderId>{
 
     get OrderPayment(): OrderPayment {
         return this.orderPayment;
+    }
+
+    get OrderDirection(): OrderDirection {
+        return this.orderDirection;
     }
     
 }

@@ -3,7 +3,7 @@ import { ValueObject } from "src/common/domain";
 export class OrderProductId extends ValueObject<OrderProductId> {
     private id: string;
 
-    constructor(id: string) {
+    private constructor(id: string) {
         super();
  
         //if(!id) { throw new EmptyOrderProductIdException('No se pudo obtener un Id de curso') /* throw DomainException NullCourseId */}

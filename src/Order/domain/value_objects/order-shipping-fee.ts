@@ -4,7 +4,7 @@ import { NegativeOrderShippingFeeException } from "../exception/negative-order-s
 export class OrderShippingFee extends ValueObject<OrderShippingFee> {
     private fee: number;
 
-    constructor(fee: number) {
+    private constructor(fee: number) {
         super();
  
         if(fee<0) { throw new NegativeOrderShippingFeeException('El shipping de la orden no puede ser negativo') /* throw DomainException NullCourseId */}

@@ -5,7 +5,7 @@ export class OrderDirection extends ValueObject<OrderDirection> {
     private long: number;
 
 
-    constructor(lat: number, long: number) {
+    private constructor(lat: number, long: number) {
         super();
  
         //if(!lat) { throw new EmptyOrderDirectionException('No se pudo obtener un Lat de curso') /* throw DomainException NullCourseLat */}
@@ -19,8 +19,12 @@ export class OrderDirection extends ValueObject<OrderDirection> {
         return false;
     }
 
-    get OrderDirection() {
+    get Latitude() {
         return this.lat;
+    }
+
+    get Longitude() {
+        return this.long;
     }
 
     public static create(lat: number, long: number): OrderDirection {

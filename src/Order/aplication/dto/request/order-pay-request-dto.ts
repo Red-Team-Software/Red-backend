@@ -6,5 +6,8 @@ export interface OrderPayRequestDto extends IServiceRequestDto {
     amount: number;
     currency: string;
     paymentMethod: string;
+    lat: number;
+    long: number;
+    
 
 }

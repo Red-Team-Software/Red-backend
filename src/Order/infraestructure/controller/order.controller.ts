@@ -5,7 +5,7 @@ import { PaymentEntryDto } from "../dto/payment-entry-dto";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { ExceptionDecorator } from "src/common/application/aspects/exeption-decorator/exception-decorator";
-import { PayOrderAplicationService } from "src/Order/aplication/service/pay-order-aplication-service";
+import { PayOrderAplicationService } from "src/Order/aplication/service/pay-order-application.service";
 import { EventBus } from "src/common/infraestructure/events/publishers/event-bus";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IApplicationService } from "src/common/application/services";
@@ -19,12 +19,15 @@ import { CalculateShippingFeeImplementation } from "../domain-service/calculate-
 import { CalculateTaxesFeeImplementation } from "../domain-service/calculate-tax-fee-implementation";
 import { StripeConnection } from "../domain-service/stripe_adapter";
 import { NestLogger } from "src/common/infraestructure/logger/nest-logger";
+import { CalculateShippingFeeHereMaps } from "../domain-service/calculate-shipping-here-maps";
+import { HereMapsSingelton } from '../../../payments/infraestructure/here-maps-singleton';
 
 @ApiTags('Order')
 @Controller('order')
 export class OrderController {
     
     private readonly stripeSingleton: StripeSingelton ;
+    private readonly hereMapsSingelton: HereMapsSingelton;
     private readonly idGen: IIdGen<string>;
     private readonly eventBus: IEventPublisher;
     private readonly calculateShipping: ICalculateShippingFee;
@@ -38,7 +41,8 @@ export class OrderController {
         this.idGen = new UuidGen();
         this.stripeSingleton = StripeSingelton.getInstance();
         this.eventBus = new EventBus();
-        this.calculateShipping = new CalculateShippingFeeImplementation();
+        this.hereMapsSingelton = HereMapsSingelton.getInstance(); 
+        this.calculateShipping = new CalculateShippingFeeHereMaps(this.hereMapsSingelton);
         this.calculateTax = new CalculateTaxesFeeImplementation();
         this.paymentConnection = new StripeConnection(this.stripeSingleton);
     
@@ -61,7 +65,9 @@ export class OrderController {
 
     @Post('/payment')
     async realizePayment(@Body() data: PaymentEntryDto) {
-        let payment: OrderPayRequestDto = {userId: 'none',...data}
+        let payment: OrderPayRequestDto = {
+            userId: 'none',
+            ...data}
         
         let response = await this.payOrderService.execute(payment);
         

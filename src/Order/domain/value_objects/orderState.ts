@@ -5,7 +5,7 @@ import { OrderStateEnum } from "./enum/order-enum-state";
 export class OrderState extends ValueObject<OrderState> {
     private state: string;
 
-    constructor(state: string) {
+    private constructor(state: string) {
         super();
 
         if( OrderStateEnum.delivered != state 
@@ -21,7 +21,7 @@ export class OrderState extends ValueObject<OrderState> {
         return this.state == obj.state;
     }
 
-    get OrderState() {
+    get orderState() {
         return this.state;
     }
 

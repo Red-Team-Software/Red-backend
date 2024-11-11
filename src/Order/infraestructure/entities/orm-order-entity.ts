@@ -8,17 +8,26 @@ export class OrmOrderEntity implements IOrderInterface {
     @PrimaryColumn({ type: 'uuid' })
     id: string;
 
-    @Column('date')
-    orderCreatedDate: Date;
+    @Column('string')
+    state: string;
 
     @Column('date')
-    orderReciviedDate?: Date;
+    orderCreatedDate: Date;
 
     @Column('integer')
     totalAmount: number;
 
     @Column('string')
-    direction: string;
+    currency: string;
+
+    @Column('float')
+    latitude: number;
+
+    @Column('float')
+    longitude: number;
+
+    @Column('date')
+    orderReciviedDate?: Date;
 
     @OneToOne( () => OrmOrderPayEntity, (pay) => pay.id)
     @JoinColumn()
@@ -26,17 +35,25 @@ export class OrmOrderEntity implements IOrderInterface {
 
     static create(
         id: string,
+        orderState: string,
         orderCreatedDate: Date,
         totalAmount: number,
+        currency: string,
+        latitude: number,
+        longitude: number,
+        orderReciviedDate?: Date,
         pay?: OrmOrderPayEntity,
-        orderReciviedDate?: Date
     ): OrmOrderEntity {
         const order = new OrmOrderEntity();
         order.id = id;
+        order.state = orderState;
         order.orderCreatedDate = orderCreatedDate;
         order.totalAmount = totalAmount;
-        order.pay = pay;
+        order.currency = currency;
+        order.latitude = latitude;
+        order.longitude = longitude;
         order.orderReciviedDate = orderReciviedDate;
+        order.pay = pay;
         return order;
     }
 

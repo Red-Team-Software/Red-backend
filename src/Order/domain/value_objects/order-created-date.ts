@@ -3,7 +3,7 @@ import { ValueObject } from "src/common/domain";
 export class OrderCreatedDate extends ValueObject<OrderCreatedDate> {
     private date: Date;
 
-    constructor(date: Date) {
+    private constructor(date: Date) {
         super();
  
         //if(!date) { throw new EmptyOrderCreatedDateException('No se pudo obtener un Id de curso') /* throw DomainException NullCourseId */}

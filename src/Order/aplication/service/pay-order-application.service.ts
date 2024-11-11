@@ -9,6 +9,7 @@ import { ICalculateTaxesFee } from 'src/Order/domain/domain-services/calculate-t
 import { OrderTotalAmount } from 'src/Order/domain/value_objects/order-totalAmount';
 import { IPaymentService } from 'src/Order/domain/domain-services/payment-interface';
 import { OrderPayment } from 'src/Order/domain/value_objects/order-payment';
+import { OrderDirection } from 'src/Order/domain/value_objects/order-direction';
 
 
 export class PayOrderAplicationService implements IApplicationService<OrderPayRequestDto,OrderPayResponseDto>{
@@ -25,25 +26,26 @@ export class PayOrderAplicationService implements IApplicationService<OrderPayRe
     
     async execute(data: OrderPayRequestDto): Promise<Result<OrderPayResponseDto>> {
         try{
-            let shippingFee = this.calculateShippingFee.calculateShippingFee();
+            let orderDirection = OrderDirection.create(data.lat, data.long);
 
-            let amount = new OrderTotalAmount(data.amount, data.currency);
+            let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
+
+            let amount = OrderTotalAmount.create(data.amount, data.currency);
 
             let taxes = this.calculateTaxesFee.calculateTaxesFee(amount);
 
-            let monto = amount.OrderAmount + (await shippingFee).OrderShippingFee + taxes.OrderTaxes;
+            let monto = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.OrderTaxes;
 
-            let total = new OrderTotalAmount(monto, data.currency);
+            let total = OrderTotalAmount.create(monto, data.currency);
 
-            let orderPayment = new OrderPayment(total.OrderAmount, total.OrderCurrency, data.paymentMethod);
+            let orderPayment = OrderPayment.create(total.OrderAmount, total.OrderCurrency, data.paymentMethod);
 
             let response = await this.payOrder.createPayment(orderPayment);
 
-            if(response){
-                return Result.success(new OrderPayResponseDto());
-            }
+            return Result.success(new OrderPayResponseDto());
+
         }catch(error){
-            return Result.fail(error)
+            return Result.fail(error);
         }
     }
     

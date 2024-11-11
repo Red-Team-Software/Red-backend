@@ -5,7 +5,7 @@ import { OrderTaxes } from 'src/Order/domain/value_objects/order-taxes';
 
 export class CalculateTaxesFeeImplementation implements ICalculateTaxesFee {
     calculateTaxesFee(amount: OrderTotalAmount): OrderTaxes {
-        const taxes = amount.OrderTotalAmount * 0.16;
+        const taxes = amount.OrderAmount * 0.16;
         return new OrderTaxes(taxes);
     }
 }

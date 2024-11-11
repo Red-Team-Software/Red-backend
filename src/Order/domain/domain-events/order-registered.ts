@@ -8,6 +8,7 @@ import { OrderReportId } from "../value_objects/order-reportId";
 import { OrderTotalAmount } from "../value_objects/order-totalAmount";
 import { OrderId } from "../value_objects/orderId";
 import { OrderState } from "../value_objects/orderState";
+import { OrderDirection } from '../value_objects/order-direction';
 
 
 export class OrderRegistered extends DomainEvent {
@@ -20,9 +21,10 @@ export class OrderRegistered extends DomainEvent {
     orderState: OrderState;
     orderCreateDate: OrderCreatedDate;
     totalAmount: OrderTotalAmount;
-    orderReciviedDate?: OrderReciviedDate;
+    orderDirection: OrderDirection;
     products?: OrderProductId[];
     bundles?: OrderBundleId[];
+    orderReciviedDate?: OrderReciviedDate;
     orderReport?: OrderReportId;
     orderPayment?: OrderPayment;
 
@@ -31,9 +33,10 @@ export class OrderRegistered extends DomainEvent {
         orderState: OrderState,
         orderCreateDate: OrderCreatedDate,
         totalAmount: OrderTotalAmount,
-        orderReciviedDate?: OrderReciviedDate,
+        orderDirection: OrderDirection,
         products?: OrderProductId[],
         bundles?: OrderBundleId[],
+        orderReciviedDate?: OrderReciviedDate,
         orderReport?: OrderReportId,
         orderPayment?: OrderPayment,
     ){
@@ -45,9 +48,10 @@ export class OrderRegistered extends DomainEvent {
         orderState: OrderState,
         orderCreatedDate: OrderCreatedDate,
         totalAmount: OrderTotalAmount,
-        orderReciviedDate?: OrderReciviedDate,
+        orderDirection: OrderDirection,
         products?: OrderProductId[],
         bundles?: OrderBundleId[],
+        orderReciviedDate?: OrderReciviedDate,
         orderReport?: OrderReportId,
         orderPayment?: OrderPayment
     ){
@@ -56,9 +60,10 @@ export class OrderRegistered extends DomainEvent {
             orderState,
             orderCreatedDate,
             totalAmount,
-            orderReciviedDate,
+            orderDirection,
             products,
             bundles,
+            orderReciviedDate,
             orderReport,
             orderPayment
         )
