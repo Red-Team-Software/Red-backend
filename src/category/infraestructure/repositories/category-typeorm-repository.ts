@@ -1,5 +1,3 @@
-// src/category/infrastructure/repositories/category-typeorm-repository.ts
-
 import { CategoryRepository } from "src/category/domain/repository/category-repository";
 import { Repository } from "typeorm";
 import { OrmCategoryEntity } from "../entities/orm-entities/orm-category-entity";
@@ -8,6 +6,8 @@ import { CategoryId } from "src/category/domain/value-object/category-id";
 import { CategoryName } from "src/category/domain/value-object/category-name";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Injectable } from "@nestjs/common";
+import { Product } from "src/product/domain/aggregate/product.aggregate";
+import { ProductID } from "src/product/domain/value-object/product-id";
 
 @Injectable()
 export class CategoryTypeORMRepository implements CategoryRepository {
@@ -32,7 +32,8 @@ export class CategoryTypeORMRepository implements CategoryRepository {
         return categoryEntity
             ? Category.create(
                 CategoryId.create(categoryEntity.id),
-                CategoryName.create(categoryEntity.name)
+                CategoryName.create(categoryEntity.name),
+                categoryEntity.products.map((product) => ProductID.create(product.id)) // Convertir productos a ProductID[]
             )
             : null;
             
@@ -48,7 +49,8 @@ export class CategoryTypeORMRepository implements CategoryRepository {
             (entity) =>
                 Category.create(
                     CategoryId.create(entity.id),
-                    CategoryName.create(entity.name)
+                    CategoryName.create(entity.name),
+                    entity.products.map((product) => ProductID.create(product.id))
                 )
         );
     }

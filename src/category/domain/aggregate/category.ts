@@ -21,7 +21,7 @@ export class Category extends AggregateRoot<CategoryId> {
         this.addEvent(CategoryCreated.create(id, name));
     }
 
-    static create(id: CategoryId, name: CategoryName): Category {
+    static create(id: CategoryId, name: CategoryName, products: unknown[]): Category {
         return new Category(id, name);
     }
 
