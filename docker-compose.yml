@@ -44,6 +44,8 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_DB_USER_PASSWORD}
       ME_CONFIG_MONGODB_URL: ${MONGOEXPRESS_DB_HOST}
       ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - mongo
     networks:
       - red-team
       

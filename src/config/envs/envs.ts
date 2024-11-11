@@ -72,6 +72,7 @@ if (error) throw new Error(`Config validation error: ${error.message}`)
 const envVars: EnvVars = value
 
 export const envs = {
+    NODE_ENV:envVars.NODE_ENV,
     port:envVars.PORT,
     rabbit_user:envVars.RABBITMQ_USER,
     rabbit_password:envVars.RABBITMQ_PASSWORD,
