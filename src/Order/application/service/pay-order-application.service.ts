@@ -14,6 +14,7 @@ import { ErrorObtainingShippingFeeApplicationException } from '../application-ex
 import { ErrorCreatingPaymentApplicationException } from '../application-exception/error-creating-payment-application.exception';
 import { ErrorObtainingTaxesApplicationException } from '../application-exception/error-obtaining-taxes.application.exception';
 import { OrderStripePaymentMethod } from 'src/Order/domain/value_objects/order-stripe-payment-method';
+import { ICommandOrderRepository } from 'src/Order/domain/command-repository/order-command-repository-interface';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -22,8 +23,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly eventPublisher: IEventPublisher,
         private readonly calculateShippingFee: ICalculateShippingFee,
         private readonly calculateTaxesFee: ICalculateTaxesFee,
-        private readonly payOrder: IPaymentService
-        //private readonly ormOrderRepository
+        private readonly payOrder: IPaymentService,
+        private readonly orderRepository: ICommandOrderRepository
     ){
         super()
     }
@@ -53,6 +54,10 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             let response = await this.payOrder.createPayment(orderPayment, stripePaymentMethod);
 
             if (!response.isSuccess) return Result.fail(new ErrorCreatingPaymentApplicationException('Error during creation of payment'));
+
+            //TODO: Crear la orden
+            
+            //await this.orderRepository.saveOrder(order);  
 
             return Result.success(new OrderPayResponseDto(response.getValue));
     }

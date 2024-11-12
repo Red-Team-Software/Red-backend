@@ -8,7 +8,7 @@ export class OrmOrderEntity implements IOrderInterface {
     @PrimaryColumn({ type: 'uuid' })
     id: string;
 
-    @Column('string')
+    @Column('varchar')
     state: string;
 
     @Column('date')
@@ -17,7 +17,7 @@ export class OrmOrderEntity implements IOrderInterface {
     @Column('integer')
     totalAmount: number;
 
-    @Column('string')
+    @Column('varchar')
     currency: string;
 
     @Column('float')
