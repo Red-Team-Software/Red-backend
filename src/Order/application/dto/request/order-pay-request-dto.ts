@@ -1,6 +1,6 @@
 import { IServiceRequestDto } from "src/common/application/services"
 
-export interface OrderPayRequestDto extends IServiceRequestDto {
+export interface OrderPayApplicationServiceRequestDto extends IServiceRequestDto {
     userId: string;
     
     amount: number;

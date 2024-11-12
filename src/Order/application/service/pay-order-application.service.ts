@@ -1,7 +1,7 @@
 import { IApplicationService} from 'src/common/application/services';
 import { PayOrder } from '../../domain/domain-events/pay-order';
 import { Result } from 'src/common/utils/result-handler/result';
-import { OrderPayRequestDto } from '../dto/request/order-pay-request-dto';
+import { OrderPayApplicationServiceRequestDto } from '../dto/request/order-pay-request-dto';
 import { OrderPayResponseDto } from '../dto/response/order-pay-response-dto';
 import { IEventPublisher } from 'src/common/application/events/event-publisher/event-publisher.abstract';
 import { ICalculateShippingFee } from 'src/Order/domain/domain-services/calculate-shippping-fee.interfafe';
@@ -15,7 +15,7 @@ import { ErrorCreatingPaymentApplicationException } from '../application-excepti
 import { ErrorObtainingTaxesApplicationException } from '../application-exception/error-obtaining-taxes.application.exception';
 
 
-export class PayOrderAplicationService extends IApplicationService<OrderPayRequestDto,OrderPayResponseDto>{
+export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
     
     constructor(
         private readonly eventPublisher: IEventPublisher,
@@ -27,7 +27,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayReque
         super()
     }
     
-    async execute(data: OrderPayRequestDto): Promise<Result<OrderPayResponseDto>> {
+    async execute(data: OrderPayApplicationServiceRequestDto): Promise<Result<OrderPayResponseDto>> {
 
             let orderDirection = OrderDirection.create(data.lat, data.long);
 
