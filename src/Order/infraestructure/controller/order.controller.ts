@@ -104,62 +104,8 @@ export class OrderController {
     }
 
 
-@Post('/pay')
-async realize(@Body() data: PaymentEntryDto) {
-    try {
-        return await this.stripeSingleton.stripeInstance.paymentIntents.create({
-        amount: data.amount,
-        currency: data.currency,
-        payment_method: 'pm_card_threeDSecureOptional',
-        payment_method_types: ['card'],
-        confirmation_method: 'automatic',
-        capture_method: 'automatic',
-        });
-      //return await payment;
-    } catch (error) {
-        console.log('Error al realizar el pago:', error);
-    }
-}
-
 @Post('/create-payment')
 async createPaymentIntent(@Body() data: PaymentEntryDto) {
-    try {
-        const paymentIntent =
-            await this.stripeSingleton.stripeInstance.paymentIntents.create({
-                amount: data.amount,
-                currency: data.currency,
-                payment_method_types: ['card'],
-                confirmation_method: 'manual',
-            });
-        return {
-            clientSecret: paymentIntent.client_secret,
-            paymentIntentId: paymentIntent.id,
-        };
-    } catch (error) {
-        console.error('Error creating payment intent:', error);
-    }
-}
-
-@Post('/confirm-payment')
-async confirmPaymentIntent(@Body() body: ConfirmPaymentDto) {
-    try {
-        const confirmedPaymentIntent =
-        await this.stripeSingleton.stripeInstance.paymentIntents.confirm(
-            body.paymentIntentId,
-                {
-                    payment_method: body.paymentMethod,
-                },
-        );
-    console.log('pago confirmado', confirmedPaymentIntent);
-    return confirmedPaymentIntent;
-    } catch (error) {
-        console.error('Error confirming payment intent:', error);
-    }
-}
-
-
-@Post('/create-paymento')
-async createPaymentIntento(@Body() data: PaymentEntryDto) {
     try {
         const paymentIntent =
             await this.stripeSingleton.stripeInstance.paymentIntents.create({
