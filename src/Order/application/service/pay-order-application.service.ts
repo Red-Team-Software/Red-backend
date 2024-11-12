@@ -15,6 +15,11 @@ import { ErrorCreatingPaymentApplicationException } from '../application-excepti
 import { ErrorObtainingTaxesApplicationException } from '../application-exception/error-obtaining-taxes.application.exception';
 import { OrderStripePaymentMethod } from 'src/Order/domain/value_objects/order-stripe-payment-method';
 import { ICommandOrderRepository } from 'src/Order/domain/command-repository/order-command-repository-interface';
+import { Order } from 'src/Order/domain/aggregate/order';
+import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
+import { OrderCreatedDate } from 'src/Order/domain/value_objects/order-created-date';
+import { OrderId } from 'src/Order/domain/value_objects/orderId';
+import { OrderState } from 'src/Order/domain/value_objects/orderState';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -24,7 +29,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly calculateShippingFee: ICalculateShippingFee,
         private readonly calculateTaxesFee: ICalculateTaxesFee,
         private readonly payOrder: IPaymentService,
-        private readonly orderRepository: ICommandOrderRepository
+        private readonly orderRepository: ICommandOrderRepository,
+        private readonly idGen: IIdGen<string>,
     ){
         super()
     }
@@ -56,7 +62,20 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             if (!response.isSuccess) return Result.fail(new ErrorCreatingPaymentApplicationException('Error during creation of payment'));
 
             //TODO: Crear la orden
-            
+
+            let order = Order.registerOrder(
+                OrderId.create(await this.idGen.genId()),
+                OrderState.create('ongoing'),
+                OrderCreatedDate.create(new Date()),
+                total,
+                orderDirection,
+                [],
+                [],
+                null,
+                null,
+                orderPayment
+            )
+            console.log('Order: ', order);
             //await this.orderRepository.saveOrder(order);  
 
             return Result.success(new OrderPayResponseDto(response.getValue));

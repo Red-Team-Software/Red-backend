@@ -42,8 +42,16 @@ export class Order extends AggregateRoot<OrderId>{
     }
     
     protected validateState(): void {
-    
+        if (
+            !this.orderState ||
+            !this.orderCreatedDate ||
+            !this.totalAmount ||
+            !this.orderDirection 
+        ) {
+            //throw new MissingOrderAtributes('The order is invalid, information is missing');
+        }
     }
+    
     clone(): Entity<OrderId> {
         throw new Error("Method not implemented.");
     }
@@ -87,7 +95,7 @@ export class Order extends AggregateRoot<OrderId>{
             orderReport,
             orderPayment
         );
-        order.when(
+        order.apply(
             OrderRegistered.create(
                 id,
                 orderState,
@@ -135,6 +143,12 @@ export class Order extends AggregateRoot<OrderId>{
     }
 
     payOrder(pay: OrderPayment): void {
+        this.when(
+            PayOrder.create(
+                this.getId(),
+                pay
+            )
+        )
         this.orderPayment = pay;
     }
 

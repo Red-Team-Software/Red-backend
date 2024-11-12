@@ -16,7 +16,7 @@ export class PayOrder extends DomainEvent {
 
     static create (
         id: OrderId,
-        orderPayment?: OrderPayment
+        orderPayment: OrderPayment
     ): PayOrder {
         return new PayOrder(
             id,

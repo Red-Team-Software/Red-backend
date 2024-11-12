@@ -91,7 +91,8 @@ export class OrderController {
                     this.calculateShipping,
                     this.calculateTax,
                     this.paymentConnection,
-                    this.orderRepository
+                    this.orderRepository,
+                    this.idGen
                 ),
                 new NestLogger(new Logger())
             )
