@@ -7,7 +7,10 @@ import { FindCategoryByIdApplication } from "src/category/application/services/f
 import { CreateCategoryApplicationRequestDTO } from "src/category/application/dto/request/create-category-application-request.dto";
 import { DeleteCategoryApplicationRequestDTO } from "src/category/application/dto/request/delete-category-application-request.dto";
 import { FindCategoryByIdApplicationRequestDTO } from "src/category/application/dto/request/find-category-by-id-application-request.dto";
-
+import { CreateCategoryApplicationResponseDTO } from 'src/category/application/dto/response/create-category-application-response.dto';
+import { Result } from 'src/common/utils/result-handler/result';
+import { FindAllCategoriesResponseDTO } from 'src/category/application/dto/response/find-all-categories-response.dto';
+import { NotFoundCategoryApplicationException } from 'src/category/application/application-exception/not-found-category-application-exception';
 @Controller('categories')
 export class CategoryController {
     constructor(
@@ -18,13 +21,13 @@ export class CategoryController {
     ) {}
 
     @Post()
-    async createCategory(@Body() request: CreateCategoryApplicationRequestDTO) {
+    async createCategory(@Body() request: CreateCategoryApplicationRequestDTO): Promise<Result<CreateCategoryApplicationResponseDTO>> {
         return await this.createCategoryApp.execute(request);
     }
 
     @Get()
-    async findAllCategories() {
-        return await this.findAllCategoriesApp.execute();
+    async findAllCategories(@Body() request: FindCategoryByIdApplicationRequestDTO): Promise<Result<FindAllCategoriesResponseDTO>> {
+        return await this.findAllCategoriesApp.execute(request);
     }
 
     @Get(':id')
@@ -41,11 +44,18 @@ export class CategoryController {
     }
 
     @Delete(':id')
-    async deleteCategory(@Param('id') id: string) {
-        const request: DeleteCategoryApplicationRequestDTO = {
-            id,
-            userId: ''
-        };
-        await this.deleteCategoryApp.execute(request);
+async deleteCategory(@Param('id') id: string) {
+    const request: DeleteCategoryApplicationRequestDTO = {
+        id,
+        userId: '' // Puedes proporcionar un userId si es necesario
+    };
+    
+    const result = await this.deleteCategoryApp.execute(request);
+
+    if (!result.isSuccess()) {
+        throw new NotFoundCategoryApplicationException();
     }
+
+    return result.getValue;
+}
 }

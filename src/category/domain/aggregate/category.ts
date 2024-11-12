@@ -1,73 +1,61 @@
-// src/Category/domain/aggregate/category.ts
+// src/category/domain/aggregate/category.ts
 
 import { AggregateRoot } from 'src/common/domain/aggregate-root/aggregate-root';
 import { CategoryId } from '../value-object/category-id';
 import { CategoryName } from '../value-object/category-name';
-import { ProductID } from 'src/Product/domain/value-object/product-id';
-//import { ComboId } from 'src/Combo/domain/value-object/combo-id';
-import { CategoryCreated } from '../domain-events/category-created';
-import { ProductAddedToCategory } from '../domain-events/product-added-to-category';
-import { ComboAddedToCategory } from '../domain-events/combo-added-to-category';
+import { CategoryImage } from '../value-object/category-image';
 import { DomainEvent } from 'src/common/domain/domain-event/domain-event';
+import { CategoryCreated } from '../domain-events/category-created';
 
 export class Category extends AggregateRoot<CategoryId> {
-    private readonly name: CategoryName;
-    private products: ProductID[] = [];
-//    private combos: ComboId[] = [];
+    private categoryName: CategoryName;
+    private categoryImage: CategoryImage | null; // Opcional para manejar categorías sin imagen
 
-    private constructor(id: CategoryId, name: CategoryName) {
+    private constructor(id: CategoryId, name: CategoryName, image: CategoryImage | null) {
         super(id);
-        this.name = name;
-        this.addEvent(CategoryCreated.create(id, name));
+        this.categoryName = name;
+        this.categoryImage = image;
     }
 
-    static create(id: CategoryId, name: CategoryName, products: unknown[]): Category {
-        return new Category(id, name);
+    // Método de fábrica para crear una nueva categoría y registrar el evento de creación
+    static create(id: CategoryId, name: CategoryName, image: CategoryImage | null): Category {
+        const category = new Category(id, name, image);
+        category.apply(CategoryCreated.create(id, name, image));
+        return category;
     }
 
-    addProduct(productId: ProductID): void {
-        if (!this.products.find(p => p.equals(productId))) {
-            this.products.push(productId);
-            this.addEvent(ProductAddedToCategory.create(this.getId(), productId)); // Usar getId()
-        }
+    // Método para inicializar una categoría existente (sin registrar evento)
+    static initializeAggregate(id: CategoryId, name: CategoryName, image: CategoryImage | null): Category {
+        const category = new Category(id, name, image);
+        category.validateState();
+        return category;
     }
 
- /*   addCombo(comboId: ComboId): void {
-        if (!this.combos.find(c => c.equals(comboId))) {
-            this.combos.push(comboId);
-            this.addEvent(ComboAddedToCategory.create(this.getId(), comboId)); // Usar getId()
-        }
-    }*/
-
-    private addEvent(event: DomainEvent): void {
-        this.events.push(event);
-    }
-
-    pullDomainEvents(): DomainEvent[] {
-        const domainEvents = [...this.events];
-        this.events = [];
-        return domainEvents;
-    }
-
+    // Método `when` para manejar los eventos de dominio
     protected when(event: DomainEvent): void {
-        // Método sin lógica adicional
+        switch (event.getEventName) {
+            case 'CategoryCreated':
+                const categoryCreated = event as CategoryCreated;
+                this.categoryName = categoryCreated.categoryName;
+                this.categoryImage = categoryCreated.categoryImage;
+                break;
+            // Agregar otros casos de eventos de dominio si es necesario
+        }
     }
 
+    // Validación del estado de la categoría
     protected validateState(): void {
-        if (!this.getId() || !this.name) {
+        if (!this.getId() || !this.categoryName) {
             throw new Error("Invalid category state: ID and name must be defined");
         }
     }
 
-    getName(): string {
-        return this.name.Value;
+    // Métodos `get` para acceder a los campos de la categoría
+    getName(): CategoryName {
+        return this.categoryName;
     }
 
-    getProducts(): ProductID[] {
-        return this.products;
+    getImage(): CategoryImage | null {
+        return this.categoryImage;
     }
-
-    /*getCombos(): ComboId[] {
-        return this.combos;
-    }*/
 }

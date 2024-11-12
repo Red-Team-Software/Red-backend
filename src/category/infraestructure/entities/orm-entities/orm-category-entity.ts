@@ -1,8 +1,6 @@
-// src/category/infrastructure/entities/orm-entities/orm-category-entity.ts
-
-import { Entity, Column, PrimaryColumn, ManyToMany, JoinTable } from "typeorm";
-import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity"
-
+import { Entity, Column, PrimaryColumn, ManyToMany, JoinTable, OneToOne, JoinColumn } from "typeorm";
+import { OrmProductEntity} from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
+import { OrmCategoryImage } from "./orm-category-image.entity";
 @Entity('category')
 export class OrmCategoryEntity {
     
@@ -13,12 +11,12 @@ export class OrmCategoryEntity {
     name: string;
 
     @ManyToMany(() => OrmProductEntity, (product) => product.categories, { cascade: true })
-    @JoinTable({
-        name: "category_product", // Nombre de la tabla intermedia
-        joinColumn: { name: "category_id", referencedColumnName: "id" },
-        inverseJoinColumn: { name: "product_id", referencedColumnName: "id" }
-    })
+    @JoinTable()
     products: OrmProductEntity[];
+
+    @OneToOne(() => OrmCategoryImage, (categoryImage) => categoryImage.category, { cascade: true })
+    @JoinColumn()
+    image: OrmCategoryImage;
 
     static create(id: string, name: string): OrmCategoryEntity {
         const category = new OrmCategoryEntity();
