@@ -13,6 +13,7 @@ import { OrderDirection } from 'src/Order/domain/value_objects/order-direction';
 import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
 import { ErrorCreatingPaymentApplicationException } from '../application-exception/error-creating-payment-application.exception';
 import { ErrorObtainingTaxesApplicationException } from '../application-exception/error-obtaining-taxes.application.exception';
+import { OrderStripePaymentMethod } from 'src/Order/domain/value_objects/order-stripe-payment-method';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -47,7 +48,9 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             
             let orderPayment = OrderPayment.create(total.OrderAmount, total.OrderCurrency, data.paymentMethod);
 
-            let response = await this.payOrder.createPayment(orderPayment);
+            let stripePaymentMethod = OrderStripePaymentMethod.create(data.stripePaymentMethod);
+
+            let response = await this.payOrder.createPayment(orderPayment, stripePaymentMethod);
 
             if (!response.isSuccess) return Result.fail(new ErrorCreatingPaymentApplicationException('Error during creation of payment'));
 

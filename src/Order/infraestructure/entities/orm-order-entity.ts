@@ -29,7 +29,7 @@ export class OrmOrderEntity implements IOrderInterface {
     @Column('date')
     orderReciviedDate?: Date;
 
-    @OneToOne( () => OrmOrderPayEntity, (pay) => pay.id)
+    @OneToOne( () => OrmOrderPayEntity, (pay) => pay.order, { eager: true } )
     @JoinColumn()
     pay?: OrmOrderPayEntity;
 

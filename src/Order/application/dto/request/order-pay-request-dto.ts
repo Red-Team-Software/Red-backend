@@ -6,6 +6,7 @@ export interface OrderPayApplicationServiceRequestDto extends IServiceRequestDto
     amount: number;
     currency: string;
     paymentMethod: string;
+    stripePaymentMethod: string;
     lat: number;
     long: number;
     

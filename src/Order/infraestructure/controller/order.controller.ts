@@ -24,17 +24,18 @@ import { TaxesShippingFeeEntryDto } from "../dto/taxes-shipping-dto";
 import { TaxesShippingFeeApplicationServiceEntryDto } from "src/Order/application/dto/request/tax-shipping-fee-request-dto";
 import { CalculateTaxesShippingResponseDto } from "src/Order/application/dto/response/calculate-taxes-shipping-fee-response.dto";
 import { CalculateTaxShippingFeeAplicationService } from "src/Order/application/service/calculate-tax-shipping-fee-application.service";
+import { ConfirmPaymentDto } from "../dto";
 
 @ApiTags('Order')
 @Controller('order')
 export class OrderController {
-  private readonly stripeSingleton: StripeSingelton;
-  private readonly hereMapsSingelton: HereMapsSingelton;
-  private readonly idGen: IIdGen<string>;
-  private readonly eventBus: IEventPublisher;
-  private readonly calculateShipping: ICalculateShippingFee;
-  private readonly calculateTax: ICalculateTaxesFee;
-  private readonly paymentConnection: IPaymentService;
+    private readonly stripeSingleton: StripeSingelton;
+    private readonly hereMapsSingelton: HereMapsSingelton;
+    private readonly idGen: IIdGen<string>;
+    private readonly eventBus: IEventPublisher;
+    private readonly calculateShipping: ICalculateShippingFee;
+    private readonly calculateTax: ICalculateTaxesFee;
+    private readonly paymentConnection: IPaymentService;
 
     //Aplication services
     private readonly payOrderService: IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>;
@@ -102,56 +103,89 @@ export class OrderController {
         return response.getValue;
     }
 
-  @Post('/pay')
-  async realize(@Body() data: PaymentEntryDto) {
+
+@Post('/pay')
+async realize(@Body() data: PaymentEntryDto) {
     try {
-      return await this.stripeSingleton.stripeInstance.paymentIntents.create({
+        return await this.stripeSingleton.stripeInstance.paymentIntents.create({
         amount: data.amount,
         currency: data.currency,
         payment_method: 'pm_card_threeDSecureOptional',
         payment_method_types: ['card'],
         confirmation_method: 'automatic',
         capture_method: 'automatic',
-      });
+        });
       //return await payment;
     } catch (error) {
-      console.log('Error al realizar el pago:', error);
+        console.log('Error al realizar el pago:', error);
     }
-  }
+}
 
-  @Post('/create-payment')
-  async createPaymentIntent(@Body() data: PaymentEntryDto) {
+@Post('/create-payment')
+async createPaymentIntent(@Body() data: PaymentEntryDto) {
     try {
-      const paymentIntent =
-        await this.stripeSingleton.stripeInstance.paymentIntents.create({
-          amount: data.amount,
-          currency: data.currency,
-          payment_method_types: ['card'],
-          confirmation_method: 'manual',
-        });
-      return {
-        clientSecret: paymentIntent.client_secret,
-        paymentIntentId: paymentIntent.id,
-      };
+        const paymentIntent =
+            await this.stripeSingleton.stripeInstance.paymentIntents.create({
+                amount: data.amount,
+                currency: data.currency,
+                payment_method_types: ['card'],
+                confirmation_method: 'manual',
+            });
+        return {
+            clientSecret: paymentIntent.client_secret,
+            paymentIntentId: paymentIntent.id,
+        };
     } catch (error) {
-      console.error('Error creating payment intent:', error);
+        console.error('Error creating payment intent:', error);
     }
-  }
+}
 
-  @Post('/confirm-payment')
-  async confirmPaymentIntent(@Body() body: ConfirmPaymentDto) {
+@Post('/confirm-payment')
+async confirmPaymentIntent(@Body() body: ConfirmPaymentDto) {
     try {
-      const confirmedPaymentIntent =
+        const confirmedPaymentIntent =
         await this.stripeSingleton.stripeInstance.paymentIntents.confirm(
-          body.paymentIntentId,
-          {
-            payment_method: body.paymentMethod,
-          },
+            body.paymentIntentId,
+                {
+                    payment_method: body.paymentMethod,
+                },
         );
-      console.log('pago confirmado', confirmedPaymentIntent);
-      return confirmedPaymentIntent;
+    console.log('pago confirmado', confirmedPaymentIntent);
+    return confirmedPaymentIntent;
     } catch (error) {
-      console.error('Error confirming payment intent:', error);
+        console.error('Error confirming payment intent:', error);
     }
-  }
+}
+
+
+@Post('/create-paymento')
+async createPaymentIntento(@Body() data: PaymentEntryDto) {
+    try {
+        const paymentIntent =
+            await this.stripeSingleton.stripeInstance.paymentIntents.create({
+                amount: data.amount,
+                currency: data.currency,
+                payment_method_types: ['card'],
+                confirmation_method: 'manual',
+            });
+        let paymentIntentId = paymentIntent.id;
+        
+        const confirmedPaymentIntent =
+            await this.stripeSingleton.stripeInstance.paymentIntents.confirm(
+                paymentIntentId,
+                {
+                    payment_method: data.paymentMethod,
+                },
+            );
+        return confirmedPaymentIntent;
+    } catch (error) {
+        console.error('Error creating payment intent:', error);
+    }
+}
+
+
+
+
+
+
 }

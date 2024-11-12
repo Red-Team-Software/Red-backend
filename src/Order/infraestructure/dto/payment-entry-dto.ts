@@ -20,6 +20,10 @@ export class PaymentEntryDto {
   @IsString()
   paymentMethod: string;
 
+  @ApiProperty({ example: 'pm_card_threeDSecureOptional', description: 'The token that stripe gives' })
+  @IsString()
+  stripePaymentMethod: string;
+
   @ApiProperty({
     example: 40.7128,
     description: 'Latitude coordinate for the location',
