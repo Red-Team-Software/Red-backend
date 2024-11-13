@@ -1,5 +1,4 @@
 import { IApplicationService} from 'src/common/application/services';
-import { PayOrder } from '../../domain/domain-events/pay-order';
 import { Result } from 'src/common/utils/result-handler/result';
 import { OrderPayApplicationServiceRequestDto } from '../dto/request/order-pay-request-dto';
 import { OrderPayResponseDto } from '../dto/response/order-pay-response-dto';
@@ -54,11 +53,11 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             if (!taxes.isSuccess) return Result.fail(new ErrorObtainingTaxesApplicationException('Error obtaining taxes'));
             
-            //let monto = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.getValue.OrderTaxes;
+            //let amountTotal = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.getValue.OrderTaxes;
             
-            let monto = amount.OrderAmount + shippingFee.OrderShippingFee + taxes.getValue.OrderTaxes;
+            let amountTotal = amount.OrderAmount + shippingFee.OrderShippingFee + taxes.getValue.OrderTaxes;
 
-            let total = OrderTotalAmount.create(monto, data.currency);
+            let total = OrderTotalAmount.create(amountTotal, data.currency);
             
             let orderPayment = OrderPayment.create(total.OrderAmount, total.OrderCurrency, data.paymentMethod);
 
@@ -67,8 +66,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             //let response = await this.payOrder.createPayment(orderPayment, stripePaymentMethod);
 
             //if (!response.isSuccess) return Result.fail(new ErrorCreatingPaymentApplicationException('Error during creation of payment'));
-
-            //TODO: Crear la orden
 
             let order = Order.registerOrder(
                 OrderId.create(await this.idGen.genId()),
@@ -89,9 +86,31 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             await this.eventPublisher.publish(order.pullDomainEvents());
 
-            return Result.success(new OrderPayResponseDto(
-                //response.getValue
-                'lol'
-            ));
+            let direction = {
+                lat: order.OrderDirection.Latitude,
+                long: order.OrderDirection.Longitude
+            }
+
+            let payment = {
+                amount: order.OrderPayment.Amount,
+                currency: order.OrderPayment.Currency,
+                paymentMethod: order.OrderPayment.PaymentMethod
+            }
+
+            return Result.success(
+                new OrderPayResponseDto(
+                    order.getId().orderId,
+                    order.OrderState.orderState,
+                    order.OrderCreatedDate.OrderCreatedDate,
+                    order.TotalAmount.OrderAmount,
+                    order.TotalAmount.OrderCurrency,
+                    direction,
+                    [],
+                    [],
+                    order.OrderReciviedDate.OrderReciviedDate,
+                    order.OrderReport?.OrderReportId,
+                    payment
+                )
+            );
     }
 }

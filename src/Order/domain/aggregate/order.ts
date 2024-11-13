@@ -9,7 +9,6 @@ import { OrderCreatedDate } from "../value_objects/order-created-date";
 import { OrderReportId } from "../value_objects/order-reportId";
 import { OrderPayment } from "../value_objects/order-payment";
 import { OrderRegistered } from "../domain-events/order-registered";
-import { PayOrder } from "../domain-events/pay-order";
 import { OrderDirection } from "../value_objects/order-direction";
 import { MissingOrderAtributes } from "../exception/missing-order-attributes.exception";
 
@@ -25,9 +24,6 @@ export class Order extends AggregateRoot<OrderId>{
             this.bundles = event.bundles;
             this.orderReciviedDate = event.orderReciviedDate;
             this.orderReport = event.orderReport;
-            this.orderPayment = event.orderPayment;
-        }
-        if (event instanceof PayOrder) {
             this.orderPayment = event.orderPayment;
         }
     }
@@ -131,16 +127,6 @@ export class Order extends AggregateRoot<OrderId>{
         );
         order.validateState();
         return order;
-    }
-
-    payOrder(pay: OrderPayment): void {
-        this.when(
-            PayOrder.create(
-                this.getId(),
-                pay
-            )
-        )
-        this.orderPayment = pay;
     }
 
     get OrderState(): OrderState {

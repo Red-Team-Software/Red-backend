@@ -138,7 +138,7 @@ export class OrderController {
         
         let response = await this.payOrderService.execute(payment);
         
-        return response.getValue.paymentState;
+        return response.getValue;
     }
 
     @Get('/tax-shipping-fee')
