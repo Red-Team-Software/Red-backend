@@ -1,6 +1,5 @@
 import { Body, Controller, Inject, Logger, Post } from "@nestjs/common";
 import { Channel } from "amqp-connection-manager";
-import { RabbitMQEventPublisher } from "src/common/infraestructure/events/publishers/rabbittMq.publisher";
 import { AddNewProductsApplicationService } from "src/notification/application/services/command/new-product-push-notification-application.service";
 import { FirebaseNotifier } from '../firebase-notifier/firebase-notifier-singleton';
 import { IPushNotifier } from "src/common/application/notification-handler/notification-interface";

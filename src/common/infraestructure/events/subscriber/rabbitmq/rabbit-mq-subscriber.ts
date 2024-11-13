@@ -36,7 +36,6 @@ export class RabbitMQSubscriber {
     async consume<T>( queue: AMQPQueue, callback: (entry:T) => Promise<void> ) {
         this.channel.consume(queue.name, async (message) => {
             const content = JSON.parse(message.content.toString())
-			console.log(content)
             await callback(content) 
             this.channel.ack(message)
         })
