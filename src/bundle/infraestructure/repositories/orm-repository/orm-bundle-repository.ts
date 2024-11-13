@@ -26,8 +26,9 @@ export class OrmBundleRepository extends Repository<OrmBundleEntity> implements 
         try{
             const entry=await this.mapper.fromDomaintoPersistence(bundle)
             const response= await this.save(entry)
+            console.log(response)
             for (const image of entry.images ){
-                this.ormBundleImageRepository.save(image)
+                let response= await this.ormBundleImageRepository.save(image)
             }
             return Result.success(bundle)
         }catch(e){
