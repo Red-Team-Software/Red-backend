@@ -11,6 +11,7 @@ import { OrderPayment } from "../value_objects/order-payment";
 import { OrderRegistered } from "../domain-events/order-registered";
 import { PayOrder } from "../domain-events/pay-order";
 import { OrderDirection } from "../value_objects/order-direction";
+import { MissingOrderAtributes } from "../exception/missing-order-attributes.exception";
 
 export class Order extends AggregateRoot<OrderId>{
     
@@ -30,9 +31,9 @@ export class Order extends AggregateRoot<OrderId>{
             this.orderCreatedDate = event.orderCreateDate;
             this.totalAmount = event.totalAmount;
             this.orderDirection = event.orderDirection;
-            this.orderReciviedDate = event.orderReciviedDate;
             this.products = event.products;
             this.bundles = event.bundles;
+            this.orderReciviedDate = event.orderReciviedDate;
             this.orderReport = event.orderReport;
             this.orderPayment = event.orderPayment;
         }
@@ -48,7 +49,7 @@ export class Order extends AggregateRoot<OrderId>{
             !this.totalAmount ||
             !this.orderDirection 
         ) {
-            //throw new MissingOrderAtributes('The order is invalid, information is missing');
+            throw new MissingOrderAtributes('The order is invalid, information is missing');
         }
     }
     
@@ -119,9 +120,9 @@ export class Order extends AggregateRoot<OrderId>{
         orderCreateDate: OrderCreatedDate,
         totalAmount: OrderTotalAmount,
         orderDirection: OrderDirection,
-        orderReciviedDate?: OrderReciviedDate,
         products?: OrderProductId[],
         bundles?: OrderBundleId[],
+        orderReciviedDate?: OrderReciviedDate,
         orderReport?: OrderReportId,
         orderPayment?: OrderPayment
 

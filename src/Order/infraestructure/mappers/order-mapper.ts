@@ -36,6 +36,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
     }
     
     async fromDomaintoPersistence(domainEntity: Order): Promise<OrmOrderEntity> {
+
         let ormOrderPayEntity: OrmOrderPayEntity;
         if(domainEntity.OrderPayment){
             ormOrderPayEntity = OrmOrderPayEntity.create(

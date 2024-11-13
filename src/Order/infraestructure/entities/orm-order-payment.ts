@@ -5,7 +5,7 @@ import { OrmOrderEntity } from "./orm-order-entity";
 @Entity('pay')
 export class OrmOrderPayEntity implements IOrderPaymentInterface {
     
-    @PrimaryColumn({ type: 'uuid' })
+    @PrimaryColumn( 'uuid' , { primaryKeyConstraintName: "pay_id" })
     id: string;
 
     @Column('integer')
@@ -17,7 +17,6 @@ export class OrmOrderPayEntity implements IOrderPaymentInterface {
     @Column('varchar')
     paymentMethod: string;
 
-    @OneToOne( () => OrmOrderEntity )
     @JoinColumn( { name: 'order_id'} )
     order: OrmOrderEntity;
 

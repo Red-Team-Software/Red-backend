@@ -20,6 +20,8 @@ import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
 import { OrderCreatedDate } from 'src/Order/domain/value_objects/order-created-date';
 import { OrderId } from 'src/Order/domain/value_objects/orderId';
 import { OrderState } from 'src/Order/domain/value_objects/orderState';
+import { OrderShippingFee } from 'src/Order/domain/value_objects/order-shipping-fee';
+import { OrderReciviedDate } from 'src/Order/domain/value_objects/order-recivied-date';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -39,9 +41,11 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let orderDirection = OrderDirection.create(data.lat, data.long);
 
-            let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
+            //let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
 
-            if (!shippingFee.isSuccess) return Result.fail(new ErrorObtainingShippingFeeApplicationException('Error obtaining shipping fee'));
+            let shippingFee = OrderShippingFee.create(10);
+
+            //if (!shippingFee.isSuccess) return Result.fail(new ErrorObtainingShippingFeeApplicationException('Error obtaining shipping fee'));
 
             let amount = OrderTotalAmount.create(data.amount, data.currency);
 
@@ -49,17 +53,19 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             if (!taxes.isSuccess) return Result.fail(new ErrorObtainingTaxesApplicationException('Error obtaining taxes'));
             
-            let monto = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.getValue.OrderTaxes;
+            //let monto = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.getValue.OrderTaxes;
             
+            let monto = amount.OrderAmount + shippingFee.OrderShippingFee + taxes.getValue.OrderTaxes;
+
             let total = OrderTotalAmount.create(monto, data.currency);
             
             let orderPayment = OrderPayment.create(total.OrderAmount, total.OrderCurrency, data.paymentMethod);
 
             let stripePaymentMethod = OrderStripePaymentMethod.create(data.stripePaymentMethod);
 
-            let response = await this.payOrder.createPayment(orderPayment, stripePaymentMethod);
+            //let response = await this.payOrder.createPayment(orderPayment, stripePaymentMethod);
 
-            if (!response.isSuccess) return Result.fail(new ErrorCreatingPaymentApplicationException('Error during creation of payment'));
+            //if (!response.isSuccess) return Result.fail(new ErrorCreatingPaymentApplicationException('Error during creation of payment'));
 
             //TODO: Crear la orden
 
@@ -71,13 +77,15 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 orderDirection,
                 [],
                 [],
-                null,
-                null,
+                OrderReciviedDate.create(new Date()),
+                undefined,
                 orderPayment
             )
-            console.log('Order: ', order);
-            //await this.orderRepository.saveOrder(order);  
+            await this.orderRepository.saveOrder(order);  
 
-            return Result.success(new OrderPayResponseDto(response.getValue));
+            return Result.success(new OrderPayResponseDto(
+                //response.getValue
+                'lol'
+            ));
     }
 }

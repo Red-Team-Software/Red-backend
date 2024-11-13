@@ -26,7 +26,7 @@ export class OrmOrderEntity implements IOrderInterface {
     @Column('float')
     longitude: number;
 
-    @Column('date')
+    @Column('date', { nullable: true })
     orderReciviedDate?: Date;
 
     @OneToOne( () => OrmOrderPayEntity, (pay) => pay.order, { eager: true } )

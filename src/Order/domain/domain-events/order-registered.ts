@@ -16,29 +16,18 @@ export class OrderRegistered extends DomainEvent {
     serialize(): string {
         return '';
     }
-    
-    orderId: OrderId;
-    orderState: OrderState;
-    orderCreateDate: OrderCreatedDate;
-    totalAmount: OrderTotalAmount;
-    orderDirection: OrderDirection;
-    products?: OrderProductId[];
-    bundles?: OrderBundleId[];
-    orderReciviedDate?: OrderReciviedDate;
-    orderReport?: OrderReportId;
-    orderPayment?: OrderPayment;
 
     constructor(
-        orderId: OrderId,
-        orderState: OrderState,
-        orderCreateDate: OrderCreatedDate,
-        totalAmount: OrderTotalAmount,
-        orderDirection: OrderDirection,
-        products?: OrderProductId[],
-        bundles?: OrderBundleId[],
-        orderReciviedDate?: OrderReciviedDate,
-        orderReport?: OrderReportId,
-        orderPayment?: OrderPayment,
+        public orderId: OrderId,
+        public orderState: OrderState,
+        public orderCreateDate: OrderCreatedDate,
+        public totalAmount: OrderTotalAmount,
+        public orderDirection: OrderDirection,
+        public products?: OrderProductId[],
+        public bundles?: OrderBundleId[],
+        public orderReciviedDate?: OrderReciviedDate,
+        public orderReport?: OrderReportId,
+        public orderPayment?: OrderPayment,
     ){
         super();
     }
@@ -55,7 +44,7 @@ export class OrderRegistered extends DomainEvent {
         orderReport?: OrderReportId,
         orderPayment?: OrderPayment
     ){
-        return new OrderRegistered(
+        let order = new OrderRegistered(
             id,
             orderState,
             orderCreatedDate,
@@ -66,7 +55,8 @@ export class OrderRegistered extends DomainEvent {
             orderReciviedDate,
             orderReport,
             orderPayment
-        )
+        );
+        return order;
     }
 
     

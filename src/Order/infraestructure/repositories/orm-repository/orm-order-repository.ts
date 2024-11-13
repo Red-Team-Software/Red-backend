@@ -23,16 +23,15 @@ export class OrmOrderRepository extends Repository<OrmOrderEntity> implements IC
     }
 
     async saveOrder(order: Order): Promise<Result<Order>> {
-        console.log("entre");
+        const queryRunner = this.manager.connection.createQueryRunner();
         try {
-            console.log('Order: ', order);
+            await queryRunner.connect();
             let orderEntity = await this.orderMapper.fromDomaintoPersistence(order);
-            console.log('OrderEntity: ', orderEntity);
-            await this.save(orderEntity);
             await this.ormOrderPayRepository.save(orderEntity.pay);
-            console.log('termine')
+            await this.save(orderEntity);
             return Result.success(order);
         } catch (error) {
+            console.log(error)
             return Result.fail( new PersistenceException( 'Create order unsucssessfully' ) );
         }
     }
