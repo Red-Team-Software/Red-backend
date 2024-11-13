@@ -7,7 +7,7 @@ import { NewProductPushNotificationApplicationResponseDTO } from "../../dto/resp
 import { ErrorSendingPushProductApplicationException } from "../../application-exception/error-sending-push-product-application-exception"
 
 
-export class AddNewProductsApplicationService extends IApplicationService<NewProductPushNotificationApplicationRequestDTO,NewProductPushNotificationApplicationResponseDTO>{
+export class AddNewProductsPushNotificationApplicationService extends IApplicationService<NewProductPushNotificationApplicationRequestDTO,NewProductPushNotificationApplicationResponseDTO>{
     constructor(
         private readonly pushNotifier:IPushNotifier
     ){

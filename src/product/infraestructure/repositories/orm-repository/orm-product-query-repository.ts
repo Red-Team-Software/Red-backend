@@ -21,7 +21,6 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
     }
     async findAllProductsByName(criteria: FindAllProductsbyNameApplicationRequestDTO): Promise<Result<Product[]>> {
         try{
-            console.log(criteria)
             const ormProducts = await this.createQueryBuilder( 'product' )
             .where('LOWER(product.name) LIKE :name', { name: `%${ criteria.name.toLowerCase().trim() }%` })
             .leftJoinAndSelect('product.images','product_image')
@@ -40,7 +39,6 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             for (const product of ormProducts){
                 products.push(await this.mapper.fromPersistencetoDomain(product))
             }
-            console.log(products)
             return Result.success(products)
         }catch(e){
             return Result.fail( new NotFoundException('products empty please try again'))
@@ -50,7 +48,6 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
     async findAllProducts(criteria:FindAllProductsApplicationRequestDTO ): Promise<Result<Product[]>>
     {
         try{
-            console.log(criteria)
             const ormProducts=await this.find({
                 take:criteria.perPage,
                 skip:criteria.page,
