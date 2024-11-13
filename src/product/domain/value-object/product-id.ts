@@ -1,4 +1,5 @@
 import { ValueObject } from "src/common/domain"
+import { InvalidProductIdException } from "../domain-exceptions/invalid-product-id-exception"
 
 export class ProductID implements ValueObject<ProductID> {
 
@@ -16,6 +17,8 @@ export class ProductID implements ValueObject<ProductID> {
     }
 
     private constructor(id:string){
+        const regex = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
+        if (!regex.test(id)) { throw new InvalidProductIdException() }
         this.id=id
     }
 

@@ -26,14 +26,12 @@ IApplicationService<FindAllProductsApplicationRequestDTO,FindAllProductsApplicat
 
         products.forEach((product)=>{
             responseDto.push({
-                productId:product.getId().Value,
-                productDescription:product.ProductDescription.Value,
-                productName:product.ProductName.Value,
-                productImages:product.ProductImages.map(image=>image.Value),
-                productPrice:product.ProductPrice.Price,
-                productCurrency:product.ProductPrice.Currency,
-                productWeigth:product.ProductWeigth.Weigth,
-                productMeasurement:product.ProductWeigth.Measure
+                id:product.getId().Value,
+                description:product.ProductDescription.Value,
+                name:product.ProductName.Value,
+                images:product.ProductImages.map(image=>image.Value),
+                price:product.ProductPrice.Price,
+                currency:product.ProductPrice.Currency,
             })
         })
         return Result.success(responseDto)

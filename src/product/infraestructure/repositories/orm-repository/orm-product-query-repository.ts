@@ -5,28 +5,52 @@ import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { OrmProductMapper } from "../../mapper/orm-mapper/orm-product-mapper";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
-import { OrmProductImage } from "../../entities/orm-entities/orm-product-image";
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
 import { FindAllProductsApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-application-request-dto";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
-import { log } from "console";
+import { FindAllProductsbyNameApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-and-combos-request-dto";
 
 
 export class OrmProductQueryRepository extends Repository<OrmProductEntity> implements IQueryProductRepository{
 
     private mapper:IMapper <Product,OrmProductEntity>
-    private readonly ormProductImageRepository: Repository<OrmProductImage>
-
 
     constructor(dataSource:DataSource){
         super( OrmProductEntity, dataSource.createEntityManager() )
         this.mapper=new OrmProductMapper(new UuidGen())
-        this.ormProductImageRepository=dataSource.getRepository( OrmProductImage )
+    }
+    async findAllProductsByName(criteria: FindAllProductsbyNameApplicationRequestDTO): Promise<Result<Product[]>> {
+        try{
+            console.log(criteria)
+            const ormProducts = await this.createQueryBuilder( 'product' )
+            .where('LOWER(product.name) LIKE :name', { name: `%${ criteria.name.toLowerCase().trim() }%` })
+            .leftJoinAndSelect('product.images','product_image')
+            .where('product.stock > :stock', { stock: 0})
+            .orderBy( 'product.caducityDate', 'DESC' )
+            .take(criteria.perPage)
+            .skip(criteria.page)
+            .getMany()
+
+
+            if(ormProducts.length==0)
+                return Result.fail( new NotFoundException('products empty please try again'))
+
+            const products:Product[]=[]
+
+            for (const product of ormProducts){
+                products.push(await this.mapper.fromPersistencetoDomain(product))
+            }
+            console.log(products)
+            return Result.success(products)
+        }catch(e){
+            return Result.fail( new NotFoundException('products empty please try again'))
+        }
     }
 
     async findAllProducts(criteria:FindAllProductsApplicationRequestDTO ): Promise<Result<Product[]>>
     {
         try{
+            console.log(criteria)
             const ormProducts=await this.find({
                 take:criteria.perPage,
                 skip:criteria.page,
