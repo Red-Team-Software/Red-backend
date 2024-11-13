@@ -14,7 +14,20 @@ import { OrderDirection } from '../value_objects/order-direction';
 export class OrderRegistered extends DomainEvent {
     
     serialize(): string {
-        return '';
+        let data = {
+            orderId: this.orderId.orderId,
+            orderState: this.orderState.orderState,
+            orderCreateDate: this.orderCreateDate.OrderCreatedDate,
+            totalAmount: this.totalAmount,
+            orderDirection: this.orderDirection,
+            products: this.products,
+            bundles: this.bundles,
+            orderReciviedDate: this.orderReciviedDate?.OrderReciviedDate,
+            orderReport: this.orderReport?.OrderReportId,
+            orderPayment: this.orderPayment
+        }
+        
+        return JSON.stringify(data);
     }
 
     constructor(

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Logger, Post } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Logger, Post } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { StripeSingelton } from "src/payments/infraestructure/stripe-singelton";
 import { PaymentEntryDto } from "../dto/payment-entry-dto";
@@ -37,6 +37,8 @@ import { FindAllOrdersEntryDto } from "../dto/find-all-orders.dto";
 import { FindAllOrdersApplicationServiceRequestDto } from "src/Order/application/dto/request/find-all-orders-request.dto";
 import { FindAllOrdersApplicationServiceResponseDto } from "src/Order/application/dto/response/find-all-orders-response.dto";
 import { FindAllOdersApplicationService } from "src/Order/application/service/find-all-orders-application.service";
+import { Channel } from 'amqplib';
+import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher";
 
 @ApiTags('Order')
 @Controller('order')
@@ -65,13 +67,17 @@ export class OrderController {
 
 
     private readonly idGen: IIdGen<string>;
-    private readonly eventBus: IEventPublisher;
+
+    //*RabbitMQ
+    private readonly rabbitMq: IEventPublisher;
 
 
-    constructor() {
+    constructor(
+        @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+    ) {
         this.idGen = new UuidGen();
         this.stripeSingleton = StripeSingelton.getInstance();
-        this.eventBus = new EventBus();
+        this.rabbitMq = new RabbitMQPublisher(this.channel);
         this.hereMapsSingelton = HereMapsSingelton.getInstance(); 
         this.calculateShipping = new CalculateShippingFeeHereMaps(this.hereMapsSingelton);
         this.calculateTax = new CalculateTaxesFeeImplementation();
@@ -87,7 +93,7 @@ export class OrderController {
         this.payOrderService = new ExceptionDecorator(
             new LoggerDecorator(
                 new PayOrderAplicationService(
-                    this.eventBus,
+                    this.rabbitMq,
                     this.calculateShipping,
                     this.calculateTax,
                     this.paymentConnection,
@@ -102,7 +108,6 @@ export class OrderController {
         this.calculateTaxesShippingFee = new ExceptionDecorator(
             new LoggerDecorator(
                 new CalculateTaxShippingFeeAplicationService(
-                    this.eventBus,
                     this.calculateShipping,
                     this.calculateTax
                 ),

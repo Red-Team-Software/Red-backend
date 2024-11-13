@@ -15,16 +15,6 @@ import { MissingOrderAtributes } from "../exception/missing-order-attributes.exc
 
 export class Order extends AggregateRoot<OrderId>{
     
-    private orderState: OrderState;
-    private orderCreatedDate: OrderCreatedDate;
-    private totalAmount: OrderTotalAmount;
-    private orderDirection: OrderDirection;
-    private orderReciviedDate?: OrderReciviedDate;
-    private products?: OrderProductId[];
-    private bundles?: OrderBundleId[];
-    private orderReport?: OrderReportId;
-    private orderPayment?: OrderPayment;
-    
     protected when(event: DomainEvent): void {
         if (event instanceof OrderRegistered) {
             this.orderState = event.orderState;
@@ -59,15 +49,15 @@ export class Order extends AggregateRoot<OrderId>{
 
     constructor(
         id: OrderId,
-        orderState: OrderState,
-        orderCreatedDate: OrderCreatedDate,
-        totalAmount: OrderTotalAmount,
-        orderDirection: OrderDirection,
-        products?: OrderProductId[],
-        bundles?: OrderBundleId[],
-        orderReciviedDate?: OrderReciviedDate,
-        orderReport?: OrderReportId,
-        orderPayment?: OrderPayment
+        private orderState: OrderState,
+        private orderCreatedDate: OrderCreatedDate,
+        private totalAmount: OrderTotalAmount,
+        private orderDirection: OrderDirection,
+        private products?: OrderProductId[],
+        private bundles?: OrderBundleId[],
+        private orderReciviedDate?: OrderReciviedDate,
+        private orderReport?: OrderReportId,
+        private orderPayment?: OrderPayment
     ) {
         super(id);
     }

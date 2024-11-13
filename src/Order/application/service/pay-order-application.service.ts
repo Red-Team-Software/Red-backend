@@ -22,6 +22,7 @@ import { OrderId } from 'src/Order/domain/value_objects/orderId';
 import { OrderState } from 'src/Order/domain/value_objects/orderState';
 import { OrderShippingFee } from 'src/Order/domain/value_objects/order-shipping-fee';
 import { OrderReciviedDate } from 'src/Order/domain/value_objects/order-recivied-date';
+import { ErrorCreatingOrderApplicationException } from '../application-exception/error-creating-product-application.exception';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -81,7 +82,12 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 undefined,
                 orderPayment
             )
-            await this.orderRepository.saveOrder(order);  
+
+            let responseDB = await this.orderRepository.saveOrder(order);  
+
+            if (!responseDB.isSuccess) return Result.fail(new ErrorCreatingOrderApplicationException('Error during creation of order'));
+
+            await this.eventPublisher.publish(order.pullDomainEvents());
 
             return Result.success(new OrderPayResponseDto(
                 //response.getValue

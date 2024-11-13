@@ -14,7 +14,6 @@ import { TaxesShippingFeeApplicationServiceEntryDto } from '../dto/request/tax-s
 export class CalculateTaxShippingFeeAplicationService extends IApplicationService<TaxesShippingFeeApplicationServiceEntryDto,CalculateTaxesShippingResponseDto>{
     
     constructor(
-        private readonly eventPublisher: IEventPublisher,
         private readonly calculateShippingFee: ICalculateShippingFee,
         private readonly calculateTaxesFee: ICalculateTaxesFee
     ){

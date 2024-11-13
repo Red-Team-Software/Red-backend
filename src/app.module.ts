@@ -16,7 +16,12 @@ import { BundleController } from './bundle/infraestructure/controller/bundle.con
     RabbitMQModule,
     NotificationModule
   ],
-  controllers: [ProductController,CategoryController,BundleController,OrderController],
+  controllers: [
+    ProductController,
+    CategoryController,
+    BundleController,
+    OrderController
+  ],
   providers:[CloudinaryProvider]
 })
 export class AppModule {}
