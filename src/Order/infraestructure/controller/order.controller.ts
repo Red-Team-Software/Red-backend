@@ -39,6 +39,8 @@ import { FindAllOrdersApplicationServiceResponseDto } from "src/Order/applicatio
 import { FindAllOdersApplicationService } from "src/Order/application/service/find-all-orders-application.service";
 import { Channel } from 'amqplib';
 import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher";
+import { IGeocodification } from "src/Order/domain/domain-services/geocodification-interface";
+import { GeocodificationHereMapsDomainService } from "../domain-service/geocodification-here-maps-domain-service";
 
 @ApiTags('Order')
 @Controller('order')
@@ -55,6 +57,7 @@ export class OrderController {
     private readonly calculateShipping: ICalculateShippingFee;
     private readonly calculateTax: ICalculateTaxesFee;
     private readonly paymentConnection: IPaymentService;
+    private readonly geocodificationAddress: IGeocodification;
     
     //*Aplication services
     private readonly payOrderService: IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>;
@@ -83,6 +86,7 @@ export class OrderController {
         this.calculateTax = new CalculateTaxesFeeImplementation();
         this.paymentConnection = new PaymentOrderImplementation(this.stripeSingleton);
         this.orderMapper = new OrmOrderMapper(this.idGen);
+        this.geocodificationAddress = new GeocodificationHereMapsDomainService(this.hereMapsSingelton);
     
         this.orderQueryRepository = new OrderQueryRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
         this.orderRepository = new OrmOrderRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
