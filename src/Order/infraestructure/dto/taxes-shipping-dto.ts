@@ -17,9 +17,6 @@ export class TaxesShippingFeeEntryDto {
     @IsString()
     paymentMethod: string;
 
-    @IsNumber()
-    lat: number;
-
-    @IsNumber()
-    long: number;
+    @IsString()
+    address: string;
 }

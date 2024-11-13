@@ -9,19 +9,27 @@ import { ErrorObtainingShippingFeeApplicationException } from '../application-ex
 import { ErrorObtainingTaxesApplicationException } from '../application-exception/error-obtaining-taxes.application.exception';
 import { CalculateTaxesShippingResponseDto } from '../dto/response/calculate-taxes-shipping-fee-response.dto';
 import { TaxesShippingFeeApplicationServiceEntryDto } from '../dto/request/tax-shipping-fee-request-dto';
+import { IGeocodification } from 'src/Order/domain/domain-services/geocodification-interface';
+import { OrderAddressStreet } from 'src/Order/domain/value_objects/order-direction-street';
 
 
 export class CalculateTaxShippingFeeAplicationService extends IApplicationService<TaxesShippingFeeApplicationServiceEntryDto,CalculateTaxesShippingResponseDto>{
     
     constructor(
         private readonly calculateShippingFee: ICalculateShippingFee,
-        private readonly calculateTaxesFee: ICalculateTaxesFee
+        private readonly calculateTaxesFee: ICalculateTaxesFee,
+        private readonly geocodificationAddress: IGeocodification,
     ){
         super()
     }
     
     async execute(data: TaxesShippingFeeApplicationServiceEntryDto): Promise<Result<CalculateTaxesShippingResponseDto>> {
-        let orderDirection = OrderDirection.create(data.lat, data.long);
+        
+        let orderAddress = OrderAddressStreet.create(data.address);
+        
+        let address = await this.geocodificationAddress.DirecctiontoLatitudeLongitude(orderAddress);
+    
+        let orderDirection = OrderDirection.create(address.getValue.Latitude, address.getValue.Longitude);
 
         let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
 

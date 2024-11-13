@@ -6,6 +6,5 @@ export class TaxesShippingFeeApplicationServiceEntryDto implements IServiceReque
     userId: string;
     amount: number;
     currency: string;
-    lat: number;
-    long: number;
+    address: string;
 }

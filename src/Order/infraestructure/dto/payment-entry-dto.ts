@@ -25,16 +25,9 @@ export class PaymentEntryDto {
   stripePaymentMethod: string;
 
   @ApiProperty({
-    example: 40.7128,
-    description: 'Latitude coordinate for the location',
+    example: '123 Main St, New York, NY 10030',
+    description: 'The address of the location',
   })
-  @IsNumber()
-  lat: number;
-
-  @ApiProperty({
-    example: -74.006,
-    description: 'Longitude coordinate for the location',
-  })
-  @IsNumber()
-  long: number;
+  @IsString()
+  address: string;
 }

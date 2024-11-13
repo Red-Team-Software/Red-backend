@@ -22,6 +22,8 @@ import { OrderState } from 'src/Order/domain/value_objects/orderState';
 import { OrderShippingFee } from 'src/Order/domain/value_objects/order-shipping-fee';
 import { OrderReciviedDate } from 'src/Order/domain/value_objects/order-recivied-date';
 import { ErrorCreatingOrderApplicationException } from '../application-exception/error-creating-product-application.exception';
+import { IGeocodification } from 'src/Order/domain/domain-services/geocodification-interface';
+import { OrderAddressStreet } from 'src/Order/domain/value_objects/order-direction-street';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -33,13 +35,18 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly payOrder: IPaymentService,
         private readonly orderRepository: ICommandOrderRepository,
         private readonly idGen: IIdGen<string>,
+        private readonly geocodificationAddress: IGeocodification,
     ){
         super()
     }
     
     async execute(data: OrderPayApplicationServiceRequestDto): Promise<Result<OrderPayResponseDto>> {
 
-            let orderDirection = OrderDirection.create(data.lat, data.long);
+            let orderAddress = OrderAddressStreet.create(data.address);
+        
+            let address = await this.geocodificationAddress.DirecctiontoLatitudeLongitude(orderAddress);
+            console.log(address.getValue);
+            let orderDirection = OrderDirection.create(address.getValue.Latitude, address.getValue.Longitude);
 
             //let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
 

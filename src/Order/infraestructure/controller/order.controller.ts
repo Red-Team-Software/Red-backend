@@ -102,7 +102,8 @@ export class OrderController {
                     this.calculateTax,
                     this.paymentConnection,
                     this.orderRepository,
-                    this.idGen
+                    this.idGen,
+                    this.geocodificationAddress,
                 ),
                 new NestLogger(new Logger())
             )
@@ -113,7 +114,8 @@ export class OrderController {
             new LoggerDecorator(
                 new CalculateTaxShippingFeeAplicationService(
                     this.calculateShipping,
-                    this.calculateTax
+                    this.calculateTax,
+                    this.geocodificationAddress,
                 ),
                 new NestLogger(new Logger())
             )
@@ -129,8 +131,6 @@ export class OrderController {
             )
         )
     }
-
-    
 
 
     @Post('/payment')
