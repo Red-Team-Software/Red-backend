@@ -1,7 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { IProduct } from "../../model-entity/orm-model-entity/product-interface";
 import { OrmProductImage } from "./orm-product-image";
-import { OrmOrderProductEntity } from "src/Order/infraestructure/entities/orm-order-product-entity";
+import { OrmOrderProductEntity } from "src/order/infraestructure/entities/orm-order-product-entity";
 
 @Entity('product')
 export class OrmProductEntity implements IProduct{
