@@ -1,33 +1,38 @@
 import { IServiceResponseDto } from "src/common/application/services"
 
-export class OrderPayResponseDto implements IServiceResponseDto {
-    
-    constructor(
-        public id: string,
-        public orderState: string,
-        public orderCreatedDate: Date,
-        public totalAmount: number,
-        public currency: string,
-        public orderDirection: {
+export interface OrderPayResponseDto extends IServiceResponseDto {
+        id: string,
+        orderState: string,
+        orderCreatedDate: Date,
+        totalAmount: number,
+        currency: string,
+        orderDirection: {
             lat: number,
             long: number
         },
-        public products?: {
+        products: {
             id: string,
             quantity: number
+            nombre:string 
+            descripcion:string
+            price:number 
+            currency:string
+            images:string[]
         }[],
-        public bundles?: {
+        bundles: {
             id: string,
             quantity: number
+            nombre:string 
+            descripcion:string
+            price:number 
+            currency:string
+            images:string[]
         }[],
-        public orderReciviedDate?: Date,
-        public orderReport?: string,
-        public orderPayment?: {
+        orderReciviedDate?: Date,
+        orderReport?: string,
+        orderPayment?: {
             amount: number,
             currency: string,
             paymentMethod: string
         }
-    ){
-    }
-
 }

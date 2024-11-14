@@ -32,6 +32,12 @@ import { OrderProductQuantity } from 'src/order/domain/entities/order-product/va
 import { OrderBundleId } from 'src/order/domain/entities/order-bundle/value_object/order-bundlesId';
 import { OrderBundleQuantity } from 'src/order/domain/entities/order-bundle/value_object/order-bundle-quantity';
 import { BundleId } from '../../../bundle/domain/value-object/bundle-id';
+import { IProductRepository } from 'src/product/domain/repository/product.interface.repositry';
+import { IBundleRepository } from 'src/bundle/domain/repository/product.interface.repositry';
+import { Product } from 'src/product/domain/aggregate/product.aggregate';
+import { ErrorCreatingOrderProductNotFoundApplicationException } from '../application-exception/error-creating-order-product-not-found-application.exception';
+import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../application-exception/error-creating-order-bundle-not-found-application.exception';
+import { Bundle } from 'src/bundle/domain/aggregate/bundle.aggregate';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -44,17 +50,54 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly orderRepository: ICommandOrderRepository,
         private readonly idGen: IIdGen<string>,
         private readonly geocodificationAddress: IGeocodification,
+        private readonly productRepository:IProductRepository,
+        private readonly bundleRepository:IBundleRepository
     ){
         super()
     }
     
     async execute(data: OrderPayApplicationServiceRequestDto): Promise<Result<OrderPayResponseDto>> {
 
-            let order: Order;
-        
-            let products: OrderProduct[] = [];
+        let products:Product[]=[]
+        let bundles:Bundle[]=[]
+        let orderproducts: OrderProduct[] = []
+        let orderBundles: OrderBundle[] = [];
 
-            let bundles: OrderBundle[] = [];
+        if(data.products){
+            for (const product of data.products){
+                let domain=await this.productRepository.findProductById(ProductID.create(product.id))
+
+                if(!domain.isSuccess())
+                    return Result.fail(new ErrorCreatingOrderProductNotFoundApplicationException())
+
+                products.push(domain.getValue)
+            }
+            
+            if (data.products)
+                orderproducts=data.products.map(product=>OrderProduct.create(
+                OrderProductId.create(ProductID.create(product.id)),
+                OrderProductQuantity.create(product.quantity))
+            )
+
+        }
+
+        if(data.bundles){
+            for (const bundle of data.bundles){
+                let domain=await this.bundleRepository.findBundleById(BundleId.create(bundle.id))
+
+                if(!domain.isSuccess())
+                    return Result.fail(new ErrorCreatingOrderBundleNotFoundApplicationException())
+                bundles.push(domain.getValue)
+            }
+
+            if (data.bundles)
+                orderBundles=data.bundles.map(bundle=>
+                    OrderBundle.create(
+                        OrderBundleId.create(BundleId.create(bundle.id)),
+                        OrderBundleQuantity.create(bundle.quantity)
+                    )
+            )
+        }
 
             let orderAddress = OrderAddressStreet.create(data.address);
         
@@ -92,29 +135,14 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException());
 
-            if (data.products)
-                products=data.products.map(product=>OrderProduct.create(
-                OrderProductId.create(ProductID.create(product.id)),
-                OrderProductQuantity.create(product.quantity))
-            )
-
-            if (data.bundles)
-                bundles=data.bundles.map(bundle=>
-                    OrderBundle.create(
-                        OrderBundleId.create(BundleId.create(bundle.id)),
-                        OrderBundleQuantity.create(bundle.quantity)
-                    )
-            )
-
-
-            order = Order.registerOrder(
+            let order = Order.registerOrder(
                 OrderId.create(await this.idGen.genId()),
                 OrderState.create('ongoing'),
                 OrderCreatedDate.create(new Date()),
                 total,
                 orderDirection,
-                products,
-                bundles,
+                orderproducts,
+                orderBundles,
                 OrderReciviedDate.create(new Date()),
                 undefined,
                 orderPayment
@@ -122,36 +150,83 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             
             let responseDB = await this.orderRepository.saveOrder(order); 
 
-            if (!responseDB.isSuccess()) return Result.fail(new ErrorCreatingOrderApplicationException());
+            if (!responseDB.isSuccess()) 
+                return Result.fail(new ErrorCreatingOrderApplicationException());
 
             await this.eventPublisher.publish(order.pullDomainEvents());
 
-            let direction = {
-                lat: order.OrderDirection.Latitude,
-                long: order.OrderDirection.Longitude
+            let productsresponse:{
+                id: string,
+                quantity: number
+                nombre:string 
+                descripcion:string
+                price:number 
+                images:string[]
+                currency:string
+            }[]=[]
+
+            let bundlesresponse:{
+                id: string,
+                quantity: number
+                nombre:string 
+                descripcion:string
+                price:number 
+                currency:string
+                images:string[]
+            }[]=[]
+
+
+            products.forEach(product=>{
+                productsresponse.push({
+                    id: product.getId().Value,
+                    quantity: order.Products.find(
+                        orderproduct=>orderproduct.getId().OrderProductId.equals(product.getId())
+                    ).Quantity.Quantity,
+                    nombre:product.ProductName.Value,
+                    descripcion:product.ProductDescription.Value,
+                    price:product.ProductPrice.Price,
+                    currency:product.ProductPrice.Currency,
+                    images:product.ProductImages.map(image=>image.Value)
+                })
+            })
+
+            bundles.forEach(bundle=>{
+                bundlesresponse.push({
+                    id: bundle.getId().Value,
+                    quantity: order.Bundles.find(
+                        orderBundle=>orderBundle.getId().OrderBundleId.equals(bundle.getId())
+                    ).Quantity.OrderBundleQuantity,
+                    nombre:bundle.BundleName.Value ,
+                    descripcion:bundle.BundleDescription.Value,
+                    price:bundle.BundlePrice.Price,
+                    currency:bundle.BundlePrice.Currency,
+                    images:bundle.BundleImages.map(image=>image.Value)                
+                })
+            })
+            
+
+            let responsedata:OrderPayResponseDto={
+                id: order.getId().orderId,
+                orderState: order.OrderState.orderState,
+                orderCreatedDate: order.OrderCreatedDate.OrderCreatedDate,
+                totalAmount: order.TotalAmount.OrderAmount,
+                currency: order.TotalAmount.OrderCurrency,
+                orderDirection: {
+                    lat: order.OrderDirection.Latitude,
+                    long: order.OrderDirection.Longitude
+                },
+                products:productsresponse,
+                bundles:bundlesresponse,
+                orderReciviedDate:order.OrderReciviedDate.OrderReciviedDate,
+                orderReport: order.OrderReport?.OrderReportId,
+                orderPayment: {
+                    amount: order.OrderPayment.Amount,
+                    currency: order.OrderPayment.Currency,
+                    paymentMethod: order.OrderPayment.PaymentMethod
+                }
             }
 
-            let payment = {
-                amount: order.OrderPayment.Amount,
-                currency: order.OrderPayment.Currency,
-                paymentMethod: order.OrderPayment.PaymentMethod
-            }
 
-
-            return Result.success(
-                new OrderPayResponseDto(
-                    order.getId().orderId,
-                    order.OrderState.orderState,
-                    order.OrderCreatedDate.OrderCreatedDate,
-                    order.TotalAmount.OrderAmount,
-                    order.TotalAmount.OrderCurrency,
-                    direction,
-                    data.products,
-                    data.bundles,
-                    order.OrderReciviedDate.OrderReciviedDate,
-                    order.OrderReport?.OrderReportId,
-                    payment
-                )
-            );
+            return Result.success(responsedata);
     }
 }
