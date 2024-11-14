@@ -43,10 +43,6 @@ export class Order extends AggregateRoot<OrderId>{
             throw new EmptyProductBundleAtributes('There must be at least one product or bundle')
         }
     }
-    
-    clone(): Entity<OrderId> {
-        throw new Error("Method not implemented.");
-    }
 
     constructor(
         id: OrderId,
