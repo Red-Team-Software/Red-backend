@@ -1,5 +1,5 @@
 import { IServiceResponseDto } from "src/common/application/services"
-import { Order } from "src/Order/domain/aggregate/order";
+import { Order } from "src/order/domain/aggregate/order";
 
 export type order = {
     orderId: string;
