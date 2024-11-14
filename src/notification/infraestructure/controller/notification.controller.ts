@@ -14,6 +14,7 @@ import { AddNewBundlePushNotificationApplicationService } from "src/notification
 import { AddNewProductsPushNotificationApplicationService } from "src/notification/application/services/command/new-product-push-notification-application.service";
 import { SendGridNewBundleEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-bundle-email-sender.service";
 import { SendGridNewProductEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-product-email-sender.service";
+import { ICreateOrder } from "../interfaces/create-order.interface";
 
 @Controller('notification')
 export class NotificationController {
@@ -51,6 +52,18 @@ export class NotificationController {
             }
         })
 
+        this.subscriber.buildQueue({
+            name:'OrderEvents',
+            pattern: 'OrderRegistered',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        })
+
         this.subscriber.consume<ICreateProduct>(
             { name: 'ProductEvents'}, 
             (data):Promise<void>=>{
@@ -68,6 +81,23 @@ export class NotificationController {
                 return
             }
         )
+
+        this.subscriber.consume<ICreateOrder>(
+            { name: 'OrderEvents'}, 
+            (data):Promise<void>=>{
+                this.sendPushOrderCreated(data)
+                this.sendEmailOrderCreated(data)
+                return
+            }
+        )
+    }
+
+    async sendPushOrderCreated(entry:ICreateOrder){
+        console.log('push order ongoing ...')
+    }
+
+    async sendEmailOrderCreated(entry:ICreateOrder){
+        console.log('email order ongoing ...')
     }
 
     async sendPushToCreatedProduct(entry:ICreateProduct):Promise<void> {
