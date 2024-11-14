@@ -7,6 +7,7 @@ import { ProductStock } from "../value-object/product-stock";
 import { ProductRegistered } from "../domain-events/product-registered";
 import { ProductImage } from "../value-object/product-image";
 import { ProductPrice } from "../value-object/product-price";
+import { ProductWeigth } from "../value-object/product-weigth";
 
 export class Product extends AggregateRoot <ProductID>{
     protected when(event: DomainEvent): void {
@@ -17,6 +18,9 @@ export class Product extends AggregateRoot <ProductID>{
                 this.productCaducityDate = productRegistered.productCaducityDate
                 this.productName = productRegistered.productName
                 this.productStock = productRegistered.productStock
+                this.productImages= productRegistered.productImage
+                this.productPrice= productRegistered.productPrice
+                this.productWeigth= productRegistered.productWeigth
         }
     }
     protected validateState(): void {
@@ -29,7 +33,8 @@ export class Product extends AggregateRoot <ProductID>{
         private productName:ProductName,
         private productStock:ProductStock,
         private productImages:ProductImage[],
-        private productPrice:ProductPrice
+        private productPrice:ProductPrice,
+        private productWeigth:ProductWeigth
     ){
         super(productId)
     }
@@ -41,7 +46,8 @@ export class Product extends AggregateRoot <ProductID>{
         productName:ProductName,
         productStock:ProductStock,
         productImages:ProductImage[],
-        productPrice:ProductPrice
+        productPrice:ProductPrice,
+        productWeigth:ProductWeigth
     ):Product{
         const product = new Product(
             productId,
@@ -50,7 +56,8 @@ export class Product extends AggregateRoot <ProductID>{
             productName,
             productStock,
             productImages,
-            productPrice
+            productPrice,
+            productWeigth
         )
         product.apply(
             ProductRegistered.create(
@@ -60,7 +67,8 @@ export class Product extends AggregateRoot <ProductID>{
                 productName,
                 productStock,
                 productImages,
-                productPrice
+                productPrice,
+                productWeigth
             )
         )
         return product
@@ -72,7 +80,8 @@ export class Product extends AggregateRoot <ProductID>{
         productName:ProductName,
         productStock:ProductStock,
         productImages:ProductImage[],
-        productPrice:ProductPrice
+        productPrice:ProductPrice,
+        productWeigth:ProductWeigth
     ):Product{
         const product = new Product(
             productId,
@@ -81,7 +90,8 @@ export class Product extends AggregateRoot <ProductID>{
             productName,
             productStock,
             productImages,
-            productPrice
+            productPrice,
+            productWeigth
         )
         product.validateState()
         return product
@@ -92,4 +102,5 @@ export class Product extends AggregateRoot <ProductID>{
     get ProductStock():ProductStock{return this.productStock}
     get ProductImages():ProductImage[]{return this.productImages}
     get ProductPrice():ProductPrice{return this.productPrice}
+    get ProductWeigth():ProductWeigth{return this.productWeigth}
 }

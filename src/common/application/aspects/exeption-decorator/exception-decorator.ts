@@ -16,7 +16,9 @@ export class ExceptionDecorator<
 			}
 			return res;
 		} catch (error) {
-			ExceptionMapper.toHttp(error,error.message);
+			if (error.Type==BaseExceptionEnum.DOMAIN_EXCEPTION)
+				ExceptionMapper.toHttp(error,error.message);
+			throw error
 		}
 	}
 }

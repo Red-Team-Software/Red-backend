@@ -6,9 +6,21 @@ import { ProductImage } from '../value-object/product-image';
 import { ProductName } from '../value-object/product-name';
 import { ProductPrice } from '../value-object/product-price';
 import { ProductStock } from '../value-object/product-stock';
+import { ProductWeigth } from '../value-object/product-weigth';
 export class ProductRegistered extends DomainEvent {
     serialize(): string {
-        return ''
+        let data:string= {  
+            productId:this.productId.Value,
+            productDescription:this.productDescription.Value,
+            productCaducityDate:this.productCaducityDate.Value,
+            productName:this.productName.Value,
+            productStock:this.productStock.Value,
+            productImage:this.productImage.map(image=>image.Value),
+            productPrice:this.productPrice,
+            productWeigth:this.productWeigth         
+        }.toString()
+        
+        return data
     }
     static create(
         productId:ProductID,
@@ -17,7 +29,8 @@ export class ProductRegistered extends DomainEvent {
         productName:ProductName,
         productStock:ProductStock,
         productImage:ProductImage[],
-        productPrice:ProductPrice
+        productPrice:ProductPrice,
+        productWeigth:ProductWeigth
     ){
         return new ProductRegistered(
             productId,
@@ -26,7 +39,8 @@ export class ProductRegistered extends DomainEvent {
             productName,
             productStock,
             productImage,
-            productPrice
+            productPrice,
+            productWeigth
         )
     }
     constructor(
@@ -36,7 +50,8 @@ export class ProductRegistered extends DomainEvent {
         public productName:ProductName,
         public productStock:ProductStock,
         public productImage:ProductImage[],
-        public productPrice:ProductPrice
+        public productPrice:ProductPrice,
+        public productWeigth:ProductWeigth
     ){
         super()
     }
