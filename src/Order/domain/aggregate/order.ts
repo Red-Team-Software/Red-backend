@@ -43,9 +43,9 @@ export class Order extends AggregateRoot<OrderId>{
             throw new MissingOrderAtributes('The order is invalid, information is missing');
         }
 
-        // if (this.products.length === 0 && this.bundles.length === 0) {
-        //     throw new EmptyProductBundleAtributes('There must be at least one product or bundle')
-        // }
+        if (this.products.length === 0 && this.bundles.length === 0) {
+            throw new EmptyProductBundleAtributes('There must be at least one product or bundle')
+        }
     }
     
     clone(): Entity<OrderId> {

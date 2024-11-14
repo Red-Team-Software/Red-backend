@@ -56,25 +56,27 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let bundles: OrderBundle[] = [];
 
-            //let orderAddress = OrderAddressStreet.create(data.address);
+            let orderAddress = OrderAddressStreet.create(data.address);
         
-            //let address = await this.geocodificationAddress.DirecctiontoLatitudeLongitude(orderAddress);
+            // let address = await this.geocodificationAddress.DirecctiontoLatitudeLongitude(orderAddress);
             
-            //let orderDirection = OrderDirection.create(address.getValue.Latitude, address.getValue.Longitude);
+            // let orderDirection = OrderDirection.create(address.getValue.Latitude, address.getValue.Longitude);
 
             let orderDirection = OrderDirection.create(10.4399, -66.89275);
 
-            //let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
+            // let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
 
             let shippingFee = OrderShippingFee.create(10);
 
-            //if (!shippingFee.isSuccess()) return Result.fail(new ErrorObtainingShippingFeeApplicationException('Error obtaining shipping fee'));
+            // if (!shippingFee.isSuccess())
+            //  return Result.fail(new ErrorObtainingShippingFeeApplicationException('Error obtaining shipping fee'));
 
             let amount = OrderTotalAmount.create(data.amount, data.currency);
 
             let taxes = await this.calculateTaxesFee.calculateTaxesFee(amount);
 
-            if (!taxes.isSuccess()) return Result.fail(new ErrorObtainingTaxesApplicationException('Error obtaining taxes'));
+            if (!taxes.isSuccess()) 
+                return Result.fail(new ErrorObtainingTaxesApplicationException('Error obtaining taxes'));
             
             //let amountTotal = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.getValue.OrderTaxes;
             
@@ -90,6 +92,21 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             //if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException('Error during creation of payment'));
 
+            if (data.products)
+                products=data.products.map(product=>OrderProduct.create(
+                OrderProductId.create(ProductID.create(product.id)),
+                OrderProductQuantity.create(product.quantity))
+            )
+
+            if (data.bundles)
+                bundles=data.bundles.map(bundle=>
+                    OrderBundle.create(
+                        OrderBundleId.create(BundleId.create(bundle.id)),
+                        OrderBundleQuantity.create(bundle.quantity)
+                    )
+            )
+
+
             order = Order.registerOrder(
                 OrderId.create(await this.idGen.genId()),
                 OrderState.create('ongoing'),
@@ -102,29 +119,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 undefined,
                 orderPayment
             )
-
-            if (data.products.length > 0){
-                data.products.forEach( (product) => {
-                    products.push(
-                        order.createOrderProduct(
-                            OrderProductId.create(ProductID.create(product.id)), 
-                            OrderProductQuantity.create(product.quantity)));
-                });
-            }
-
-            if (data.bundles.length > 0){
-
-                data.bundles.forEach( (bundle) => {
-                    bundles.push(
-                        order.createOrderBundle(
-                            OrderBundleId.create(BundleId.create(bundle.id)),
-                            OrderBundleQuantity.create(bundle.quantity)));
-                });
-            }
-
-            order.OrderSetBundles(bundles);
-            order.OrderSetProducts(products);
-
+            
             let responseDB = await this.orderRepository.saveOrder(order); 
 
             if (!responseDB.isSuccess()) return Result.fail(new ErrorCreatingOrderApplicationException('Error during creation of order'));

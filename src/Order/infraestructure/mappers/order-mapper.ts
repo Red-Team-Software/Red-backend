@@ -13,6 +13,7 @@ import { IProductRepository } from "src/product/domain/repository/product.interf
 import { OrmOrderProductEntity } from "../entities/orm-order-product-entity";
 import { OrmOrderBundleEntity } from "../entities/orm-order-bundle-entity";
 import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry";
+import { NotFoundException } from "@nestjs/common";
 
 
 export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
@@ -68,6 +69,9 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
 
         for (let product of domainEntity.Products){
             let response = await this.ormProductRepository.findProductById(product.getId().OrderProductId);
+            if(!response.isSuccess())
+                throw new NotFoundException('Find product id not registered')
+
             ormProducts.push(
                 OrmOrderProductEntity.create(
                     domainEntity.getId().orderId,
@@ -81,6 +85,10 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
 
         for (let bundle of domainEntity.Bundles){
             let response = await this.ormBundleRepository.findBundleById(bundle.getId().OrderBundleId);
+            
+            if(!response.isSuccess())
+                throw new NotFoundException('Find bundle id not registered')
+
             ormBundles.push(
                 OrmOrderBundleEntity.create(
                     domainEntity.getId().orderId,

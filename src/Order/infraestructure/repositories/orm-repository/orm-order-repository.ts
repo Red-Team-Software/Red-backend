@@ -31,7 +31,6 @@ export class OrmOrderRepository extends Repository<OrmOrderEntity> implements IC
     async saveOrder(order: Order): Promise<Result<Order>> {
         try {
             let orderEntity = await this.orderMapper.fromDomaintoPersistence(order);
-            console.log(orderEntity);
             await this.ormOrderPayRepository.save(orderEntity.pay);
             await this.save(orderEntity);
             await this.ormOrderProductRepository.save(orderEntity.order_products);
