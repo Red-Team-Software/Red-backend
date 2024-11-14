@@ -177,7 +177,9 @@ export class OrderController {
     async calculateTaxesAndShipping(@Body() data: TaxesShippingFeeEntryDto) {
         let payment: TaxesShippingFeeApplicationServiceEntryDto = {
             userId: 'none',
-            ...data
+            amount: data.amount,
+            currency: data.currency.toLowerCase(),
+            address: data.address,
         }
         
         let response = await this.calculateTaxesShippingFee.execute(payment);
