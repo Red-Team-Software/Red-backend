@@ -175,7 +175,7 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Get('/tax-shipping-fee')
+    @Post('/tax-shipping-fee')
     async calculateTaxesAndShipping(@Body() data: TaxesShippingFeeEntryDto) {
         let payment: TaxesShippingFeeApplicationServiceEntryDto = {
             userId: 'none',
