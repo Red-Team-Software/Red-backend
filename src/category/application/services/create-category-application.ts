@@ -69,7 +69,7 @@ export class CreateCategoryApplication extends IApplicationService<
         const response: CreateCategoryApplicationResponseDTO = {
             id: categoryId.Value,
             name: categoryName.Value,
-            image: categoryImage ? categoryImage.getValue() : null,
+            image: categoryImage.Value ? categoryImage.Value : null,
         };
 
         return Result.success(response);

@@ -26,8 +26,8 @@ export class FindAllCategoriesApplication extends IApplicationService<
 
         const categoryResponses: CategoryResponse[] = categories.map((category) => ({
             id: category.getId().Value,
-            name: category.getCategoryName().Value,
-            image: category.getCategoryImage() ? category.getCategoryImage().getValue() : null, // Manejo de la imagen
+            name: category.getName().Value,
+            image: category.getImage().Value ? category.getImage().Value : null, // Manejo de la imagen
         }));
 
         return Result.success({
