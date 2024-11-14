@@ -10,11 +10,14 @@ import { RabbitMQSubscriber } from 'src/common/infraestructure/events/subscriber
 import { ICreateProduct } from '../interfaces/create-product.interface';
 import { SaveTokenInfraestructureEntryDTO } from "../dto-request/save-token-infraestructure-entry-dto";
 import { ICreateBundle } from "../interfaces/create-bundle.interface";
-import { AddNewBundlePushNotificationApplicationService } from "src/notification/application/services/command/new-bundle-push-notification-application.service";
-import { AddNewProductsPushNotificationApplicationService } from "src/notification/application/services/command/new-product-push-notification-application.service";
 import { SendGridNewBundleEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-bundle-email-sender.service";
 import { SendGridNewProductEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-product-email-sender.service";
 import { ICreateOrder } from "../interfaces/create-order.interface";
+import { NewBundlePushNotificationApplicationService } from "src/notification/application/services/command/new-bundle-push-notification-application.service";
+import { NewProductsPushNotificationApplicationService } from "src/notification/application/services/command/new-product-push-notification-application.service";
+import { SendGridNewOrderEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-order-email-sender.service";
+import { NewOrderPushNotificationApplicationService } from "src/notification/application/services/command/new-order-push-notification-application.service";
+import { NewOrderPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-order-push-notification-application-request-dto";
 
 @Controller('notification')
 export class NotificationController {
@@ -93,17 +96,38 @@ export class NotificationController {
     }
 
     async sendPushOrderCreated(entry:ICreateOrder){
-        console.log('push order ongoing ...')
+        
+        let service= new ExceptionDecorator(
+            new LoggerDecorator(
+                new NewOrderPushNotificationApplicationService(
+                    this.pushsender
+                ),
+              new NestLogger(new Logger())
+            )
+          )
+        let data:NewOrderPushNotificationApplicationRequestDTO={
+            userId:'none',
+            tokens:this.tokens,
+            orderState:entry.orderState,
+            orderCreateDate:entry.orderCreateDate,
+            totalAmount:entry.totalAmount.amount,
+            currency:entry.totalAmount.currency
+        }
+        service.execute(data)
     }
 
     async sendEmailOrderCreated(entry:ICreateOrder){
-        console.log('email order ongoing ...')
-    }
+        let emailsender=new SendGridNewOrderEmailSender()
+        emailsender.setVariablesToSend({
+            price:entry.totalAmount.amount,
+            currency:entry.totalAmount.currency
+        })
+        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')     }
 
     async sendPushToCreatedProduct(entry:ICreateProduct):Promise<void> {
         let service= new ExceptionDecorator(
             new LoggerDecorator(
-                new AddNewProductsPushNotificationApplicationService(
+                new NewProductsPushNotificationApplicationService(
                     this.pushsender
                 ),
               new NestLogger(new Logger())
@@ -144,7 +168,7 @@ export class NotificationController {
     async sendPushToCreatedBundle(entry:ICreateBundle){
         let service= new ExceptionDecorator(
             new LoggerDecorator(
-                new AddNewBundlePushNotificationApplicationService(
+                new NewBundlePushNotificationApplicationService(
                     this.pushsender
                 ),
               new NestLogger(new Logger())

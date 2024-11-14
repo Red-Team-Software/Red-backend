@@ -3,18 +3,19 @@ import { IPushNotifier } from "src/common/application/notification-handler/notif
 import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
 import { ErrorSendingPushProductApplicationException } from "../../application-exception/error-sending-push-product-application-exception";
-import { NewBundlePushNotificationApplicationRequestDTO } from "../../dto/request/new-bundle-push-notification-application-request-dto";
-import { NewProductPushNotificationApplicationResponseDTO } from "../../dto/response/new-product-push-notification-application-response-dto";
+import { NewOrderPushNotificationApplicationRequestDTO } from "../../dto/request/new-order-push-notification-application-request-dto";
+import { NewOrderPushNotificationApplicationResponseDTO } from "../../dto/response/new-bundle-push-notification-application-response-dto copy";
 
 
 
-export class NewBundlePushNotificationApplicationService extends IApplicationService<NewBundlePushNotificationApplicationRequestDTO,NewProductPushNotificationApplicationResponseDTO>{
+
+export class NewOrderPushNotificationApplicationService extends IApplicationService<NewOrderPushNotificationApplicationRequestDTO,NewOrderPushNotificationApplicationResponseDTO>{
     constructor(
         private readonly pushNotifier:IPushNotifier,
     ){
         super()
     }
-    async execute(data: NewBundlePushNotificationApplicationRequestDTO): Promise<Result<NewProductPushNotificationApplicationResponseDTO>> {
+    async execute(data: NewOrderPushNotificationApplicationRequestDTO): Promise<Result<NewOrderPushNotificationApplicationResponseDTO>> {
 
 
         let sendDTO:PushNotifierRequestDto[]=[]
@@ -25,8 +26,8 @@ export class NewBundlePushNotificationApplicationService extends IApplicationSer
             sendDTO.push({
                 token: token,
                 notification: { 
-                    title: `Salio un nuevo combo!!!`, 
-                    body: `El combo es ${data.name} con un valor de ${data.price}${currencySymbol} si quieres ver los, entra ya!`,
+                    title: `Salio una nueva orden !!!`, 
+                    body: `La orden se encuentra en estado ${data.orderState} con un valor de ${data.totalAmount}${currencySymbol} espero que este satisfecho con nuestros servicios!`,
                 } 
             })
         })
