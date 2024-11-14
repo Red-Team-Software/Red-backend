@@ -1,5 +1,5 @@
-import { IServiceRequestDto } from "src/common/application/services"
+import { IServiceRequestDto, IServiceResponseDto } from "src/common/application/services"
 
-export interface NewBundlePushNotificationApplicationRequestDTO extends IServiceRequestDto {
+export interface NewBundlePushNotificationApplicationResponseDTO extends IServiceResponseDto{
     succses:boolean
 }

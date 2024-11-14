@@ -29,7 +29,7 @@ jobs:
       env:
         DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        NEW_VERSION: ${{ steps.version }}
+        NEW_VERSION: ${{ steps.version.outputs.version  }}
       run: |
         echo "Trying Login ..."
         echo "New version $NEW_VERSION uploading"
@@ -37,10 +37,14 @@ jobs:
         echo "End login"
 
     - name: Build Docker Image
+      env:
+        NEW_VERSION: ${{ steps.version.outputs.version  }}
       run: |
         docker build -t c102002/red-team:$NEW_VERSION .
         docker build -t c102002/red-team:latest .
     - name: Push Docker Image
+      env:
+        NEW_VERSION: ${{ steps.version.outputs.version  }}
       run: |
-        docker push -t c102002/red-team:$NEW_VERSION
-        docker push -t c102002/red-team:latest
+        docker push c102002/red-team:$NEW_VERSION
+        docker push c102002/red-team:latest
