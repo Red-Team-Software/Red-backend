@@ -33,13 +33,13 @@ export class CalculateTaxShippingFeeAplicationService extends IApplicationServic
 
         let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
 
-        if (!shippingFee.isSuccess) return Result.fail(new ErrorObtainingShippingFeeApplicationException('Error obtaining shipping fee'));
+        if (!shippingFee.isSuccess) return Result.fail(new ErrorObtainingShippingFeeApplicationException());
 
         let amount = OrderTotalAmount.create(data.amount, data.currency);
 
         let taxes = await this.calculateTaxesFee.calculateTaxesFee(amount);
 
-        if (!taxes.isSuccess) return Result.fail(new ErrorObtainingTaxesApplicationException('Error obtaining taxes'));
+        if (!taxes.isSuccess) return Result.fail(new ErrorObtainingTaxesApplicationException());
 
         return Result.success(new CalculateTaxesShippingResponseDto(taxes.getValue.OrderTaxes,shippingFee.getValue.OrderShippingFee));
     }
