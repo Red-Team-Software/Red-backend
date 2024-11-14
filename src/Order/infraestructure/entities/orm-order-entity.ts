@@ -27,13 +27,13 @@ export class OrmOrderEntity implements IOrderInterface {
 
     @Column('float')
     longitude: number;
-
-    @Column('date', { nullable: true })
-    orderReciviedDate?: Date;
-
+    
     @OneToOne( () => OrmOrderPayEntity, (pay) => pay.order, { eager: true } )
     @JoinColumn()
     pay?: OrmOrderPayEntity;
+
+    @Column('date', { nullable: true })
+    orderReciviedDate?: Date;
 
     @OneToMany(() => OrmOrderProductEntity, (orderProduct) => orderProduct.order)
     order_products?: OrmOrderProductEntity[];
@@ -62,10 +62,10 @@ export class OrmOrderEntity implements IOrderInterface {
         order.currency = currency;
         order.latitude = latitude;
         order.longitude = longitude;
-        order.orderReciviedDate = orderReciviedDate;
         order.pay = pay;
         order.order_products = orderProducts;
         order.order_bundles = orderBundles;
+        order.orderReciviedDate = orderReciviedDate;
         return order;
     }
 

@@ -12,6 +12,8 @@ import { SaveTokenInfraestructureEntryDTO } from "../dto-request/save-token-infr
 import { ICreateBundle } from "../interfaces/create-bundle.interface";
 import { AddNewBundlePushNotificationApplicationService } from "src/notification/application/services/command/new-bundle-push-notification-application.service";
 import { AddNewProductsPushNotificationApplicationService } from "src/notification/application/services/command/new-product-push-notification-application.service";
+import { SendGridNewBundleEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-bundle-email-sender.service";
+import { SendGridNewProductEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-product-email-sender.service";
 
 @Controller('notification')
 export class NotificationController {
@@ -62,6 +64,7 @@ export class NotificationController {
             { name: 'BundleEvents'}, 
             (data):Promise<void>=>{
                 this.sendPushToCreatedBundle(data)
+                this.sendEmailToCreateBundle(data)
                 return
             }
         )
@@ -88,7 +91,24 @@ export class NotificationController {
     }
 
     async sendEmailToCreateProduct(entry:ICreateProduct):Promise<void> {
-        // TODO
+        let emailsender=new SendGridNewProductEmailSender()
+        emailsender.setVariablesToSend({
+            name:entry.productName,
+            price:entry.productPrice.price,
+            currency:entry.productPrice.currency,
+            image:entry.productImage.pop()
+        })
+        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')    }
+
+    async sendEmailToCreateBundle(entry:ICreateBundle):Promise<void> {
+        let emailsender=new SendGridNewBundleEmailSender()
+        emailsender.setVariablesToSend({
+            name:entry.bundleName,
+            price:entry.bundlePrice.price,
+            currency:entry.bundlePrice.currency,
+            image:entry.bundleImages.pop()
+        })
+        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')
     }
 
     async sendPushToCreatedBundle(entry:ICreateBundle){

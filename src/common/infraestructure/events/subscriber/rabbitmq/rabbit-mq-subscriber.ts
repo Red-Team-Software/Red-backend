@@ -28,16 +28,13 @@ export class RabbitMQSubscriber {
 	}
 
     async buildQueue( queue: AMQPQueue ) {
-        this.channel.assertQueue( queue.name, {  exclusive: true} )    
+        this.channel.assertQueue( queue.name, {  exclusive: false} )    
         this.channel.assertExchange(queue.exchange.name, queue.exchange.type,{durable:false})
         this.channel.bindQueue(queue.name, queue.exchange.name, queue.pattern)
     }
 
     async consume<T>( queue: AMQPQueue, callback: (entry:T) => Promise<void> ) {
-		console.log('consuming in: ', queue.name)
         this.channel.consume(queue.name, async (message) => {
-			console.log(queue.name)
-
             const content = JSON.parse(message.content.toString())
             await callback(content) 
             this.channel.ack(message)
