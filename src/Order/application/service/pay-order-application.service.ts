@@ -21,7 +21,7 @@ import { OrderId } from 'src/Order/domain/value_objects/orderId';
 import { OrderState } from 'src/Order/domain/value_objects/orderState';
 import { OrderShippingFee } from 'src/Order/domain/value_objects/order-shipping-fee';
 import { OrderReciviedDate } from 'src/Order/domain/value_objects/order-recivied-date';
-import { ErrorCreatingOrderApplicationException } from '../application-exception/error-creating-product-application.exception';
+import { ErrorCreatingOrderApplicationException } from '../application-exception/error-creating-order-application.exception';
 import { IGeocodification } from 'src/Order/domain/domain-services/geocodification-interface';
 import { OrderAddressStreet } from 'src/Order/domain/value_objects/order-direction-street';
 import { OrderProduct } from 'src/Order/domain/entities/order-product/order-product-entity';
@@ -69,14 +69,14 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             let shippingFee = OrderShippingFee.create(10);
 
             // if (!shippingFee.isSuccess())
-            //  return Result.fail(new ErrorObtainingShippingFeeApplicationException('Error obtaining shipping fee'));
+            //  return Result.fail(new ErrorObtainingShippingFeeApplicationException());
 
             let amount = OrderTotalAmount.create(data.amount, data.currency);
 
             let taxes = await this.calculateTaxesFee.calculateTaxesFee(amount);
 
             if (!taxes.isSuccess()) 
-                return Result.fail(new ErrorObtainingTaxesApplicationException('Error obtaining taxes'));
+                return Result.fail(new ErrorObtainingTaxesApplicationException());
             
             //let amountTotal = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.getValue.OrderTaxes;
             
@@ -90,7 +90,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let response = await this.payOrder.createPayment(orderPayment, stripePaymentMethod);
 
-            if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException('Error during creation of payment'));
+            if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException());
 
             if (data.products)
                 products=data.products.map(product=>OrderProduct.create(
@@ -122,7 +122,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             
             let responseDB = await this.orderRepository.saveOrder(order); 
 
-            if (!responseDB.isSuccess()) return Result.fail(new ErrorCreatingOrderApplicationException('Error during creation of order'));
+            if (!responseDB.isSuccess()) return Result.fail(new ErrorCreatingOrderApplicationException());
 
             await this.eventPublisher.publish(order.pullDomainEvents());
 

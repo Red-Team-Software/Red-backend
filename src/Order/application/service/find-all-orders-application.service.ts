@@ -18,7 +18,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
 
         let response = await this.orderRepository.findAllOrders(data);
 
-        if (!response.isSuccess) return Result.fail(new NotFoundOrderApplicationException('Error during the search of the orders'));
+        if (!response.isSuccess) return Result.fail(new NotFoundOrderApplicationException());
 
         let orders = response.getValue;
 
