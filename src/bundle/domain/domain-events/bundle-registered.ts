@@ -11,7 +11,7 @@ import { ProductID } from "src/product/domain/value-object/product-id"
 
 export class BundleRegistered extends DomainEvent {
     serialize(): string {
-        let data:string= {  
+        let data= {  
             bundleId:this.bundleId.Value,
             bundleDescription:this.bundleDescription.Value,
             bundleCaducityDate:this.bundleCaducityDate.Value,
@@ -21,10 +21,9 @@ export class BundleRegistered extends DomainEvent {
             bundlePrice:this.bundlePrice,
             bundleWeigth:this.bundleWeigth,
             bundleProductId:this.productId.map(id=>id.Value)
-        }.toString()
-        //TODO hacerlo con objetos complejos
-        
-        return data
+        }
+
+        return JSON.stringify(data)
     }
     static create(
         bundleId:BundleId,

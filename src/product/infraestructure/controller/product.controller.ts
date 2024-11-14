@@ -17,7 +17,6 @@ import { OrmProductQueryRepository } from '../repositories/orm-repository/orm-pr
 import { FindAllProductsApplicationService } from 'src/product/application/services/query/find-all-products-application.service';
 import { FindAllProductsInfraestructureRequestDTO } from '../dto-request/find-all-products-infraestructure-request-dto';
 import { PaginationRequestDTO } from 'src/common/application/services/dto/request/pagination-request-dto';
-import { RabbitMQEventPublisher } from 'src/common/infraestructure/events/publishers/rabbittMq.publisher';
 import { Channel } from 'amqplib';
 import { FindAllProductsAndBundlesInfraestructureRequestDTO } from '../dto-request/find-all-products-and-bundles-infraestructure-request-dto';
 import { FindAllProductsAndComboApplicationService } from 'src/product/application/services/query/find-all-product-and-combo-by-name-application.service';
@@ -26,6 +25,7 @@ import { OrmBundleQueryRepository } from 'src/bundle/infraestructure/repositorie
 import { FindAllProductsbyNameApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-and-combos-request-dto';
 import { FindProductByIdInfraestructureRequestDTO } from '../dto-request/find-product-by-id-infraestructure-request-dto';
 import { FindProductByIdApplicationService } from 'src/product/application/services/query/find-product-by-id-application.service';
+import { RabbitMQPublisher } from 'src/common/infraestructure/events/publishers/rabbit-mq-publisher';
 
 
 @Controller('product')
@@ -60,7 +60,7 @@ export class ProductController {
 
     let service= new ExceptionDecorator(
           new CreateProductApplicationService(
-            new RabbitMQEventPublisher(this.channel),
+            new RabbitMQPublisher(this.channel),
             this.ormProductRepo,
             this.idGen,
             new CloudinaryService()

@@ -5,7 +5,6 @@ import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 import { CreateBundleInfraestructureRequestDTO } from "../dto-request/create-bundle-infraestructure-request-dto"
 import { ExceptionDecorator } from "src/common/application/aspects/exeption-decorator/exception-decorator"
-import { RabbitMQEventPublisher } from "src/common/infraestructure/events/publishers/rabbittMq.publisher"
 import { Channel } from "amqplib"
 import { CreateBundleApplicationService } from "src/bundle/application/services/command/create-bundle-application.service"
 import { CloudinaryService } from "src/common/infraestructure/file-uploader/cloudinary-uploader"
@@ -23,6 +22,7 @@ import { FindAllBundlesByNameInfraestructureRequestDTO } from "../dto-request/fi
 import { FindAllBundlesByNameApplicationService } from "src/bundle/application/services/query/find-all-bundles-by-name-application.service"
 import { FindBundleByIdInfraestructureRequestDTO } from "../dto-request/find-bundle-by-id-infraestructure-request-dto"
 import { FindBundleByIdApplicationService } from "src/bundle/application/services/query/find-bundle-by-id-application.service"
+import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher"
 
 @Controller('bundle')
 export class BundleController {
@@ -53,7 +53,7 @@ export class BundleController {
 
     let service= new ExceptionDecorator(
           new CreateBundleApplicationService(
-            new RabbitMQEventPublisher(this.channel),
+            new RabbitMQPublisher(this.channel),
             this.ormBundletRepo,
             this.idGen,
             new CloudinaryService()
