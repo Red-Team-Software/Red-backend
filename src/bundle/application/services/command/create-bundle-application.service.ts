@@ -54,6 +54,7 @@ export class CreateBundleApplicationService extends IApplicationService
             uploaded.push(imageuploaded.getValue)
         }
 
+
         let id=await this.idGen.genId()
         let bundle=Bundle.Registerbundle(
             BundleId.create(id),
@@ -67,7 +68,7 @@ export class CreateBundleApplicationService extends IApplicationService
             command.productId.map(id=>ProductID.create(id))
         )
         let result=await this.bunldeRepository.createBundle(bundle)
-    
+
         if (!result.isSuccess()) 
             return Result.fail(new ErrorCreatingBundleApplicationException())
     
