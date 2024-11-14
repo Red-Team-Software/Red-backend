@@ -9,7 +9,6 @@ import { OrderTotalAmount } from 'src/order/domain/value_objects/order-totalAmou
 import { IPaymentService } from 'src/order/domain/domain-services/payment-interface';
 import { OrderPayment } from 'src/order/domain/value_objects/order-payment';
 import { OrderDirection } from 'src/order/domain/value_objects/order-direction';
-import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
 import { ErrorCreatingPaymentApplicationException } from '../application-exception/error-creating-payment-application.exception';
 import { ErrorObtainingTaxesApplicationException } from '../application-exception/error-obtaining-taxes.application.exception';
 import { OrderStripePaymentMethod } from 'src/order/domain/value_objects/order-stripe-payment-method';
