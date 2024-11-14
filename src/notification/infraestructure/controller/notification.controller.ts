@@ -1,6 +1,5 @@
 import { Body, Controller, Inject, Logger, Post } from "@nestjs/common";
 import { Channel } from "amqp-connection-manager";
-import { AddNewProductsApplicationService } from "src/notification/application/services/command/new-product-push-notification-application.service";
 import { FirebaseNotifier } from '../firebase-notifier/firebase-notifier-singleton';
 import { IPushNotifier } from "src/common/application/notification-handler/notification-interface";
 import { NewProductPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-product-push-notification-application-request-dto";
@@ -10,6 +9,11 @@ import { NestLogger } from "src/common/infraestructure/logger/nest-logger";
 import { RabbitMQSubscriber } from 'src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber';
 import { ICreateProduct } from '../interfaces/create-product.interface';
 import { SaveTokenInfraestructureEntryDTO } from "../dto-request/save-token-infraestructure-entry-dto";
+import { ICreateBundle } from "../interfaces/create-bundle.interface";
+import { AddNewBundlePushNotificationApplicationService } from "src/notification/application/services/command/new-bundle-push-notification-application.service";
+import { AddNewProductsPushNotificationApplicationService } from "src/notification/application/services/command/new-product-push-notification-application.service";
+import { SendGridNewBundleEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-bundle-email-sender.service";
+import { SendGridNewProductEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-product-email-sender.service";
 
 @Controller('notification')
 export class NotificationController {
@@ -47,7 +51,6 @@ export class NotificationController {
             }
         })
 
-
         this.subscriber.consume<ICreateProduct>(
             { name: 'ProductEvents'}, 
             (data):Promise<void>=>{
@@ -57,11 +60,11 @@ export class NotificationController {
             }
         )
 
-        this.subscriber.consume<ICreateProduct>(
+        this.subscriber.consume<ICreateBundle>(
             { name: 'BundleEvents'}, 
             (data):Promise<void>=>{
-                this.sendEmailToCreateProduct(data)
-                this.sendPushToCreatedProduct(data)
+                this.sendPushToCreatedBundle(data)
+                this.sendEmailToCreateBundle(data)
                 return
             }
         )
@@ -70,7 +73,7 @@ export class NotificationController {
     async sendPushToCreatedProduct(entry:ICreateProduct):Promise<void> {
         let service= new ExceptionDecorator(
             new LoggerDecorator(
-                new AddNewProductsApplicationService(
+                new AddNewProductsPushNotificationApplicationService(
                     this.pushsender
                 ),
               new NestLogger(new Logger())
@@ -87,13 +90,47 @@ export class NotificationController {
         service.execute(data)
     }
 
-    async sendPushToCreatedBundle(){
-        
-
-    }
-
     async sendEmailToCreateProduct(entry:ICreateProduct):Promise<void> {
+        let emailsender=new SendGridNewProductEmailSender()
+        emailsender.setVariablesToSend({
+            name:entry.productName,
+            price:entry.productPrice.price,
+            currency:entry.productPrice.currency,
+            image:entry.productImage.pop()
+        })
+        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')    }
+
+    async sendEmailToCreateBundle(entry:ICreateBundle):Promise<void> {
+        let emailsender=new SendGridNewBundleEmailSender()
+        emailsender.setVariablesToSend({
+            name:entry.bundleName,
+            price:entry.bundlePrice.price,
+            currency:entry.bundlePrice.currency,
+            image:entry.bundleImages.pop()
+        })
+        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')
     }
+
+    async sendPushToCreatedBundle(entry:ICreateBundle){
+        let service= new ExceptionDecorator(
+            new LoggerDecorator(
+                new AddNewBundlePushNotificationApplicationService(
+                    this.pushsender
+                ),
+              new NestLogger(new Logger())
+            )
+          )
+
+        let data:NewProductPushNotificationApplicationRequestDTO={
+            userId:'none',
+            tokens:this.tokens,
+            name:entry.bundleName,
+            price:entry.bundlePrice.price,
+            currency:entry.bundlePrice.currency
+        }
+        service.execute(data)
+    }
+
 
     @Post('savetoken')
     async saveToken(@Body() entry:SaveTokenInfraestructureEntryDTO){

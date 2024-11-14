@@ -69,7 +69,6 @@ export class CreateBundleApplicationService extends IApplicationService
         )
         let result=await this.bunldeRepository.createBundle(bundle)
 
-        console.log(result)
         if (!result.isSuccess()) 
             return Result.fail(new ErrorCreatingBundleApplicationException())
     
