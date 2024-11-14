@@ -1,16 +1,16 @@
 import { IApplicationService} from 'src/common/application/services';
 import { Result } from 'src/common/utils/result-handler/result';
 import { IEventPublisher } from 'src/common/application/events/event-publisher/event-publisher.abstract';
-import { ICalculateShippingFee } from 'src/Order/domain/domain-services/calculate-shippping-fee.interfafe';
-import { ICalculateTaxesFee } from 'src/Order/domain/domain-services/calculate-taxes-fee.interface';
-import { OrderTotalAmount } from 'src/Order/domain/value_objects/order-totalAmount';
-import { OrderDirection } from 'src/Order/domain/value_objects/order-direction';
+import { ICalculateShippingFee } from 'src/order/domain/domain-services/calculate-shippping-fee.interfafe';
+import { ICalculateTaxesFee } from 'src/order/domain/domain-services/calculate-taxes-fee.interface';
+import { OrderTotalAmount } from 'src/order/domain/value_objects/order-totalAmount';
+import { OrderDirection } from 'src/order/domain/value_objects/order-direction';
 import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
 import { ErrorObtainingTaxesApplicationException } from '../application-exception/error-obtaining-taxes.application.exception';
 import { CalculateTaxesShippingResponseDto } from '../dto/response/calculate-taxes-shipping-fee-response.dto';
 import { TaxesShippingFeeApplicationServiceEntryDto } from '../dto/request/tax-shipping-fee-request-dto';
-import { IGeocodification } from 'src/Order/domain/domain-services/geocodification-interface';
-import { OrderAddressStreet } from 'src/Order/domain/value_objects/order-direction-street';
+import { IGeocodification } from 'src/order/domain/domain-services/geocodification-interface';
+import { OrderAddressStreet } from 'src/order/domain/value_objects/order-direction-street';
 
 
 export class CalculateTaxShippingFeeAplicationService extends IApplicationService<TaxesShippingFeeApplicationServiceEntryDto,CalculateTaxesShippingResponseDto>{

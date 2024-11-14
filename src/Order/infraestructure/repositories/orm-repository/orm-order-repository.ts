@@ -1,6 +1,6 @@
 import { Result } from "src/common/utils/result-handler/result";
-import { Order } from "src/Order/domain/aggregate/order";
-import { ICommandOrderRepository } from "src/Order/domain/command-repository/order-command-repository-interface";
+import { Order } from "src/order/domain/aggregate/order";
+import { ICommandOrderRepository } from "src/order/domain/command-repository/order-command-repository-interface";
 import { Repository, DataSource } from 'typeorm';
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 import { IMapper } from "src/common/application/mappers/mapper.interface";

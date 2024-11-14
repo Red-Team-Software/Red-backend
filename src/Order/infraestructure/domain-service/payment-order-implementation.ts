@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { OrderPayment } from "../../domain/value_objects/order-payment";
 import { IPaymentService } from "../../domain/domain-services/payment-interface";
 import { Result } from "src/common/utils/result-handler/result";
-import { OrderStripePaymentMethod } from "src/Order/domain/value_objects/order-stripe-payment-method";
+import { OrderStripePaymentMethod } from "src/order/domain/value_objects/order-stripe-payment-method";
 
 export class PaymentOrderImplementation implements IPaymentService {    
     private stripe: StripeSingelton;
