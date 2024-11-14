@@ -24,6 +24,14 @@ import { OrderReciviedDate } from 'src/Order/domain/value_objects/order-recivied
 import { ErrorCreatingOrderApplicationException } from '../application-exception/error-creating-product-application.exception';
 import { IGeocodification } from 'src/Order/domain/domain-services/geocodification-interface';
 import { OrderAddressStreet } from 'src/Order/domain/value_objects/order-direction-street';
+import { OrderProduct } from 'src/Order/domain/entities/order-product/order-product-entity';
+import { OrderBundle } from 'src/Order/domain/entities/order-bundle/order-bundle-entity';
+import { OrderProductId } from 'src/Order/domain/entities/order-product/value_object/order-productId';
+import { ProductID } from '../../../product/domain/value-object/product-id';
+import { OrderProductQuantity } from 'src/Order/domain/entities/order-product/value_object/order-Product-quantity';
+import { OrderBundleId } from 'src/Order/domain/entities/order-bundle/value_object/order-bundlesId';
+import { OrderBundleQuantity } from 'src/Order/domain/entities/order-bundle/value_object/order-bundle-quantity';
+import { BundleId } from '../../../bundle/domain/value-object/bundle-id';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -42,23 +50,31 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
     
     async execute(data: OrderPayApplicationServiceRequestDto): Promise<Result<OrderPayResponseDto>> {
 
-            let orderAddress = OrderAddressStreet.create(data.address);
+            let order: Order;
         
-            let address = await this.geocodificationAddress.DirecctiontoLatitudeLongitude(orderAddress);
-            console.log(address.getValue);
-            let orderDirection = OrderDirection.create(address.getValue.Latitude, address.getValue.Longitude);
+            let products: OrderProduct[] = [];
+
+            let bundles: OrderBundle[] = [];
+
+            //let orderAddress = OrderAddressStreet.create(data.address);
+        
+            //let address = await this.geocodificationAddress.DirecctiontoLatitudeLongitude(orderAddress);
+            
+            //let orderDirection = OrderDirection.create(address.getValue.Latitude, address.getValue.Longitude);
+
+            let orderDirection = OrderDirection.create(10.4399, -66.89275);
 
             //let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
 
             let shippingFee = OrderShippingFee.create(10);
 
-            //if (!shippingFee.isSuccess) return Result.fail(new ErrorObtainingShippingFeeApplicationException('Error obtaining shipping fee'));
+            //if (!shippingFee.isSuccess()) return Result.fail(new ErrorObtainingShippingFeeApplicationException('Error obtaining shipping fee'));
 
             let amount = OrderTotalAmount.create(data.amount, data.currency);
 
             let taxes = await this.calculateTaxesFee.calculateTaxesFee(amount);
 
-            if (!taxes.isSuccess) return Result.fail(new ErrorObtainingTaxesApplicationException('Error obtaining taxes'));
+            if (!taxes.isSuccess()) return Result.fail(new ErrorObtainingTaxesApplicationException('Error obtaining taxes'));
             
             //let amountTotal = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.getValue.OrderTaxes;
             
@@ -72,24 +88,46 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             //let response = await this.payOrder.createPayment(orderPayment, stripePaymentMethod);
 
-            //if (!response.isSuccess) return Result.fail(new ErrorCreatingPaymentApplicationException('Error during creation of payment'));
+            //if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException('Error during creation of payment'));
 
-            let order = Order.registerOrder(
+            order = Order.registerOrder(
                 OrderId.create(await this.idGen.genId()),
                 OrderState.create('ongoing'),
                 OrderCreatedDate.create(new Date()),
                 total,
                 orderDirection,
-                [],
-                [],
+                products,
+                bundles,
                 OrderReciviedDate.create(new Date()),
                 undefined,
                 orderPayment
             )
 
-            let responseDB = await this.orderRepository.saveOrder(order);  
+            if (data.products.length > 0){
+                data.products.forEach( (product) => {
+                    products.push(
+                        order.createOrderProduct(
+                            OrderProductId.create(ProductID.create(product.id)), 
+                            OrderProductQuantity.create(product.quantity)));
+                });
+            }
 
-            if (!responseDB.isSuccess) return Result.fail(new ErrorCreatingOrderApplicationException('Error during creation of order'));
+            if (data.bundles.length > 0){
+
+                data.bundles.forEach( (bundle) => {
+                    bundles.push(
+                        order.createOrderBundle(
+                            OrderBundleId.create(BundleId.create(bundle.id)),
+                            OrderBundleQuantity.create(bundle.quantity)));
+                });
+            }
+
+            order.OrderSetBundles(bundles);
+            order.OrderSetProducts(products);
+
+            let responseDB = await this.orderRepository.saveOrder(order); 
+
+            if (!responseDB.isSuccess()) return Result.fail(new ErrorCreatingOrderApplicationException('Error during creation of order'));
 
             await this.eventPublisher.publish(order.pullDomainEvents());
 
@@ -104,6 +142,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 paymentMethod: order.OrderPayment.PaymentMethod
             }
 
+
             return Result.success(
                 new OrderPayResponseDto(
                     order.getId().orderId,
@@ -112,8 +151,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                     order.TotalAmount.OrderAmount,
                     order.TotalAmount.OrderCurrency,
                     direction,
-                    [],
-                    [],
+                    data.products,
+                    data.bundles,
                     order.OrderReciviedDate.OrderReciviedDate,
                     order.OrderReport?.OrderReportId,
                     payment

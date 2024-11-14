@@ -1,11 +1,12 @@
+import { BundleId } from "src/bundle/domain/value-object/bundle-id";
 import { ValueObject } from "src/common/domain";
 
 export class OrderBundleId extends ValueObject<OrderBundleId> {
-    private id: string;
+    private id: BundleId;
 
-    private constructor(id: string) {
+    private constructor(id: BundleId) {
         super();
- 
+
         //if(!id) { throw new EmptyOrderBundleIdException('No se pudo obtener un Id de curso') /* throw DomainException NullCourseId */}
 
         this.id = id;
@@ -19,7 +20,7 @@ export class OrderBundleId extends ValueObject<OrderBundleId> {
         return this.id;
     }
 
-    public static create(id: string): OrderBundleId {
+    public static create(id: BundleId): OrderBundleId {
         return new OrderBundleId(id);
     }
 }

@@ -1,6 +1,8 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
 import { IOrderInterface } from "../orm-model-entity/order-interface";
 import { OrmOrderPayEntity } from "./orm-order-payment";
+import { OrmOrderProductEntity } from "./orm-order-product-entity";
+import { OrmOrderBundleEntity } from "./orm-order-bundle-entity";
 
 @Entity('order')
 export class OrmOrderEntity implements IOrderInterface {
@@ -33,6 +35,12 @@ export class OrmOrderEntity implements IOrderInterface {
     @JoinColumn()
     pay?: OrmOrderPayEntity;
 
+    @OneToMany(() => OrmOrderProductEntity, (orderProduct) => orderProduct.order)
+    order_products?: OrmOrderProductEntity[];
+
+    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.order)
+    order_bundles?: OrmOrderBundleEntity[]
+
     static create(
         id: string,
         orderState: string,
@@ -41,8 +49,10 @@ export class OrmOrderEntity implements IOrderInterface {
         currency: string,
         latitude: number,
         longitude: number,
-        orderReciviedDate?: Date,
         pay?: OrmOrderPayEntity,
+        orderProducts?: OrmOrderProductEntity[],
+        orderBundles?: OrmOrderBundleEntity[],
+        orderReciviedDate?: Date,
     ): OrmOrderEntity {
         const order = new OrmOrderEntity();
         order.id = id;
@@ -54,6 +64,8 @@ export class OrmOrderEntity implements IOrderInterface {
         order.longitude = longitude;
         order.orderReciviedDate = orderReciviedDate;
         order.pay = pay;
+        order.order_products = orderProducts;
+        order.order_bundles = orderBundles;
         return order;
     }
 

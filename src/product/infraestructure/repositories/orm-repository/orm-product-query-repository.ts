@@ -9,6 +9,7 @@ import { IQueryProductRepository } from "src/product/application/query-repositor
 import { FindAllProductsApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-application-request-dto";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { FindAllProductsbyNameApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-and-combos-request-dto";
+import { ProductID } from "src/product/domain/value-object/product-id";
 
 
 export class OrmProductQueryRepository extends Repository<OrmProductEntity> implements IQueryProductRepository{
@@ -71,5 +72,5 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             return Result.fail( new NotFoundException('products empty please try again'))
         }
     }
-     
+    
 }

@@ -19,7 +19,7 @@ export class StripeConnection implements IPaymentService {
         try {
             const paymentIntent =
                 await this.stripe.stripeInstance.paymentIntents.create({
-                    amount: pay.Amount,
+                    amount: pay.Amount*100,
                     currency: pay.Currency,
                     payment_method_types: ['card'],
                     confirmation_method: 'manual',

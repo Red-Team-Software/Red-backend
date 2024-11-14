@@ -9,15 +9,31 @@ import { OrderDirection } from "src/Order/domain/value_objects/order-direction";
 import { OrderCreatedDate } from "src/Order/domain/value_objects/order-created-date";
 import { OrmOrderPayEntity } from '../entities/orm-order-payment';
 import { OrderPayment } from "src/Order/domain/value_objects/order-payment";
+import { IProductRepository } from "src/product/domain/repository/product.interface.repositry";
+import { OrmOrderProductEntity } from "../entities/orm-order-product-entity";
+import { OrmOrderBundleEntity } from "../entities/orm-order-bundle-entity";
+import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry";
 
 
 export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
     
     constructor(
-        private readonly idGen:IIdGen<string>
+        private readonly idGen:IIdGen<string>,
+        private readonly ormProductRepository: IProductRepository,
+        private readonly ormBundleRepository: IBundleRepository
     ){}
     
     async fromPersistencetoDomain(infraEstructure: OrmOrderEntity): Promise<Order> {
+
+        // const ormProducts = await this.ormOrderProductRepository.findProductsByOrderId(domainEntity.getId());
+
+        // const products: Product[] = [];
+
+        // products.forEach( (product) => {
+            
+        // });
+
+
 
         let order = Order.initializeAggregate(
             OrderId. create(infraEstructure.id),
@@ -46,6 +62,32 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
                 domainEntity.OrderPayment.PaymentMethod,
                 domainEntity.getId().orderId
             );
+        }  
+        
+        let ormProducts: OrmOrderProductEntity[] = [];
+
+        for (let product of domainEntity.Products){
+            let response = await this.ormProductRepository.findProductById(product.getId().OrderProductId);
+            ormProducts.push(
+                OrmOrderProductEntity.create(
+                    domainEntity.getId().orderId,
+                    response.getValue.getId().Value,
+                    domainEntity.Products[0].Quantity.Quantity
+                )
+            )
+        }
+
+        let ormBundles: OrmOrderBundleEntity[] = [];
+
+        for (let bundle of domainEntity.Bundles){
+            let response = await this.ormBundleRepository.findBundleById(bundle.getId().OrderBundleId);
+            ormBundles.push(
+                OrmOrderBundleEntity.create(
+                    domainEntity.getId().orderId,
+                    response.getValue.getId().Value,
+                    domainEntity.Bundles[0].Quantity.OrderBundleQuantity
+                )
+            )
         }
 
         return OrmOrderEntity.create(
@@ -56,9 +98,10 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             domainEntity.TotalAmount.OrderCurrency,
             domainEntity.OrderDirection.Latitude,
             domainEntity.OrderDirection.Longitude,
+            ormOrderPayEntity,
+            ormProducts,
+            ormBundles,
             domainEntity.OrderReciviedDate.OrderReciviedDate,
-            ormOrderPayEntity
         );
     }
-
 }

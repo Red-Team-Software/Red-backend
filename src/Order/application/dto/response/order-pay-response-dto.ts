@@ -12,8 +12,14 @@ export class OrderPayResponseDto implements IServiceResponseDto {
             lat: number,
             long: number
         },
-        public products?: string[],
-        public bundles?: string[],
+        public products?: {
+            id: string,
+            quantity: number
+        }[],
+        public bundles?: {
+            id: string,
+            quantity: number
+        }[],
         public orderReciviedDate?: Date,
         public orderReport?: string,
         public orderPayment?: {

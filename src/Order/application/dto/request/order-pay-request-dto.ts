@@ -8,6 +8,14 @@ export interface OrderPayApplicationServiceRequestDto extends IServiceRequestDto
     paymentMethod: string;
     stripePaymentMethod: string;
     address: string;
+    products?: {
+        id: string,
+        quantity: number
+    }[];
+    bundles?: {
+        id: string,
+        quantity: number
+    }[];
     
 
 }

@@ -6,7 +6,6 @@ import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { ExceptionDecorator } from "src/common/application/aspects/exeption-decorator/exception-decorator";
 import { PayOrderAplicationService } from "src/Order/application/service/pay-order-application.service";
-import { EventBus } from "src/common/infraestructure/events/publishers/event-bus";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IApplicationService } from "src/common/application/services";
 import { OrderPayApplicationServiceRequestDto } from "src/Order/application/dto/request/order-pay-request-dto";
@@ -41,6 +40,14 @@ import { Channel } from 'amqplib';
 import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher";
 import { IGeocodification } from "src/Order/domain/domain-services/geocodification-interface";
 import { GeocodificationHereMapsDomainService } from "../domain-service/geocodification-here-maps-domain-service";
+import { OrmProductQueryRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-query-repository";
+import { IProductRepository } from "src/product/domain/repository/product.interface.repositry";
+import { OrmProductRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-repository";
+import { Product } from "src/product/domain/aggregate/product.aggregate";
+import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
+import { OrmProductMapper } from "src/product/infraestructure/mapper/orm-mapper/orm-product-mapper";
+import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry";
+import { OrmBundleRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-repository";
 
 @ApiTags('Order')
 @Controller('order')
@@ -67,8 +74,10 @@ export class OrderController {
     //*Repositories
     private readonly orderRepository: ICommandOrderRepository;
     private readonly orderQueryRepository: IQueryOrderRepository;
+    private readonly ormProductRepository: IProductRepository;
+    private readonly ormBundleRepository: IBundleRepository;
 
-
+    //*IdGen
     private readonly idGen: IIdGen<string>;
 
     //*RabbitMQ
@@ -78,19 +87,32 @@ export class OrderController {
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
     ) {
+        //*IdGen
         this.idGen = new UuidGen();
+
+        //*implementations of singeltons
         this.stripeSingleton = StripeSingelton.getInstance();
-        this.rabbitMq = new RabbitMQPublisher(this.channel);
         this.hereMapsSingelton = HereMapsSingelton.getInstance(); 
+
+        //*RabbitMQ
+        this.rabbitMq = new RabbitMQPublisher(this.channel);
+
+        //*implementations of domain services
         this.calculateShipping = new CalculateShippingFeeHereMaps(this.hereMapsSingelton);
         this.calculateTax = new CalculateTaxesFeeImplementation();
         this.paymentConnection = new PaymentOrderImplementation(this.stripeSingleton);
-        this.orderMapper = new OrmOrderMapper(this.idGen);
         this.geocodificationAddress = new GeocodificationHereMapsDomainService(this.hereMapsSingelton);
-    
+        
+        //*Repositories
+        this.ormProductRepository = new OrmProductRepository(PgDatabaseSingleton.getInstance());
+        this.ormBundleRepository = new OrmBundleRepository(PgDatabaseSingleton.getInstance());
+        
+        //*Mappers
+        this.orderMapper = new OrmOrderMapper(this.idGen,this.ormProductRepository,this.ormBundleRepository);
+
+        //*Repositories
         this.orderQueryRepository = new OrderQueryRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
         this.orderRepository = new OrmOrderRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
-
 
 
         //*Pay Service
@@ -137,8 +159,8 @@ export class OrderController {
     async realizePayment(@Body() data: PaymentEntryDto) {
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: 'none',
+            currency: data.currency.toLowerCase(),
             ...data}
-
         
         let response = await this.payOrderService.execute(payment);
         
