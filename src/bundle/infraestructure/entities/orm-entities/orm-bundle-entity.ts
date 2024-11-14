@@ -2,6 +2,7 @@ import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from 
 import { IBundle } from "../../model-entity/orm-model-entity/bundle-interface";
 import { OrmBundleImage } from "./orm-bundle-image";
 import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
+import { OrmOrderBundleEntity } from "src/Order/infraestructure/entities/orm-order-bundle-entity";
 
 @Entity('bundle')
 export class OrmBundleEntity implements IBundle{
@@ -29,6 +30,9 @@ export class OrmBundleEntity implements IBundle{
         }
     })
     products: OrmProductEntity[];
+
+    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.bundle)
+    order_bundles?: OrmOrderBundleEntity[]
 
     static create ( 
         id:string,

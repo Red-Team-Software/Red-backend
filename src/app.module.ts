@@ -5,6 +5,7 @@ import { ProductController } from './product/infraestructure/controller/product.
 import { CloudinaryProvider } from './common/infraestructure/providers/cloudinary.provider';
 import { NotificationModule } from './notification/infraestructure/notification.module';
 import { CategoryController } from './category/infraestructure/controller/category.controller';
+import { OrderController } from './Order/infraestructure/controller/order.controller';
 import { BundleController } from './bundle/infraestructure/controller/bundle.controller';
 
 @Module({
@@ -15,7 +16,12 @@ import { BundleController } from './bundle/infraestructure/controller/bundle.con
     RabbitMQModule,
     NotificationModule
   ],
-  controllers: [ProductController,CategoryController,BundleController],
+  controllers: [
+    ProductController,
+    CategoryController,
+    BundleController,
+    OrderController
+  ],
   providers:[CloudinaryProvider]
 })
 export class AppModule {}

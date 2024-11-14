@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { IProduct } from "../../model-entity/orm-model-entity/product-interface";
 import { OrmProductImage } from "./orm-product-image";
+import { OrmOrderProductEntity } from "src/Order/infraestructure/entities/orm-order-product-entity";
 
 @Entity('product')
 export class OrmProductEntity implements IProduct{
@@ -15,6 +16,9 @@ export class OrmProductEntity implements IProduct{
     @Column( 'varchar' ) currency: string;
     @Column( 'integer' ) weigth: number;
     @Column( 'varchar' ) measurament: string;
+
+    @OneToMany(() => OrmOrderProductEntity, (orderProduct) => orderProduct.product)
+    order_products?: OrmOrderProductEntity[]
 
     static create ( 
         id:string,

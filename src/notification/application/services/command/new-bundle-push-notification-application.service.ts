@@ -8,7 +8,7 @@ import { NewProductPushNotificationApplicationResponseDTO } from "../../dto/resp
 
 
 
-export class AddNewBundlePushNotificationApplicationService extends IApplicationService<NewBundlePushNotificationApplicationRequestDTO,NewProductPushNotificationApplicationResponseDTO>{
+export class NewBundlePushNotificationApplicationService extends IApplicationService<NewBundlePushNotificationApplicationRequestDTO,NewProductPushNotificationApplicationResponseDTO>{
     constructor(
         private readonly pushNotifier:IPushNotifier,
     ){
@@ -26,8 +26,7 @@ export class AddNewBundlePushNotificationApplicationService extends IApplication
                 token: token,
                 notification: { 
                     title: `Salio un nuevo combo!!!`, 
-                    body: `El combo es ${data.name} con un valor de ${data.price}${currencySymbol}
-                    si quieres ver los, entra ya!`,
+                    body: `El combo es ${data.name} con un valor de ${data.price}${currencySymbol} si quieres ver los, entra ya!`,
                 } 
             })
         })
