@@ -88,9 +88,9 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let stripePaymentMethod = OrderStripePaymentMethod.create(data.stripePaymentMethod);
 
-            //let response = await this.payOrder.createPayment(orderPayment, stripePaymentMethod);
+            let response = await this.payOrder.createPayment(orderPayment, stripePaymentMethod);
 
-            //if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException('Error during creation of payment'));
+            if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException('Error during creation of payment'));
 
             if (data.products)
                 products=data.products.map(product=>OrderProduct.create(
