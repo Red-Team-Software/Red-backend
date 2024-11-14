@@ -138,16 +138,6 @@ export class Order extends AggregateRoot<OrderId>{
         return order;
     }
 
-    createOrderProduct(id: OrderProductId, quantity: OrderProductQuantity): OrderProduct {
-        let product = OrderProduct.create(id, quantity);
-        return product;
-    }
-
-    createOrderBundle(id: OrderBundleId, quantity: OrderBundleQuantity): OrderBundle {
-        let bundle = OrderBundle.create(id, quantity);
-        return bundle;
-    }
-
     get OrderState(): OrderState {
         return this.orderState;
     }
@@ -184,12 +174,4 @@ export class Order extends AggregateRoot<OrderId>{
         return this.orderDirection;
     }
 
-    OrderSetProducts(products: OrderProduct[]) {
-        this.products = products;
-    }
-
-    OrderSetBundles(bundles: OrderBundle[]) {
-        this.bundles = bundles;
-    }
-    
 }
