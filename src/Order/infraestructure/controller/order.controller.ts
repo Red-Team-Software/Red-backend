@@ -159,9 +159,15 @@ export class OrderController {
     async realizePayment(@Body() data: PaymentEntryDto) {
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: 'none',
+            amount: data.amount,
             currency: data.currency.toLowerCase(),
-            ...data}
-        
+            paymentMethod: data.paymentMethod,
+            stripePaymentMethod: data.stripePaymentMethod,
+            address: data.address,
+            products: data.products,
+            bundles: data.bundles
+        }
+
         let response = await this.payOrderService.execute(payment);
         
         return response.getValue;
