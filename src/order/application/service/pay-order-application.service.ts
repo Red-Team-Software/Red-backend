@@ -27,7 +27,7 @@ import { OrderProduct } from 'src/order/domain/entities/order-product/order-prod
 import { OrderBundle } from 'src/order/domain/entities/order-bundle/order-bundle-entity';
 import { OrderProductId } from 'src/order/domain/entities/order-product/value_object/order-productId';
 import { ProductID } from '../../../product/domain/value-object/product-id';
-import { OrderProductQuantity } from 'src/order/domain/entities/order-product/value_object/order-Product-quantity';
+
 import { OrderBundleId } from 'src/order/domain/entities/order-bundle/value_object/order-bundlesId';
 import { OrderBundleQuantity } from 'src/order/domain/entities/order-bundle/value_object/order-bundle-quantity';
 import { BundleId } from '../../../bundle/domain/value-object/bundle-id';
@@ -37,6 +37,7 @@ import { Product } from 'src/product/domain/aggregate/product.aggregate';
 import { ErrorCreatingOrderProductNotFoundApplicationException } from '../application-exception/error-creating-order-product-not-found-application.exception';
 import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../application-exception/error-creating-order-bundle-not-found-application.exception';
 import { Bundle } from 'src/bundle/domain/aggregate/bundle.aggregate';
+import { OrderProductQuantity } from 'src/order/domain/entities/order-product/value_object/order-product-quantity';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
