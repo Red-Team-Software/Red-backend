@@ -11,10 +11,6 @@ import { OrderDirection } from "../value_objects/order-direction";
 import { MissingOrderAtributes } from "../exception/missing-order-attributes.exception";
 import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
 import { OrderProduct } from "../entities/order-product/order-product-entity";
-import { OrderProductId } from "../entities/order-product/value_object/order-productId";
-import { OrderProductQuantity } from "../entities/order-product/value_object/order-Product-quantity";
-import { OrderBundleId } from "../entities/order-bundle/value_object/order-bundlesId";
-import { OrderBundleQuantity } from "../entities/order-bundle/value_object/order-bundle-quantity";
 import { EmptyProductBundleAtributes } from "../exception/product-bundle-empty.exception";
 
 export class Order extends AggregateRoot<OrderId>{
@@ -46,10 +42,6 @@ export class Order extends AggregateRoot<OrderId>{
         if (this.products.length === 0 && this.bundles.length === 0) {
             throw new EmptyProductBundleAtributes('There must be at least one product or bundle')
         }
-    }
-    
-    clone(): Entity<OrderId> {
-        throw new Error("Method not implemented.");
     }
 
     constructor(

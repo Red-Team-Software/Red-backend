@@ -126,6 +126,8 @@ export class OrderController {
                     this.orderRepository,
                     this.idGen,
                     this.geocodificationAddress,
+                    this.ormProductRepository,
+                    this.ormBundleRepository
                 ),
                 new NestLogger(new Logger())
             )
