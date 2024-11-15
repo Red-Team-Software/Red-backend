@@ -8,7 +8,7 @@ export class OrmOrderPayEntity implements IOrderPaymentInterface {
     @PrimaryColumn( 'uuid' , { primaryKeyConstraintName: "pay_id" })
     id: string;
 
-    @Column('integer')
+    @Column('numeric')
     amount: number;
 
     @Column('varchar')

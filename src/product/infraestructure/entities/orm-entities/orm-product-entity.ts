@@ -12,7 +12,7 @@ export class OrmProductEntity implements IProduct{
     @Column( 'timestamp', { default: () => 'CURRENT_TIMESTAMP' } ) caducityDate: Date
     @OneToMany( () => OrmProductImage,   image => image.product,{ eager: true }) images: OrmProductImage[]   
     @Column( 'integer' ) stock: number
-    @Column( 'integer' ) price: number
+    @Column( 'numeric' ) price: number
     @Column( 'varchar' ) currency: string;
     @Column( 'integer' ) weigth: number;
     @Column( 'varchar' ) measurament: string;
