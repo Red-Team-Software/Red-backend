@@ -37,7 +37,7 @@ export class OrmCategoryMapper implements IMapper<Category, OrmCategoryEntity> {
         const category = Category.create(
             CategoryId.create(infraEntity.id),
             CategoryName.create(infraEntity.name),
-            infraEntity.image ? CategoryImage.create(infraEntity.image.url) : null // Mapeo de la URL de la imagen si existe
+            CategoryImage.create(infraEntity.image.image) // Mapeo de la URL de la imagen si existe
         );
 
         return category;

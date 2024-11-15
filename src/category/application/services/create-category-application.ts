@@ -16,16 +16,17 @@ import { ErrorNameAlreadyApplicationException } from "../application-exception/e
 import { ErrorUploadingImagesApplicationException } from "../application-exception/error-uploading-images-application-exception";
 import { ErrorCreatingCategoryApplicationException } from "../application-exception/error-creating-category-application-exception";
 import { TypeFile } from "src/common/application/file-uploader/enums/type-file.enum";
+import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 
-@Injectable()
 export class CreateCategoryApplication extends IApplicationService<
     CreateCategoryApplicationRequestDTO,
     CreateCategoryApplicationResponseDTO
 > {
     constructor(
+        private readonly eventPublisher: IEventPublisher,
         private readonly categoryRepository: ICategoryRepository,
         private readonly idGen: IIdGen<string>,
-        private readonly fileUploader: IFileUploader
+        private readonly fileUploader: IFileUploader,
     ) {
         super();
     }
@@ -60,7 +61,7 @@ export class CreateCategoryApplication extends IApplicationService<
         const category = Category.create(categoryId, categoryName,categoryImage);
 
         // Save category to repository
-        const saveResult = await this.categoryRepository.save(category);
+        const saveResult = await this.categoryRepository.createCategory(category);
         if (!saveResult.isSuccess()) {
             return Result.fail(new ErrorCreatingCategoryApplicationException());
         }
@@ -69,7 +70,7 @@ export class CreateCategoryApplication extends IApplicationService<
         const response: CreateCategoryApplicationResponseDTO = {
             id: categoryId.Value,
             name: categoryName.Value,
-            image: categoryImage ? categoryImage.getValue() : null,
+            image:categoryImage.Value,
         };
 
         return Result.success(response);

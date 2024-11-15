@@ -1,22 +1,33 @@
+import { IApplicationService } from "src/common/application/services/application.service.interface";
+import { FindCategoryByIdApplicationRequestDTO } from "src/category/application/dto/request/find-category-by-id-application-request.dto";
+import { FindCategoryByIdApplicationResponseDTO } from "src/category/application/dto/response/find-category-by-id-application-response.dto";
+import { IQueryCategoryRepository } from "src/category/application/query-repository/query-category-repository";
+import { Result } from "src/common/utils/result-handler/result";
+import { NotFoundCategoryApplicationException } from "../application-exception/not-found-category-application-exception";
+export class FindCategoryByIdApplicationService extends IApplicationService<
+  FindCategoryByIdApplicationRequestDTO,
+  FindCategoryByIdApplicationResponseDTO
+> {
+  constructor(
+    private readonly queryCategoryRepository: IQueryCategoryRepository
+  ) {
+    super();
+  }
 
-import { FindCategoryByIdApplicationRequestDTO } from "../dto/request/find-category-by-id-application-request.dto";
-import { FindCategoryByIdApplicationResponseDTO } from "../dto/response/find-category-by-id-application-response.dto";
-import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
-import { CategoryId } from "src/category/domain/value-object/category-id";
-import { Injectable } from "@nestjs/common";
+  async execute(data: FindCategoryByIdApplicationRequestDTO): Promise<Result<FindCategoryByIdApplicationResponseDTO>> {
+    const response = await this.queryCategoryRepository.findCategoryById(data);
 
-@Injectable()
-export class FindCategoryByIdApplication {
-    constructor(private readonly categoryRepository: ICategoryRepository) {}
-
-    async execute(request: FindCategoryByIdApplicationRequestDTO): Promise<FindCategoryByIdApplicationResponseDTO> {
-        const category = await this.categoryRepository.findById(CategoryId.create(request.id));
-        if (!category) throw new Error("Category not found");
-
-        return {
-            id: category.getId().Value,
-            name: category.getName(),
-            productIds: category.getProducts().map((productId) => productId.Value),
-        };
+    if (!response.isSuccess()) {
+      return Result.fail(new NotFoundCategoryApplicationException());
     }
+
+    const category = response.getValue;
+    const responseDto: FindCategoryByIdApplicationResponseDTO = {
+      id: category.getId().Value,
+      name: category.getName().Value,
+      image: category.getImage().Value
+    };
+
+    return Result.success(responseDto);
+  }
 }

@@ -1,61 +1,82 @@
+import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { ICategoryRepository } from 'src/category/domain/repository/category-repository.interface';
+import { OrmCategoryRepository } from '../repositories/category-typeorm-repository';
+import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
+import { CreateCategoryInfrastructureRequestDTO } from '../dto-request/create-category-infrastructure-request.dto';
+import { ExceptionDecorator } from 'src/common/application/aspects/exeption-decorator/exception-decorator';
+import { CreateCategoryApplication } from 'src/category/application/services/create-category-application';
+import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
+import { UuidGen } from 'src/common/infraestructure/id-gen/uuid-gen';
+import { LoggerDecorator } from 'src/common/application/aspects/logger-decorator/logger-decorator';
+import { NestLogger } from 'src/common/infraestructure/logger/nest-logger';
+import { CloudinaryService } from 'src/common/infraestructure/file-uploader/cloudinary-uploader';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FindAllCategoriesApplicationService } from 'src/category/application/services/find-all-categories-application';
+import { PaginationRequestDTO } from 'src/common/application/services/dto/request/pagination-request-dto';
+import { RabbitMQEventPublisher } from 'src/common/infraestructure/events/publishers/rabbittMq.publisher';
+import { Channel } from 'amqplib';
+import { IQueryCategoryRepository } from 'src/category/application/query-repository/query-category-repository';
+import { OrmCategoryQueryRepository } from '../repositories/orm-category-query-repository';
+import { FindAllCategoriesInfraestructureRequestDTO } from '../dto-request/find-all-categories-infraestructure-request-dto';
 
-import { Controller, Get, Post, Delete, Param, Body, HttpException, HttpStatus } from '@nestjs/common';
-import { CreateCategoryApplication } from "src/category/application/services/create-category-application";
-import { FindAllCategoriesApplication } from "src/category/application/services/find-all-categories-application";
-import { DeleteCategoryApplication } from "src/category/application/services/delete-category-application";
-import { FindCategoryByIdApplication } from "src/category/application/services/find-category-by-id-application";
-import { CreateCategoryApplicationRequestDTO } from "src/category/application/dto/request/create-category-application-request.dto";
-import { DeleteCategoryApplicationRequestDTO } from "src/category/application/dto/request/delete-category-application-request.dto";
-import { FindCategoryByIdApplicationRequestDTO } from "src/category/application/dto/request/find-category-by-id-application-request.dto";
-import { CreateCategoryApplicationResponseDTO } from 'src/category/application/dto/response/create-category-application-response.dto';
-import { Result } from 'src/common/utils/result-handler/result';
-import { FindAllCategoriesResponseDTO } from 'src/category/application/dto/response/find-all-categories-response.dto';
-import { NotFoundCategoryApplicationException } from 'src/category/application/application-exception/not-found-category-application-exception';
-@Controller('categories')
+@Controller('category')
 export class CategoryController {
-    constructor(
-        private readonly createCategoryApp: CreateCategoryApplication,
-        private readonly findAllCategoriesApp: FindAllCategoriesApplication,
-        private readonly deleteCategoryApp: DeleteCategoryApplication,
-        private readonly findCategoryByIdApp: FindCategoryByIdApplication,
-    ) {}
 
-    @Post()
-    async createCategory(@Body() request: CreateCategoryApplicationRequestDTO): Promise<Result<CreateCategoryApplicationResponseDTO>> {
-        return await this.createCategoryApp.execute(request);
-    }
+  private readonly ormCategoryRepo: ICategoryRepository;
+  private readonly idGen: IIdGen<string>;
+  private readonly ormCategoryQueryRepo: IQueryCategoryRepository;
+  
+  constructor(
+    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+  ) {
+    this.idGen = new UuidGen();
+    this.ormCategoryRepo = new OrmCategoryRepository(PgDatabaseSingleton.getInstance());
+    this.ormCategoryQueryRepo = new OrmCategoryQueryRepository(PgDatabaseSingleton.getInstance());
+  }
 
-    @Get()
-    async findAllCategories(@Body() request: FindCategoryByIdApplicationRequestDTO): Promise<Result<FindAllCategoriesResponseDTO>> {
-        return await this.findAllCategoriesApp.execute(request);
-    }
+  @Post('create')
+  @UseInterceptors(FileInterceptor('image'))
+  async createCategory(
+    @Body() entry: CreateCategoryInfrastructureRequestDTO,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({
+            fileType: /(jpeg|jpg|png)$/,
+          }),
+        ],
+      })
+    ) image: Express.Multer.File
+  ) {
+    let service = new ExceptionDecorator(
+      new CreateCategoryApplication(
+        new RabbitMQEventPublisher(this.channel),
+        this.ormCategoryRepo,
+        this.idGen,
+        new CloudinaryService()
+      )
+    );
 
-    @Get(':id')
-    async findCategoryById(@Param('id') id: string) {
-        const request: FindCategoryByIdApplicationRequestDTO = {
-            id,
-            userId: ''
-        };
-        const category = await this.findCategoryByIdApp.execute(request);
-        if (!category) {
-            throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
-        }
-        return category;
-    }
+    const buffer = image.buffer;
+    const response = await service.execute({ userId: 'none', ...entry, image: buffer });
+    return response.getValue
+  }
 
-    @Delete(':id')
-async deleteCategory(@Param('id') id: string) {
-    const request: DeleteCategoryApplicationRequestDTO = {
-        id,
-        userId: '' // Puedes proporcionar un userId si es necesario
-    };
-    
-    const result = await this.deleteCategoryApp.execute(request);
+  @Get('all')
+  async getAllCategories(@Query() entry: FindAllCategoriesInfraestructureRequestDTO) {
+    if (!entry.page) entry.page = 1;
+    if (!entry.perPage) entry.perPage = 10;
 
-    if (!result.isSuccess()) {
-        throw new NotFoundCategoryApplicationException();
-    }
+    const pagination: PaginationRequestDTO = { userId: 'none', page: entry.page, perPage: entry.perPage };
 
-    return result.getValue;
-}
+    let service = new ExceptionDecorator(
+      new LoggerDecorator(
+        new FindAllCategoriesApplicationService(this.ormCategoryQueryRepo),
+        new NestLogger(new Logger())
+      )
+    );
+
+    const response = await service.execute({ ...pagination });
+    return response.getValue
+  }
 }

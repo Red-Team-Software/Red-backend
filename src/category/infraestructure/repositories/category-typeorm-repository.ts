@@ -1,5 +1,5 @@
-import { CategoryRepository } from "src/category/domain/repository/category-repository";
-import { Repository } from "typeorm";
+import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
+import { DataSource, Repository } from "typeorm";
 import { OrmCategoryEntity } from "../entities/orm-entities/orm-category-entity";
 import { Category } from "src/category/domain/aggregate/category";
 import { CategoryId } from "src/category/domain/value-object/category-id";
@@ -12,65 +12,78 @@ import { NotFoundCategoryApplicationException } from "src/category/application/a
 import { OrmCategoryMapper } from "../mapper/orm-category-mapper";
 import { OrmCategoryImage } from "../entities/orm-entities/orm-category-image.entity";
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
+import { IMapper } from "src/common/application/mappers/mapper.interface";
+import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 
-@Injectable()
-export class CategoryTypeORMRepository implements CategoryRepository {
-    constructor(
-        @InjectRepository(OrmCategoryEntity)
-        private readonly ormRepository: Repository<OrmCategoryEntity>,
-        private readonly mapper: OrmCategoryMapper,
-        private readonly ormCategoryImageRepository: Repository<OrmCategoryImage> // Repositorio para la imagen
-    
-    ) {}
+export class OrmCategoryRepository extends Repository<OrmCategoryEntity> implements ICategoryRepository {
+    private mapper: IMapper<Category, OrmCategoryEntity>;
+    private readonly ormCategoryImageRepository: Repository<OrmCategoryImage>;
+
+    constructor(dataSource: DataSource) {
+        super(OrmCategoryEntity, dataSource.createEntityManager());
+        this.mapper = new OrmCategoryMapper(new UuidGen());
+        this.ormCategoryImageRepository = dataSource.getRepository(OrmCategoryImage);
+    }
 
 
     async createCategory(category: Category): Promise<Result<Category>> {
         try {
-            // Convertimos la categoría de dominio a la entidad de persistencia
-            const categoryEntity = await this.mapper.fromDomaintoPersistence(category);
+            const entry = await this.mapper.fromDomaintoPersistence(category);
+            const response = await this.save(entry);
             
-            // Guardamos la entidad de categoría en el repositorio principal
-            const savedCategory = await this.ormRepository.save(categoryEntity);
-            
-            // Si hay una imagen asociada, la guardamos en el repositorio de imágenes
-            if (categoryEntity.image) {
-                await this.ormCategoryImageRepository.save(categoryEntity.image);
+            if (entry.image) {
+                await this.ormCategoryImageRepository.save(entry.image);
             }
-            
+    
             return Result.success(category);
         } catch (error) {
             return Result.fail(new PersistenceException('Create category unsuccessfully'));
         }
     }
-    async findById(id: CategoryId): Promise<Category | null> {
-        const categoryEntity = await this.ormRepository.findOne({
-            where: { id: id.Value },
-            relations: ["image"], // Cargar la imagen asociada
-        });
     
-        return categoryEntity
-            ? Category.create(
-                CategoryId.create(categoryEntity.id),
-                CategoryName.create(categoryEntity.name),
-                categoryEntity.image ? CategoryImage.create(categoryEntity.image.url) : null // Manejo de la imagen
-            )
-            : null;
+    async findCategoryById(id: CategoryId): Promise<Result<Category>> {
+        try {
+            const categoryEntity = await this.findOne({
+                where: { id: id.Value },
+                relations: ['image', 'products'],
+            });
+    
+            if (!categoryEntity) {
+                return Result.fail(new NotFoundCategoryApplicationException()); // Manejo del caso en que no se encuentra la categoría
+            }
+    
+            const category = await this.mapper.fromPersistencetoDomain(categoryEntity);
+            return Result.success(category); // Envolvemos la categoría en `Result.success`
+        } catch (error) {
+            return Result.fail(new PersistenceException('Find category by ID unsuccessfully')); // Manejo de errores
+        }
+    }
+    
+
+    async verifyCategoryExistenceByName(name: CategoryName): Promise<Result<boolean>> {
+        try {
+            const existingCategory = await this.findOne({
+                where: { name: name.Value },
+            });
+            return Result.success(!!existingCategory); // Retorna un `Result` booleano
+        } catch (error) {
+            return Result.fail(new PersistenceException('Verify category existence by name unsuccessfully'));
+        }
     }
 
-    async verifyCategoryExistenceByName(name: CategoryName): Promise<boolean> {
-        const existingCategory = await this.ormRepository.findOne({
-            where: { name: name.Value },
-        });
-        return !!existingCategory; // Retorna `true` si existe, `false` en caso contrario
+    async deleteCategoryById(id: CategoryId): Promise<Result<CategoryId>> {
+        try {
+            // Utilizamos `id.Value` para extraer el identificador primitivo
+            await this.delete({ id: id.Value });
+            return Result.success(id); // Devolvemos `Result.success()` sin ningún valor
+        } catch (error) {
+            return Result.fail(new PersistenceException('Delete category unsuccessfully'));
+        }
     }
-
-    async delete(id: CategoryId): Promise<void> {
-        await this.ormRepository.delete(id.Value);
-    }
-
+    
     async findAll(): Promise<Result<Category[]>> {
         try {
-            const ormCategories = await this.ormRepository.find();
+            const ormCategories = await this.find();
 
             if (!ormCategories || ormCategories.length === 0) {
                 return Result.fail(new NotFoundCategoryApplicationException());

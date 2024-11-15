@@ -5,11 +5,9 @@ import { Category } from "../aggregate/category";
 import { CategoryId } from "../value-object/category-id";
 import { CategoryName } from "../value-object/category-name";
 export interface ICategoryRepository {
-
-    save(category: Category): Promise<Result<void>>;
-    findById(id: CategoryId): Promise<Result<Category | null>>;
-    delete(id: CategoryId): Promise<Result<void>>;
+    findCategoryById(id: CategoryId): Promise<Result<Category>>;
+    deleteCategoryById(id: CategoryId): Promise<Result<CategoryId>>;
     findAll(): Promise<Result<Category[]>>;
-    verifyCategoryExistenceByName(name: CategoryName): Promise<Result<boolean>>; // Nuevo método
-
+    createCategory(category: Category): Promise<Result<Category>>;
+    verifyCategoryExistenceByName(name: CategoryName): Promise<Result<boolean>>;
 }

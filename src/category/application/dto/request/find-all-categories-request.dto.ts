@@ -1,4 +1,5 @@
-import { IServiceRequestDto } from "src/common/application/services";
 
-export interface FindAllCategoriesRequestDTO extends IServiceRequestDto {
+import { PaginationRequestDTO } from "src/common/application/services/dto/request/pagination-request-dto";
+
+export interface FindAllCategoriesApplicationRequestDTO extends PaginationRequestDTO {
 }
