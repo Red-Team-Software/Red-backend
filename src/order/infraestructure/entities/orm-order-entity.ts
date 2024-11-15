@@ -16,7 +16,7 @@ export class OrmOrderEntity implements IOrderInterface {
     @Column('date')
     orderCreatedDate: Date;
 
-    @Column('integer')
+    @Column('numeric')
     totalAmount: number;
 
     @Column('varchar')
