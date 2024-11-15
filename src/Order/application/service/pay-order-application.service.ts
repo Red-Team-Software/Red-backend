@@ -28,7 +28,7 @@ import { OrderProduct } from 'src/order/domain/entities/order-product/order-prod
 import { OrderBundle } from 'src/order/domain/entities/order-bundle/order-bundle-entity';
 import { OrderProductId } from 'src/order/domain/entities/order-product/value_object/order-productId';
 import { ProductID } from '../../../product/domain/value-object/product-id';
-import { OrderProductQuantity } from 'src/order/domain/entities/order-product/value_object/order-Product-quantity';
+import { OrderProductQuantity } from 'src/order/domain/entities/order-product/value_object/order-product-quantity';
 import { OrderBundleId } from 'src/order/domain/entities/order-bundle/value_object/order-bundlesId';
 import { OrderBundleQuantity } from 'src/order/domain/entities/order-bundle/value_object/order-bundle-quantity';
 import { BundleId } from '../../../bundle/domain/value-object/bundle-id';

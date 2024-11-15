@@ -1,6 +1,6 @@
 import { Entity } from "src/common/domain";
 import { OrderProductId } from "./value_object/order-productId";
-import { OrderProductQuantity } from "./value_object/order-Product-quantity";
+import { OrderProductQuantity } from "./value_object/order-product-quantity";
 
 export class OrderProduct extends Entity<OrderProductId> {
     
