@@ -7,8 +7,4 @@ export class CreateCategoryInfrastructureRequestDTO {
     @MinLength(3)
     name: string;
 
-    @ApiProperty({ required: false, description: 'Base64-encoded image' })
-    @IsOptional()
-    @IsBase64()
-    image?: string;
 }

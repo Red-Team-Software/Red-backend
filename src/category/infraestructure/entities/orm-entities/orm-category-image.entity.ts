@@ -10,7 +10,6 @@ export class OrmCategoryImage {
     image: string; // URL o ruta de la imagen
 
     @OneToOne(() => OrmCategoryEntity)
-    @JoinColumn({ name: 'category_id' })
     category: OrmCategoryEntity;
 
     @Column('uuid')

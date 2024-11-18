@@ -13,7 +13,9 @@ export class OrmCategoryMapper implements IMapper<Category, OrmCategoryEntity> {
 
     async fromDomaintoPersistence(domainEntity: Category): Promise<OrmCategoryEntity> {
         // Crear la entidad de imagen de persistencia si existe en el dominio
-        const ormImage = domainEntity.getImage()
+
+        try {
+            const ormImage = domainEntity.getImage()
             ? OrmCategoryImage.create(
                 await this.idGen.genId(), 
                 domainEntity.getImage().Value, 
@@ -30,6 +32,11 @@ export class OrmCategoryMapper implements IMapper<Category, OrmCategoryEntity> {
         };
 
         return data;
+        } catch (error) {
+            console.log("Error en el mapper de category",error);
+            
+        }
+        
     }
 
     async fromPersistencetoDomain(infraEntity: OrmCategoryEntity): Promise<Category> {

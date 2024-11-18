@@ -5,7 +5,7 @@ import { Category } from "../aggregate/category";
 import { CategoryId } from "../value-object/category-id";
 import { CategoryName } from "../value-object/category-name";
 export interface ICategoryRepository {
-    findCategoryById(id: CategoryId): Promise<Result<Category>>;
+    findById(id: CategoryId): Promise<Result<Category>>;
     deleteCategoryById(id: CategoryId): Promise<Result<CategoryId>>;
     findAll(): Promise<Result<Category[]>>;
     createCategory(category: Category): Promise<Result<Category>>;

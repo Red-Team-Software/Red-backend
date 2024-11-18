@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ICategoryRepository } from 'src/category/domain/repository/category-repository.interface';
 import { OrmCategoryRepository } from '../repositories/category-typeorm-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
@@ -13,13 +13,16 @@ import { CloudinaryService } from 'src/common/infraestructure/file-uploader/clou
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FindAllCategoriesApplicationService } from 'src/category/application/services/find-all-categories-application';
 import { PaginationRequestDTO } from 'src/common/application/services/dto/request/pagination-request-dto';
-import { RabbitMQEventPublisher } from 'src/common/infraestructure/events/publishers/rabbittMq.publisher';
+import { RabbitMQPublisher } from 'src/common/infraestructure/events/publishers/rabbit-mq-publisher';
 import { Channel } from 'amqplib';
 import { IQueryCategoryRepository } from 'src/category/application/query-repository/query-category-repository';
 import { OrmCategoryQueryRepository } from '../repositories/orm-category-query-repository';
 import { FindAllCategoriesInfraestructureRequestDTO } from '../dto-request/find-all-categories-infraestructure-request-dto';
+import { ApiTags } from '@nestjs/swagger';
+import { DeleteCategoryApplication } from 'src/category/application/services/delete-category-application';
 
 @Controller('category')
+@ApiTags("category")
 export class CategoryController {
 
   private readonly ormCategoryRepo: ICategoryRepository;
@@ -50,7 +53,7 @@ export class CategoryController {
   ) {
     let service = new ExceptionDecorator(
       new CreateCategoryApplication(
-        new RabbitMQEventPublisher(this.channel),
+        new RabbitMQPublisher(this.channel),
         this.ormCategoryRepo,
         this.idGen,
         new CloudinaryService()
@@ -77,6 +80,19 @@ export class CategoryController {
     );
 
     const response = await service.execute({ ...pagination });
+    return response.getValue
+  }
+
+
+  // asjdnasjd.com/api/category/delete/1
+  @Delete('delete/:id')
+  async deleteCategory(@Param('id') id: string) {
+    
+    let service = new ExceptionDecorator(
+      new DeleteCategoryApplication(this.ormCategoryRepo)
+    )
+
+    const response = await service.execute({ userId: 'none', id });
     return response.getValue
   }
 }

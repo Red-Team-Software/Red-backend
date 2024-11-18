@@ -6,10 +6,16 @@ import { DeleteCategoryApplicationResponseDTO } from "../dto/response/delete-cat
 import { CategoryId } from "src/category/domain/value-object/category-id";
 import { Result } from "src/common/utils/result-handler/result";
 import { NotFoundCategoryApplicationException } from "../application-exception/not-found-category-application-exception";
+import { IApplicationService } from "src/common/application/services";
 
 @Injectable()
-export class DeleteCategoryApplication {
-    constructor(private readonly categoryRepository: ICategoryRepository) {}
+export class DeleteCategoryApplication extends IApplicationService<
+DeleteCategoryApplicationRequestDTO,
+DeleteCategoryApplicationResponseDTO
+> {
+    constructor(private readonly categoryRepository: ICategoryRepository) {
+        super()
+    }
 
     async execute(request: DeleteCategoryApplicationRequestDTO): Promise<Result<DeleteCategoryApplicationResponseDTO>> {
         const categoryId = CategoryId.create(request.id);
@@ -21,7 +27,7 @@ export class DeleteCategoryApplication {
         }
 
         // Intentar eliminar la categoría
-        await this.categoryRepository.delete(categoryId);
+        await this.categoryRepository.deleteCategoryById(categoryId);
 
         const response: DeleteCategoryApplicationResponseDTO = {
             message: `Category with ID ${request.id} has been successfully deleted.`,

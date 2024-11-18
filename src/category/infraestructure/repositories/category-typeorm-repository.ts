@@ -37,11 +37,13 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
     
             return Result.success(category);
         } catch (error) {
+        console.log("error en el repo es",error);
+
             return Result.fail(new PersistenceException('Create category unsuccessfully'));
         }
     }
     
-    async findCategoryById(id: CategoryId): Promise<Result<Category>> {
+    async findById(id: CategoryId): Promise<Result<Category>> {
         try {
             const categoryEntity = await this.findOne({
                 where: { id: id.Value },
