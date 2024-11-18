@@ -30,7 +30,10 @@ interface EnvVars {
     STRIPE_PRIVATE_KEY:string,
     CLOUDINARY_CLOUD_NAME:string,
     CLOUDINARY_API_KEY:string,
-    CLOUDINARY_API_SECRET:string	
+    CLOUDINARY_API_SECRET:string,
+    HERE_MAP_API_KEY:string	
+    API_KEY_EMAIL_SENDER:string
+    EMAIL_SENDER:string
 }
 
 const envsSchema = joi.object({
@@ -62,7 +65,10 @@ const envsSchema = joi.object({
     STRIPE_PRIVATE_KEY:joi.string().required(),
     CLOUDINARY_CLOUD_NAME:joi.string().required(),
     CLOUDINARY_API_KEY:joi.string().required(),
-    CLOUDINARY_API_SECRET:joi.string().required()
+    CLOUDINARY_API_SECRET:joi.string().required(),
+    HERE_MAP_API_KEY:joi.string().required(),
+    API_KEY_EMAIL_SENDER:joi.string().required(),
+    EMAIL_SENDER:joi.string().required()
 }).unknown(true);
 
 const {error, value} = envsSchema.validate(process.env);
@@ -72,6 +78,7 @@ if (error) throw new Error(`Config validation error: ${error.message}`)
 const envVars: EnvVars = value
 
 export const envs = {
+    NODE_ENV:envVars.NODE_ENV,
     port:envVars.PORT,
     rabbit_user:envVars.RABBITMQ_USER,
     rabbit_password:envVars.RABBITMQ_PASSWORD,
@@ -99,5 +106,8 @@ export const envs = {
     STRIPE_PRIVATE_KEY:envVars.STRIPE_PRIVATE_KEY,
     CLOUDINARY_CLOUD_NAME:envVars.CLOUDINARY_CLOUD_NAME,
     CLOUDINARY_API_KEY:envVars.CLOUDINARY_API_KEY,
-    CLOUDINARY_API_SECRET:envVars.CLOUDINARY_API_SECRET
+    CLOUDINARY_API_SECRET:envVars.CLOUDINARY_API_SECRET,
+    HERE_MAP_API_KEY:envVars.HERE_MAP_API_KEY,
+    API_KEY_EMAIL_SENDER:envVars.API_KEY_EMAIL_SENDER,
+    EMAIL_SENDER:envVars.EMAIL_SENDER
 }

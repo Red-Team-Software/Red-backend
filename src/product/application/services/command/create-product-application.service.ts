@@ -60,7 +60,7 @@ export class CreateProductApplicationService extends IApplicationService
             ProductName.create(command.name),
             ProductStock.create(command.stock),
             uploaded.map((image)=>ProductImage.create(image.url)),
-            ProductPrice.create(command.price,command.currency.toLowerCase()),
+            ProductPrice.create(command.price,command.currency),
             ProductWeigth.create(command.weigth,command.measurement)
         )
         let result=await this.productRepository.createProduct(product)

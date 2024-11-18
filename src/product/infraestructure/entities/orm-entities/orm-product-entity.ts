@@ -2,6 +2,7 @@ import { Column, Entity, ManyToMany, OneToMany, PrimaryColumn } from "typeorm";
 import { IProduct } from "../../model-entity/orm-model-entity/product-interface";
 import { OrmProductImage } from "./orm-product-image";
 import { OrmCategoryEntity } from "src/category/infraestructure/entities/orm-entities/orm-category-entity";
+import { OrmOrderProductEntity } from "src/order/infraestructure/entities/orm-order-product-entity";
 
 @Entity('product')
 export class OrmProductEntity implements IProduct{
@@ -12,7 +13,7 @@ export class OrmProductEntity implements IProduct{
     @Column( 'timestamp', { default: () => 'CURRENT_TIMESTAMP' } ) caducityDate: Date
     @OneToMany( () => OrmProductImage,   image => image.product,{ eager: true }) images: OrmProductImage[]   
     @Column( 'integer' ) stock: number
-    @Column( 'integer' ) price: number
+    @Column( 'numeric' ) price: number
     @Column( 'varchar' ) currency: string;
     @Column( 'integer' ) weigth: number;
     @Column( 'varchar' ) measurament: string;
@@ -21,6 +22,9 @@ export class OrmProductEntity implements IProduct{
     @ManyToMany(() => OrmCategoryEntity, (category) => category.products)
     categories: OrmCategoryEntity[]; // Esta propiedad permite que Product esté en múltiples categorías
     
+    @OneToMany(() => OrmOrderProductEntity, (orderProduct) => orderProduct.product)
+    order_products?: OrmOrderProductEntity[]
+
     static create ( 
         id:string,
         name: string,

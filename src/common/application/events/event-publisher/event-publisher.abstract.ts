@@ -18,10 +18,10 @@ export abstract class IEventPublisher {
 		return this.subscribers.get(event).includes(subscriber);
 	}
 
-	subscribe<T extends DomainEvent>(
+	subscribe<T extends DomainEvent,Entry extends string,Exit>(
 		event: string,
 		subscribers: IEventSubscriber<DomainEvent>[],
-		mapper: (json: Record<any, any>) => T
+		mapper: (json: Record<Entry,Exit>) => T
 	): void {
 		this.subscribers.set(event, subscribers);
 	}

@@ -3,7 +3,7 @@ import Stripe from "stripe";
 
 export class StripeSingelton{
     private static instance:StripeSingelton
-    private stripeInstance:Stripe
+    public stripeInstance:Stripe
     constructor(){
         this.stripeInstance=new Stripe(envs.STRIPE_PRIVATE_KEY)
     }

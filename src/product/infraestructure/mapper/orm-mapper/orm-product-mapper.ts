@@ -50,7 +50,7 @@ export class OrmProductMapper implements IMapper <Product,OrmProductEntity>{
             ProductName.create(infraEstructure.name),
             ProductStock.create(infraEstructure.stock),
             infraEstructure.images.map((ormimage)=>ProductImage.create(ormimage.image)),
-            ProductPrice.create(infraEstructure.price,infraEstructure.currency),
+            ProductPrice.create(Number(infraEstructure.price),infraEstructure.currency),
             ProductWeigth.create(infraEstructure.weigth,infraEstructure.measurament)
         )
         return product
