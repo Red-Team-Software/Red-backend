@@ -98,4 +98,35 @@ this is our domain model according to Elaboration and domain model chapter 3
 
 ## Elaboration (18-10-2024) 2 weeks
 
+### Historias de usuario 
+
+| Task                                                          | Time required | Assigned to   | Current Status | Finished                       |
+|---------------------------------------------------------------|---------------|---------------|----------------|--------------------------------|
+| Nombre de la historia: Visualización de productos disponibles |  2 weeks      | Fung          | done           | - [x] done                     |
+| Nombre de la historia: Buscar productos y combos por nombre   |  2 weeks      | Fung          | done           | - [x] done                     |
+| Nombre de la historia: Notificación por orden realizado       |  2 weeks      | Fung          | done           | - [x] done                     |
+| Nombre de la historia: Visualizacion de producto              |  2 weeks      | Fung          | done           | - [x] done                     |
+| Nombre de la historia: Visualización de impuestos             |  2 weeks      | Gabriel       | done           | - [x] done                     |
+| Nombre de la historia: Visualización de tarifa de envío       |  2 weeks      | Gabriel       | done           | - [x] done                     |
+| Nombre de la historia: Realizar Pago                          |  2 weeks      | Gabriel       | done           | - [x] done                     |
+| Nombre de la historia: Eliminar Categoria                     |  2 weeks      | Ponceleon     | not done       | - [ ] done                     |
+| Nombre de la historia: Visualizar Categoria                   |  2 weeks      | Ponceleon     | not done       | - [ ] done                     |
+| Nombre de la historia: Crear Categoria                        |  2 weeks      | Ponceleon     | not done       | - [ ] done                     |
+
+- [x] done
+- [ ] not done
+
+NT: Hoy 08/11/2024 Ponceleon si completo su responsabilidad (3 dias despues de la entrega del inception)
+
+### Modelo de dominio
+
+#### Domain model
+[![domain model elaboration](./public/images/elaboration/Diagramas-Equipo-Rojo%20-%20domain-model.svg)](https://lucid.app/lucidchart/6702d2bf-abc6-4e63-9c91-a2162adb8348/edit?invitationId=inv_e6b8aa9a-adee-4f9c-bda7-4b37490b17ca&page=_W5nKC6R8y1b#)
+
+#### ORM model
+[![orm model elaboration](./public/images/elaboration/Diagramas-Equipo-Rojo%20-%20orm-model.svg)](https://lucid.app/lucidchart/6702d2bf-abc6-4e63-9c91-a2162adb8348/edit?invitationId=inv_e6b8aa9a-adee-4f9c-bda7-4b37490b17ca&page=_W5nKC6R8y1b#)
+
+
+### Construction (06-12-2024) 3 weeks
+
 ...On going
