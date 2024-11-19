@@ -33,10 +33,10 @@ $ pnpm install
 $ pnpm start
 
 # watch mode
-$ npm dev
+$ pnpm dev
 
 # production mode
-$ npm build
+$ pnpm build
 ```
 
 ## Test
@@ -59,7 +59,7 @@ $ pnpm run test:cov
 $ docker compose up -d
 
 # test coverage
-$ pnpm run test:cov
+$ pnpm dev
 ```
 
 ## Support
@@ -100,21 +100,21 @@ this is our domain model according to Elaboration and domain model chapter 3
 
 ### Historias de usuario 
 
-| Task                                                          | Time required | Assigned to   | Current Status | Finished                       |
-|---------------------------------------------------------------|---------------|---------------|----------------|--------------------------------|
-| Nombre de la historia: Visualización de productos disponibles |  2 weeks      | Fung          | done           | - [x] done                     |
-| Nombre de la historia: Buscar productos y combos por nombre   |  2 weeks      | Fung          | done           | - [x] done                     |
-| Nombre de la historia: Notificación por orden realizado       |  2 weeks      | Fung          | done           | - [x] done                     |
-| Nombre de la historia: Visualizacion de producto              |  2 weeks      | Fung          | done           | - [x] done                     |
-| Nombre de la historia: Visualización de impuestos             |  2 weeks      | Gabriel       | done           | - [x] done                     |
-| Nombre de la historia: Visualización de tarifa de envío       |  2 weeks      | Gabriel       | done           | - [x] done                     |
-| Nombre de la historia: Realizar Pago                          |  2 weeks      | Gabriel       | done           | - [x] done                     |
-| Nombre de la historia: Eliminar Categoria                     |  2 weeks      | Ponceleon     | not done       | - [ ] done                     |
-| Nombre de la historia: Visualizar Categoria                   |  2 weeks      | Ponceleon     | not done       | - [ ] done                     |
-| Nombre de la historia: Crear Categoria                        |  2 weeks      | Ponceleon     | not done       | - [ ] done                     |
+| Task                                                          | Time required | Assigned to   | Current Status | Finished                              |
+|---------------------------------------------------------------|---------------|---------------|----------------|---------------------------------------|
+| Nombre de la historia: Visualización de productos disponibles |  2 weeks      | Fung          | done           | &#x2705;                              |
+| Nombre de la historia: Buscar productos y combos por nombre   |  2 weeks      | Fung          | done           | &#x2705;                              |
+| Nombre de la historia: Notificación por orden realizado       |  2 weeks      | Fung          | done           | &#x2705;                              |
+| Nombre de la historia: Visualizacion de producto              |  2 weeks      | Fung          | done           | &#x2705;                              |
+| Nombre de la historia: Visualización de impuestos             |  2 weeks      | Gabriel       | done           | &#x2705;                              |
+| Nombre de la historia: Visualización de tarifa de envío       |  2 weeks      | Gabriel       | done           | &#x2705;                              |
+| Nombre de la historia: Realizar Pago                          |  2 weeks      | Gabriel       | done           | &#x2705;                              |
+| Nombre de la historia: Eliminar Categoria                     |  2 weeks      | Ponceleon     | NOT done       | &#x274C;                              |
+| Nombre de la historia: Visualizar Categoria                   |  2 weeks      | Ponceleon     | NOT done       | &#x274C;                              |
+| Nombre de la historia: Crear Categoria                        |  2 weeks      | Ponceleon     | NOT done       | &#x274C;                              |
 
-- [x] done
-- [ ] not done
+&#x2705; done
+&#x274C; NOT done
 
 NT: Hoy 08/11/2024 Ponceleon si completo su responsabilidad (3 dias despues de la entrega del inception)
 
