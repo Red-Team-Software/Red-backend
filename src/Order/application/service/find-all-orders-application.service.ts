@@ -30,7 +30,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
                 orderState: order.OrderState.orderState,
                 orderCreatedDate: order.OrderCreatedDate.OrderCreatedDate,
                 totalAmount: order.TotalAmount.OrderAmount,
-                orderReciviedDate: order.OrderReciviedDate.OrderReciviedDate,
+                orderReciviedDate: order.OrderReceivedDate.OrderReceivedDate,
                 orderPayment: {
                     paymetAmount: order.OrderPayment.Amount,
                     paymentCurrency: order.OrderPayment.Currency,

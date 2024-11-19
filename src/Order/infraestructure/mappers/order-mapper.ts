@@ -15,9 +15,14 @@ import { OrmOrderBundleEntity } from "../entities/orm-order-bundle-entity";
 import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry";
 import { NotFoundException } from "@nestjs/common";
 import { ProductID } from '../../../product/domain/value-object/product-id';
-import { Product } from "src/product/domain/aggregate/product.aggregate";
-import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate";
 import { BundleId } from "src/bundle/domain/value-object/bundle-id";
+import { OrderProduct } from "src/order/domain/entities/order-product/order-product-entity";
+import { OrderBundle } from "src/order/domain/entities/order-bundle/order-bundle-entity";
+import { OrderProductId } from "src/order/domain/entities/order-product/value_object/order-productId";
+import { OrderProductQuantity } from "src/order/domain/entities/order-product/value_object/order-product-quantity";
+import { OrderBundleQuantity } from "src/order/domain/entities/order-bundle/value_object/order-bundle-quantity";
+import { OrderBundleId } from "src/order/domain/entities/order-bundle/value_object/order-bundlesId";
+import { OrderReceivedDate } from "src/order/domain/value_objects/order-received-date";
 
 
 export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
@@ -30,12 +35,9 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
     
     async fromPersistencetoDomain(infraEstructure: OrmOrderEntity): Promise<Order> {
 
-        // const ormProducts = await this.ormOrderProductRepository.findProductsByOrderId(domainEntity.getId());
-
-
-
-        let products: Product[] = [];
-        let bundles: Bundle[] = [];
+        let products: OrderProduct[] = [];
+        let bundles: OrderBundle[] = [];
+        let recievedDate: OrderReceivedDate;
 
         let ormProducts:OrmOrderProductEntity[] = infraEstructure.order_products;
         let ormBundles:OrmOrderBundleEntity[] = infraEstructure.order_bundles;
@@ -43,15 +45,25 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         if(ormProducts){
             for (let product of ormProducts){
                 let response = await this.ormProductRepository.findProductById(ProductID.create(product.product_id));
-                products.push(response.getValue);
+                products.push( OrderProduct.create(
+                    OrderProductId.create(response.getValue.getId()),
+                    OrderProductQuantity.create(product.quantity)
+                ))
             }
         }
 
         if(ormBundles){
             for (let bundle of ormBundles){
                 let response = await this.ormBundleRepository.findBundleById(BundleId.create(bundle.bundle_id));
-                bundles.push(response.getValue);
+                bundles.push( OrderBundle.create(
+                    OrderBundleId.create(response.getValue.getId()),
+                    OrderBundleQuantity.create(bundle.quantity)
+                ))
             }
+        }
+
+        if(infraEstructure.orderReceivedDate){
+            recievedDate = OrderReceivedDate.create(infraEstructure.orderReceivedDate);
         }
 
         let order = Order.initializeAggregate(
@@ -60,9 +72,9 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             OrderCreatedDate.create(infraEstructure.orderCreatedDate),
             OrderTotalAmount.create(infraEstructure.totalAmount,infraEstructure.currency),
             OrderDirection.create(infraEstructure.latitude,infraEstructure.longitude),
-            null,
-            null,
-            null,
+            products,
+            bundles,
+            recievedDate,
             null,
             OrderPayment.create(infraEstructure.pay.amount,infraEstructure.pay.currency,infraEstructure.pay.paymentMethod)
         );
@@ -127,7 +139,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             ormOrderPayEntity,
             ormProducts,
             ormBundles,
-            domainEntity.OrderReciviedDate.OrderReciviedDate,
+            domainEntity.OrderReceivedDate.OrderReceivedDate,
         );
     }
 }

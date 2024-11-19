@@ -28,7 +28,7 @@ export interface OrderPayResponseDto extends IServiceResponseDto {
             currency:string
             images:string[]
         }[],
-        orderReciviedDate?: Date,
+        orderReceivedDate?: Date,
         orderReport?: string,
         orderPayment?: {
             amount: number,

@@ -20,7 +20,7 @@ import { OrderCreatedDate } from 'src/order/domain/value_objects/order-created-d
 import { OrderId } from 'src/order/domain/value_objects/orderId';
 import { OrderState } from 'src/order/domain/value_objects/orderState';
 import { OrderShippingFee } from 'src/order/domain/value_objects/order-shipping-fee';
-import { OrderReciviedDate } from 'src/order/domain/value_objects/order-recivied-date';
+import { OrderReceivedDate } from 'src/order/domain/value_objects/order-received-date';
 import { ErrorCreatingOrderApplicationException } from '../application-exception/error-creating-order-application.exception';
 import { IGeocodification } from 'src/order/domain/domain-services/geocodification-interface';
 import { OrderAddressStreet } from 'src/order/domain/value_objects/order-direction-street';
@@ -143,7 +143,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 orderDirection,
                 orderproducts,
                 orderBundles,
-                OrderReciviedDate.create(new Date()),
+                OrderReceivedDate.create(new Date()),
                 undefined,
                 orderPayment
             )
@@ -217,7 +217,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 },
                 products:productsresponse,
                 bundles:bundlesresponse,
-                orderReciviedDate:order.OrderReciviedDate.OrderReciviedDate,
+                orderReceivedDate:order.OrderReceivedDate.OrderReceivedDate,
                 orderReport: order.OrderReport?.OrderReportId,
                 orderPayment: {
                     amount: order.OrderPayment.Amount,

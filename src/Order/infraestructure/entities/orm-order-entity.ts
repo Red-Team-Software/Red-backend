@@ -33,7 +33,7 @@ export class OrmOrderEntity implements IOrderInterface {
     pay?: OrmOrderPayEntity;
 
     @Column('date', { nullable: true })
-    orderReciviedDate?: Date;
+    orderReceivedDate?: Date;
 
     @OneToMany(() => OrmOrderProductEntity, (orderProduct) => orderProduct.order)
     order_products?: OrmOrderProductEntity[];
@@ -52,7 +52,7 @@ export class OrmOrderEntity implements IOrderInterface {
         pay?: OrmOrderPayEntity,
         orderProducts?: OrmOrderProductEntity[],
         orderBundles?: OrmOrderBundleEntity[],
-        orderReciviedDate?: Date,
+        orderReceivedDate?: Date,
     ): OrmOrderEntity {
         const order = new OrmOrderEntity();
         order.id = id;
@@ -65,7 +65,7 @@ export class OrmOrderEntity implements IOrderInterface {
         order.pay = pay;
         order.order_products = orderProducts;
         order.order_bundles = orderBundles;
-        order.orderReciviedDate = orderReciviedDate;
+        order.orderReceivedDate = orderReceivedDate;
         return order;
     }
 

@@ -1,7 +1,7 @@
 import { DomainEvent } from "src/common/domain";
 import { OrderCreatedDate } from "../value_objects/order-created-date";
 import { OrderPayment } from "../value_objects/order-payment";
-import { OrderReciviedDate } from "../value_objects/order-recivied-date";
+import { OrderReceivedDate } from "../value_objects/order-received-date";
 import { OrderReportId } from "../value_objects/order-reportId";
 import { OrderTotalAmount } from "../value_objects/order-totalAmount";
 import { OrderId } from "../value_objects/orderId";
@@ -22,7 +22,7 @@ export class OrderRegistered extends DomainEvent {
             orderDirection: this.orderDirection,
             products: this.products,
             bundles: this.bundles,
-            orderReciviedDate: this.orderReciviedDate?.OrderReciviedDate,
+            orderReceivedDate: this.orderReceivedDate?.OrderReceivedDate,
             orderReport: this.orderReport?.OrderReportId,
             orderPayment: this.orderPayment
         }
@@ -38,7 +38,7 @@ export class OrderRegistered extends DomainEvent {
         public orderDirection: OrderDirection,
         public products?: OrderProduct[],
         public bundles?: OrderBundle[],
-        public orderReciviedDate?: OrderReciviedDate,
+        public orderReceivedDate?: OrderReceivedDate,
         public orderReport?: OrderReportId,
         public orderPayment?: OrderPayment,
     ){
@@ -53,7 +53,7 @@ export class OrderRegistered extends DomainEvent {
         orderDirection: OrderDirection,
         products?: OrderProduct[],
         bundles?: OrderBundle[],
-        orderReciviedDate?: OrderReciviedDate,
+        orderReceivedDate?: OrderReceivedDate,
         orderReport?: OrderReportId,
         orderPayment?: OrderPayment
     ){
@@ -65,7 +65,7 @@ export class OrderRegistered extends DomainEvent {
             orderDirection,
             products,
             bundles,
-            orderReciviedDate,
+            orderReceivedDate,
             orderReport,
             orderPayment
         );
