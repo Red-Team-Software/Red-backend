@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./public/images/icons/godeli logo.svg" width="200" alt="Red Logo" />
+</p>
+
 # Red-Team-Backend
 
 This is the Red team backend for the subject Software Development into the ["Universidad Catolica Andres Bello"](https://www.ucab.edu.ve/)
