@@ -89,14 +89,14 @@ Nest is [MIT licensed](LICENSE).
 </table>
 </p>
 
-## Inception (18-10-2024) 2 weeks
+## Inception (07-10-2024 / 18-10-2024) 2 weeks
 
 Make a Domain model following the principles of ["Third Edition Applying UML and Patterns An Introduction to Object-Oriented Analysis and design and iterative development (Craig Larman , 2016)"](https://www.amazon.ca/Applying-Uml-Patterns-Introduction-Development/dp/9332553947)
 this is our domain model according to Elaboration and domain model chapter 3
 
 [![domain model 50%](./public/images/inseption/modelo-dominio-50.svg)](https://lucid.app/lucidchart/6702d2bf-abc6-4e63-9c91-a2162adb8348/edit?beaconFlowId=F16D73A2C341A29D&invitationId=inv_e6b8aa9a-adee-4f9c-bda7-4b37490b17ca&page=0_0#)
 
-## Elaboration (18-10-2024) 2 weeks
+## Elaboration (01-11-2024 / 15-11-2024) 2 weeks
 
 ### Historias de usuario 
 
