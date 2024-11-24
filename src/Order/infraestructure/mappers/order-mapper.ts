@@ -26,9 +26,6 @@ import { OrderReport } from "src/order/domain/entities/report/report-entity";
 import { OrderReportId } from '../../domain/entities/report/value-object/order-report-id';
 import { OrderReportDescription } from '../../domain/entities/report/value-object/order-report-description';
 import { OrmOrderReportEntity } from "../entities/orm-order-report-entity";
-import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton";
-import { OrderQueryRepository } from "../repositories/orm-repository/orm-order-query-repository";
-import { IQueryOrderRepository } from "src/order/application/query-repository/order-query-repository-interface";
 import { OrderPayment } from "src/order/domain/entities/payment/order-payment-entity";
 import { PaymentId } from '../../domain/entities/payment/value-object/payment-id';
 import { PaymentMethod } from "src/order/domain/entities/payment/value-object/payment-method";
@@ -38,14 +35,12 @@ import { PaymentCurrency } from "src/order/domain/entities/payment/value-object/
 
 export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
     
-    private ormOrderRepository: IQueryOrderRepository;
 
     constructor(
         private readonly idGen:IIdGen<string>,
         private readonly ormProductRepository: IProductRepository,
         private readonly ormBundleRepository: IBundleRepository
     ){
-        this.ormOrderRepository = new OrderQueryRepository(PgDatabaseSingleton.getInstance(), this);
     }
     
     async fromPersistencetoDomain(infraEstructure: OrmOrderEntity): Promise<Order> {
