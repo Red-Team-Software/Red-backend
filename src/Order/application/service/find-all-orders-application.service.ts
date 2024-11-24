@@ -4,12 +4,30 @@ import { FindAllOrdersApplicationServiceRequestDto } from '../dto/request/find-a
 import { FindAllOrdersApplicationServiceResponseDto, order } from '../dto/response/find-all-orders-response.dto';
 import { IQueryOrderRepository } from '../query-repository/order-query-repository-interface';
 import { NotFoundOrderApplicationException } from '../application-exception/not-found-order-application.exception';
+import { ProductID } from 'src/product/domain/value-object/product-id';
+import { IProductRepository } from 'src/product/domain/repository/product.interface.repositry';
+import { IBundleRepository } from 'src/bundle/domain/repository/product.interface.repositry';
+import { ErrorCreatingOrderProductNotFoundApplicationException } from '../application-exception/error-creating-order-product-not-found-application.exception';
+import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
+import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../application-exception/error-creating-order-bundle-not-found-application.exception';
+
+
+export type productsOrder = {
+    quantity: number
+    nombre: string 
+    descripcion: string
+    price:number 
+    images:string[]
+    currency:string
+}
 
 
 export class FindAllOdersApplicationService extends IApplicationService<FindAllOrdersApplicationServiceRequestDto,FindAllOrdersApplicationServiceResponseDto>{
     
     constructor(
-        private readonly orderRepository: IQueryOrderRepository
+        private readonly orderRepository: IQueryOrderRepository,
+        private readonly productRepository:IProductRepository,
+        private readonly bundleRepository:IBundleRepository
     ){
         super()
     }
@@ -22,6 +40,38 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
 
         let orders = response.getValue;
 
+        let products;  
+        let bundles; 
+        
+        orders.forEach( (order) => {
+            products.push(order.Products);
+            bundles.push(order.Bundles);
+        });
+
+        let domainProducts=[]
+        let domainBundles=[]
+
+        if(products){
+            for (const product of products){
+                let domain=await this.productRepository.findProductById(ProductID.create(product.id))
+
+                if(!domain.isSuccess())
+                    return Result.fail(new ErrorCreatingOrderProductNotFoundApplicationException())
+
+                domainProducts.push(domain.getValue)
+            }
+
+        }
+
+        if(bundles){
+            for (const bundle of bundles){
+                let domain=await this.bundleRepository.findBundleById(BundleId.create(bundle.id))
+
+                if(!domain.isSuccess()) return Result.fail(new ErrorCreatingOrderBundleNotFoundApplicationException())
+                domainBundles.push(domain.getValue)
+            }
+        }
+
         let ordersDto: order[] = [];
 
         orders.forEach( (order) => {
@@ -30,11 +80,11 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
                 orderState: order.OrderState.orderState,
                 orderCreatedDate: order.OrderCreatedDate.OrderCreatedDate,
                 totalAmount: order.TotalAmount.OrderAmount,
-                orderReciviedDate: order.OrderReceivedDate.OrderReceivedDate,
+                orderReceivedDate: order.OrderReceivedDate.OrderReceivedDate,
                 orderPayment: {
-                    paymetAmount: order.OrderPayment.Amount,
-                    paymentCurrency: order.OrderPayment.Currency,
-                    payementMethod: order.OrderPayment.PaymentMethod
+                    paymetAmount: order.OrderPayment.PaymentAmount.Value,
+                    paymentCurrency: order.OrderPayment.PaymentCurrency.Value,
+                    payementMethod: order.OrderPayment.PaymentMethods.Value
                 }
             })
         });

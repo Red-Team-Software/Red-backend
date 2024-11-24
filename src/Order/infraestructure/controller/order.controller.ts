@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Logger, Post } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Logger, Post, Query } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { StripeSingelton } from "src/payments/infraestructure/stripe-singelton";
 import { PaymentEntryDto } from "../dto/payment-entry-dto";
@@ -48,6 +48,10 @@ import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entit
 import { OrmProductMapper } from "src/product/infraestructure/mapper/orm-mapper/orm-product-mapper";
 import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry";
 import { OrmBundleRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-repository";
+import { CancelOrderApplicationServiceRequestDto } from "src/order/application/dto/request/cancel-order-request-dto";
+import { CancelOrderApplicationServiceResponseDto } from "src/order/application/dto/response/cancel-order-response-dto";
+import { CancelOderApplicationService } from "src/order/application/service/cancel-order-application.service";
+import { CancelOrderDto } from "../dto/cancel-order-entry.dto";
 
 @ApiTags('Order')
 @Controller('order')
@@ -70,6 +74,7 @@ export class OrderController {
     private readonly payOrderService: IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>;
     private readonly calculateTaxesShippingFee: IApplicationService<TaxesShippingFeeApplicationServiceEntryDto,CalculateTaxesShippingResponseDto>;
     private readonly getAllOrders: IApplicationService<FindAllOrdersApplicationServiceRequestDto,FindAllOrdersApplicationServiceResponseDto>;
+    private readonly orderCanceled: IApplicationService<CancelOrderApplicationServiceRequestDto,CancelOrderApplicationServiceResponseDto>
 
     //*Repositories
     private readonly orderRepository: ICommandOrderRepository;
@@ -106,7 +111,7 @@ export class OrderController {
         //*Repositories
         this.ormProductRepository = new OrmProductRepository(PgDatabaseSingleton.getInstance());
         this.ormBundleRepository = new OrmBundleRepository(PgDatabaseSingleton.getInstance());
-        
+
         //*Mappers
         this.orderMapper = new OrmOrderMapper(this.idGen,this.ormProductRepository,this.ormBundleRepository);
 
@@ -131,7 +136,7 @@ export class OrderController {
                 ),
                 new NestLogger(new Logger())
             )
-        )
+        );
 
         //*Calculate Taxes and Shipping Fee
         this.calculateTaxesShippingFee = new ExceptionDecorator(
@@ -143,17 +148,32 @@ export class OrderController {
                 ),
                 new NestLogger(new Logger())
             )
-        )
+        );
 
         //*fins All Orders
         this.getAllOrders = new ExceptionDecorator(
             new LoggerDecorator(
                 new FindAllOdersApplicationService(
-                    this.orderQueryRepository
+                    this.orderQueryRepository,
+                    this.ormProductRepository,
+                    this.ormBundleRepository
                 ),
                 new NestLogger(new Logger())
             )
-        )
+        );
+
+        //*order canceled
+
+        this.orderCanceled = new ExceptionDecorator(
+            new LoggerDecorator(
+                new CancelOderApplicationService(
+                    this.orderQueryRepository,
+                    this.orderRepository,
+                    this.rabbitMq
+                ),
+                new NestLogger(new Logger())
+            )
+        );
     }
 
 
@@ -190,7 +210,7 @@ export class OrderController {
     }
 
     @Get('/all')
-    async findAllOrders(@Body() data: FindAllOrdersEntryDto) {
+    async findAllOrders(@Query() data: FindAllOrdersEntryDto) {
         let values: FindAllOrdersApplicationServiceRequestDto = {
             userId: 'none',
             ...data
@@ -201,6 +221,18 @@ export class OrderController {
         return response.getValue;
     }
 
+    @Post('/cancel-order')
+    async cancelOrder(@Body() data: CancelOrderDto) {
+        let request: CancelOrderApplicationServiceRequestDto = {
+            userId: 'none',
+            orderId: data.orderId
+        }
+        
+        
+        let response = await this.orderCanceled.execute(request);
+        
+        return response.getValue;
+    }
 
 
 // @Post('/create-payment')

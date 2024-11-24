@@ -3,6 +3,7 @@ import { IOrderInterface } from "../orm-model-entity/order-interface";
 import { OrmOrderPayEntity } from "./orm-order-payment";
 import { OrmOrderProductEntity } from "./orm-order-product-entity";
 import { OrmOrderBundleEntity } from "./orm-order-bundle-entity";
+import { OrmOrderReportEntity } from "./orm-order-report-entity";
 
 @Entity('order')
 export class OrmOrderEntity implements IOrderInterface {
@@ -35,11 +36,16 @@ export class OrmOrderEntity implements IOrderInterface {
     @Column('date', { nullable: true })
     orderReceivedDate?: Date;
 
-    @OneToMany(() => OrmOrderProductEntity, (orderProduct) => orderProduct.order)
+    @OneToMany(() => OrmOrderProductEntity, (orderProduct) => orderProduct.order )
     order_products?: OrmOrderProductEntity[];
 
-    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.order)
+    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.order )
     order_bundles?: OrmOrderBundleEntity[]
+
+    @OneToOne( () => OrmOrderReportEntity, (orderReport) => orderReport.order )
+    @JoinColumn()
+    order_report?: OrmOrderReportEntity;
+
 
     static create(
         id: string,
@@ -53,6 +59,7 @@ export class OrmOrderEntity implements IOrderInterface {
         orderProducts?: OrmOrderProductEntity[],
         orderBundles?: OrmOrderBundleEntity[],
         orderReceivedDate?: Date,
+        orderReport?: OrmOrderReportEntity
     ): OrmOrderEntity {
         const order = new OrmOrderEntity();
         order.id = id;
@@ -66,6 +73,7 @@ export class OrmOrderEntity implements IOrderInterface {
         order.order_products = orderProducts;
         order.order_bundles = orderBundles;
         order.orderReceivedDate = orderReceivedDate;
+        order.order_report = orderReport;
         return order;
     }
 

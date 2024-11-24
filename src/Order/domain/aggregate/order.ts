@@ -4,14 +4,15 @@ import { OrderState } from "../value_objects/orderState";
 import { OrderTotalAmount } from "../value_objects/order-totalAmount";
 import { OrderReceivedDate } from "../value_objects/order-received-date";
 import { OrderCreatedDate } from "../value_objects/order-created-date";
-import { OrderReportId } from "../value_objects/order-reportId";
-import { OrderPayment } from "../value_objects/order-payment";
 import { OrderRegistered } from "../domain-events/order-registered";
 import { OrderDirection } from "../value_objects/order-direction";
 import { MissingOrderAtributes } from "../exception/missing-order-attributes.exception";
 import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
 import { OrderProduct } from "../entities/order-product/order-product-entity";
 import { EmptyProductBundleAtributes } from "../exception/product-bundle-empty.exception";
+import { OrderReport } from "../entities/report/report-entity";
+import { OrderStateUpdated } from "../domain-events/order-state-updated";
+import { OrderPayment } from "../entities/payment/order-payment-entity";
 
 export class Order extends AggregateRoot<OrderId>{
     
@@ -26,6 +27,10 @@ export class Order extends AggregateRoot<OrderId>{
             this.orderReceivedDate = event.orderReceivedDate;
             this.orderReport = event.orderReport;
             this.orderPayment = event.orderPayment;
+        }
+
+        if (event instanceof OrderStateUpdated) {
+            this.orderState = event.orderState;
         }
     }
     
@@ -53,7 +58,7 @@ export class Order extends AggregateRoot<OrderId>{
         private products?: OrderProduct[],
         private bundles?: OrderBundle[],
         private orderReceivedDate?: OrderReceivedDate,
-        private orderReport?: OrderReportId,
+        private orderReport?: OrderReport,
         private orderPayment?: OrderPayment
     ) {
         super(id);
@@ -68,7 +73,7 @@ export class Order extends AggregateRoot<OrderId>{
         products?: OrderProduct[],
         bundles?: OrderBundle[],
         orderReceivedDate?: OrderReceivedDate,
-        orderReport?: OrderReportId,
+        orderReport?: OrderReport,
         orderPayment?: OrderPayment
     ): Order {
         let order = new Order(
@@ -100,7 +105,6 @@ export class Order extends AggregateRoot<OrderId>{
         return order;
     }
     
-    
     static initializeAggregate(
         id: OrderId,
         orderState: OrderState,
@@ -110,7 +114,7 @@ export class Order extends AggregateRoot<OrderId>{
         products?: OrderProduct[],
         bundles?: OrderBundle[],
         orderReceivedDate?: OrderReceivedDate,
-        orderReport?: OrderReportId,
+        orderReport?: OrderReport,
         orderPayment?: OrderPayment
 
     ): Order {
@@ -128,6 +132,16 @@ export class Order extends AggregateRoot<OrderId>{
         );
         order.validateState();
         return order;
+    }
+
+    UpdateOrderState(orderState: OrderState): void {
+        this.orderState = orderState;
+        this.apply(
+            OrderStateUpdated.create(
+                this.getId(),
+                orderState
+            )
+        );
     }
 
     get OrderState(): OrderState {
@@ -154,7 +168,7 @@ export class Order extends AggregateRoot<OrderId>{
         return this.bundles;
     }
 
-    get OrderReport(): OrderReportId {
+    get OrderReport(): OrderReport {
         return this.orderReport;
     }
 

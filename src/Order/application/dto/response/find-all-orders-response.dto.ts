@@ -1,18 +1,21 @@
 import { IServiceResponseDto } from "src/common/application/services"
-import { Order } from "src/order/domain/aggregate/order";
 
 export type order = {
     orderId: string;
     orderState: string;
     orderCreatedDate: Date;
     totalAmount: number;
-    orderReciviedDate?: Date;
+    orderReceivedDate?: Date;
     orderPayment?: {
         paymetAmount: number;
         paymentCurrency: string;
         payementMethod: string;
     };
-    //orderDirection: OrderDirection;
+    // orderDirection: {
+    //     lat: number;
+    //     lng: number;
+    // }
+    //orderDirection: string;
     //products?: OrderProductId[];
     //bundles?: OrderBundleId[];
     //orderReport?: OrderReportId;

@@ -2,13 +2,13 @@ import { DomainEvent } from "src/common/domain";
 import { OrderCreatedDate } from "../value_objects/order-created-date";
 import { OrderPayment } from "../value_objects/order-payment";
 import { OrderReceivedDate } from "../value_objects/order-received-date";
-import { OrderReportId } from "../value_objects/order-reportId";
 import { OrderTotalAmount } from "../value_objects/order-totalAmount";
 import { OrderId } from "../value_objects/orderId";
 import { OrderState } from "../value_objects/orderState";
 import { OrderDirection } from '../value_objects/order-direction';
 import { OrderProduct } from "../entities/order-product/order-product-entity";
 import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
+import { OrderReport } from "../entities/report/report-entity";
 
 
 export class OrderRegistered extends DomainEvent {
@@ -39,7 +39,7 @@ export class OrderRegistered extends DomainEvent {
         public products?: OrderProduct[],
         public bundles?: OrderBundle[],
         public orderReceivedDate?: OrderReceivedDate,
-        public orderReport?: OrderReportId,
+        public orderReport?: OrderReport,
         public orderPayment?: OrderPayment,
     ){
         super();
@@ -54,7 +54,7 @@ export class OrderRegistered extends DomainEvent {
         products?: OrderProduct[],
         bundles?: OrderBundle[],
         orderReceivedDate?: OrderReceivedDate,
-        orderReport?: OrderReportId,
+        orderReport?: OrderReport,
         orderPayment?: OrderPayment
     ){
         let order = new OrderRegistered(

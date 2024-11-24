@@ -2,13 +2,12 @@ import { Order } from "src/Order/domain/aggregate/order";
 import { OrmOrderEntity } from "../entities/orm-order-entity";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
-import { OrderId } from "src/Order/domain/value_objects/orderId";
-import { OrderState } from "src/Order/domain/value_objects/orderState";
-import { OrderTotalAmount } from "src/Order/domain/value_objects/order-totalAmount";
-import { OrderDirection } from "src/Order/domain/value_objects/order-direction";
-import { OrderCreatedDate } from "src/Order/domain/value_objects/order-created-date";
+import { OrderId } from "src/order/domain/value_objects/orderId";
+import { OrderState } from "src/order/domain/value_objects/orderState";
+import { OrderTotalAmount } from "src/order/domain/value_objects/order-totalAmount";
+import { OrderDirection } from "src/order/domain/value_objects/order-direction";
+import { OrderCreatedDate } from "src/order/domain/value_objects/order-created-date";
 import { OrmOrderPayEntity } from '../entities/orm-order-payment';
-import { OrderPayment } from "src/Order/domain/value_objects/order-payment";
 import { IProductRepository } from "src/product/domain/repository/product.interface.repositry";
 import { OrmOrderProductEntity } from "../entities/orm-order-product-entity";
 import { OrmOrderBundleEntity } from "../entities/orm-order-bundle-entity";
@@ -23,21 +22,39 @@ import { OrderProductQuantity } from "src/order/domain/entities/order-product/va
 import { OrderBundleQuantity } from "src/order/domain/entities/order-bundle/value_object/order-bundle-quantity";
 import { OrderBundleId } from "src/order/domain/entities/order-bundle/value_object/order-bundlesId";
 import { OrderReceivedDate } from "src/order/domain/value_objects/order-received-date";
+import { OrderReport } from "src/order/domain/entities/report/report-entity";
+import { OrderReportId } from '../../domain/entities/report/value-object/order-report-id';
+import { OrderReportDescription } from '../../domain/entities/report/value-object/order-report-description';
+import { OrmOrderReportEntity } from "../entities/orm-order-report-entity";
+import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton";
+import { OrderQueryRepository } from "../repositories/orm-repository/orm-order-query-repository";
+import { IQueryOrderRepository } from "src/order/application/query-repository/order-query-repository-interface";
+import { OrderPayment } from "src/order/domain/entities/payment/order-payment-entity";
+import { PaymentId } from '../../domain/entities/payment/value-object/payment-id';
+import { PaymentMethod } from "src/order/domain/entities/payment/value-object/payment-method";
+import { PaymentAmount } from "src/order/domain/entities/payment/value-object/payment-amount";
+import { PaymentCurrency } from "src/order/domain/entities/payment/value-object/payment-currency";
 
 
 export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
     
+    private ormOrderRepository: IQueryOrderRepository;
+
     constructor(
         private readonly idGen:IIdGen<string>,
         private readonly ormProductRepository: IProductRepository,
         private readonly ormBundleRepository: IBundleRepository
-    ){}
+    ){
+        this.ormOrderRepository = new OrderQueryRepository(PgDatabaseSingleton.getInstance(), this);
+    }
     
     async fromPersistencetoDomain(infraEstructure: OrmOrderEntity): Promise<Order> {
 
         let products: OrderProduct[] = [];
         let bundles: OrderBundle[] = [];
         let recievedDate: OrderReceivedDate;
+        let orderReport: OrderReport;
+        let orderPayment: OrderPayment;
 
         let ormProducts:OrmOrderProductEntity[] = infraEstructure.order_products;
         let ormBundles:OrmOrderBundleEntity[] = infraEstructure.order_bundles;
@@ -46,7 +63,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             for (let product of ormProducts){
                 let response = await this.ormProductRepository.findProductById(ProductID.create(product.product_id));
                 products.push( OrderProduct.create(
-                    OrderProductId.create(response.getValue.getId()),
+                    OrderProductId.create(response.getValue.getId().Value),
                     OrderProductQuantity.create(product.quantity)
                 ))
             }
@@ -66,6 +83,22 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             recievedDate = OrderReceivedDate.create(infraEstructure.orderReceivedDate);
         }
 
+        if(infraEstructure.order_report){
+            orderReport = OrderReport.create(
+                OrderReportId.create(infraEstructure.order_report.id),
+                OrderReportDescription.create(infraEstructure.order_report.description));
+        }
+
+
+
+        if(infraEstructure.pay){
+        orderPayment = OrderPayment.create(
+            PaymentId.create(infraEstructure.pay.id),
+            PaymentMethod.create(infraEstructure.pay.paymentMethod),
+            PaymentAmount.create(infraEstructure.pay.amount),
+            PaymentCurrency.create(infraEstructure.pay.currency)
+        )}
+
         let order = Order.initializeAggregate(
             OrderId. create(infraEstructure.id),
             OrderState.create(infraEstructure.state),
@@ -75,22 +108,22 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             products,
             bundles,
             recievedDate,
-            null,
-            OrderPayment.create(infraEstructure.pay.amount,infraEstructure.pay.currency,infraEstructure.pay.paymentMethod)
+            orderReport,
+            orderPayment
         );
-
         return order;
     }
     
     async fromDomaintoPersistence(domainEntity: Order): Promise<OrmOrderEntity> {
 
+
         let ormOrderPayEntity: OrmOrderPayEntity;
         if(domainEntity.OrderPayment){
             ormOrderPayEntity = OrmOrderPayEntity.create(
-                await this.idGen.genId(),
-                domainEntity.OrderPayment.Amount,
-                domainEntity.OrderPayment.Currency,
-                domainEntity.OrderPayment.PaymentMethod,
+                domainEntity.OrderPayment.OrderPaymentId.Value,
+                domainEntity.OrderPayment.PaymentAmount.Value,
+                domainEntity.OrderPayment.PaymentCurrency.Value,
+                domainEntity.OrderPayment.PaymentMethods.Value,
                 domainEntity.getId().orderId
             );
         }  
@@ -98,7 +131,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         let ormProducts: OrmOrderProductEntity[] = [];
 
         for (let product of domainEntity.Products){
-            let response = await this.ormProductRepository.findProductById(product.getId().OrderProductId);
+            let response = await this.ormProductRepository.findProductById(ProductID.create(product.OrderProductId.OrderProductId));
             if(!response.isSuccess())
                 throw new NotFoundException('Find product id not registered')
 
@@ -128,6 +161,14 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             )
         }
 
+        let orderOrmReport: OrmOrderReportEntity;
+        if(domainEntity.OrderReport){
+            orderOrmReport = OrmOrderReportEntity.create(
+                domainEntity.OrderReport.OrderReportId.OrderReportId,
+                domainEntity.OrderReport.Description.Value
+            )
+        }
+
         return OrmOrderEntity.create(
             domainEntity.getId().orderId,
             domainEntity.OrderState.orderState,
@@ -139,7 +180,8 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             ormOrderPayEntity,
             ormProducts,
             ormBundles,
-            domainEntity.OrderReceivedDate.OrderReceivedDate,
+            domainEntity.OrderReceivedDate ? domainEntity.OrderReceivedDate.OrderReceivedDate : null,
+            domainEntity.OrderReport ? orderOrmReport : null,
         );
     }
 }

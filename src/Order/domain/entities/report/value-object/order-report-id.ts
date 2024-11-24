@@ -1,12 +1,13 @@
 import { ValueObject } from "src/common/domain";
+import { EmptyOrderReportIdException } from "../exception/empty-order-report-id-exception";
 
 export class OrderReportId extends ValueObject<OrderReportId> {
     private id: string;
 
     private constructor(id: string) {
         super();
- 
-        //if(!id) { throw new EmptyOrderReportIdException('No se pudo obtener un Id de curso') /* throw DomainException NullCourseId */}
+
+        if(!id) throw new EmptyOrderReportIdException();
 
         this.id = id;
     }

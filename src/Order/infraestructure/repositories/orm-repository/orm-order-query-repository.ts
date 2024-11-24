@@ -7,6 +7,7 @@ import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { OrmOrderPayEntity } from "../../entities/orm-order-payment";
 import { FindAllOrdersApplicationServiceRequestDto } from "src/order/application/dto/request/find-all-orders-request.dto";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
+import { OrderId } from "src/order/domain/value_objects/orderId";
 
 
 export class OrderQueryRepository extends Repository<OrmOrderEntity> implements IQueryOrderRepository {
@@ -49,4 +50,37 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
             return Result.fail(new NotFoundException('products empty please try again'));
         }
     }
+
+    async findOrderPaymentId(orderId: OrderId): Promise<Result<string>> {
+        try {
+            const ormOrder = await this.findOne({
+                where: { id: orderId.orderId },
+                relations: ["pay"]
+            });
+
+            if (!ormOrder || !ormOrder.pay) return Result.fail(new NotFoundException('Order or payment not found'));
+            
+
+            return Result.success(ormOrder.pay.id);
+        } catch (error) {
+            return Result.fail(new NotFoundException('Order or payment not found'));
+        }
+    }
+
+    async findOrderById(orderId: OrderId): Promise<Result<Order>> {
+        try {
+            const ormOrder = await this.findOne({
+                where: { id: orderId.orderId },
+                relations: ["pay", "products", "bundles"]
+            });
+
+            if (!ormOrder) return Result.fail(new NotFoundException('Order not found'));
+
+            const domainOrder = await this.orderMapper.fromPersistencetoDomain(ormOrder);
+            return Result.success(domainOrder);
+        } catch (error) {
+            return Result.fail(new NotFoundException('Order not found'));
+        }
+    }
+
 }

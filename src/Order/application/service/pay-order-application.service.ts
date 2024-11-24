@@ -7,7 +7,6 @@ import { ICalculateShippingFee } from 'src/order/domain/domain-services/calculat
 import { ICalculateTaxesFee } from 'src/order/domain/domain-services/calculate-taxes-fee.interface';
 import { OrderTotalAmount } from 'src/order/domain/value_objects/order-totalAmount';
 import { IPaymentService } from 'src/order/domain/domain-services/payment-interface';
-import { OrderPayment } from 'src/order/domain/value_objects/order-payment';
 import { OrderDirection } from 'src/order/domain/value_objects/order-direction';
 import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
 import { ErrorCreatingPaymentApplicationException } from '../application-exception/error-creating-payment-application.exception';
@@ -38,6 +37,12 @@ import { Product } from 'src/product/domain/aggregate/product.aggregate';
 import { ErrorCreatingOrderProductNotFoundApplicationException } from '../application-exception/error-creating-order-product-not-found-application.exception';
 import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../application-exception/error-creating-order-bundle-not-found-application.exception';
 import { Bundle } from 'src/bundle/domain/aggregate/bundle.aggregate';
+import { OrderReport } from 'src/order/domain/entities/report/report-entity';
+import { OrderPayment } from 'src/order/domain/entities/payment/order-payment-entity';
+import { PaymentId } from 'src/order/domain/entities/payment/value-object/payment-id';
+import { PaymentMethod } from 'src/order/domain/entities/payment/value-object/payment-method';
+import { PaymentAmount } from 'src/order/domain/entities/payment/value-object/payment-amount';
+import { PaymentCurrency } from 'src/order/domain/entities/payment/value-object/payment-currency';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -75,7 +80,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             
             if (data.products)
                 orderproducts=data.products.map(product=>OrderProduct.create(
-                OrderProductId.create(ProductID.create(product.id)),
+                OrderProductId.create(product.id),
                 OrderProductQuantity.create(product.quantity))
             )
 
@@ -127,7 +132,12 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let total = OrderTotalAmount.create(amountTotal, data.currency);
             
-            let orderPayment = OrderPayment.create(total.OrderAmount, total.OrderCurrency, data.paymentMethod);
+            let orderPayment = OrderPayment.create(
+                PaymentId.create(await this.idGen.genId()),
+                PaymentMethod.create(data.paymentMethod),
+                PaymentAmount.create(total.OrderAmount),
+                PaymentCurrency.create(total.OrderCurrency)
+            );
 
             let stripePaymentMethod = OrderStripePaymentMethod.create(data.stripePaymentMethod);
 
@@ -143,8 +153,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 orderDirection,
                 orderproducts,
                 orderBundles,
-                OrderReceivedDate.create(new Date()),
-                undefined,
+                undefined, 
+                undefined, 
                 orderPayment
             )
             
@@ -180,7 +190,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 productsresponse.push({
                     id: product.getId().Value,
                     quantity: order.Products.find(
-                        orderproduct=>orderproduct.getId().OrderProductId.equals(product.getId())
+                        orderproduct=>product.getId().equals(ProductID.create(orderproduct.OrderProductId.OrderProductId))
                     ).Quantity.Quantity,
                     nombre:product.ProductName.Value,
                     descripcion:product.ProductDescription.Value,
@@ -218,11 +228,10 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 products:productsresponse,
                 bundles:bundlesresponse,
                 orderReceivedDate:order.OrderReceivedDate.OrderReceivedDate,
-                orderReport: order.OrderReport?.OrderReportId,
                 orderPayment: {
-                    amount: order.OrderPayment.Amount,
-                    currency: order.OrderPayment.Currency,
-                    paymentMethod: order.OrderPayment.PaymentMethod
+                    amount: order.OrderPayment.PaymentAmount.Value,
+                    currency: order.OrderPayment.PaymentCurrency.Value,
+                    paymentMethod: order.OrderPayment.PaymentMethods.Value
                 }
             }
 
