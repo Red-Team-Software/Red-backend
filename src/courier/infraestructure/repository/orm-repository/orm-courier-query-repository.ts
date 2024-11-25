@@ -10,7 +10,7 @@ import { NotFoundException } from "src/common/infraestructure/infraestructure-ex
 
 
 
-export class CourierRepository extends Repository<OrmCourierEntity> implements ICourierQueryRepository{
+export class CourierQueryRepository extends Repository<OrmCourierEntity> implements ICourierQueryRepository{
     
     constructor(
         dataSourse: DataSource,
