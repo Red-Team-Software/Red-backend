@@ -3,5 +3,5 @@ import { Courier } from "../aggregate/courier";
 
 
 export interface ICourierRepository {
-    save(courier: Courier): Promise<Result<Courier>>
+    saveCourier(courier: Courier): Promise<Result<Courier>>
 }

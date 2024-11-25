@@ -4,8 +4,8 @@ import { CourierId } from "src/courier/domain/value-objects/courier-id"
 import { CourierName } from "src/courier/domain/value-objects/courier-name"
 
 
-export interface CourierQueryRepositoryInterface {
+export interface ICourierQueryRepository {
     findCourierById(courierId: CourierId): Promise<Result<Courier>>
-    findCourierByCourierName(courierName: CourierName): Promise<Result<Courier>>
+    findCourierByName(courierName: CourierName): Promise<Result<Courier>>
     findAllCouriers(): Promise<Result<Courier[]>>
 }

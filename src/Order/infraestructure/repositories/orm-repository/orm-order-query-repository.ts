@@ -26,9 +26,9 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
     
     async findAllOrders(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>> {
         try {
-            const ormOrders = await this.createQueryBuilder("order")
-                .leftJoinAndSelect("order.pay", "payment")
-                .getMany();
+            const ormOrders = await this.find({
+                relations: ["pay", "order_products", "order_bundles","order_report"]
+            });
 
                 if(ormOrders.length==0) return Result.fail( new NotFoundException('products empty please try again'))
             
@@ -71,7 +71,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
         try {
             const ormOrder = await this.findOne({
                 where: { id: orderId.orderId },
-                relations: ["pay", "products", "bundles"]
+                relations: ["pay", "order_products", "order_bundles","order_report"]
             });
 
             if (!ormOrder) return Result.fail(new NotFoundException('Order not found'));

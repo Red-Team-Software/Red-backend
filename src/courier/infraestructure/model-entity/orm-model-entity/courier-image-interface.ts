@@ -1,4 +1,4 @@
-export interface IDeliveryImage{
+export interface ICourierImage{
     id:string,
     image:string
 }
