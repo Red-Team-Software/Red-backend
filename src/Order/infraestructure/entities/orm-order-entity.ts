@@ -29,7 +29,7 @@ export class OrmOrderEntity implements IOrderInterface {
     @Column('float')
     longitude: number;
     
-    @OneToOne( () => OrmOrderPayEntity, (pay) => pay.order, { eager: true, cascade: true } )
+    @OneToOne( () => OrmOrderPayEntity, (pay) => pay.order, { cascade: true } )
     @JoinColumn()
     pay?: OrmOrderPayEntity;
 

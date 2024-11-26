@@ -98,7 +98,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             if (data.bundles)
                 orderBundles=data.bundles.map(bundle=>
                     OrderBundle.create(
-                        OrderBundleId.create(BundleId.create(bundle.id)),
+                        OrderBundleId.create(bundle.id),
                         OrderBundleQuantity.create(bundle.quantity)
                     )
             )
@@ -207,7 +207,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 bundlesresponse.push({
                     id: bundle.getId().Value,
                     quantity: order.Bundles.find(
-                        orderBundle=>orderBundle.getId().OrderBundleId.equals(bundle.getId())
+                        orderBundle=>bundle.getId().equals(BundleId.create(bundle.getId().Value))
                     ).Quantity.OrderBundleQuantity,
                     nombre:bundle.BundleName.Value ,
                     descripcion:bundle.BundleDescription.Value,

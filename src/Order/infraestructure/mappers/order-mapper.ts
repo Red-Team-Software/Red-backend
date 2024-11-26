@@ -44,8 +44,6 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
     }
     
     async fromPersistencetoDomain(infraEstructure: OrmOrderEntity): Promise<Order> {
-        
-        console.log(infraEstructure);
 
         let products: OrderProduct[] = [];
         let bundles: OrderBundle[] = [];
@@ -58,9 +56,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
 
         if(ormProducts){
             for (let product of ormProducts){
-                console.log(product);
                 let response = await this.ormProductRepository.findProductById(ProductID.create(product.product_id));
-                console.log(response);
                 products.push( OrderProduct.create(
                     OrderProductId.create(response.getValue.getId().Value),
                     OrderProductQuantity.create(product.quantity)
@@ -68,19 +64,15 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             }
         }
 
-        //console.log(products);
-
         if(ormBundles){
             for (let bundle of ormBundles){
                 let response = await this.ormBundleRepository.findBundleById(BundleId.create(bundle.bundle_id));
                 bundles.push( OrderBundle.create(
-                    OrderBundleId.create(response.getValue.getId()),
+                    OrderBundleId.create(response.getValue.getId().Value),
                     OrderBundleQuantity.create(bundle.quantity)
                 ))
             }
         }
-
-        //console.log(bundles);
 
         if(infraEstructure.orderReceivedDate){
             recievedDate = OrderReceivedDate.create(infraEstructure.orderReceivedDate);
@@ -91,8 +83,6 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
                 OrderReportId.create(infraEstructure.order_report.id),
                 OrderReportDescription.create(infraEstructure.order_report.description));
         }
-
-
 
         if(infraEstructure.pay){
         orderPayment = OrderPayment.create(
@@ -114,6 +104,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             orderReport,
             orderPayment
         );
+
         return order;
     }
     
@@ -149,7 +140,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         let ormBundles: OrmOrderBundleEntity[] = [];
 
         for (let bundle of domainEntity.Bundles){
-            let response = await this.ormBundleRepository.findBundleById(bundle.getId().OrderBundleId);
+            let response = await this.ormBundleRepository.findBundleById(BundleId.create(bundle.getId().OrderBundleId));
             
             if(!response.isSuccess())
                 throw new NotFoundException('Find bundle id not registered')

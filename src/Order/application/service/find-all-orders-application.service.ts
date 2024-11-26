@@ -9,17 +9,11 @@ import { ErrorCreatingOrderProductNotFoundApplicationException } from '../applic
 import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
 import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../application-exception/error-creating-order-bundle-not-found-application.exception';
 import { FindAllOrdersApplicationServiceRequestDto } from '../dto/request/find-all-orders-request.dto';
-import { FindAllOrdersApplicationServiceResponseDto, order } from '../dto/response/find-all-orders-response.dto';
+import { bundlesOrderResponse, FindAllOrdersApplicationServiceResponseDto,  orderResponse, productsOrderResponse } from '../dto/response/find-all-orders-response.dto';
+import { OrderProduct } from 'src/order/domain/entities/order-product/order-product-entity';
+import { OrderBundle } from 'src/order/domain/entities/order-bundle/order-bundle-entity';
+import { bundlesOrderType, productsOrderType } from '../types/get-all-orders-types';
 
-
-export type productsOrder = {
-    quantity: number
-    nombre: string 
-    descripcion: string
-    price:number 
-    images:string[]
-    currency:string
-}
 
 
 export class FindAllOdersApplicationService extends IApplicationService<FindAllOrdersApplicationServiceRequestDto,FindAllOrdersApplicationServiceResponseDto>{
@@ -40,54 +34,102 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
 
         let orders = response.getValue;
 
-        let products;  
-        let bundles; 
-        
-        orders.forEach( (order) => { 
-            if (order.Products) products.push(order.Products);
-            if (order.Bundles) bundles.push(order.Bundles);
-        });
+        let products: productsOrderType[] = [];  
+        let bundles: bundlesOrderType[] = []; 
 
-        let domainProducts=[]
-        let domainBundles=[]
+        for (let order of orders){
+            if (order.Products && order.Products.length > 0) products.push({
+                products: order.Products, orderid: order.getId().orderId
+            });
+            if (order.Bundles && order.Bundles.length > 0) bundles.push({
+                bundles: order.Bundles, 
+                orderid: order.getId().orderId
+            });
+        };
+
+        let domainProducts: productsOrderResponse[]=[];
+        let domainBundles: bundlesOrderResponse[]=[];
 
         if(products){
             for (const product of products){
-                let domain=await this.productRepository.findProductById(ProductID.create(product.id))
+                for (const prod of product.products){
+                    let domain=await this.productRepository.findProductById(ProductID.create(prod.OrderProductId.OrderProductId))
 
-                if(!domain.isSuccess())
-                    return Result.fail(new ErrorCreatingOrderProductNotFoundApplicationException())
+                    if(!domain.isSuccess())
+                        return Result.fail(new ErrorCreatingOrderProductNotFoundApplicationException())
 
-                domainProducts.push(domain.getValue)
-            }
-
-        }
+                    domainProducts.push({
+                        id: domain.getValue.getId().Value,
+                        name: domain.getValue.ProductName.Value,
+                        descripcion: domain.getValue.ProductDescription.Value,
+                        quantity: prod.Quantity.Quantity,
+                        price: domain.getValue.ProductPrice.Price,
+                        images: domain.getValue.ProductImages.map((image)=>image.Value),
+                        currency: domain.getValue.ProductPrice.Currency,
+                        orderid: product.orderid
+                    });
+                }
+            };
+        };
 
         if(bundles){
             for (const bundle of bundles){
-                let domain=await this.bundleRepository.findBundleById(BundleId.create(bundle.id))
+                for (const bund of bundle.bundles){
+                    let domain=await this.bundleRepository.findBundleById(BundleId.create(bund.OrderBundleId.OrderBundleId))
 
-                if(!domain.isSuccess()) return Result.fail(new ErrorCreatingOrderBundleNotFoundApplicationException())
-                domainBundles.push(domain.getValue)
-            }
-        }
+                    if(!domain.isSuccess()) return Result.fail(new ErrorCreatingOrderBundleNotFoundApplicationException())
+                
 
-        let ordersDto: order[] = [];
+                    domainBundles.push({
+                        id: domain.getValue.getId().Value,
+                        name: domain.getValue.BundleName.Value,
+                        descripcion: domain.getValue.BundleDescription.Value,
+                        quantity: bund.Quantity.OrderBundleQuantity,
+                        price: domain.getValue.BundlePrice.Price,
+                        images: domain.getValue.BundleImages.map((image)=>image.Value),
+                        currency: domain.getValue.BundlePrice.Currency,
+                        orderid: bundle.orderid
+                    });
+                }
+            };
+        };
+
+        let ordersDto: orderResponse[] = [];
 
         orders.forEach( (order) => {
+
+            let associatedProducts;
+            let associatedBundles;
+            
+            if (domainProducts) associatedProducts = domainProducts.filter((product) => product.orderid === order.getId().orderId); 
+            
+            if (domainBundles) associatedBundles = domainBundles.filter((bundle) => bundle.orderid === order.getId().orderId); 
+
             ordersDto.push({
                 orderId: order.getId().orderId,
                 orderState: order.OrderState.orderState,
                 orderCreatedDate: order.OrderCreatedDate.OrderCreatedDate,
                 totalAmount: order.TotalAmount.OrderAmount,
-                orderReceivedDate: order.OrderReceivedDate.OrderReceivedDate,
+                orderReceivedDate: order.OrderReceivedDate? order.OrderReceivedDate.OrderReceivedDate : null,
                 orderPayment: {
                     paymetAmount: order.OrderPayment.PaymentAmount.Value,
                     paymentCurrency: order.OrderPayment.PaymentCurrency.Value,
                     payementMethod: order.OrderPayment.PaymentMethods.Value
-                }
-            })
+                },
+                orderDirection: {
+                    lat: order.OrderDirection.Latitude,
+                    lng: order.OrderDirection.Longitude
+                },
+                products: associatedProducts,
+                bundles: associatedBundles,
+                orderReport: order.OrderReport ? {
+                    id: order.OrderReport.OrderReportId.OrderReportId,
+                    description: order.OrderReport.Description.Value,
+                    orderid: order.getId().orderId
+                } : null
+            });
         });
+
 
         return Result.success(new FindAllOrdersApplicationServiceResponseDto(ordersDto));
     }

@@ -1,7 +1,35 @@
 import { IServiceResponseDto } from "src/common/application/services/dto/response/service-response-dto.interface";
 
 
-export type order = {
+export type productsOrderResponse = {
+    id: string
+    name: string 
+    descripcion: string
+    quantity: number
+    price:number 
+    images:string[]
+    currency:string
+    orderid: string
+}
+
+export type bundlesOrderResponse = {
+    id: string
+    name: string 
+    descripcion: string
+    quantity: number
+    price:number 
+    images:string[]
+    currency:string
+    orderid: string
+}
+
+export type reportOrderResponse = {
+    id: string
+    description: string
+    orderid: string
+}
+
+export type orderResponse = {
     orderId: string;
     orderState: string;
     orderCreatedDate: Date;
@@ -12,20 +40,20 @@ export type order = {
         paymentCurrency: string;
         payementMethod: string;
     };
-    // orderDirection: {
-    //     lat: number;
-    //     lng: number;
-    // }
+    orderDirection: {
+        lat: number;
+        lng: number;
+    };
     //orderDirection: string;
-    //products?: OrderProductId[];
-    //bundles?: OrderBundleId[];
-    //orderReport?: OrderReportId;
+    products?: productsOrderResponse[];
+    bundles?: bundlesOrderResponse[];
+    orderReport?: reportOrderResponse;
 }
 
 export class FindAllOrdersApplicationServiceResponseDto implements IServiceResponseDto {
     
     constructor(
-        readonly orders: order[]
+        readonly orders: orderResponse[]
     ){
         
     }

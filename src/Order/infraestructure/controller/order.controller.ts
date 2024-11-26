@@ -229,7 +229,6 @@ export class OrderController {
             orderId: data.orderId
         }
         
-        
         let response = await this.orderCanceled.execute(request);
         
         return response.getValue;

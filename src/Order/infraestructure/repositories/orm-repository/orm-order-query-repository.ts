@@ -29,23 +29,22 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
             const ormOrders = await this.find({
                 relations: ["pay", "order_products", "order_bundles","order_report"]
             });
-            console.log(ormOrders);
+            
                 if(ormOrders.length==0) return Result.fail( new NotFoundException('Orders empty, please try again'))
             
                 let domainOrders: Order[] = [];
 
-                ormOrders.forEach( async (ormOrder) => {
-                    domainOrders.push(await this.orderMapper.fromPersistencetoDomain(ormOrder));
-                });
+                for(let ormOrder of ormOrders){
+                    let or = await this.orderMapper.fromPersistencetoDomain(ormOrder)
+                    domainOrders.push(or);
+                };
 
-                //console.log(domainOrders);
-
-                if (data.perPage) {
-                    let page = data.page;
-                    if (!page) {page = 0}
+                // if (data.perPage) {
+                //     let page = data.page;
+                //     if (!page) {page = 0}
         
-                    domainOrders = domainOrders.slice((page*data.perPage), (data.perPage) + (page*data.perPage));
-                }
+                //     domainOrders = domainOrders.slice((page*data.perPage), (data.perPage) + (page*data.perPage));
+                // }
 
             return Result.success(domainOrders);
         } catch (error) {
