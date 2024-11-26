@@ -1,4 +1,5 @@
-import { IServiceResponseDto } from "src/common/application/services"
+import { IServiceResponseDto } from "src/common/application/services/dto/response/service-response-dto.interface";
+
 
 export type order = {
     orderId: string;

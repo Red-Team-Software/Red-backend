@@ -44,6 +44,8 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
     }
     
     async fromPersistencetoDomain(infraEstructure: OrmOrderEntity): Promise<Order> {
+        
+        console.log(infraEstructure);
 
         let products: OrderProduct[] = [];
         let bundles: OrderBundle[] = [];
@@ -51,18 +53,22 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         let orderReport: OrderReport;
         let orderPayment: OrderPayment;
 
-        let ormProducts:OrmOrderProductEntity[] = infraEstructure.order_products;
-        let ormBundles:OrmOrderBundleEntity[] = infraEstructure.order_bundles;
+        const ormProducts:OrmOrderProductEntity[] = infraEstructure.order_products;
+        const ormBundles:OrmOrderBundleEntity[] = infraEstructure.order_bundles;
 
         if(ormProducts){
             for (let product of ormProducts){
+                console.log(product);
                 let response = await this.ormProductRepository.findProductById(ProductID.create(product.product_id));
+                console.log(response);
                 products.push( OrderProduct.create(
                     OrderProductId.create(response.getValue.getId().Value),
                     OrderProductQuantity.create(product.quantity)
                 ))
             }
         }
+
+        //console.log(products);
 
         if(ormBundles){
             for (let bundle of ormBundles){
@@ -73,6 +79,8 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
                 ))
             }
         }
+
+        //console.log(bundles);
 
         if(infraEstructure.orderReceivedDate){
             recievedDate = OrderReceivedDate.create(infraEstructure.orderReceivedDate);
@@ -110,7 +118,6 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
     }
     
     async fromDomaintoPersistence(domainEntity: Order): Promise<OrmOrderEntity> {
-
 
         let ormOrderPayEntity: OrmOrderPayEntity;
         if(domainEntity.OrderPayment){
@@ -164,7 +171,9 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             )
         }
 
-        return OrmOrderEntity.create(
+        let orderReceivedDate = domainEntity.OrderReceivedDate ? domainEntity.OrderReceivedDate.OrderReceivedDate : null;
+
+        let orrOrder = OrmOrderEntity.create(
             domainEntity.getId().orderId,
             domainEntity.OrderState.orderState,
             domainEntity.OrderCreatedDate.OrderCreatedDate,
@@ -175,8 +184,10 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             ormOrderPayEntity,
             ormProducts,
             ormBundles,
-            domainEntity.OrderReceivedDate ? domainEntity.OrderReceivedDate.OrderReceivedDate : null,
+            orderReceivedDate,
             domainEntity.OrderReport ? orderOrmReport : null,
         );
+
+        return orrOrder;
     }
 }

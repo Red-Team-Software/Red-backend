@@ -29,14 +29,16 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
             const ormOrders = await this.find({
                 relations: ["pay", "order_products", "order_bundles","order_report"]
             });
-
-                if(ormOrders.length==0) return Result.fail( new NotFoundException('products empty please try again'))
+            console.log(ormOrders);
+                if(ormOrders.length==0) return Result.fail( new NotFoundException('Orders empty, please try again'))
             
                 let domainOrders: Order[] = [];
 
                 ormOrders.forEach( async (ormOrder) => {
                     domainOrders.push(await this.orderMapper.fromPersistencetoDomain(ormOrder));
                 });
+
+                //console.log(domainOrders);
 
                 if (data.perPage) {
                     let page = data.page;
@@ -47,7 +49,8 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
 
             return Result.success(domainOrders);
         } catch (error) {
-            return Result.fail(new NotFoundException('products empty please try again'));
+            console.log("error");
+            return Result.fail(new NotFoundException('Orders empty, please try again'));
         }
     }
 

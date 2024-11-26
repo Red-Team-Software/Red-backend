@@ -52,6 +52,7 @@ import { CancelOrderApplicationServiceRequestDto } from "src/order/application/d
 import { CancelOrderApplicationServiceResponseDto } from "src/order/application/dto/response/cancel-order-response-dto";
 import { CancelOderApplicationService } from "src/order/application/service/cancel-order-application.service";
 import { CancelOrderDto } from "../dto/cancel-order-entry.dto";
+import { StripeConnection } from "../domain-service/stripe_adapter";
 
 @ApiTags('Order')
 @Controller('order')
@@ -105,7 +106,7 @@ export class OrderController {
         //*implementations of domain services
         this.calculateShipping = new CalculateShippingFeeHereMaps(this.hereMapsSingelton);
         this.calculateTax = new CalculateTaxesFeeImplementation();
-        this.paymentConnection = new PaymentOrderImplementation(this.stripeSingleton);
+        this.paymentConnection = new StripeConnection(this.stripeSingleton);
         this.geocodificationAddress = new GeocodificationHereMapsDomainService(this.hereMapsSingelton);
         
         //*Repositories

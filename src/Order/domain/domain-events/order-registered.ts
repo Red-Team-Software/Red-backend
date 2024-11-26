@@ -1,6 +1,5 @@
 import { DomainEvent } from "src/common/domain";
 import { OrderCreatedDate } from "../value_objects/order-created-date";
-import { OrderPayment } from "../value_objects/order-payment";
 import { OrderReceivedDate } from "../value_objects/order-received-date";
 import { OrderTotalAmount } from "../value_objects/order-totalAmount";
 import { OrderId } from "../value_objects/orderId";
@@ -9,6 +8,7 @@ import { OrderDirection } from '../value_objects/order-direction';
 import { OrderProduct } from "../entities/order-product/order-product-entity";
 import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
 import { OrderReport } from "../entities/report/report-entity";
+import { OrderPayment } from "../entities/payment/order-payment-entity";
 
 
 export class OrderRegistered extends DomainEvent {

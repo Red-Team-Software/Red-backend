@@ -29,20 +29,20 @@ export class OrmOrderEntity implements IOrderInterface {
     @Column('float')
     longitude: number;
     
-    @OneToOne( () => OrmOrderPayEntity, (pay) => pay.order, { eager: true } )
+    @OneToOne( () => OrmOrderPayEntity, (pay) => pay.order, { eager: true, cascade: true } )
     @JoinColumn()
     pay?: OrmOrderPayEntity;
 
     @Column('date', { nullable: true })
     orderReceivedDate?: Date;
 
-    @OneToMany(() => OrmOrderProductEntity, (orderProduct) => orderProduct.order )
+    @OneToMany(() => OrmOrderProductEntity, (orderProduct) => orderProduct.order, { cascade: true } )
     order_products?: OrmOrderProductEntity[];
 
-    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.order )
+    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.order, { cascade: true } )
     order_bundles?: OrmOrderBundleEntity[]
 
-    @OneToOne( () => OrmOrderReportEntity, (orderReport) => orderReport.order )
+    @OneToOne( () => OrmOrderReportEntity, (orderReport) => orderReport.order, { cascade: true })
     @JoinColumn()
     order_report?: OrmOrderReportEntity;
 

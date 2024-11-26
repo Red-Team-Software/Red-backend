@@ -6,7 +6,7 @@ import { OrmOrderEntity } from "./orm-order-entity";
 @Entity('order_product')
 export class OrmOrderProductEntity {
 
-    @ManyToOne(() => OrmOrderEntity, (order) => order.order_products)
+    @ManyToOne(() => OrmOrderEntity, (order) => order.order_products, { eager: true })
     @JoinColumn({ name: 'order_id' })
     order: OrmOrderEntity;
 

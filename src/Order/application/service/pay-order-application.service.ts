@@ -145,6 +145,9 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException());
 
+            let orderReceivedDate: OrderReceivedDate = null;
+            let orderReport: OrderReport = null;
+            
             let order = Order.registerOrder(
                 OrderId.create(await this.idGen.genId()),
                 OrderState.create('ongoing'),
@@ -153,10 +156,10 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 orderDirection,
                 orderproducts,
                 orderBundles,
-                undefined, 
-                undefined, 
+                orderReceivedDate, 
+                orderReport, 
                 orderPayment
-            )
+            );
             
             let responseDB = await this.orderRepository.saveOrder(order); 
 
@@ -227,7 +230,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 },
                 products:productsresponse,
                 bundles:bundlesresponse,
-                orderReceivedDate:order.OrderReceivedDate.OrderReceivedDate,
                 orderPayment: {
                     amount: order.OrderPayment.PaymentAmount.Value,
                     currency: order.OrderPayment.PaymentCurrency.Value,

@@ -1,7 +1,5 @@
 import { IApplicationService} from 'src/common/application/services';
 import { Result } from 'src/common/utils/result-handler/result';
-import { FindAllOrdersApplicationServiceRequestDto } from '../dto/request/find-all-orders-request.dto';
-import { FindAllOrdersApplicationServiceResponseDto, order } from '../dto/response/find-all-orders-response.dto';
 import { IQueryOrderRepository } from '../query-repository/order-query-repository-interface';
 import { NotFoundOrderApplicationException } from '../application-exception/not-found-order-application.exception';
 import { ProductID } from 'src/product/domain/value-object/product-id';
@@ -10,6 +8,8 @@ import { IBundleRepository } from 'src/bundle/domain/repository/product.interfac
 import { ErrorCreatingOrderProductNotFoundApplicationException } from '../application-exception/error-creating-order-product-not-found-application.exception';
 import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
 import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../application-exception/error-creating-order-bundle-not-found-application.exception';
+import { FindAllOrdersApplicationServiceRequestDto } from '../dto/request/find-all-orders-request.dto';
+import { FindAllOrdersApplicationServiceResponseDto, order } from '../dto/response/find-all-orders-response.dto';
 
 
 export type productsOrder = {
@@ -43,9 +43,9 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
         let products;  
         let bundles; 
         
-        orders.forEach( (order) => {
-            products.push(order.Products);
-            bundles.push(order.Bundles);
+        orders.forEach( (order) => { 
+            if (order.Products) products.push(order.Products);
+            if (order.Bundles) bundles.push(order.Bundles);
         });
 
         let domainProducts=[]
