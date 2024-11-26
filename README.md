@@ -83,13 +83,77 @@ Nest is [MIT licensed](LICENSE).
 ## Requirements
 <p align="center">
 <table align="center">
-    <tbody>
-        <tr>
-            <td align="center"> <a href="https://docs.nestjs.com" rel="nofollow"> <img src="./public/images/dependencies/nest-logo.svg" width="150px;" alt="" style="max-width:100%;"><br><sub><b>NestJS</b></sub></a><br><a href="https://docs.nestjs.com" title="Commits"><g-emoji class="g-emoji" alias="book" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f4d6.png">📖</g-emoji></a></td>
-            <td align="center"> <a href="https://nodejs.org/docs/latest/api/" rel="nofollow"> <img src="./public/images/dependencies/nodejs-png-nodejs-icon-png-50-px-1600.png" width="150px;" alt="" style="max-width:100%;"><br><sub><b>NodeJS</b></sub></a><br><a href="https://docs.nestjs.com" title="Commits"><g-emoji class="g-emoji" alias="book" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f4d6.png">📖</g-emoji></a></td>
-            <td align="center"> <a href="https://docs.docker.com" rel="nofollow"> <img src="./public/images/dependencies/Docker-Symbol.png" width="275px;" alt="https://docs.docker.com" style="max-width:100%;"><br><sub><b>Docker</b></sub></a><br><a href="https://docs.docker.com" title="Commits"><g-emoji class="g-emoji" alias="book" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f4d6.png">📖</g-emoji></a></td>
-        </tr>
-    </tbody>
+<tbody>
+    <tr>
+        <td align="center"> 
+            <a href="https://docs.nestjs.com" rel="nofollow"> 
+                <img src="./public/images/dependencies/nest-logo.svg" width="100px;" alt="" style="max-width:100%;">
+                <br><sub><b>NestJS</b></sub>
+            </a>
+            <br><a href="https://docs.nestjs.com" title="Commits">📖</a>
+        </td>
+        <td align="center"> 
+            <a href="https://nodejs.org/docs/latest/api/" rel="nofollow"> 
+                <img src="./public/images/dependencies/nodejs-png-nodejs-icon-png-50-px-1600.png" width="150px;" alt="" style="max-width:100%;">
+                <br><sub><b>NodeJS</b></sub>
+            </a>
+            <br><a href="https://nodejs.org/docs/latest/api/" title="Commits">📖</a>
+        </td>
+        <td align="center"> 
+            <a href="https://docs.docker.com" rel="nofollow"> 
+                <img src="./public/images/dependencies/Docker-Symbol.png" width="150px;" alt="https://docs.docker.com" style="max-width:100%;">
+                <br><sub><b>Docker</b></sub>
+            </a>
+            <br><a href="https://docs.docker.com" title="Commits">📖</a>
+        </td>
+        <td align="center"> 
+            <a href="https://cloudinary.com/" rel="nofollow"> 
+                <img src="./public/images/dependencies/Cloudinary_Logo.png" width="150px;" alt="https://cloudinary.com/" style="max-width:100%;">
+                <br><sub><b>Cloudinary</b></sub>
+            </a>
+            <br><a href="https://cloudinary.com/" title="Commits">📖</a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center"> 
+            <a href="https://firebase.google.com/" rel="nofollow"> 
+                <img src="./public/images/dependencies/firebase-logo_brandlogos.net_5nzap.png" width="150px;" alt="" style="max-width:100%;">
+                <br><sub><b>Firebase</b></sub>
+            </a>
+            <br><a href="https://firebase.google.com/" title="Commits">📖</a>
+        </td>
+        <td align="center"> 
+            <a href="https://www.mongodb.com/" rel="nofollow"> 
+                <img src="./public/images/dependencies/mongodb.png" width="150px;" alt="" style="max-width:100%;">
+                <br><sub><b>MongoDB</b></sub>
+            </a>
+            <br><a href="https://www.mongodb.com/" title="Commits">📖</a>
+        </td>
+        <td align="center"> 
+            <a href="https://www.postgresql.org/" rel="nofollow"> 
+                <img src="./public/images/dependencies/postgresql-logo.png" width="150px;" alt="https://www.postgresql.org/" style="max-width:100%;">
+                <br><sub><b>Postgresql</b></sub>
+            </a>
+            <br><a href="https://www.postgresql.org/" title="Commits">📖</a>
+        </td>
+        <td align="center"> 
+            <a href="https://www.rabbitmq.com/" rel="nofollow"> 
+                <img src="./public/images/dependencies/rabbitmq-logo-png-transparent.svg" width="150px;" alt="https://www.rabbitmq.com/" style="max-width:100%;">
+                <br><sub><b>RabbitMQ</b></sub>
+            </a>
+            <br><a href="https://www.rabbitmq.com/" title="Commits">📖</a>
+        </td>
+    </tr>
+    <tr>
+        <td align="center"> 
+            <a href="https://stripe.com/" rel="nofollow"> 
+                <img src="./public/images/dependencies/Stripe-Logo.png" width="150px;" alt="" style="max-width:100%;">
+                <br><sub><b>Stripe</b></sub>
+            </a>
+            <br><a href="https://stripe.com/" title="Commits">📖</a>
+        </td>
+    </tr>
+</tbody>
 </table>
 </p>
 
@@ -104,21 +168,22 @@ this is our domain model according to Elaboration and domain model chapter 3
 
 ### Historias de usuario 
 
-| Task                                                          | Time required | Assigned to   | Current Status | Finished                              |
-|---------------------------------------------------------------|---------------|---------------|----------------|---------------------------------------|
-| Nombre de la historia: Visualización de productos disponibles |  2 weeks      | Fung          | done           | &#x2705;                              |
-| Nombre de la historia: Buscar productos y combos por nombre   |  2 weeks      | Fung          | done           | &#x2705;                              |
-| Nombre de la historia: Notificación por orden realizado       |  2 weeks      | Fung          | done           | &#x2705;                              |
-| Nombre de la historia: Visualizacion de producto              |  2 weeks      | Fung          | done           | &#x2705;                              |
-| Nombre de la historia: Visualización de impuestos             |  2 weeks      | Gabriel       | done           | &#x2705;                              |
-| Nombre de la historia: Visualización de tarifa de envío       |  2 weeks      | Gabriel       | done           | &#x2705;                              |
-| Nombre de la historia: Realizar Pago                          |  2 weeks      | Gabriel       | done           | &#x2705;                              |
-| Nombre de la historia: Eliminar Categoria                     |  2 weeks      | Ponceleon     | NOT done       | &#x274C;                              |
-| Nombre de la historia: Visualizar Categoria                   |  2 weeks      | Ponceleon     | NOT done       | &#x274C;                              |
-| Nombre de la historia: Crear Categoria                        |  2 weeks      | Ponceleon     | NOT done       | &#x274C;                              |
+| Task                                    | Time required | Assigned to | Current Status | Finished               |
+|-----------------------------------------|---------------|-------------|----------------|------------------------|
+| Visualización de productos disponibles  | 2 weeks       | Fung        | done           | ✅ done                |
+| Buscar productos y combos por nombre    | 2 weeks       | Fung        | done           | ✅ done                |
+| Notificación por orden realizado        | 2 weeks       | Fung        | done           | ✅ done                |
+| Visualización de producto               | 2 weeks       | Fung        | done           | ✅ done                |
+| Visualización de impuestos              | 2 weeks       | Gabriel     | done           | ✅ done                |
+| Visualización de tarifa de envío        | 2 weeks       | Gabriel     | done           | ✅ done                |
+| Realizar Pago                           | 2 weeks       | Gabriel     | done           | ✅ done                |
+| Eliminar Categoria                      | 2 weeks       | Ponceleon   | NOT done       | ❌ NOT done            |
+| Visualizar Categoria                    | 2 weeks       | Ponceleon   | NOT done       | ❌ NOT done            |
+| Crear Categoria                         | 2 weeks       | Ponceleon   | NOT done       | ❌ NOT done            |
 
-&#x2705; done
-&#x274C; NOT done
+#### Leyenda
+✅ done
+❌ NOT done
 
 NT: Hoy 08/11/2024 Ponceleon si completo su responsabilidad (3 dias despues de la entrega del inception)
 
@@ -131,6 +196,39 @@ NT: Hoy 08/11/2024 Ponceleon si completo su responsabilidad (3 dias despues de l
 [![orm model elaboration](./public/images/elaboration/Diagramas-Equipo-Rojo%20-%20orm-model.svg)](https://lucid.app/lucidchart/6702d2bf-abc6-4e63-9c91-a2162adb8348/edit?invitationId=inv_e6b8aa9a-adee-4f9c-bda7-4b37490b17ca&page=_W5nKC6R8y1b#)
 
 
-### Construction (06-12-2024) 3 weeks
+### Construction (15-11-2024 / 06-12-2024 ) 3 weeks
+
+### Historias de usuario 
+
+
+| Task                                     | Time required | Assigned to | Current Status | Finished               |
+|------------------------------------------|---------------|-------------|----------------|------------------------|
+| Registro de usuario                      | 2 weeks       | Fung        | On going       | :construction: Working |
+| Iniciar Sesión                           | 2 weeks       | Fung        | On going       | :construction: Working |
+| Recuperación de contraseña               | 2 weeks       | Fung        | On going       | :construction: Working |
+| Cierre de sesión                         | 2 weeks       | Fung        | On going       | :construction: Working |
+| Modificar perfil                         | 2 weeks       | Fung        | On going       | :construction: Working |
+| Agregar dirección de entrega             | 2 weeks       | Fung        | On going       | :construction: Working |
+| Editar dirección de entrega              | 2 weeks       | Fung        | On going       | :construction: Working |
+| Eliminar dirección de entrega            | 2 weeks       | Fung        | On going       | :construction: Working |
+| Establecer dirección predeterminada      | 2 weeks       | Fung        | On going       | :construction: Working |
+| Notificación por cambio de contraseña    | 2 weeks       | Fung        | On going       | :construction: Working |
+| Promociones de productos                 | 2 weeks       | Fung        | On going       | :construction: Working |
+| Ver historial de órdenes pasadas         | 2 weeks       | Gabriel     | On going       | :construction: Working |
+| Repetir una orden pasada                 | 2 weeks       | Gabriel     | On going       | :construction: Working |
+| Cancelar una orden activa                | 2 weeks       | Gabriel     | On going       | :construction: Working |
+| Visualización de impuestos               | 2 weeks       | Gabriel     | On going       | :construction: Working |
+| Visualización de tarifa de envío         | 2 weeks       | Gabriel     | On going       | :construction: Working |
+| Notificación de cancelación de orden     | 2 weeks       | Gabriel     | On going       | :construction: Working |
+| Aplicar cupones de descuento             | 2 weeks       | Ponceleon   | On going       | :construction: Working |
+| Notificación de promociones              | 2 weeks       | Ponceleon   | On going       | :construction: Working |
+| Notificación de cupones                  | 2 weeks       | Ponceleon   | On going       | :construction: Working |
+| Ver productos más vendidos               | 2 weeks       | Ponceleon   | On going       | :construction: Working |
+
+
+#### Leyenda
+✅ done
+❌ NOT done
+:construction: Working
 
 ...On going
