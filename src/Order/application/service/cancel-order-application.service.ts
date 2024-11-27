@@ -36,7 +36,7 @@ export class CancelOderApplicationService extends IApplicationService<CancelOrde
 
         if (!responseCommand.isSuccess()) return Result.fail(new ErrorModifiyingOrderStateApplicationException());
 
-        //await this.eventPublisher.publish(newOrder.pullDomainEvents())
+        await this.eventPublisher.publish(newOrder.pullDomainEvents())
 
         let responseDto: CancelOrderApplicationServiceResponseDto = {
             orderId: newOrder.getId().orderId,

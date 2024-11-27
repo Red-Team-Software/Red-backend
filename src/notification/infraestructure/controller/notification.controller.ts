@@ -20,6 +20,7 @@ import { NewOrderPushNotificationApplicationService } from "src/notification/app
 import { NewOrderPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-order-push-notification-application-request-dto";
 import { CancelOrderPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/cancel-order-push-notification-application-request-dto";
 import { CanceledOrderPushNotificationApplicationService } from "src/notification/application/services/command/cancel-order-push-notification-application.service";
+import { SendGridCanceledOrderEmailSender } from "src/common/infraestructure/email-sender/send-grid-canceled-order-email-sender.service";
 
 @Controller('notification')
 export class NotificationController {
@@ -139,10 +140,13 @@ export class NotificationController {
     }
 
 
-
-
     async sendEmailOrderCanceled(entry:ICancelOrder){
-
+        let emailsender=new SendGridCanceledOrderEmailSender()
+        emailsender.setVariablesToSend({
+            username:'customer',
+            orderid: entry.orderId
+        })
+        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve') 
 
     }
 
@@ -174,7 +178,8 @@ export class NotificationController {
             price:entry.totalAmount.amount,
             currency:entry.totalAmount.currency
         })
-        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')     }
+        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')     
+    }
 
     async sendPushToCreatedProduct(entry:ICreateProduct):Promise<void> {
         let service= new ExceptionDecorator(
