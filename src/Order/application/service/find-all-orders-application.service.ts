@@ -10,8 +10,6 @@ import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
 import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../application-exception/error-creating-order-bundle-not-found-application.exception';
 import { FindAllOrdersApplicationServiceRequestDto } from '../dto/request/find-all-orders-request.dto';
 import { bundlesOrderResponse, FindAllOrdersApplicationServiceResponseDto,  orderResponse, productsOrderResponse } from '../dto/response/find-all-orders-response.dto';
-import { OrderProduct } from 'src/order/domain/entities/order-product/order-product-entity';
-import { OrderBundle } from 'src/order/domain/entities/order-bundle/order-bundle-entity';
 import { bundlesOrderType, productsOrderType } from '../types/get-all-orders-types';
 
 

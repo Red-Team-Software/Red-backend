@@ -53,22 +53,6 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
         }
     }
 
-    async findOrderPaymentId(orderId: OrderId): Promise<Result<string>> {
-        try {
-            const ormOrder = await this.findOne({
-                where: { id: orderId.orderId },
-                relations: ["pay"]
-            });
-
-            if (!ormOrder || !ormOrder.pay) return Result.fail(new NotFoundException('Order or payment not found'));
-            
-
-            return Result.success(ormOrder.pay.id);
-        } catch (error) {
-            return Result.fail(new NotFoundException('Order or payment not found'));
-        }
-    }
-
     async findOrderById(orderId: OrderId): Promise<Result<Order>> {
         try {
             const ormOrder = await this.findOne({

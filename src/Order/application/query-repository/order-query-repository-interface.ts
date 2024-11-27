@@ -8,5 +8,4 @@ import { OrderId } from "src/order/domain/value_objects/orderId";
 export interface IQueryOrderRepository {
     findAllOrders(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>>;
     findOrderById(orderId: OrderId): Promise<Result<Order>>;
-    findOrderPaymentId(orderId: OrderId): Promise<Result<string>>;
 }

@@ -12,12 +12,14 @@ import { SaveTokenInfraestructureEntryDTO } from "../dto-request/save-token-infr
 import { ICreateBundle } from "../interfaces/create-bundle.interface";
 import { SendGridNewBundleEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-bundle-email-sender.service";
 import { SendGridNewProductEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-product-email-sender.service";
-import { ICreateOrder } from "../interfaces/create-order.interface";
+import { ICancelOrder, ICreateOrder } from "../interfaces/create-order.interface";
 import { NewBundlePushNotificationApplicationService } from "src/notification/application/services/command/new-bundle-push-notification-application.service";
 import { NewProductsPushNotificationApplicationService } from "src/notification/application/services/command/new-product-push-notification-application.service";
 import { SendGridNewOrderEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-order-email-sender.service";
 import { NewOrderPushNotificationApplicationService } from "src/notification/application/services/command/new-order-push-notification-application.service";
 import { NewOrderPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-order-push-notification-application-request-dto";
+import { CancelOrderPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/cancel-order-push-notification-application-request-dto";
+import { CanceledOrderPushNotificationApplicationService } from "src/notification/application/services/command/cancel-order-push-notification-application.service";
 
 @Controller('notification')
 export class NotificationController {
@@ -67,6 +69,18 @@ export class NotificationController {
             }
         })
 
+        this.subscriber.buildQueue({
+            name:'OrderEvents',
+            pattern: 'OrderStateUpdated',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        })
+
         this.subscriber.consume<ICreateProduct>(
             { name: 'ProductEvents'}, 
             (data):Promise<void>=>{
@@ -93,7 +107,45 @@ export class NotificationController {
                 return
             }
         )
+
+        this.subscriber.consume<ICancelOrder>(
+            { name: 'OrderEvents'}, 
+            (data):Promise<void>=>{
+                this.sendPushOrderCanceled(data)
+                //this.sendEmailOrderCanceled(data)
+                return
+            }
+        )
+
+
     }
+
+    async sendPushOrderCanceled(entry:ICancelOrder){
+        let service= new ExceptionDecorator(
+            new LoggerDecorator(
+                new CanceledOrderPushNotificationApplicationService(
+                    this.pushsender
+                ),
+            new NestLogger(new Logger())
+            )
+        )
+        let data: CancelOrderPushNotificationApplicationRequestDTO={
+            userId:'none',
+            tokens:this.tokens,
+            orderState:entry.orderState,
+            orderId:entry.orderId
+        }
+        service.execute(data)
+    }
+
+
+
+
+    async sendEmailOrderCanceled(entry:ICancelOrder){
+
+
+    }
+
 
     async sendPushOrderCreated(entry:ICreateOrder){
         
@@ -102,9 +154,9 @@ export class NotificationController {
                 new NewOrderPushNotificationApplicationService(
                     this.pushsender
                 ),
-              new NestLogger(new Logger())
+            new NestLogger(new Logger())
             )
-          )
+        )
         let data:NewOrderPushNotificationApplicationRequestDTO={
             userId:'none',
             tokens:this.tokens,
@@ -130,9 +182,9 @@ export class NotificationController {
                 new NewProductsPushNotificationApplicationService(
                     this.pushsender
                 ),
-              new NestLogger(new Logger())
+            new NestLogger(new Logger())
             )
-          )
+        )
 
         let data:NewProductPushNotificationApplicationRequestDTO={
             userId:'none',
