@@ -7,6 +7,8 @@ import { NotificationModule } from './notification/infraestructure/notification.
 import { CategoryController } from './category/infraestructure/controller/category.controller';
 import { OrderController } from './order/infraestructure/controller/order.controller';
 import { BundleController } from './bundle/infraestructure/controller/bundle.controller';
+import { AuthController } from './auth/infraestructure/controller/auth.controller';
+import { UserController } from './user/infraestructure/controller/user.controller';
 
 @Module({
   imports: [
@@ -20,7 +22,9 @@ import { BundleController } from './bundle/infraestructure/controller/bundle.con
     ProductController,
     CategoryController,
     BundleController,
-    OrderController
+    OrderController,
+    AuthController,
+    UserController
   ],
   providers:[CloudinaryProvider]
 })

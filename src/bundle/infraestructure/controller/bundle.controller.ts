@@ -1,6 +1,6 @@
 import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common"
 import { FilesInterceptor } from "@nestjs/platform-express/multer"
-import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry"
+import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 import { CreateBundleInfraestructureRequestDTO } from "../dto-request/create-bundle-infraestructure-request-dto"
@@ -23,7 +23,9 @@ import { FindAllBundlesByNameApplicationService } from "src/bundle/application/s
 import { FindBundleByIdInfraestructureRequestDTO } from "../dto-request/find-bundle-by-id-infraestructure-request-dto"
 import { FindBundleByIdApplicationService } from "src/bundle/application/services/query/find-bundle-by-id-application.service"
 import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher"
+import { ApiTags } from "@nestjs/swagger"
 
+@ApiTags('Bundle')
 @Controller('bundle')
 export class BundleController {
 

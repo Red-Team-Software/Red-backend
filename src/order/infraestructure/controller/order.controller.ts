@@ -41,12 +41,12 @@ import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/
 import { IGeocodification } from "src/order/domain/domain-services/geocodification-interface";
 import { GeocodificationHereMapsDomainService } from "../domain-service/geocodification-here-maps-domain-service";
 import { OrmProductQueryRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-query-repository";
-import { IProductRepository } from "src/product/domain/repository/product.interface.repositry";
+import { IProductRepository } from "src/product/domain/repository/product.repositry.interface";
 import { OrmProductRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-repository";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
 import { OrmProductMapper } from "src/product/infraestructure/mapper/orm-mapper/orm-product-mapper";
-import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry";
+import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface";
 import { OrmBundleRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-repository";
 
 @ApiTags('Order')
