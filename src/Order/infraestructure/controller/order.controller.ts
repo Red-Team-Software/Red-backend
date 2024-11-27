@@ -57,6 +57,7 @@ import { CreateOrderReportApplicationServiceResponseDto } from "src/order/applic
 import { CreateOrderReportApplicationServiceRequestDto } from "src/order/application/dto/request/create-order-report-request-dto";
 import { CreateReportApplicationService } from "src/order/application/service/create-report-application.service";
 import { CreateReportEntryDto } from "../dto/create-report-entry.dto";
+import { RefundPaymentDto } from "../dto/confirm-payment.dto";
 
 @ApiTags('Order')
 @Controller('order')
@@ -268,28 +269,41 @@ export class OrderController {
     }
 
 
-// @Post('/create-payment')
-// async createPaymentIntent(@Body() data: PaymentEntryDto) {
-//     try {
-//         const paymentIntent =
-//             await this.stripeSingleton.stripeInstance.paymentIntents.create({
-//                 amount: data.amount,
-//                 currency: data.currency,
-//                 payment_method_types: ['card'],
-//                 confirmation_method: 'manual',
-//             });
-//         let paymentIntentId = paymentIntent.id;
+@Post('/create-payment')
+async createPaymentIntent(@Body() data: PaymentEntryDto) {
+    try {
+        const paymentIntent =
+            await this.stripeSingleton.stripeInstance.paymentIntents.create({
+                amount: data.amount,
+                currency: data.currency,
+                payment_method_types: ['card'],
+                confirmation_method: 'manual',
+            });
+        let paymentIntentId = paymentIntent.id;
         
-//         const confirmedPaymentIntent =
-//             await this.stripeSingleton.stripeInstance.paymentIntents.confirm(
-//                 paymentIntentId,
-//                 {
-//                     payment_method: data.paymentMethod,
-//                 },
-//             );
-//         return confirmedPaymentIntent;
-//     } catch (error) {
-//         console.error('Error creating payment intent:', error);
-//     }
-// }
+        const confirmedPaymentIntent =
+            await this.stripeSingleton.stripeInstance.paymentIntents.confirm(
+                paymentIntentId,
+                {
+                    payment_method: data.paymentMethod,
+                },
+            );
+        return confirmedPaymentIntent;
+    } catch (error) {
+        console.error('Error creating payment intent:', error);
+    }
+}
+
+@Post('/refund-payment')
+async refundPayment(@Body() data: RefundPaymentDto) {
+    try {
+        const refund = await this.stripeSingleton.stripeInstance.refunds.create({
+            payment_intent: data.stripePaymentMethod,
+            amount: 1000*100,
+        });
+        return refund;
+    } catch (error) {
+        console.error('Error refunding payment:', error);
+    }
+}
 }

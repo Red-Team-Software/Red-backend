@@ -39,12 +39,14 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
                     domainOrders.push(or);
                 };
 
-                // if (data.perPage) {
-                //     let page = data.page;
-                //     if (!page) {page = 0}
+                if (data.perPage) {
+                    let page = data.page;
+                    if (!page) {page = 0}
         
-                //     domainOrders = domainOrders.slice((page*data.perPage), (data.perPage) + (page*data.perPage));
-                // }
+                    domainOrders = domainOrders.slice((page*data.perPage), (data.perPage) + (page*data.perPage));
+                }
+
+                console.log("domainOrders", domainOrders);
 
             return Result.success(domainOrders);
         } catch (error) {
