@@ -158,7 +158,8 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         if(domainEntity.OrderReport){
             orderOrmReport = OrmOrderReportEntity.create(
                 domainEntity.OrderReport.OrderReportId.OrderReportId,
-                domainEntity.OrderReport.Description.Value
+                domainEntity.OrderReport.Description.Value,
+                domainEntity.getId().orderId
             )
         }
 

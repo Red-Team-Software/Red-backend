@@ -19,11 +19,13 @@ export class OrmOrderReportEntity implements IOrderReport {
 
     static create(
         id: string,
-        description: string
+        description: string,
+        order_id: string
     ): OrmOrderReportEntity {
         const orderReport = new OrmOrderReportEntity();
         orderReport.id = id;
         orderReport.description = description;
+        orderReport.order_id = order_id;
         return orderReport;
     }
 }

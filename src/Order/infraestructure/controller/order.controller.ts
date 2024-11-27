@@ -53,6 +53,10 @@ import { CancelOrderApplicationServiceResponseDto } from "src/order/application/
 import { CancelOderApplicationService } from "src/order/application/service/cancel-order-application.service";
 import { CancelOrderDto } from "../dto/cancel-order-entry.dto";
 import { StripeConnection } from "../domain-service/stripe_adapter";
+import { CreateOrderReportApplicationServiceResponseDto } from "src/order/application/dto/response/create-order-report-response.dto";
+import { CreateOrderReportApplicationServiceRequestDto } from "src/order/application/dto/request/create-order-report-request-dto";
+import { CreateReportApplicationService } from "src/order/application/service/create-report-application.service";
+import { CreateReportEntryDto } from "../dto/create-report-entry.dto";
 
 @ApiTags('Order')
 @Controller('order')
@@ -75,7 +79,8 @@ export class OrderController {
     private readonly payOrderService: IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>;
     private readonly calculateTaxesShippingFee: IApplicationService<TaxesShippingFeeApplicationServiceEntryDto,CalculateTaxesShippingResponseDto>;
     private readonly getAllOrders: IApplicationService<FindAllOrdersApplicationServiceRequestDto,FindAllOrdersApplicationServiceResponseDto>;
-    private readonly orderCanceled: IApplicationService<CancelOrderApplicationServiceRequestDto,CancelOrderApplicationServiceResponseDto>
+    private readonly orderCanceled: IApplicationService<CancelOrderApplicationServiceRequestDto,CancelOrderApplicationServiceResponseDto>;
+    private readonly createReport: IApplicationService<CreateOrderReportApplicationServiceRequestDto,CreateOrderReportApplicationServiceResponseDto>;
 
     //*Repositories
     private readonly orderRepository: ICommandOrderRepository;
@@ -175,6 +180,21 @@ export class OrderController {
                 new NestLogger(new Logger())
             )
         );
+
+
+        //*Create Report
+        this.createReport = new ExceptionDecorator(
+            new LoggerDecorator(
+                new CreateReportApplicationService(
+                    this.orderQueryRepository,
+                    this.orderRepository,
+                    this.rabbitMq,
+                    this.idGen
+                ),
+                new NestLogger(new Logger())
+            )
+        );
+
     }
 
 
@@ -230,6 +250,19 @@ export class OrderController {
         }
         
         let response = await this.orderCanceled.execute(request);
+        
+        return response.getValue;
+    }
+
+    @Post('/report-order')
+    async reportOrder(@Body() data: CreateReportEntryDto) {
+        let request: CreateOrderReportApplicationServiceRequestDto = {
+            userId: 'none',
+            orderId: data.orderId,
+            description: data.description
+        }
+        
+        let response = await this.createReport.execute(request);
         
         return response.getValue;
     }

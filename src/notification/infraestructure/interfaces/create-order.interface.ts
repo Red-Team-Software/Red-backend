@@ -10,11 +10,6 @@ export interface ICreateOrder {
     orderPayment:      OrderPayment;
 }
 
-export interface ICancelOrder {
-    orderId:           string;
-    orderState:        string;
-}
-
 export interface Bundle {
     id:            OrderBundleIDClass;
     orderBundleId: OrderBundleIDClass;

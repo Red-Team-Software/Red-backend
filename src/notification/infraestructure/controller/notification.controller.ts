@@ -12,7 +12,6 @@ import { SaveTokenInfraestructureEntryDTO } from "../dto-request/save-token-infr
 import { ICreateBundle } from "../interfaces/create-bundle.interface";
 import { SendGridNewBundleEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-bundle-email-sender.service";
 import { SendGridNewProductEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-product-email-sender.service";
-import { ICancelOrder, ICreateOrder } from "../interfaces/create-order.interface";
 import { NewBundlePushNotificationApplicationService } from "src/notification/application/services/command/new-bundle-push-notification-application.service";
 import { NewProductsPushNotificationApplicationService } from "src/notification/application/services/command/new-product-push-notification-application.service";
 import { SendGridNewOrderEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-order-email-sender.service";
@@ -21,6 +20,8 @@ import { NewOrderPushNotificationApplicationRequestDTO } from "src/notification/
 import { CancelOrderPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/cancel-order-push-notification-application-request-dto";
 import { CanceledOrderPushNotificationApplicationService } from "src/notification/application/services/command/cancel-order-push-notification-application.service";
 import { SendGridCanceledOrderEmailSender } from "src/common/infraestructure/email-sender/send-grid-canceled-order-email-sender.service";
+import { ICreateOrder } from "../interfaces/create-order.interface";
+import { ICancelOrder } from "../interfaces/cancel-order.interface";
 
 @Controller('notification')
 export class NotificationController {
@@ -71,8 +72,8 @@ export class NotificationController {
         })
 
         this.subscriber.buildQueue({
-            name:'OrderEvents',
-            pattern: 'OrderStateUpdated',
+            name:'OrderEvents/CancelOrder',
+            pattern: 'OrderStatusCanceled',
             exchange:{
                 name:'DomainEvent',
                 type:'direct',
@@ -110,10 +111,10 @@ export class NotificationController {
         )
 
         this.subscriber.consume<ICancelOrder>(
-            { name: 'OrderEvents'}, 
+            { name: 'OrderEvents/CancelOrder'}, 
             (data):Promise<void>=>{
                 this.sendPushOrderCanceled(data)
-                //this.sendEmailOrderCanceled(data)
+                this.sendEmailOrderCanceled(data)
                 return
             }
         )
@@ -149,7 +150,6 @@ export class NotificationController {
         await emailsender.sendEmail('anfung.21@est.ucab.edu.ve') 
 
     }
-
 
     async sendPushOrderCreated(entry:ICreateOrder){
         

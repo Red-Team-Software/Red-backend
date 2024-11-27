@@ -23,10 +23,9 @@ export class CanceledOrderPushNotificationApplicationService extends IApplicatio
                 token: token,
                 notification: { 
                     title: `¡Orden Cancelada con Éxito!`, 
-                    body: `¡Hola! La orden ${data.orderId} ha sido cancelada correctamente. 
+                    body: `La orden ${data.orderId} ha sido cancelada. 
                     Si tuviste algún inconveniente durante el proceso o necesitas más ayuda, 
-                    te invitamos a generar un reporte para que podamos ayudarte mejor. 
-                    ¡Estamos aquí para ayudarte!`,
+                    te invitamos a generar un reporte para que podamos ayudarte mejor.`,
                 } 
             })
         })
