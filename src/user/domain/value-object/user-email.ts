@@ -14,7 +14,7 @@ export class UserEmail implements ValueObject<UserEmail> {
 
     static create ( email: string ): UserEmail {
         
-        const regex = new RegExp('/^[^\s@]+@[^\s@]+\.[^\s@]+$/');
+        const regex = new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
         
         if (!regex.test(email)) 
             throw new InvalidUserEmailException()

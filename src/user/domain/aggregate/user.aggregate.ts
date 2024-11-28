@@ -4,6 +4,7 @@ import { UserEmail } from "../value-object/user-email";
 import { UserName } from "../value-object/user-name";
 import { UserPhone } from "../value-object/user-phone";
 import { UserRegistered } from '../domain-events/user-registered';
+import { UserImage } from "../value-object/user-image";
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -21,7 +22,8 @@ export class User extends AggregateRoot <UserId>{
         userId:UserId,
         private userEmail:UserEmail,
         private userName:UserName,
-        private userPhone:UserPhone
+        private userPhone:UserPhone,
+        private userImage?:UserImage
     ){
         super(userId)
     }
@@ -30,28 +32,40 @@ export class User extends AggregateRoot <UserId>{
         userId:UserId,
         userEmail:UserEmail,
         userName:UserName,
-        userPhone:UserPhone
+        userPhone:UserPhone,
+        userImage?:UserImage
     ):User{
         const user = new User(
             userId,
             userEmail,
             userName,
-            userPhone
+            userPhone,
+            userImage
         )
-        user.apply
+        user.apply(
+            UserRegistered.create(
+                userId,
+                userEmail,
+                userName,
+                userPhone,
+                userImage
+            )
+        )
         return user
     }
     static initializeAggregate(
         userId:UserId,
         userEmail:UserEmail,
         userName:UserName,
-        userPhone:UserPhone
+        userPhone:UserPhone,
+        userImage?:UserImage
     ):User{
         const user = new User(
             userId,
             userEmail,
             userName,
-            userPhone
+            userPhone,
+            userImage
         )
         user.validateState()
         return user
@@ -59,4 +73,5 @@ export class User extends AggregateRoot <UserId>{
     get UserEmail():UserEmail{return this.userEmail}
     get UserName():UserName {return this.userName}
     get UserPhone():UserPhone {return this.userPhone}
+    get UserImage():UserImage {return this.userImage}
 }

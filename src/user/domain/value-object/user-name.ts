@@ -13,7 +13,8 @@ export class UserName implements ValueObject<UserName> {
     get Value(){ return this.name }
 
     static create ( name: string ): UserName {
-        const regex=new RegExp(`/^[a-z0-9_-]{3,16}$/`)
+        const regex=new RegExp(/^[A-Za-zÁÉÍÓÚáéíóúÑñ]{1,50}$/)
+        console.log(regex.test(name))
         if (!regex.test(name))
             throw new InvalidUserNameException()
         return new UserName( name )

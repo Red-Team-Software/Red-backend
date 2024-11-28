@@ -6,6 +6,10 @@ import { LogInUserApplicationResponseDTO } from "../../dto/response/log-in-user-
 export class LogInUserApplicationService extends IApplicationService 
 <LogInUserApplicationRequestDTO,LogInUserApplicationResponseDTO> {
 
+    constructor(){
+        super()
+    }
+
     execute(data: LogInUserApplicationRequestDTO): Promise<Result<LogInUserApplicationResponseDTO>> {
         throw new Error("Method not implemented.");
     }
