@@ -12,12 +12,14 @@ import { CuponDiscount } from "src/cupon/domain/value-object/cupon-discount";
 import { CuponState } from "src/cupon/domain/value-object/cupon-state";
 import { ErrorCreatingCuponApplicationException } from "../../application-exception/error-creating-cupon-application-exception copy";
 import { ErrorNameAlreadyApplicationException } from "../../application-exception/error-name-already-exist-cupon-application-exception";
+import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 
 export class CreateCuponApplicationService extends IApplicationService<
   CreateCuponApplicationRequestDTO,
   CreateCuponApplicationResponseDTO
 > {
   constructor(
+    private readonly eventPublisher: IEventPublisher,
     private readonly cuponRepository: ICuponRepository,
     private readonly idGen: IIdGen<string>
   ) {
@@ -52,10 +54,12 @@ export class CreateCuponApplicationService extends IApplicationService<
 
     // Guardar el cupón en el repositorio
     let result = await this.cuponRepository.createCupon(cupon);
+    console.log(result)
     if (!result.isSuccess()) {
+      console.log("aqui")
       return Result.fail(new ErrorCreatingCuponApplicationException());
     }
-
+    await this.eventPublisher.publish(cupon.pullDomainEvents())
     // Preparar la respuesta
     let response: CreateCuponApplicationResponseDTO = {
       code: command.code,

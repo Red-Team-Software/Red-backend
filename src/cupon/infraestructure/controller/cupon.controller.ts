@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Delete, Logger } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Delete, Logger, Inject } from '@nestjs/common';
 import { ICuponRepository } from 'src/cupon/domain/repository/cupon.interface.repository';
 import { OrmCuponRepository } from '../repository/orm-cupon-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
@@ -16,7 +16,12 @@ import { PaginationRequestDTO } from 'src/common/application/services/dto/reques
 import { LoggerDecorator } from 'src/common/application/aspects/logger-decorator/logger-decorator';
 import { NestLogger } from 'src/common/infraestructure/logger/nest-logger';
 import { FindAllCuponsApplicationService } from 'src/cupon/application/services/query/find-all-cupons-application-service';
+import { ApiTags } from '@nestjs/swagger';
+import { CreateCuponInfraestructureRequestDTO } from '../dto-request/create-cupon-infraestructure-request';
+import { RabbitMQPublisher } from 'src/common/infraestructure/events/publishers/rabbit-mq-publisher';
+import { Channel } from 'amqplib';
 
+@ApiTags('Cupon')
 @Controller('cupon')
 export class CuponController {
 
@@ -24,21 +29,22 @@ export class CuponController {
   private readonly idGen: IIdGen<string>;
   private readonly ormCuponQueryRepo: IQueryCuponRepository;
 
-  constructor() {
+  constructor(@Inject("RABBITMQ_CONNECTION") private readonly channel: Channel) {
     this.idGen = new UuidGen();
     this.ormCuponRepo = new OrmCuponRepository(PgDatabaseSingleton.getInstance());
     this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
   }
 
   @Post('create')
-  async createCupon(@Body() entry: CreateCuponApplicationRequestDTO) {
+  async createCupon(@Body() entry: CreateCuponInfraestructureRequestDTO) {
     let service = new ExceptionDecorator(
       new CreateCuponApplicationService(
+        new RabbitMQPublisher(this.channel),
         this.ormCuponRepo,
         this.idGen
       )
     );
-    let response = await service.execute(entry);
+    let response = await service.execute({userId:'none',...entry});
     return response.getValue;
   }
 

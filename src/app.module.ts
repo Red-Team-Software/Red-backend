@@ -7,6 +7,7 @@ import { NotificationModule } from './notification/infraestructure/notification.
 import { CategoryController } from './category/infraestructure/controller/category.controller';
 import { OrderController } from './order/infraestructure/controller/order.controller';
 import { BundleController } from './bundle/infraestructure/controller/bundle.controller';
+import { CuponController } from './cupon/infraestructure/controller/cupon.controller';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { BundleController } from './bundle/infraestructure/controller/bundle.con
     ProductController,
     CategoryController,
     BundleController,
-    OrderController
+    OrderController,
+    CuponController
   ],
   providers:[CloudinaryProvider]
 })
