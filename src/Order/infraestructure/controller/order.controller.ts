@@ -177,6 +177,7 @@ export class OrderController {
     async realizePayment(@Body() data: StripePaymentEntryDto) {
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: 'none',
+            paymentId: data.PaymentId,
             currency: data.currency.toLowerCase(),
             paymentMethod: data.paymentMethod,
             address: data.address,

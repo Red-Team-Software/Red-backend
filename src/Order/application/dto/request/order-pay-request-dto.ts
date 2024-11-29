@@ -2,6 +2,7 @@ import { IServiceRequestDto } from "src/common/application/services"
 
 export interface OrderPayApplicationServiceRequestDto extends IServiceRequestDto {
     userId: string;
+    paymentId: string;
     currency: string;
     paymentMethod: string;
     address: string;
