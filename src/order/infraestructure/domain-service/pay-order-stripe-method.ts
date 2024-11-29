@@ -30,6 +30,7 @@ export class StripePayOrderMethod implements IPaymentMethodService {
                     currency: order.TotalAmount.OrderCurrency,
                     payment_method_types: ['card'],
                     confirmation_method: 'manual',
+                    metadata: { orderId: order.getId().orderId },
                 });
             let paymentIntentId = paymentIntent.id;
             

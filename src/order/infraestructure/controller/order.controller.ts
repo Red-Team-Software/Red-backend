@@ -177,7 +177,7 @@ export class OrderController {
     async realizePayment(@Body() data: StripePaymentEntryDto) {
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: 'none',
-            paymentId: data.PaymentId,
+            paymentId: data.paymentId,
             currency: data.currency.toLowerCase(),
             paymentMethod: data.paymentMethod,
             address: data.address,
@@ -258,5 +258,24 @@ export class OrderController {
         
         return response.getValue;
     }
+
+    // @Post('/refund/stripe')
+    // async refundPayment(@Body() data: StripePaymentEntryDto) {
+    //     try {
+
+    //         const paymentIntents = await this.stripeSingleton.stripeInstance.paymentIntents.list({});
+
+    //         const stripePaymentIntent = paymentIntents.data.find(
+    //             (paymentIntent) => paymentIntent.metadata.orderId === data.paymentId,
+    //         );
+
+    //         const refund = await this.stripeSingleton.stripeInstance.refunds.create({
+    //             payment_intent: stripePaymentIntent.id,
+    //         });
+    //         return refund.status;
+    //     } catch (error) {
+    //         return error;
+    //     }
+    // }
 
 }
