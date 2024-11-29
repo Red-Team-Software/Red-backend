@@ -19,13 +19,11 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
     async saveUser(user: User): Promise<Result<User>> {
         try{
             let ormUser=await this.mapper.fromDomaintoPersistence(user)
-            console.log(ormUser)
             let response =await this.save(ormUser)
             if (!response)
                 return Result.fail( new PersistenceException('Create user unsucssessfully') )
             return Result.success(user)
         }catch(e){
-            console.log(e)
             return Result.fail( new PersistenceException('Create user unsucssessfully') )
         }
     }

@@ -4,17 +4,36 @@ import { IAccount } from "src/auth/application/model/account.interface";
 import { Result } from "src/common/utils/result-handler/result";
 import { ICommandAccountRepository } from "src/auth/application/repository/command-account-repository.interface";
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
+import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-user-entity";
 
 
 export class OrmAccountCommandRepository extends Repository<OrmAccountEntity> implements ICommandAccountRepository<IAccount>{
 
+    private readonly ormUserRepository: Repository<OrmUserEntity>
+
     constructor(dataSource:DataSource){
         super(OrmAccountEntity, dataSource.createEntityManager())
+        this.ormUserRepository=dataSource.getRepository( OrmUserEntity )
     }
 
     async createAccount(entry: IAccount): Promise<Result<IAccount>> {
         try{
-            let account =await this.save(entry)
+            let ormAccount=OrmAccountEntity.create(
+                entry.sessions,
+                entry.id,
+                entry.email,
+                entry.password,
+                entry.created_at,
+                entry.isConfirmed,
+                entry.idUser
+            )
+            ormAccount.user=await this.ormUserRepository.findOneBy({id:entry.idUser})
+
+            if(!ormAccount.user)
+                return Result.fail( new PersistenceException('Create account unsucssessfully, the user is not registered') )
+
+            let account =await this.save(ormAccount)
+
             if (!account)
                 return Result.fail( new PersistenceException('Create account unsucssessfully') )
             return Result.success(entry)

@@ -49,6 +49,12 @@ export class RegisterUserApplicationService extends IApplicationService
 
         let password= await this.encryptor.hashPassword(data.password)
 
+        let user=User.RegisterUser(
+            UserId.create(await this.idGen.genId()),
+            UserName.create(data.name),
+            UserPhone.create(data.phone)
+        )
+
         let account:IAccount={
             sessions: [] ,
             id:id,
@@ -56,24 +62,18 @@ export class RegisterUserApplicationService extends IApplicationService
             password: password,
             created_at: this.dateHandler.currentDate(),
             isConfirmed:false,
+            idUser:user.getId().Value
         }
-
-        let user=User.RegisterUser(
-            UserId.create(await this.idGen.genId()),
-            UserEmail.create(data.email),
-            UserName.create(data.name),
-            UserPhone.create(data.phone)
-        )
-
-        let commandResult=await this.commandAccountRepository.createAccount(account)
-        
-        if (!commandResult.isSuccess())
-            return Result.fail(new ErrorRegisteringAccountApplicationException())
 
         let userResponse=await this.commandUserRepository.saveUser(user)
 
         if(!userResponse.isSuccess())
             return Result.fail(new ErrorRegisteringUserApplicationException())
+
+        let commandResult=await this.commandAccountRepository.createAccount(account)
+        
+        if (!commandResult.isSuccess())
+            return Result.fail(new ErrorRegisteringAccountApplicationException())
         
         this.eventPublisher.publish(user.pullDomainEvents())
         

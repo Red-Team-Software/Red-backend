@@ -10,21 +10,18 @@ export class UserRegistered extends DomainEvent {
         let data= {  
             userId:this.userId.Value,
             userName:this.userName.Value,
-            userEmail:this.userEmail.Value,      
             userPhone:this.userPhone.Value,  
             userImage: this.userImage ? this.userImage.Value : undefined        }
         return JSON.stringify(data)
     }
     static create(
         userId:UserId,
-        userEmail:UserEmail,
         userName:UserName,
         userPhone:UserPhone,
         userImage:UserImage
     ){
         return new UserRegistered(
             userId,
-            userEmail,
             userName,
             userPhone,
             userImage
@@ -32,7 +29,6 @@ export class UserRegistered extends DomainEvent {
     }
     constructor(
         public userId:UserId,
-        public userEmail:UserEmail,
         public userName:UserName,
         public userPhone:UserPhone,
         public userImage:UserImage

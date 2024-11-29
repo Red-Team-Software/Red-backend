@@ -15,7 +15,6 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
 
         let data= OrmUserEntity.create(
             domainEntity.getId().Value,
-            domainEntity.UserEmail.Value,
             domainEntity.UserName.Value,
             domainEntity.UserPhone.Value,
             domainEntity.UserImage ? domainEntity.UserImage.Value : undefined
@@ -26,7 +25,6 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
 
         let user=User.initializeAggregate(
             UserId.create(infraEstructure.id),
-            UserEmail.create(infraEstructure.email),
             UserName.create(infraEstructure.name),
             UserPhone.create(infraEstructure.phone),
             infraEstructure.image ? UserImage.create(infraEstructure.image) : undefined
