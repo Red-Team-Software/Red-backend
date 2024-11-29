@@ -2,7 +2,7 @@ import { Transform } from 'class-transformer';
 import { IsArray, IsNumber, IsPositive, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class PaymentEntryDto {
+export class StripePaymentEntryDto {
   @ApiProperty({ example: 100, description: 'The amount to be paid' })
   @IsNumber()
   @IsPositive()

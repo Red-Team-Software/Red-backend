@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Inject, Logger, Post, Query } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { StripeSingelton } from "src/payments/infraestructure/stripe-singelton";
-import { PaymentEntryDto } from "../dto/payment-entry-dto";
+import { StripePaymentEntryDto } from "../dto/stripe-payment-entry-dto";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { ExceptionDecorator } from "src/common/application/aspects/exeption-decorator/exception-decorator";
@@ -13,12 +13,10 @@ import { OrderPayResponseDto } from "src/order/application/dto/response/order-pa
 import { LoggerDecorator } from "src/common/application/aspects/logger-decorator/logger-decorator";
 import { ICalculateShippingFee } from "src/order/domain/domain-services/calculate-shippping-fee.interfafe";
 import { ICalculateTaxesFee } from "src/order/domain/domain-services/calculate-taxes-fee.interface";
-import { IPaymentService } from "src/order/domain/domain-services/payment-interface";
 import { CalculateTaxesFeeImplementation } from "../domain-service/calculate-tax-fee-implementation";
 import { NestLogger } from "src/common/infraestructure/logger/nest-logger";
 import { CalculateShippingFeeHereMaps } from "../domain-service/calculate-shipping-here-maps";
 import { HereMapsSingelton } from '../../../payments/infraestructure/here-maps-singleton';
-import { PaymentOrderImplementation } from "../domain-service/payment-order-implementation";
 import { TaxesShippingFeeEntryDto } from "../dto/taxes-shipping-dto";
 import { TaxesShippingFeeApplicationServiceEntryDto } from "src/order/application/dto/request/tax-shipping-fee-request-dto";
 import { CalculateTaxesShippingResponseDto } from "src/order/application/dto/response/calculate-taxes-shipping-fee-response.dto";
@@ -40,24 +38,19 @@ import { Channel } from 'amqplib';
 import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher";
 import { IGeocodification } from "src/order/domain/domain-services/geocodification-interface";
 import { GeocodificationHereMapsDomainService } from "../domain-service/geocodification-here-maps-domain-service";
-import { OrmProductQueryRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-query-repository";
 import { IProductRepository } from "src/product/domain/repository/product.interface.repositry";
 import { OrmProductRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-repository";
-import { Product } from "src/product/domain/aggregate/product.aggregate";
-import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
-import { OrmProductMapper } from "src/product/infraestructure/mapper/orm-mapper/orm-product-mapper";
 import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry";
 import { OrmBundleRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-repository";
 import { CancelOrderApplicationServiceRequestDto } from "src/order/application/dto/request/cancel-order-request-dto";
 import { CancelOrderApplicationServiceResponseDto } from "src/order/application/dto/response/cancel-order-response-dto";
 import { CancelOderApplicationService } from "src/order/application/service/cancel-order-application.service";
 import { CancelOrderDto } from "../dto/cancel-order-entry.dto";
-import { StripeConnection } from "../domain-service/stripe_adapter";
+import { StripePayOrderMethod } from "../domain-service/pay-order-stripe-method";
 import { CreateOrderReportApplicationServiceResponseDto } from "src/order/application/dto/response/create-order-report-response.dto";
 import { CreateOrderReportApplicationServiceRequestDto } from "src/order/application/dto/request/create-order-report-request-dto";
 import { CreateReportApplicationService } from "src/order/application/service/create-report-application.service";
 import { CreateReportEntryDto } from "../dto/create-report-entry.dto";
-import { RefundPaymentDto } from "../dto/confirm-payment.dto";
 
 @ApiTags('Order')
 @Controller('order')
@@ -73,11 +66,9 @@ export class OrderController {
     //*Domain services
     private readonly calculateShipping: ICalculateShippingFee;
     private readonly calculateTax: ICalculateTaxesFee;
-    private readonly paymentConnection: IPaymentService;
     private readonly geocodificationAddress: IGeocodification;
     
     //*Aplication services
-    private readonly payOrderService: IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>;
     private readonly calculateTaxesShippingFee: IApplicationService<TaxesShippingFeeApplicationServiceEntryDto,CalculateTaxesShippingResponseDto>;
     private readonly getAllOrders: IApplicationService<FindAllOrdersApplicationServiceRequestDto,FindAllOrdersApplicationServiceResponseDto>;
     private readonly orderCanceled: IApplicationService<CancelOrderApplicationServiceRequestDto,CancelOrderApplicationServiceResponseDto>;
@@ -112,7 +103,6 @@ export class OrderController {
         //*implementations of domain services
         this.calculateShipping = new CalculateShippingFeeHereMaps(this.hereMapsSingelton);
         this.calculateTax = new CalculateTaxesFeeImplementation();
-        this.paymentConnection = new StripeConnection(this.stripeSingleton);
         this.geocodificationAddress = new GeocodificationHereMapsDomainService(this.hereMapsSingelton);
         
         //*Repositories
@@ -128,22 +118,7 @@ export class OrderController {
 
 
         //*Pay Service
-        this.payOrderService = new ExceptionDecorator(
-            new LoggerDecorator(
-                new PayOrderAplicationService(
-                    this.rabbitMq,
-                    this.calculateShipping,
-                    this.calculateTax,
-                    this.paymentConnection,
-                    this.orderRepository,
-                    this.idGen,
-                    this.geocodificationAddress,
-                    this.ormProductRepository,
-                    this.ormBundleRepository
-                ),
-                new NestLogger(new Logger())
-            )
-        );
+        
 
         //*Calculate Taxes and Shipping Fee
         this.calculateTaxesShippingFee = new ExceptionDecorator(
@@ -195,24 +170,39 @@ export class OrderController {
                 new NestLogger(new Logger())
             )
         );
-
     }
 
 
-    @Post('/payment')
-    async realizePayment(@Body() data: PaymentEntryDto) {
+    @Post('/pay/stripe')
+    async realizePayment(@Body() data: StripePaymentEntryDto) {
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: 'none',
-            amount: data.amount,
             currency: data.currency.toLowerCase(),
             paymentMethod: data.paymentMethod,
-            stripePaymentMethod: data.stripePaymentMethod,
             address: data.address,
             products: data.products,
             bundles: data.bundles
         }
 
-        let response = await this.payOrderService.execute(payment);
+        let payOrderService = new ExceptionDecorator(
+            new LoggerDecorator(
+                new PayOrderAplicationService(
+                    this.rabbitMq,
+                    this.calculateShipping,
+                    this.calculateTax,
+                    new StripePayOrderMethod(this.stripeSingleton, this.idGen, data.stripePaymentMethod),
+                    this.orderRepository,
+                    this.idGen,
+                    this.geocodificationAddress,
+                    this.ormProductRepository,
+                    this.ormBundleRepository
+                ),
+                new NestLogger(new Logger())
+            )
+        );
+
+
+        let response = await payOrderService.execute(payment);
         
         return response.getValue;
     }
@@ -268,42 +258,4 @@ export class OrderController {
         return response.getValue;
     }
 
-
-@Post('/create-payment')
-async createPaymentIntent(@Body() data: PaymentEntryDto) {
-    try {
-        const paymentIntent =
-            await this.stripeSingleton.stripeInstance.paymentIntents.create({
-                amount: data.amount,
-                currency: data.currency,
-                payment_method_types: ['card'],
-                confirmation_method: 'manual',
-            });
-        let paymentIntentId = paymentIntent.id;
-        
-        const confirmedPaymentIntent =
-            await this.stripeSingleton.stripeInstance.paymentIntents.confirm(
-                paymentIntentId,
-                {
-                    payment_method: data.paymentMethod,
-                },
-            );
-        return confirmedPaymentIntent;
-    } catch (error) {
-        console.error('Error creating payment intent:', error);
-    }
-}
-
-@Post('/refund-payment')
-async refundPayment(@Body() data: RefundPaymentDto) {
-    try {
-        const refund = await this.stripeSingleton.stripeInstance.refunds.create({
-            payment_intent: data.stripePaymentMethod,
-            amount: 1000*100,
-        });
-        return refund;
-    } catch (error) {
-        console.error('Error refunding payment:', error);
-    }
-}
 }

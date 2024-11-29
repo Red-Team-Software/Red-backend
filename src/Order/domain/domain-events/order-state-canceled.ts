@@ -2,7 +2,9 @@ import { DomainEvent } from "src/common/domain";
 import { OrderId } from "../value_objects/orderId";
 import { OrderState } from "../value_objects/orderState";
 
-export class OrderStatusUpdated extends DomainEvent {
+
+
+export class OrderStatusCanceled extends DomainEvent {
     
     serialize(): string {
         let data = {
@@ -24,7 +26,7 @@ export class OrderStatusUpdated extends DomainEvent {
         id: OrderId,
         orderState: OrderState,
     ){
-        let order = new OrderStatusUpdated(
+        let order = new OrderStatusCanceled(
             id,
             orderState
         );

@@ -33,6 +33,7 @@ export type orderResponse = {
     orderId: string;
     orderState: string;
     orderCreatedDate: Date;
+    orderTimeCreated: string;
     totalAmount: number;
     orderReceivedDate?: Date;
     orderPayment?: {

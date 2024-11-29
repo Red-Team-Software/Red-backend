@@ -11,8 +11,9 @@ import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
 import { OrderProduct } from "../entities/order-product/order-product-entity";
 import { EmptyProductBundleAtributes } from "../exception/product-bundle-empty.exception";
 import { OrderReport } from "../entities/report/report-entity";
-import { OrderStatusCanceled } from "../domain-events/order-state-updated";
+import { OrderStatusCanceled } from "../domain-events/order-state-canceled";
 import { OrderPayment } from "../entities/payment/order-payment-entity";
+import { OrderStatusUpdated } from "../domain-events/order-state-updated";
 
 export class Order extends AggregateRoot<OrderId>{
     
@@ -30,6 +31,10 @@ export class Order extends AggregateRoot<OrderId>{
         }
 
         if (event instanceof OrderStatusCanceled) {
+            this.orderState = event.orderState;
+        }
+
+        if (event instanceof OrderStatusUpdated) {
             this.orderState = event.orderState;
         }
     }
@@ -134,10 +139,18 @@ export class Order extends AggregateRoot<OrderId>{
         return order;
     }
 
-    UpdateOrderState(orderState: OrderState): void {
-        this.orderState = orderState;
+    cancelOrder(orderState: OrderState): void {
         this.apply(
             OrderStatusCanceled.create(
+                this.getId(),
+                orderState
+            )
+        );
+    }
+
+    updateOrderStatus(orderState: OrderState): void {
+        this.apply(
+            OrderStatusUpdated.create(
                 this.getId(),
                 orderState
             )

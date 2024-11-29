@@ -30,7 +30,7 @@ export class CancelOderApplicationService extends IApplicationService<CancelOrde
 
         let newOrder = response.getValue;
 
-        newOrder.UpdateOrderState(OrderState.create('canceled'));
+        newOrder.cancelOrder(OrderState.create('canceled'));
 
         let responseCommand = await this.orderRepository.saveOrder(newOrder);
 

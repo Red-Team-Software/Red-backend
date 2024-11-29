@@ -6,7 +6,7 @@ import { IEventPublisher } from 'src/common/application/events/event-publisher/e
 import { ICalculateShippingFee } from 'src/order/domain/domain-services/calculate-shippping-fee.interfafe';
 import { ICalculateTaxesFee } from 'src/order/domain/domain-services/calculate-taxes-fee.interface';
 import { OrderTotalAmount } from 'src/order/domain/value_objects/order-totalAmount';
-import { IPaymentService } from 'src/order/domain/domain-services/payment-interface';
+import { IPaymentMethodService } from 'src/order/domain/domain-services/payment-method-interface';
 import { OrderDirection } from 'src/order/domain/value_objects/order-direction';
 import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
 import { ErrorCreatingPaymentApplicationException } from '../application-exception/error-creating-payment-application.exception';
@@ -39,24 +39,24 @@ import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../applica
 import { Bundle } from 'src/bundle/domain/aggregate/bundle.aggregate';
 import { OrderReport } from 'src/order/domain/entities/report/report-entity';
 import { OrderPayment } from 'src/order/domain/entities/payment/order-payment-entity';
-import { PaymentId } from 'src/order/domain/entities/payment/value-object/payment-id';
-import { PaymentMethod } from 'src/order/domain/entities/payment/value-object/payment-method';
-import { PaymentAmount } from 'src/order/domain/entities/payment/value-object/payment-amount';
-import { PaymentCurrency } from 'src/order/domain/entities/payment/value-object/payment-currency';
+import { CalculateAmount } from 'src/order/domain/domain-services/calculate-amount';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
     
+    private readonly calculateAmount = new CalculateAmount();
+
     constructor(
         private readonly eventPublisher: IEventPublisher,
         private readonly calculateShippingFee: ICalculateShippingFee,
         private readonly calculateTaxesFee: ICalculateTaxesFee,
-        private readonly payOrder: IPaymentService,
+        private readonly payOrder: IPaymentMethodService,
         private readonly orderRepository: ICommandOrderRepository,
         private readonly idGen: IIdGen<string>,
         private readonly geocodificationAddress: IGeocodification,
         private readonly productRepository:IProductRepository,
-        private readonly bundleRepository:IBundleRepository
+        private readonly bundleRepository:IBundleRepository,
+        
     ){
         super()
     }
@@ -104,6 +104,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             )
         }
 
+        let amount = this.calculateAmount.calculateAmount(products,bundles,orderproducts,orderBundles,data.currency)
+
             let orderAddress = OrderAddressStreet.create(data.address);
         
             // let address = await this.geocodificationAddress.DirecctiontoLatitudeLongitude(orderAddress);
@@ -119,8 +121,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             // if (!shippingFee.isSuccess())
             //  return Result.fail(new ErrorObtainingShippingFeeApplicationException());
 
-            let amount = OrderTotalAmount.create(data.amount, data.currency);
-
             let taxes = await this.calculateTaxesFee.calculateTaxesFee(amount);
 
             if (!taxes.isSuccess()) 
@@ -132,25 +132,14 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let total = OrderTotalAmount.create(amountTotal, data.currency);
             
-            let orderPayment = OrderPayment.create(
-                PaymentId.create(await this.idGen.genId()),
-                PaymentMethod.create(data.paymentMethod),
-                PaymentAmount.create(total.OrderAmount),
-                PaymentCurrency.create(total.OrderCurrency)
-            );
-
-            let stripePaymentMethod = OrderStripePaymentMethod.create(data.stripePaymentMethod);
-
-            let response = await this.payOrder.createPayment(orderPayment, stripePaymentMethod);
-
-            if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException());
+            let orderPayment: OrderPayment 
 
             let orderReceivedDate: OrderReceivedDate = null;
             let orderReport: OrderReport = null;
             
-            let order = Order.registerOrder(
+            let order = Order.initializeAggregate(
                 OrderId.create(await this.idGen.genId()),
-                OrderState.create('ongoing'),
+                OrderState.create('waiting'),
                 OrderCreatedDate.create(new Date()),
                 total,
                 orderDirection,
@@ -160,8 +149,12 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 orderReport, 
                 orderPayment
             );
+
+            let response = await this.payOrder.createPayment(order);
+
+            if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException());
             
-            let responseDB = await this.orderRepository.saveOrder(order); 
+            let responseDB = await this.orderRepository.saveOrder(response.getValue); 
 
             if (!responseDB.isSuccess()) 
                 return Result.fail(new ErrorCreatingOrderApplicationException());
@@ -207,7 +200,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 bundlesresponse.push({
                     id: bundle.getId().Value,
                     quantity: order.Bundles.find(
-                        orderBundle=>bundle.getId().equals(BundleId.create(bundle.getId().Value))
+                        orderBundle=>bundle.getId().equals(BundleId.create(orderBundle.OrderBundleId.OrderBundleId))
                     ).Quantity.OrderBundleQuantity,
                     nombre:bundle.BundleName.Value ,
                     descripcion:bundle.BundleDescription.Value,
@@ -217,23 +210,25 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 })
             })
             
+            console.log('holi')
 
-            let responsedata:OrderPayResponseDto={
-                id: order.getId().orderId,
-                orderState: order.OrderState.orderState,
-                orderCreatedDate: order.OrderCreatedDate.OrderCreatedDate,
-                totalAmount: order.TotalAmount.OrderAmount,
-                currency: order.TotalAmount.OrderCurrency,
+            let responsedata: OrderPayResponseDto = {
+                id: response.getValue.getId().orderId,
+                orderState: response.getValue.OrderState.orderState,
+                orderCreatedDate: response.getValue.OrderCreatedDate.OrderCreatedDate,
+                orderTimeCreated: response.getValue.OrderCreatedDate.OrderCreatedDate.toTimeString().split(' ')[0],
+                totalAmount: response.getValue.TotalAmount.OrderAmount,
+                currency: response.getValue.TotalAmount.OrderCurrency,
                 orderDirection: {
-                    lat: order.OrderDirection.Latitude,
-                    long: order.OrderDirection.Longitude
+                    lat: response.getValue.OrderDirection.Latitude,
+                    long: response.getValue.OrderDirection.Longitude
                 },
-                products:productsresponse,
-                bundles:bundlesresponse,
+                products: productsresponse,
+                bundles: bundlesresponse,
                 orderPayment: {
-                    amount: order.OrderPayment.PaymentAmount.Value,
-                    currency: order.OrderPayment.PaymentCurrency.Value,
-                    paymentMethod: order.OrderPayment.PaymentMethods.Value
+                    amount: response.getValue.OrderPayment.PaymentAmount.Value,
+                    currency: response.getValue.OrderPayment.PaymentCurrency.Value,
+                    paymentMethod: response.getValue.OrderPayment.PaymentMethods.Value
                 }
             }
 
