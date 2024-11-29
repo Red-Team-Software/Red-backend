@@ -68,7 +68,7 @@ export class OrmBundleMapper implements IMapper <Bundle,OrmBundleEntity>{
             BundleName.create(infraEstructure.name),
             BundleStock.create(infraEstructure.stock),
             infraEstructure.images.map((ormimage)=>BundleImage.create(ormimage.image)),
-            BundlePrice.create(infraEstructure.price,infraEstructure.currency),
+            BundlePrice.create(Number(infraEstructure.price),infraEstructure.currency),
             BundleWeigth.create(infraEstructure.weigth,infraEstructure.measurament),
             infraEstructure.products.map(product=>ProductID.create(product.id))
         )
