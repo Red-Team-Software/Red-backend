@@ -4,6 +4,4 @@ export interface ICommandTokenSessionRepository<T> {
   createSession(entry: T): Promise<Result<T>>
   updateSession(entry: T): Promise<Result<T>>
   deleteSessionById(id: string): Promise<Result<string>>
-  findSessionById(id: string): Promise<Result<T>> 
-  findAllTokenSessionsByUserId(id: string): Promise<Result<T[]>> 
 }

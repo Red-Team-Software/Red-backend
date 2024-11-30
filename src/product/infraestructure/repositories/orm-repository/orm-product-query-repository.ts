@@ -31,9 +31,8 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             .skip(criteria.page)
             .getMany()
 
-
-            if(ormProducts.length==0)
-                return Result.fail( new NotFoundException('products empty please try again'))
+            // if(ormProducts.length==0)
+            //     return Result.fail( new NotFoundException('products empty please try again'))
 
             const products:Product[]=[]
 

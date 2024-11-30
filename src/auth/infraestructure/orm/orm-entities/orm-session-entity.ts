@@ -8,7 +8,7 @@ export class OrmSessionEntity implements ISession{
     
     @PrimaryColumn({type:"uuid"}) id: string;
     @Column( 'timestamp', { default: () => 'CURRENT_TIMESTAMP' } ) expired_at: Date;
-    @Column( 'varchar') push_token: string;
+    @Column( 'varchar',{nullable:true}) push_token: string;
     @ManyToOne( () => OrmAccountEntity ) @JoinColumn( { name: 'id' } ) account: OrmAccountEntity
     @Column( 'varchar' ) accountId: string;
     

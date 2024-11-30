@@ -15,6 +15,7 @@ import { UserNotFoundApplicationException } from "../../application-exeption/use
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
+import { ErrorRegisteringSessionApplicationException } from "../../application-exeption/error-registering-session-application-exception";
 
 export class LogInUserApplicationService extends IApplicationService 
 <LogInUserApplicationRequestDTO,LogInUserApplicationResponseDTO> {
@@ -60,7 +61,7 @@ export class LogInUserApplicationService extends IApplicationService
 
         const jwt = this.jwtGen.generateJwt( idSession )
         
-        this.commandTokenSessionRepository.createSession(
+        let sessionResponse=await this.commandTokenSessionRepository.createSession(
         {
             expired_at: this.dateHandler.getExpiry(),
             id: idSession,
@@ -68,11 +69,15 @@ export class LogInUserApplicationService extends IApplicationService
             accountId: account.id
         })
 
+        console.log(sessionResponse)
+
+        if (!sessionResponse.isSuccess())
+            return Result.fail(new ErrorRegisteringSessionApplicationException())
 
         return Result.success({
             accountId:account.id,
             user: {
-                id: account.id,
+                id: user.getId().Value,
                 email: account.email,
                 name: user.UserName.Value,
                 phone: user.UserPhone.Value

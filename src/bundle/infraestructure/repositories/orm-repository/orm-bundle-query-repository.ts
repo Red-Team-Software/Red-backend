@@ -61,9 +61,8 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
                 .take(criteria.perPage)
                 .getMany()
 
-
-                if(ormBundle.length==0)
-                    return Result.fail( new NotFoundException('bundles not foudnd please try again'))
+                // if(ormBundle.length==0)
+                //     return Result.fail( new NotFoundException('bundles not foudnd please try again'))
 
                 const bundles:Bundle[]=[]
                 for (const bundle of ormBundle){
