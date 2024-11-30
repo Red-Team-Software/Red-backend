@@ -51,6 +51,7 @@ import { CreateOrderReportApplicationServiceResponseDto } from "src/order/applic
 import { CreateOrderReportApplicationServiceRequestDto } from "src/order/application/dto/request/create-order-report-request-dto";
 import { CreateReportApplicationService } from "src/order/application/service/create-report-application.service";
 import { CreateReportEntryDto } from "../dto/create-report-entry.dto";
+import { RefundPaymentStripeConnection } from "../domain-service/refund-amount-stripe";
 
 @ApiTags('Order')
 @Controller('order')
@@ -151,7 +152,8 @@ export class OrderController {
                 new CancelOderApplicationService(
                     this.orderQueryRepository,
                     this.orderRepository,
-                    this.rabbitMq
+                    this.rabbitMq,
+                    new RefundPaymentStripeConnection(this.stripeSingleton)
                 ),
                 new NestLogger(new Logger())
             )

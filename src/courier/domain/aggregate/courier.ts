@@ -17,6 +17,8 @@ export class Courier extends AggregateRoot<CourierId>{
         courierId: CourierId,
         private courierName: CourierName,
         private courierImage: CourierImage,
+        //private password:
+        //priavte username:
     )
     {
         super(courierId)

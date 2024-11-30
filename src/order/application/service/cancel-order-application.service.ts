@@ -9,6 +9,7 @@ import { NotFoundOrderApplicationException } from "../application-exception/not-
 import { OrderState } from "src/order/domain/value_objects/orderState";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { ErrorModifiyingOrderStateApplicationException } from "../application-exception/error-modifying-order-status-application.exception";
+import { IRefundPaymentService } from "src/order/domain/domain-services/refund-amount.interface";
 
 
 
@@ -18,6 +19,7 @@ export class CancelOderApplicationService extends IApplicationService<CancelOrde
         private readonly orderQueryRepository: IQueryOrderRepository,
         private readonly orderRepository: ICommandOrderRepository,
         private readonly eventPublisher: IEventPublisher,
+        private readonly refundPayment: IRefundPaymentService
     ){
         super()
     }
@@ -31,6 +33,8 @@ export class CancelOderApplicationService extends IApplicationService<CancelOrde
         let newOrder = response.getValue;
 
         newOrder.cancelOrder(OrderState.create('canceled'));
+
+        this.refundPayment.refundPayment(newOrder);
 
         let responseCommand = await this.orderRepository.saveOrder(newOrder);
 
