@@ -22,14 +22,14 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
     }
     async findAllProductsByName(criteria: FindAllProductsbyNameApplicationRequestDTO): Promise<Result<Product[]>> {
         try{
-            const ormProducts = await this.createQueryBuilder( 'product' )
-            .where('LOWER(product.name) LIKE :name', { name: `%${ criteria.name.toLowerCase().trim() }%` })
-            .leftJoinAndSelect('product.images','product_image')
-            .where('product.stock > :stock', { stock: 0})
-            .orderBy( 'product.caducityDate', 'DESC' )
-            .take(criteria.perPage)
-            .skip(criteria.page)
-            .getMany()
+            const ormProducts = await this.createQueryBuilder('product')
+                .where('LOWER(product.name) LIKE :name', { name: `%${criteria.name.toLowerCase().trim()}%` })
+                .andWhere('product.stock > :stock', { stock: 0 })
+                .leftJoinAndSelect('product.images', 'product_image')
+                .orderBy('product.caducityDate', 'DESC')
+                .take(criteria.perPage)
+                .skip(criteria.page)
+                .getMany();
 
             // if(ormProducts.length==0)
             //     return Result.fail( new NotFoundException('products empty please try again'))
