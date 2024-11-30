@@ -18,6 +18,8 @@ import { IEventPublisher } from "src/common/application/events/event-publisher/e
 import { ErrorRegisteringAccountApplicationException } from "../../application-exeption/error-registering-account-application-exception";
 import { ErrorRegisteringUserApplicationException } from "../../application-exeption/error-registering-user-application-exception";
 import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface";
+import { UserRole } from "src/user/domain/value-object/user-role";
+import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
 
 
 export class RegisterUserApplicationService extends IApplicationService 
@@ -52,7 +54,8 @@ export class RegisterUserApplicationService extends IApplicationService
         let user=User.RegisterUser(
             UserId.create(await this.idGen.genId()),
             UserName.create(data.name),
-            UserPhone.create(data.phone)
+            UserPhone.create(data.phone),
+            UserRole.create(UserRoles.CLIENT)
         )
 
         let account:IAccount={

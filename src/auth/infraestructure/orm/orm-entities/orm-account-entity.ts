@@ -1,8 +1,8 @@
 import { IAccount } from "src/auth/application/model/account.interface";
 import { ISession } from "src/auth/application/model/session.interface";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
-import { OrmSession } from "./orm-session-entity";
 import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-user-entity";
+import { OrmSessionEntity } from "./orm-session-entity";
 
 
 @Entity('account')
@@ -14,7 +14,7 @@ export class OrmAccountEntity implements IAccount{
     @Column( 'boolean')  isConfirmed: boolean;
     @Column( 'varchar' ) idUser: string;
 
-    @OneToMany( () => OrmSession, session => session.account,{ eager: true })  
+    @OneToMany( () => OrmSessionEntity, session => session.account,{ eager: true })  
     sessions: ISession[];
 
     @ManyToOne( () => OrmUserEntity , user=>user.id) @JoinColumn( { name: 'id' } ) 

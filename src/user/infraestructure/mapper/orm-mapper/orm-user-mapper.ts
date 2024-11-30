@@ -5,8 +5,9 @@ import { UserId } from "src/user/domain/value-object/user-id"
 import { UserImage } from "src/user/domain/value-object/user-image"
 import { UserName } from "src/user/domain/value-object/user-name"
 import { OrmUserEntity } from "../../entities/orm-entities/orm-user-entity"
-import { UserEmail } from "src/user/domain/value-object/user-email"
 import { UserPhone } from "src/user/domain/value-object/user-phone"
+import { UserRole } from "src/user/domain/value-object/user-role"
+import { UserRoles } from "src/user/domain/value-object/enum/user.roles"
 
 
 export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
@@ -17,7 +18,8 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
             domainEntity.getId().Value,
             domainEntity.UserName.Value,
             domainEntity.UserPhone.Value,
-            domainEntity.UserImage ? domainEntity.UserImage.Value : undefined
+            domainEntity.UserRole.Value as UserRoles,
+            domainEntity.UserImage ? domainEntity.UserImage.Value : undefined,
         )
         return data
     }
@@ -27,6 +29,7 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
             UserId.create(infraEstructure.id),
             UserName.create(infraEstructure.name),
             UserPhone.create(infraEstructure.phone),
+            UserRole.create(infraEstructure.type),
             infraEstructure.image ? UserImage.create(infraEstructure.image) : undefined
         )
         return user
