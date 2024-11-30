@@ -1,6 +1,5 @@
 import { IServiceResponseDto } from "src/common/application/services/dto/response/service-response-dto.interface";
 
-
 export type productsOrderResponse = {
     id: string
     name: string 
@@ -29,6 +28,11 @@ export type reportOrderResponse = {
     orderid: string
 }
 
+export type courierOrderResponse = {
+    courierName: string
+    courierImage: string
+}
+
 export type orderResponse = {
     orderId: string;
     orderState: string;
@@ -49,6 +53,7 @@ export type orderResponse = {
     products?: productsOrderResponse[];
     bundles?: bundlesOrderResponse[];
     orderReport?: reportOrderResponse;
+    orderCourier: courierOrderResponse;
 }
 
 export class FindAllOrdersApplicationServiceResponseDto implements IServiceResponseDto {

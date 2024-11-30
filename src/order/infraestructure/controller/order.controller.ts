@@ -52,6 +52,11 @@ import { CreateOrderReportApplicationServiceRequestDto } from "src/order/applica
 import { CreateReportApplicationService } from "src/order/application/service/create-report-application.service";
 import { CreateReportEntryDto } from "../dto/create-report-entry.dto";
 import { RefundPaymentStripeConnection } from "../domain-service/refund-amount-stripe";
+import { ICourierRepository } from "src/courier/domain/repositories/courier-repository-interface";
+import { OrmCourierMapper } from "src/courier/infraestructure/mapper/orm-courier-mapper/orm-courier-mapper";
+import { CourierRepository } from "src/courier/infraestructure/repository/orm-repository/orm-courier-repository";
+import { ICourierQueryRepository } from "src/courier/application/query-repository/courier-query-repository-interface";
+import { CourierQueryRepository } from "src/courier/infraestructure/repository/orm-repository/orm-courier-query-repository";
 
 @ApiTags('Order')
 @Controller('order')
@@ -80,6 +85,8 @@ export class OrderController {
     private readonly orderQueryRepository: IQueryOrderRepository;
     private readonly ormProductRepository: IProductRepository;
     private readonly ormBundleRepository: IBundleRepository;
+    private readonly ormCourierRepository: ICourierRepository;
+    private readonly ormCourierQueryRepository: ICourierQueryRepository;
 
     //*IdGen
     private readonly idGen: IIdGen<string>;
@@ -109,14 +116,21 @@ export class OrderController {
         //*Repositories
         this.ormProductRepository = new OrmProductRepository(PgDatabaseSingleton.getInstance());
         this.ormBundleRepository = new OrmBundleRepository(PgDatabaseSingleton.getInstance());
+        this.ormCourierRepository = new CourierRepository(
+            PgDatabaseSingleton.getInstance(),
+            new OrmCourierMapper(this.idGen)
+        );
+        this.ormCourierQueryRepository = new CourierQueryRepository(
+            PgDatabaseSingleton.getInstance(),
+            new OrmCourierMapper(this.idGen)
+        );
 
         //*Mappers
-        this.orderMapper = new OrmOrderMapper(this.idGen,this.ormProductRepository,this.ormBundleRepository);
+        this.orderMapper = new OrmOrderMapper(this.idGen,this.ormProductRepository,this.ormBundleRepository,this.ormCourierRepository);
 
         //*Repositories
         this.orderQueryRepository = new OrderQueryRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
         this.orderRepository = new OrmOrderRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
-
 
         //*Pay Service
         
@@ -139,7 +153,8 @@ export class OrderController {
                 new FindAllOdersApplicationService(
                     this.orderQueryRepository,
                     this.ormProductRepository,
-                    this.ormBundleRepository
+                    this.ormBundleRepository,
+                    this.ormCourierQueryRepository
                 ),
                 new NestLogger(new Logger())
             )
@@ -198,7 +213,8 @@ export class OrderController {
                     this.idGen,
                     this.geocodificationAddress,
                     this.ormProductRepository,
-                    this.ormBundleRepository
+                    this.ormBundleRepository,
+                    this.ormCourierQueryRepository
                 ),
                 new NestLogger(new Logger())
             )

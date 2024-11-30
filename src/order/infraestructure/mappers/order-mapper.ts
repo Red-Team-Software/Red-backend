@@ -31,6 +31,11 @@ import { PaymentId } from '../../domain/entities/payment/value-object/payment-id
 import { PaymentMethod } from "src/order/domain/entities/payment/value-object/payment-method";
 import { PaymentAmount } from "src/order/domain/entities/payment/value-object/payment-amount";
 import { PaymentCurrency } from "src/order/domain/entities/payment/value-object/payment-currency";
+import { OrderCourier } from "src/order/domain/entities/order-courier/order-courier-entity";
+import { OrderCourierId } from "src/order/domain/entities/order-courier/value-object/order-courier-id";
+import { OrderCourierDirection } from '../../domain/entities/order-courier/value-object/order-courier-direction';
+import { ICourierRepository } from "src/courier/domain/repositories/courier-repository-interface";
+import { OrmOrderCourierEntity } from "../entities/orm-order-courier-entity";
 
 
 export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
@@ -39,7 +44,8 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
     constructor(
         private readonly idGen:IIdGen<string>,
         private readonly ormProductRepository: IProductRepository,
-        private readonly ormBundleRepository: IBundleRepository
+        private readonly ormBundleRepository: IBundleRepository,
+        private readonly ormCourierRepository: ICourierRepository
     ){
     }
     
@@ -50,6 +56,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         let recievedDate: OrderReceivedDate;
         let orderReport: OrderReport;
         let orderPayment: OrderPayment;
+        let orderCourier: OrderCourier;
 
         const ormProducts:OrmOrderProductEntity[] = infraEstructure.order_products;
         const ormBundles:OrmOrderBundleEntity[] = infraEstructure.order_bundles;
@@ -92,12 +99,18 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             PaymentCurrency.create(infraEstructure.pay.currency)
         )}
 
+        orderCourier = OrderCourier.create(
+            OrderCourierId.create(infraEstructure.order_courier.courier_id),
+            OrderCourierDirection.create(infraEstructure.order_courier.latitude,infraEstructure.order_courier.longitude)
+        );
+
         let order = Order.initializeAggregate(
             OrderId. create(infraEstructure.id),
             OrderState.create(infraEstructure.state),
             OrderCreatedDate.create(infraEstructure.orderCreatedDate),
             OrderTotalAmount.create(infraEstructure.totalAmount,infraEstructure.currency),
             OrderDirection.create(infraEstructure.latitude,infraEstructure.longitude),
+            orderCourier,
             products,
             bundles,
             recievedDate,
@@ -157,11 +170,18 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         let orderOrmReport: OrmOrderReportEntity;
         if(domainEntity.OrderReport){
             orderOrmReport = OrmOrderReportEntity.create(
-                domainEntity.OrderReport.OrderReportId.OrderReportId,
+                domainEntity.OrderReport.getId().OrderReportId,
                 domainEntity.OrderReport.Description.Value,
                 domainEntity.getId().orderId
             )
         }
+
+        let orderCourier = OrmOrderCourierEntity.create(
+            domainEntity.getId().orderId,
+            domainEntity.OrderCourier.getId().OrderCourierId,
+            domainEntity.OrderCourier.CourierDirection.Latitude,
+            domainEntity.OrderCourier.CourierDirection.Longitude
+        )
 
         let orderReceivedDate = domainEntity.OrderReceivedDate ? domainEntity.OrderReceivedDate.OrderReceivedDate : null;
 
@@ -173,6 +193,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             domainEntity.TotalAmount.OrderCurrency,
             domainEntity.OrderDirection.Latitude,
             domainEntity.OrderDirection.Longitude,
+            orderCourier,
             ormOrderPayEntity,
             ormProducts,
             ormBundles,

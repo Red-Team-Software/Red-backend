@@ -9,6 +9,7 @@ import { OrderProduct } from "../entities/order-product/order-product-entity";
 import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
 import { OrderReport } from "../entities/report/report-entity";
 import { OrderPayment } from "../entities/payment/order-payment-entity";
+import { OrderCourier } from "../entities/order-courier/order-courier-entity";
 
 
 export class OrderRegistered extends DomainEvent {
@@ -20,10 +21,11 @@ export class OrderRegistered extends DomainEvent {
             orderCreateDate: this.orderCreateDate.OrderCreatedDate,
             totalAmount: this.totalAmount,
             orderDirection: this.orderDirection,
+            orderCourier: this.orderCourier,
             products: this.products,
             bundles: this.bundles,
             orderReceivedDate: this.orderReceivedDate?.OrderReceivedDate,
-            orderReport: this.orderReport?.OrderReportId,
+            orderReport: this.orderReport?.getId(),
             orderPayment: this.orderPayment
         }
         
@@ -36,6 +38,7 @@ export class OrderRegistered extends DomainEvent {
         public orderCreateDate: OrderCreatedDate,
         public totalAmount: OrderTotalAmount,
         public orderDirection: OrderDirection,
+        public orderCourier: OrderCourier,
         public products?: OrderProduct[],
         public bundles?: OrderBundle[],
         public orderReceivedDate?: OrderReceivedDate,
@@ -51,6 +54,7 @@ export class OrderRegistered extends DomainEvent {
         orderCreatedDate: OrderCreatedDate,
         totalAmount: OrderTotalAmount,
         orderDirection: OrderDirection,
+        orderCourier: OrderCourier,
         products?: OrderProduct[],
         bundles?: OrderBundle[],
         orderReceivedDate?: OrderReceivedDate,
@@ -63,6 +67,7 @@ export class OrderRegistered extends DomainEvent {
             orderCreatedDate,
             totalAmount,
             orderDirection,
+            orderCourier,
             products,
             bundles,
             orderReceivedDate,

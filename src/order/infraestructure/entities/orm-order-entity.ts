@@ -4,6 +4,7 @@ import { OrmOrderPayEntity } from "./orm-order-payment";
 import { OrmOrderProductEntity } from "./orm-order-product-entity";
 import { OrmOrderBundleEntity } from "./orm-order-bundle-entity";
 import { OrmOrderReportEntity } from "./orm-order-report-entity";
+import { OrmOrderCourierEntity } from "./orm-order-courier-entity";
 
 @Entity('order')
 export class OrmOrderEntity implements IOrderInterface {
@@ -46,6 +47,9 @@ export class OrmOrderEntity implements IOrderInterface {
     @JoinColumn()
     order_report?: OrmOrderReportEntity;
 
+    @OneToOne( () => OrmOrderCourierEntity, (orderCourier) => orderCourier.order_id, { cascade: true })
+    @JoinColumn()
+    order_courier?: OrmOrderCourierEntity;
 
     static create(
         id: string,
@@ -55,6 +59,7 @@ export class OrmOrderEntity implements IOrderInterface {
         currency: string,
         latitude: number,
         longitude: number,
+        orderCourier: OrmOrderCourierEntity,
         pay?: OrmOrderPayEntity,
         orderProducts?: OrmOrderProductEntity[],
         orderBundles?: OrmOrderBundleEntity[],
@@ -69,6 +74,7 @@ export class OrmOrderEntity implements IOrderInterface {
         order.currency = currency;
         order.latitude = latitude;
         order.longitude = longitude;
+        order.order_courier = orderCourier;
         order.pay = pay;
         order.order_products = orderProducts;
         order.order_bundles = orderBundles;

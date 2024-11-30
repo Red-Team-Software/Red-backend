@@ -40,6 +40,11 @@ import { Bundle } from 'src/bundle/domain/aggregate/bundle.aggregate';
 import { OrderReport } from 'src/order/domain/entities/report/report-entity';
 import { OrderPayment } from 'src/order/domain/entities/payment/order-payment-entity';
 import { CalculateAmount } from 'src/order/domain/domain-services/calculate-amount';
+import { ICourierRepository } from 'src/courier/domain/repositories/courier-repository-interface';
+import { ICourierQueryRepository } from 'src/courier/application/query-repository/courier-query-repository-interface';
+import { OrderCourier } from 'src/order/domain/entities/order-courier/order-courier-entity';
+import { OrderCourierId } from 'src/order/domain/entities/order-courier/value-object/order-courier-id';
+import { OrderCourierDirection } from 'src/order/domain/entities/order-courier/value-object/order-courier-direction';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -56,6 +61,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly geocodificationAddress: IGeocodification,
         private readonly productRepository:IProductRepository,
         private readonly bundleRepository:IBundleRepository,
+        private readonly ormCourierQueryRepository: ICourierQueryRepository
         
     ){
         super()
@@ -136,6 +142,15 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let orderReceivedDate: OrderReceivedDate = null;
             let orderReport: OrderReport = null;
+
+            let courier = await this.ormCourierQueryRepository.findAllCouriers();
+
+            let selectedCourierId = courier.getValue[Math.floor(Math.random() * courier.getValue.length)].getId();
+
+            let orderCourier = OrderCourier.create(
+                OrderCourierId.create(selectedCourierId.courierId),
+                OrderCourierDirection.create(orderDirection.Latitude, orderDirection.Longitude)
+            );
             
             let order = Order.initializeAggregate(
                 OrderId.create(await this.idGen.genId()),
@@ -143,6 +158,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 OrderCreatedDate.create(new Date()),
                 total,
                 orderDirection,
+                orderCourier,
                 orderproducts,
                 orderBundles,
                 orderReceivedDate, 
@@ -169,7 +185,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 price:number 
                 images:string[]
                 currency:string
-            }[]=[]
+            }[]=[];
 
             let bundlesresponse:{
                 id: string,
@@ -179,7 +195,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 price:number 
                 currency:string
                 images:string[]
-            }[]=[]
+            }[]=[];
 
 
             products.forEach(product=>{
@@ -194,7 +210,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                     currency:product.ProductPrice.Currency,
                     images:product.ProductImages.map(image=>image.Value)
                 })
-            })
+            });
 
             bundles.forEach(bundle=>{
                 bundlesresponse.push({
@@ -208,9 +224,10 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                     currency:bundle.BundlePrice.Currency,
                     images:bundle.BundleImages.map(image=>image.Value)                
                 })
-            })
-            
-            console.log('holi')
+            });
+
+            let selectedCourier = courier.getValue.find(c => c.getId().equals(selectedCourierId) );
+
 
             let responsedata: OrderPayResponseDto = {
                 id: response.getValue.getId().orderId,
@@ -229,6 +246,10 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                     amount: response.getValue.OrderPayment.PaymentAmount.Value,
                     currency: response.getValue.OrderPayment.PaymentCurrency.Value,
                     paymentMethod: response.getValue.OrderPayment.PaymentMethods.Value
+                },
+                orderCourier: {
+                    courierName: selectedCourier.CourierName.courierName,
+                    courierImage: selectedCourier.CourierImage.Value
                 }
             }
 

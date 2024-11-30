@@ -1,6 +1,5 @@
 import { ValueObject } from "src/common/domain";
 import { BadFormatOrderDirectionLatitudeException } from "../exception/bad-format-order-direction-latitude.exception";
-import { string } from "joi";
 import { BadFormatOrderDirectionLongitudeException } from "../exception/bad-format-order-direction-longitude.exception";
 import { EmptyOrderDirectionLatitudeException } from "../exception/empty-order-direction-latitude.exception";
 import { EmptyOrderDirectionLongitudeException } from "../exception/empty-order-direction-longitude.exception";

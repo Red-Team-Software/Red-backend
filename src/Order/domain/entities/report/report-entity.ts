@@ -22,10 +22,6 @@ export class OrderReport extends Entity<OrderReportId> {
         );
     }
 
-    get OrderReportId(): OrderReportId {
-        return this.orderReportId;
-    }
-
     get Description(): OrderReportDescription {
         return this.description;
     }

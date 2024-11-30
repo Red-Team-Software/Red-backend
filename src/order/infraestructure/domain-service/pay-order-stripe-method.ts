@@ -55,6 +55,7 @@ export class StripePayOrderMethod implements IPaymentMethodService {
                 order.OrderCreatedDate,
                 order.TotalAmount,
                 order.OrderDirection,
+                order.OrderCourier,
                 order.Products,
                 order.Bundles,
                 order.OrderReceivedDate, 

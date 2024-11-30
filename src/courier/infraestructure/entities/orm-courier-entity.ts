@@ -1,9 +1,10 @@
 import { Column, Entity, OneToMany, OneToOne, PrimaryColumn } from "typeorm"
 import { OrmCourierImageEntity } from "./orm-courier-image-entity"
 import { ICourierInterface } from "../model-entity/orm-model-entity/courier-interface"
+import { OrmOrderCourierEntity } from "src/order/infraestructure/entities/orm-order-courier-entity"
 
 
-@Entity( { name: 'courier' } )
+@Entity( 'courier' )
 export class OrmCourierEntity implements ICourierInterface{
     @PrimaryColumn({type:"uuid"}) 
     id:string
@@ -11,6 +12,9 @@ export class OrmCourierEntity implements ICourierInterface{
     name: string
     @OneToOne( () => OrmCourierImageEntity,   image => image.courier,{ eager: true }) 
     image: OrmCourierImageEntity   
+
+    @OneToMany( () => OrmOrderCourierEntity, order_couriers => order_couriers.courier )
+    order_couriers: OrmOrderCourierEntity[]
 
     static create ( 
         id:string,
