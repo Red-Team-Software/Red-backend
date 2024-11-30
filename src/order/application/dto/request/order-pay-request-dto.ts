@@ -15,5 +15,4 @@ export interface OrderPayApplicationServiceRequestDto extends IServiceRequestDto
         quantity: number
     }[];
     
-
 }

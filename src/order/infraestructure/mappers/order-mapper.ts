@@ -8,10 +8,10 @@ import { OrderTotalAmount } from "src/order/domain/value_objects/order-totalAmou
 import { OrderDirection } from "src/order/domain/value_objects/order-direction";
 import { OrderCreatedDate } from "src/order/domain/value_objects/order-created-date";
 import { OrmOrderPayEntity } from '../entities/orm-order-payment';
-import { IProductRepository } from "src/product/domain/repository/product.interface.repositry";
+import { IProductRepository } from "src/product/domain/repository/product.repositry.interface";
 import { OrmOrderProductEntity } from "../entities/orm-order-product-entity";
 import { OrmOrderBundleEntity } from "../entities/orm-order-bundle-entity";
-import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry";
+import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface";
 import { NotFoundException } from "@nestjs/common";
 import { ProductID } from '../../../product/domain/value-object/product-id';
 import { BundleId } from "src/bundle/domain/value-object/bundle-id";

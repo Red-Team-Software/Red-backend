@@ -8,6 +8,8 @@ import { CategoryController } from './category/infraestructure/controller/catego
 import { OrderController } from './order/infraestructure/controller/order.controller';
 import { BundleController } from './bundle/infraestructure/controller/bundle.controller';
 import { CourierController } from './courier/infraestructure/controller/courier.controller';
+import { AuthController } from './auth/infraestructure/controller/auth.controller';
+import { UserController } from './user/infraestructure/controller/user.controller';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { CourierController } from './courier/infraestructure/controller/courier.
     CategoryController,
     BundleController,
     OrderController,
+    AuthController,
+    UserController,
     CourierController
   ],
   providers:[CloudinaryProvider]
