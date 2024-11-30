@@ -6,14 +6,25 @@ import { UserPhone } from "../value-object/user-phone";
 import { UserRegistered } from '../domain-events/user-registered';
 import { UserImage } from "../value-object/user-image";
 import { UserDirection } from '../value-object/user-direction';
+import { UserDirectionAdded } from "../domain-events/user-direction-added";
+import { UserDirectionDeleted } from "../domain-events/user-direction-deleted";
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
         switch (event.getEventName){
-            case 'UserRegistered':
+            case 'UserRegistered':{
             const userRegistered: UserRegistered = event as UserRegistered
             this.userName=userRegistered.userName
             this.userPhone=userRegistered.userPhone
+            }
+            case 'UserDirectionAdded':{
+                const userDirectionAdded: UserDirectionAdded = event as UserDirectionAdded
+                this.UserDirections.push(userDirectionAdded.userDirection)
+            }
+            case 'UserDirectionDeleted':{
+                const userDirectionDeleted: UserDirectionAdded = event as UserDirectionAdded
+                this.UserDirections.filter(userDirection=>!userDirection.equals(userDirectionDeleted.userDirection))
+            }
         }
     }
     protected validateState(): void {
@@ -69,9 +80,24 @@ export class User extends AggregateRoot <UserId>{
         user.validateState()
         return user
     }
+    addDirection(direction:UserDirection):void{
+        this.apply(
+            UserDirectionAdded.create(
+                this.getId(),
+                direction
+            )
+        )    
+    }
+    deleteDirection(direction:UserDirection):void{
+        this.apply(
+            UserDirectionDeleted.create(
+                this.getId(),
+                direction
+            )
+        )    
+    }
     get UserName():UserName {return this.userName}
     get UserPhone():UserPhone {return this.userPhone}
     get UserImage():UserImage {return this.userImage}
     get UserDirections():UserDirection[] {return this.userDirections}
-
 }

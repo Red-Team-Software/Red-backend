@@ -6,12 +6,15 @@ import { OrmUserEntity } from "../../entities/orm-entities/orm-user-entity";
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { OrmUserMapper } from "../../mapper/orm-mapper/orm-user-mapper";
+import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
+import { UserDirection } from "src/user/domain/value-object/user-direction";
+import { UserId } from "src/user/domain/value-object/user-id";
 import { OrmDirectionEntity } from "../../entities/orm-entities/orm-direction-entity";
 import { OrmDirectionUserEntity } from "../../model-entity/orm-model-entity/orm-direction-user-entity";
 
 
 
-export class OrmUserCommandRepository extends Repository<OrmUserEntity> implements ICommandUserRepository{
+export class OrmUserQueryRepository extends Repository<OrmUserEntity> implements IQueryUserRepository{
 
     private mapper:IMapper <User,OrmUserEntity>
     private readonly ormDirectionRepository: Repository<OrmDirectionEntity>;
@@ -23,15 +26,28 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
         this.ormDirectionRepository=dataSource.getRepository(OrmDirectionEntity)
         this.ormDirectionUserRepository=dataSource.getRepository(OrmDirectionUserEntity)
     }
-    async saveUser(user: User): Promise<Result<User>> {
+
+    async findUserById(id: UserId): Promise<Result<User>> {
         try{
-            let ormUser=await this.mapper.fromDomaintoPersistence(user)
-            let response =await this.save(ormUser)
-            if (!response)
-                return Result.fail( new PersistenceException('Create user unsucssessfully') )
+            let ormUser=await this.findOneBy({id:id.Value})
+            if (!ormUser)
+                return Result.fail(new PersistenceException('Find user by id unsucssessfully'))
+            let user= await this.mapper.fromPersistencetoDomain(ormUser)
             return Result.success(user)
         }catch(e){
-            return Result.fail( new PersistenceException('Create user unsucssessfully') )
+            return Result.fail(new PersistenceException('Find user by id unsucssessfully'))
         }
     }
+    async findUserDirectionsByUserId(id: UserId): Promise<Result<UserDirection[]>> {
+        try{
+            let ormUser=await this.findOneBy({id:id.Value})
+            if (!ormUser)
+                return Result.fail(new PersistenceException('Find user direcction by id unsucssessfully'))
+            let user= await this.mapper.fromPersistencetoDomain(ormUser)
+            return Result.success(user.UserDirections)
+        }catch(e){
+            return Result.fail(new PersistenceException('Find user direcction by id unsucssessfully'))
+        }    
+    }
+
 }

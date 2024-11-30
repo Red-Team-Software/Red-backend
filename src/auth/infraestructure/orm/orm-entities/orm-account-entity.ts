@@ -8,7 +8,7 @@ import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/or
 @Entity('account')
 export class OrmAccountEntity implements IAccount{
     @PrimaryColumn({type:"uuid"}) id: string;
-    @Column( 'varchar') email: string;
+    @Column( 'varchar', {unique:true}) email: string;
     @Column( 'varchar') password: string;
     @Column( 'timestamp', { default: () => 'CURRENT_TIMESTAMP' } )  created_at: Date;
     @Column( 'boolean')  isConfirmed: boolean;
