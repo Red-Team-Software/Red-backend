@@ -18,6 +18,9 @@ import { NewProductsPushNotificationApplicationService } from "src/notification/
 import { SendGridNewOrderEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-order-email-sender.service";
 import { NewOrderPushNotificationApplicationService } from "src/notification/application/services/command/new-order-push-notification-application.service";
 import { NewOrderPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-order-push-notification-application-request-dto";
+import { ICreateCupon } from "../interfaces/create-cupon.interface";
+import { NewCuponPushNotificationApplicationService } from "src/notification/application/services/command/new-cupon-push-notification-application.service";
+import { NewCuponPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-cupon-push-notification-application-request-dto";
 
 @Controller('notification')
 export class NotificationController {
@@ -67,6 +70,18 @@ export class NotificationController {
             }
         })
 
+        this.subscriber.buildQueue({
+            name:'CuponEvents',
+            pattern: 'CuponRegistered',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        })
+
         this.subscriber.consume<ICreateProduct>(
             { name: 'ProductEvents'}, 
             (data):Promise<void>=>{
@@ -93,6 +108,35 @@ export class NotificationController {
                 return
             }
         )
+        
+        this.subscriber.consume<ICreateCupon>(
+            { name: 'CuponEvents'}, 
+            (data):Promise<void>=>{
+                this.sendPushCuponCreated(data)
+                return
+            }
+        )
+    }
+
+    
+    async sendPushCuponCreated(entry:ICreateCupon){
+        let service=new ExceptionDecorator(
+            new LoggerDecorator(
+                new NewCuponPushNotificationApplicationService(
+                    this.pushsender
+                ),
+                new NestLogger(new Logger())
+            )
+        )
+        let data:NewCuponPushNotificationApplicationRequestDTO={
+            userId:'none',
+            tokens:this.tokens,
+            name:entry.cuponName,
+            discount: entry.cuponDiscount,
+            code:entry.cuponCode,
+            state:entry.cuponState
+        }
+        service.execute(data)
     }
 
     async sendPushOrderCreated(entry:ICreateOrder){
