@@ -56,18 +56,22 @@ export class CourierQueryRepository extends Repository<OrmCourierEntity> impleme
     
     async findAllCouriers(): Promise<Result<Courier[]>> {
         try{
-            let ormCourier = await this.find({});
+            let ormCourier = await this.find({
+                relations: ['image'],
+            });
 
             if (!ormCourier) return Result.fail( new NotFoundException('Courier not found') );
 
             let courier: Courier[] = [];
             
-            ormCourier.map( async (ormCourier) =>
-                courier.push(await this.ormMapper.fromPersistencetoDomain(ormCourier))
-            );
+            for ( let ormCour of ormCourier){
+                let r = await this.ormMapper.fromPersistencetoDomain(ormCour);
+                courier.push(r);
+            }
 
             return Result.success(courier);
         }catch(error){
+            console.log(error);
             return Result.fail( new NotFoundException('Courier not found') );
         }
     }

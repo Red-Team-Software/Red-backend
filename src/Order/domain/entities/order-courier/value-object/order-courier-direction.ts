@@ -16,8 +16,8 @@ export class OrderCourierDirection extends ValueObject<OrderCourierDirection> {
         if (!lat) throw new EmptyOrderCourierDirectionLatitudeException()
         if (!long) throw new EmptyOrderCourierDirectionLongitudeException()
 
-        if (typeof lat !== 'number') throw new BadFormatOrderCourierDirectionLatitudeException()
-        if (typeof long !== 'number') throw new BadFormatOrderCourierDirectionLongitudeException()
+        //if (typeof lat !== 'number') throw new BadFormatOrderCourierDirectionLatitudeException()
+        //if (typeof long !== 'number') throw new BadFormatOrderCourierDirectionLongitudeException()
 
         this.long = long;
         this.lat = lat;

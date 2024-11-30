@@ -1,5 +1,5 @@
-import { Body, Controller, FileTypeValidator, Inject, ParseFilePipe, Post, UploadedFiles, UseInterceptors } from "@nestjs/common"
-import { FilesInterceptor } from "@nestjs/platform-express"
+import { Body, Controller, FileTypeValidator, Inject, ParseFilePipe, Post, UploadedFile, UploadedFiles, UseInterceptors } from "@nestjs/common"
+import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express"
 import { Channel } from "amqplib"
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract"
 import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface"
@@ -36,9 +36,9 @@ export class CourierController {
     }
 
     @Post('create')
-    @UseInterceptors(FilesInterceptor('images'))  
+    @UseInterceptors(FileInterceptor('image'))  
     async createCourier(@Body() entry: CreateCourierEntryDTO,
-    @UploadedFiles(
+    @UploadedFile(
         new ParseFilePipe({
             validators: [
                 new FileTypeValidator({

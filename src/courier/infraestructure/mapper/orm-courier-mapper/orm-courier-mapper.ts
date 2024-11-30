@@ -32,7 +32,7 @@ export class OrmCourierMapper implements IMapper<Courier,OrmCourierEntity>{
     }
     
     async fromPersistencetoDomain(infraEstructure: OrmCourierEntity): Promise<Courier> {
-        
+
         let newCourier: Courier = Courier.initializeAggregate(
             CourierId.create(infraEstructure.id),
             CourierName.create(infraEstructure.name),

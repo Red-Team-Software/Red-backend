@@ -120,7 +120,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
                 orderId: order.getId().orderId,
                 orderState: order.OrderState.orderState,
                 orderCreatedDate: order.OrderCreatedDate.OrderCreatedDate,
-                orderTimeCreated: order.OrderCreatedDate.OrderCreatedDate.toTimeString().split(' ')[0],
+                orderTimeCreated: new Date(order.OrderCreatedDate.OrderCreatedDate).toTimeString().split(' ')[0],
                 totalAmount: order.TotalAmount.OrderAmount,
                 orderReceivedDate: order.OrderReceivedDate? order.OrderReceivedDate.OrderReceivedDate : null,
                 orderPayment: {

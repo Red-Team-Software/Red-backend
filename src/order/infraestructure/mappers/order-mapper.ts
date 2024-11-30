@@ -99,9 +99,13 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             PaymentCurrency.create(infraEstructure.pay.currency)
         )}
 
+        const latitude = infraEstructure.order_courier.latitude;
+        const longitude = infraEstructure.order_courier.longitude;
+
+
         orderCourier = OrderCourier.create(
             OrderCourierId.create(infraEstructure.order_courier.courier_id),
-            OrderCourierDirection.create(infraEstructure.order_courier.latitude,infraEstructure.order_courier.longitude)
+            OrderCourierDirection.create(latitude,longitude)
         );
 
         let order = Order.initializeAggregate(

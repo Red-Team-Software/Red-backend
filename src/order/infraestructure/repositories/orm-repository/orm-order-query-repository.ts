@@ -27,7 +27,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
     async findAllOrders(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>> {
         try {
             const ormOrders = await this.find({
-                relations: ["pay", "order_products", "order_bundles","order_report"]
+                relations: ["pay", "order_products", "order_bundles","order_report","order_courier"]
             });
             
                 if(ormOrders.length==0) return Result.fail( new NotFoundException('Orders empty, please try again'))
@@ -46,11 +46,9 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
                     domainOrders = domainOrders.slice((page*data.perPage), (data.perPage) + (page*data.perPage));
                 }
 
-                console.log("domainOrders", domainOrders);
-
             return Result.success(domainOrders);
         } catch (error) {
-            console.log("error");
+            console.log("error", error);
             return Result.fail(new NotFoundException('Orders empty, please try again'));
         }
     }
@@ -59,7 +57,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
         try {
             const ormOrder = await this.findOne({
                 where: { id: orderId.orderId },
-                relations: ["pay", "order_products", "order_bundles","order_report"]
+                relations: ["pay", "order_products", "order_bundles","order_report","order_courier"]
             });
 
             if (!ormOrder) return Result.fail(new NotFoundException('Order not found'));
