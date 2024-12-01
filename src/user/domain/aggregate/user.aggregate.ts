@@ -10,6 +10,9 @@ import { UserDirectionDeleted } from "../domain-events/user-direction-deleted";
 import { DomainExceptionNotHandled } from "src/common/domain/domain-exception-not-handled/domain-exception-not-handled";
 import { UserRole } from "../value-object/user-role";
 import { InvalidUserException } from "../domain-exceptions/invalid-user-exception";
+import { UserImageUpdated } from "../domain-events/user-image-updated";
+import { UserNameUpdated } from "../domain-events/user-name-updated";
+import { UserPhoneUpdated } from "../domain-events/user-phone-updated";
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -28,6 +31,21 @@ export class User extends AggregateRoot <UserId>{
             case 'UserDirectionDeleted':{
                 const userDirectionDeleted: UserDirectionAdded = event as UserDirectionAdded
                 this.UserDirections.filter(userDirection=>!userDirection.equals(userDirectionDeleted.userDirection))
+                break;
+            }
+            case 'UserImageUpdated':{
+                const userImageUpdated: UserImageUpdated = event as UserImageUpdated
+                this.userImage=userImageUpdated.userImage
+                break;
+            }
+            case 'UserNameUpdated':{
+                const userNameUpdated: UserNameUpdated = event as UserNameUpdated
+                this.userName=userNameUpdated.userName
+                break;
+            }
+            case 'UserPhoneUpdated':{
+                const userPhoneUpdated: UserPhoneUpdated = event as UserPhoneUpdated
+                this.userPhone=userPhoneUpdated.userPhone
                 break;
             }
             default: { throw new DomainExceptionNotHandled(JSON.stringify(event)) }
@@ -86,7 +104,7 @@ export class User extends AggregateRoot <UserId>{
         userName:UserName,
         userPhone:UserPhone,
         userRole:UserRole,
-        userDirection?:UserDirection[],
+        userDirection:UserDirection[],
         userImage?:UserImage,
     ):User{
         const user = new User(
@@ -115,6 +133,31 @@ export class User extends AggregateRoot <UserId>{
                 direction
             )
         )    
+    }
+    updateImage(userImage:UserImage):void{
+        this.apply(
+            UserImageUpdated.create(
+                this.getId(),
+                userImage
+            )
+        )
+    }
+
+    updateName(userName:UserName){
+        this.apply(
+            UserNameUpdated.create(
+                this.getId(),
+                userName
+            )
+        )
+    }
+    updatePhone(userPhone:UserPhone){
+        this.apply(
+            UserPhoneUpdated.create(
+                this.getId(),
+                userPhone
+            )
+        )
     }
     get UserName():UserName {return this.userName}
     get UserPhone():UserPhone {return this.userPhone}

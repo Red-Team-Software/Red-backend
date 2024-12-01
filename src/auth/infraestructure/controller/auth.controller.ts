@@ -1,4 +1,4 @@
-import { Controller, Inject, Post, Body, Logger, Put } from "@nestjs/common"
+import { Controller, Inject, Post, Body, Logger, Put, Get, UseGuards } from "@nestjs/common"
 import { ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { IDateHandler } from "src/common/application/date-handler/date-handler.interface"
 import { IEncryptor } from "src/common/application/encryptor/encryptor.interface"
@@ -49,6 +49,13 @@ import { CodeValidateInfraestructureRequestDTO } from "../dto/request/code-valid
 import { ChangePasswordApplicationService } from "src/auth/application/services/command/change-password-application.service"
 import { ChangePasswordInfraestructureRequestDTO } from "../dto/request/change-password-infraestructure-request-dto"
 import { ChangePasswordInfraestructureResponseDTO } from "../dto/response/change-password-infraestructure-response-dto"
+import { CurrentUserInfraestructureResponseDTO } from "../dto/response/current-user-infraestructure-response-dto"
+import { GetCredential } from "../jwt/decorator/get-credential.decorator"
+import { ICredential } from "src/auth/application/model/credential.interface"
+import { JwtAuthGuard } from "../jwt/guards/jwt-auth.guard"
+import { UserId } from "src/user/domain/value-object/user-id"
+import { PersistenceException } from "src/common/infraestructure/infraestructure-exception"
+import { UserRoles } from "src/user/domain/value-object/enum/user.roles"
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -212,6 +219,28 @@ export class AuthController {
   
   let response=await service.execute({userId:'none',...entry})
   return response.getValue
+  }
+
+  @Get('current')
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({  description: 'Get current User data', type: CurrentUserInfraestructureResponseDTO })
+  async currentUser( @GetCredential() credential:ICredential ) {
+
+    let userResponse=await this.queryUserRepository.findUserById(UserId.create(credential.account.idUser))
+
+    if (!userResponse.isSuccess())
+      throw new PersistenceException('account id is not found')
+
+    const user=userResponse.getValue
+    const response:CurrentUserInfraestructureResponseDTO={
+      id: credential.account.idUser,
+      email: credential.account.email,
+      name: user.UserName.Value,
+      phone: user.UserPhone.Value,
+      image: user.UserImage ? user.UserImage.Value : null,
+      type: user.UserRole.Value as UserRoles,
+    }
+    return response
   }
 
 }

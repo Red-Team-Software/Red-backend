@@ -37,9 +37,6 @@ export class RolesGuard implements CanActivate {
                 return true;
     
             const { request } = context.switchToHttp().getRequest();
-
-            //TODO sale como undefined
-            console.log(request)
     
             const roles=await this.getUserRole(request.credential)
     

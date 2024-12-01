@@ -44,7 +44,16 @@ export class OrmTokenCommandRepository extends Repository<OrmSessionEntity> impl
     }
   }
   async updateSession(entry: ISession): Promise<Result<ISession>> {
-    throw new Error("Method not implemented.");
+    try {
+        let resultUpdate = await this.upsert(entry,['id'])         
+
+        if (!resultUpdate)
+            return Result.fail(new PersistenceException('Update session unsucssessfully'))
+      
+        return Result.success(entry)
+    } catch (e) {
+        return Result.fail(new PersistenceException('Update session unsucssessfully'))
+    }    
   }
   async deleteSessionById(id: string): Promise<Result<string>> {
     throw new Error("Method not implemented.");

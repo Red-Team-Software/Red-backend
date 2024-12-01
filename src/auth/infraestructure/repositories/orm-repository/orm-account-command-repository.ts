@@ -63,7 +63,6 @@ export class OrmAccountCommandRepository extends Repository<OrmAccountEntity> im
            
             return Result.success(entry)
         } catch (e) {
-            console.log(e)
             return Result.fail(new PersistenceException('Update account unsucssessfully'))
         }    
     }

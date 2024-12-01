@@ -21,18 +21,35 @@ import { NewOrderPushNotificationApplicationRequestDTO } from "src/notification/
 import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard";
 import { ICredential } from "src/auth/application/model/credential.interface";
 import { GetCredential } from "src/auth/infraestructure/jwt/decorator/get-credential.decorator";
+import { ICommandTokenSessionRepository } from "src/auth/application/repository/command-token-session-repository.interface";
+import { ISession } from "src/auth/application/model/session.interface";
+import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
+import { IQueryAccountRepository } from "src/auth/application/repository/query-account-repository.interface";
+import { IAccount } from "src/auth/application/model/account.interface";
+import { IQueryTokenSessionRepository } from "src/auth/application/repository/Query-token-session-repository.interface";
+import { OrmAccountQueryRepository } from "src/auth/infraestructure/repositories/orm-repository/orm-account-query-repository";
+import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton";
+import { OrmTokenQueryRepository } from "src/auth/infraestructure/repositories/orm-repository/orm-token-query-session-repository";
+import { OrmTokenCommandRepository } from "src/auth/infraestructure/repositories/orm-repository/orm-token-command-session-repository";
 
 @Controller('notification')
 export class NotificationController {
 
     private readonly subscriber:RabbitMQSubscriber
-    private readonly tokens:string[]=[]
     private readonly pushsender:IPushNotifier
+    private readonly commandTokenSessionRepository:ICommandTokenSessionRepository<ISession>
+    private readonly queryAccountRepository:IQueryAccountRepository<IAccount>
+    private readonly querySessionRepository:IQueryTokenSessionRepository<ISession>
+    private readonly tokens:string[]=[]
+
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
     ){
         this.pushsender=FirebaseNotifier.getInstance()
         this.subscriber=new RabbitMQSubscriber(this.channel)
+        this.commandTokenSessionRepository= new OrmTokenCommandRepository(PgDatabaseSingleton.getInstance())
+        this.queryAccountRepository= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance())
+        this.querySessionRepository= new OrmTokenQueryRepository(PgDatabaseSingleton.getInstance())
 
         this.subscriber.buildQueue({
             name:'ProductEvents',
@@ -108,6 +125,7 @@ export class NotificationController {
               new NestLogger(new Logger())
             )
           )
+        
         let data:NewOrderPushNotificationApplicationRequestDTO={
             userId:'none',
             tokens:this.tokens,
@@ -128,6 +146,12 @@ export class NotificationController {
         await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')     }
 
     async sendPushToCreatedProduct(entry:ICreateProduct):Promise<void> {
+
+        const tokens=await this.querySessionRepository.findAllTokenSessions()
+
+        if (!tokens.isSuccess())
+            throw tokens.getError
+        
         let service= new ExceptionDecorator(
             new LoggerDecorator(
                 new NewProductsPushNotificationApplicationService(
@@ -139,7 +163,7 @@ export class NotificationController {
 
         let data:NewProductPushNotificationApplicationRequestDTO={
             userId:'none',
-            tokens:this.tokens,
+            tokens:tokens.getValue,
             name:entry.productName,
             price:entry.productPrice.price,
             currency:entry.productPrice.currency
@@ -148,6 +172,12 @@ export class NotificationController {
     }
 
     async sendEmailToCreateProduct(entry:ICreateProduct):Promise<void> {
+
+        const emailsResponse=await this.queryAccountRepository.findAllEmails()
+
+        if (!emailsResponse.isSuccess())
+            throw emailsResponse.getError
+
         let emailsender=new SendGridNewProductEmailSender()
         emailsender.setVariablesToSend({
             name:entry.productName,
@@ -155,7 +185,10 @@ export class NotificationController {
             currency:entry.productPrice.currency,
             image:entry.productImage.pop()
         })
-        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')    }
+        for (const email of emailsResponse.getValue){
+            let pepe=await emailsender.sendEmail(email)
+        }        
+    }
 
     async sendEmailToCreateBundle(entry:ICreateBundle):Promise<void> {
         let emailsender=new SendGridNewBundleEmailSender()
@@ -194,7 +227,9 @@ export class NotificationController {
         @GetCredential() credential:ICredential,
         @Body() entry:SaveTokenInfraestructureEntryDTO
     ){
-        this.tokens.push(entry.token)
-        return {success:true}
+        credential.session.push_token=entry.token
+        let response=await this.commandTokenSessionRepository.updateSession(credential.session)
+        if (!response.isSuccess())
+            throw new PersistenceException('error registering token')
     }
 }

@@ -2,5 +2,5 @@ import { ApplicationException } from "src/common/application/application-exeptio
 
 export class ErrorCreatingBundleApplicationException extends ApplicationException{
     constructor() {
-        super('Error during creation of bundle');
+        super('Error user not found');
     }}

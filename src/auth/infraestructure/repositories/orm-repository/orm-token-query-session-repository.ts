@@ -28,8 +28,16 @@ export class OrmTokenQueryRepository extends Repository<OrmSessionEntity> implem
       return Result.fail( new NotFoundException('Find session unsucssessfully'))
   }    
   }
-  async findAllTokenSessionsByUserId(id: string): Promise<Result<ISession[]>> {
-    throw new Error("Method not implemented.");
-  }
+  async findAllTokenSessions(): Promise<Result<string[]>> {
+    try{
+      const sessions = await this.createQueryBuilder("session")
+      .select("session.push_token")
+      .getMany()
+      const tokens = sessions.map(session => session.push_token) 
+      return Result.success(tokens)
+      }catch(e){
+      return Result.fail( new NotFoundException('Error finding all emails'))
+  }   
+}
   
 }

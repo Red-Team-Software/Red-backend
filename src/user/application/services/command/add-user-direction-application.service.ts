@@ -39,8 +39,6 @@ export class AddUserDirectionApplicationService extends IApplicationService
             user.addDirection(direction)
         })
 
-        console.log(user)
-
         return Result.success({userId:data.userId})
     }
 

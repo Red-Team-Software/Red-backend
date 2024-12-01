@@ -23,6 +23,20 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
         this.ormDirectionRepository=dataSource.getRepository(OrmDirectionEntity)
         this.ormDirectionUserRepository=dataSource.getRepository(OrmDirectionUserEntity)
     }
+    async updateUser(user: User): Promise<Result<User>> {
+    try {
+        let ormModel=await this.mapper.fromDomaintoPersistence(user)
+
+        let resultUpdate = await this.upsert(ormModel,['id'])         
+    
+            if (!resultUpdate)
+                return Result.fail(new PersistenceException('Update user unsucssessfully'))
+          
+            return Result.success(user)
+        } catch (e) {
+            return Result.fail(new PersistenceException('Update user unsucssessfully'))
+        }  
+    }
     async saveUser(user: User): Promise<Result<User>> {
         try{
             let ormUser=await this.mapper.fromDomaintoPersistence(user)

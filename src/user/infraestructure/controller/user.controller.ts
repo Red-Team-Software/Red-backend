@@ -1,8 +1,7 @@
-import { Channel } from "diagnostics_channel"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 import { UpdateProfileInfraestructureRequestDTO } from "../dto/request/update-profile-infraestructure-request-dto"
-import { Controller, Inject, Patch, Body, Get, Query, Post, UseGuards } from "@nestjs/common"
+import { Controller, Inject, Patch, Body, Get, Query, Post, UseGuards, BadRequestException, Logger } from "@nestjs/common"
 import { ApiResponse, ApiTags } from "@nestjs/swagger"
 import { UpdateProfileInfraestructureResponseDTO } from "../dto/response/update-profile-infraestructure-response-dto"
 import { OrmUserQueryRepository } from "../repositories/orm-repository/orm-user-query-repository"
@@ -22,6 +21,22 @@ import { ICredential } from "src/auth/application/model/credential.interface"
 import { Roles } from "src/auth/infraestructure/jwt/decorator/roles.decorator"
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles"
 import { RolesGuard } from "src/auth/infraestructure/jwt/guards/roles.guard"
+import { IAuditRepository } from "src/common/application/repositories/audit.repository"
+import { OrmAuditRepository } from "src/common/infraestructure/repository/orm-repository/orm-audit.repository"
+import { UpdateProfileApplicationService } from "src/user/application/services/command/update-profile-application.service"
+import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher"
+import { CloudinaryService } from "src/common/infraestructure/file-uploader/cloudinary-uploader"
+import { Channel } from "amqplib"
+import { ImageTransformer } from "src/common/infraestructure/image-helper/image-transformer"
+import { LoggerDecorator } from "src/common/application/aspects/logger-decorator/logger-decorator"
+import { NestLogger } from "src/common/infraestructure/logger/nest-logger"
+import { ICommandAccountRepository } from "src/auth/application/repository/command-account-repository.interface"
+import { IAccount } from "src/auth/application/model/account.interface"
+import { OrmAccountCommandRepository } from "src/auth/infraestructure/repositories/orm-repository/orm-account-command-repository"
+import { IQueryAccountRepository } from "src/auth/application/repository/query-account-repository.interface"
+import { OrmAccountQueryRepository } from "src/auth/infraestructure/repositories/orm-repository/orm-account-query-repository"
+import { IEncryptor } from "src/common/application/encryptor/encryptor.interface"
+import { BcryptEncryptor } from "src/common/infraestructure/encryptor/bcrypt-encryptor"
 
 @ApiTags('User')
 @Controller('user')
@@ -30,6 +45,13 @@ export class UserController {
   private readonly idGen: IIdGen<string> 
   private readonly ormUserQueryRepo:IQueryUserRepository
   private readonly ormUserCommandRepo:ICommandUserRepository
+  private readonly ormAccountCommandRepo:ICommandAccountRepository<IAccount>
+  private readonly ormAccountQueryRepo:IQueryAccountRepository<IAccount>
+  private readonly auditRepository: IAuditRepository
+  private readonly imageTransformer:ImageTransformer
+  private readonly encryptor: IEncryptor
+
+
   
   constructor(
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -37,6 +59,12 @@ export class UserController {
     this.idGen= new UuidGen()
     this.ormUserQueryRepo=new OrmUserQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormUserCommandRepo=new OrmUserCommandRepository(PgDatabaseSingleton.getInstance())
+    this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
+    this.ormAccountCommandRepo= new OrmAccountCommandRepository(PgDatabaseSingleton.getInstance())
+    this.ormAccountQueryRepo= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance())
+    this.imageTransformer= new ImageTransformer()
+    this.encryptor= new BcryptEncryptor()
+
   }
 
   @UseGuards(JwtAuthGuard)
@@ -48,7 +76,38 @@ export class UserController {
   })
   async UpdateProfile( 
     @GetCredential() credential:ICredential,
-    @Body() entry:UpdateProfileInfraestructureRequestDTO ) {        
+    @Body() entry:UpdateProfileInfraestructureRequestDTO ) { 
+
+      let image: Buffer = null
+      if (
+        !entry.email &&
+        !entry.image &&
+        !entry.name &&
+        !entry.password &&
+        !entry.phone
+      ) throw new BadRequestException('Error you must have at least one of the params filled')
+
+      if(entry.image)
+        image=(await this.imageTransformer.base64ToFile(entry.image)).buffer
+
+      let service= new ExceptionDecorator(
+          new UpdateProfileApplicationService(
+            this.ormUserCommandRepo,
+            this.ormUserQueryRepo,
+            this.ormAccountCommandRepo,
+            this.ormAccountQueryRepo,
+            new RabbitMQPublisher(this.channel),
+            new CloudinaryService(),
+            this.idGen,
+            this.encryptor
+        )
+    )
+    let response= await service.execute({
+      userId:credential.account.idUser,
+      ...entry,image,
+      accountId:credential.account.id
+    })
+    return response.getValue       
   }
 
   @UseGuards(JwtAuthGuard)
