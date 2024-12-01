@@ -12,13 +12,13 @@ import { UserId } from "src/user/domain/value-object/user-id"
 import { OrmUserCommandRepository } from "../repositories/orm-repository/orm-user-command-repository"
 import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface"
 import { AddUserDirectionsInfraestructureRequestDTO } from "../dto/request/add-user-direction-infreaestructure-request-dto"
-import { CreateBundleApplicationService } from "src/bundle/application/services/command/create-bundle-application.service"
 import { ExceptionDecorator } from "src/common/application/aspects/exeption-decorator/exception-decorator"
-import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher"
-import { CloudinaryService } from "src/common/infraestructure/file-uploader/cloudinary-uploader"
 import { AddUserDirectionApplicationService } from "src/user/application/services/command/add-user-direction-application.service"
 import { AddUserDirectionInfraestructureResponseDTO } from "../dto/response/add-user-direction-infraestructure-response-dto"
 import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard"
+import { ISession } from "src/auth/application/model/session.interface"
+import { GetCredential } from "src/auth/infraestructure/jwt/decorator/get-credential.decorator"
+import { ICredential } from "src/auth/application/model/credential.interface"
 
 @ApiTags('User')
 @Controller('user')
@@ -64,13 +64,16 @@ export class UserController {
     description: 'User direction information',
     type: AddUserDirectionInfraestructureResponseDTO,
   })
-  async addDirectionToUser(@Body() entry:AddUserDirectionsInfraestructureRequestDTO){
+  async addDirectionToUser(
+    @GetCredential() credential:ICredential ,
+    @Body() entry:AddUserDirectionsInfraestructureRequestDTO){
+      console.log('user:',credential.account.idUser)
     let service= new ExceptionDecorator(
       new AddUserDirectionApplicationService (
         this.ormUserCommandRepo,
         this.ormUserQueryRepo
       )
   )
-  let response = await service.execute({userId:'none',...entry})
+  let response = await service.execute({userId:credential.account.idUser,...entry})
   }
 }

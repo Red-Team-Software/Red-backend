@@ -69,8 +69,6 @@ export class LogInUserApplicationService extends IApplicationService
             accountId: account.id
         })
 
-        console.log(sessionResponse)
-
         if (!sessionResponse.isSuccess())
             return Result.fail(new ErrorRegisteringSessionApplicationException())
 

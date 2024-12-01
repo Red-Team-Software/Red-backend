@@ -5,7 +5,6 @@ import { Result } from "src/common/utils/result-handler/result"
 import { Repository, DataSource } from "typeorm"
 import { OrmAccountEntity } from "../../orm/orm-entities/orm-account-entity"
 import { OrmSessionEntity } from "../../orm/orm-entities/orm-session-entity"
-import { Session } from "@nestjs/common"
 
 
 
@@ -19,9 +18,8 @@ export class OrmTokenQueryRepository extends Repository<OrmSessionEntity> implem
     }
   async findSessionById(id: string): Promise<Result<ISession>> {
     try{
-      console.log(id)
       const ormSession=await this.findOneBy({id})
-      console.log(ormSession)
+      
       if(!ormSession)
           return Result.fail( new NotFoundException('Find session unsucssessfully'))
 

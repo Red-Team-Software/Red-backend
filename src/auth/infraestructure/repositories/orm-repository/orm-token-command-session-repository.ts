@@ -18,9 +18,13 @@ export class OrmTokenCommandRepository extends Repository<OrmSessionEntity> impl
     }
   async createSession(entry: ISession): Promise<Result<ISession>> {
     try{
-      let session=OrmSessionEntity.create(entry.id,entry.expired_at,entry.push_token,entry.accountId)
+      let session=OrmSessionEntity.create(
+        entry.id,
+        entry.expired_at,
+        entry.push_token,
+        entry.accountId
+      )
 
-      console.log(session)
       let ormAccount=await this.ormAccountRepository.findOneBy({id:session.accountId})
 
       if (!ormAccount)
@@ -28,16 +32,14 @@ export class OrmTokenCommandRepository extends Repository<OrmSessionEntity> impl
 
       session.account=ormAccount
 
-      console.log('final',session)
       let ormSession=await this.save(session)
 
       if (!ormSession)
         return Result.fail( new PersistenceException('Create session unsucssessfully') )
-      console.log('guardado',ormSession)
+
       return Result.success(entry)
 
     }catch(e){
-      console.log('error',e)
       return Result.fail( new PersistenceException('Create session unsucssessfully') )
     }
   }
@@ -49,9 +51,8 @@ export class OrmTokenCommandRepository extends Repository<OrmSessionEntity> impl
   }
   async findSessionById(id: string): Promise<Result<ISession>> {
     try{
-      console.log(id)
       const ormSession=await this.findOneBy({id})
-      console.log(ormSession)
+      
       if(!ormSession)
           return Result.fail( new NotFoundException('Find session unsucssessfully'))
 

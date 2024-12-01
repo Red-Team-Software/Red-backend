@@ -9,6 +9,12 @@ import { JwtPayloadInfraestructureDTO } from "../decorator/dto/jwt-payload-infra
 import { envs } from "src/config/envs/envs"
 import { OrmTokenQueryRepository } from "../../repositories/orm-repository/orm-token-query-session-repository"
 import { IQueryTokenSessionRepository } from "src/auth/application/repository/Query-token-session-repository.interface"
+import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface"
+import { UserId } from "src/user/domain/value-object/user-id"
+import { IQueryAccountRepository } from "src/auth/application/repository/query-account-repository.interface"
+import { IAccount } from "src/auth/application/model/account.interface"
+import { ICredential } from "src/auth/application/model/credential.interface"
+import { OrmAccountQueryRepository } from "../../repositories/orm-repository/orm-account-query-repository"
 
 
 
@@ -17,11 +23,13 @@ import { IQueryTokenSessionRepository } from "src/auth/application/repository/Qu
 export class JwtAuthGuard implements CanActivate {
 
     private readonly sessionRepository: IQueryTokenSessionRepository<ISession>
+    private readonly accountRepository: IQueryAccountRepository<IAccount>
 
     constructor(
         private jwtService: JwtService,
     ) {
         this.sessionRepository = new OrmTokenQueryRepository(PgDatabaseSingleton.getInstance())
+        this.accountRepository= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance())
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -39,20 +47,26 @@ export class JwtAuthGuard implements CanActivate {
         try {
             const payload = await this.jwtService.verifyAsync( token, { secret: envs.JWT_SECRET_KEY } )
             const sessionData = await this.validate( payload )
-            log(sessionData)
-            request.user = sessionData; // Añade el usuario decodificado a la solicitud
-            request['session'] = sessionData
+            request.credential = sessionData
         } catch (e) {
-            console.log(e)
              throw new UnauthorizedException(`Error durig getting the token with name:${e.name}, message:${e.message}`)
         }
         return true
     }
     
-    private async validate(payload: JwtPayloadInfraestructureDTO) {
+    private async validate(payload: JwtPayloadInfraestructureDTO):Promise<ICredential>{
         const session = await this.sessionRepository.findSessionById( payload.id ); 
         if ( !session.isSuccess() ) 
             throw new NotFoundException('session id not foud')
-        return session.getValue;
+
+        const account = await this.accountRepository.findAccountById(session.getValue.accountId) 
+        if ( !account.isSuccess() ) 
+            throw new NotFoundException('account id not found')
+        
+        let credential:ICredential={
+            account:account.getValue,
+            session:session.getValue
+        }
+        return credential
     }
 }
