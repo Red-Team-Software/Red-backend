@@ -8,6 +8,7 @@ import { OrmUserEntity } from "../../entities/orm-entities/orm-user-entity"
 import { UserPhone } from "src/user/domain/value-object/user-phone"
 import { UserRole } from "src/user/domain/value-object/user-role"
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles"
+import { UserDirection } from "src/user/domain/value-object/user-direction"
 
 
 export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
@@ -30,6 +31,10 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
             UserName.create(infraEstructure.name),
             UserPhone.create(infraEstructure.phone),
             UserRole.create(infraEstructure.type),
+            infraEstructure.direcction 
+            ? infraEstructure.direcction.map(ormdirection=>
+                UserDirection.create(ormdirection.name, ormdirection.isFavorite,1 ,1))
+            : [],
             infraEstructure.image ? UserImage.create(infraEstructure.image) : undefined
         )
         return user

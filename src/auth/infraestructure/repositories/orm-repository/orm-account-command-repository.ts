@@ -16,6 +16,19 @@ export class OrmAccountCommandRepository extends Repository<OrmAccountEntity> im
         this.ormUserRepository=dataSource.getRepository( OrmUserEntity )
     }
 
+    async addVerificationCode(id: string, code: string): Promise<Result<string>> {
+        try {
+            const result = await this.update({id},{code})
+            
+            if (!result)
+                return Result.fail(new PersistenceException('Update account with code unsucssessfully'))
+            
+            return Result.success(id)
+        } catch (e) {
+            return Result.fail(new PersistenceException('Update account with code unsucssessfully'))
+        } 
+    }
+
     async createAccount(entry: IAccount): Promise<Result<IAccount>> {
         try{
             let ormAccount=OrmAccountEntity.create(
@@ -43,9 +56,14 @@ export class OrmAccountCommandRepository extends Repository<OrmAccountEntity> im
     }
     async updateAccount(entry: IAccount): Promise<Result<IAccount>> {
         try {
-            const result = await this.save(entry)
+            let resultUpdate = await this.upsert(entry,['id'])         
+
+            if (!resultUpdate)
+                return Result.fail(new PersistenceException('Update account unsucssessfully'))
+           
             return Result.success(entry)
         } catch (e) {
+            console.log(e)
             return Result.fail(new PersistenceException('Update account unsucssessfully'))
         }    
     }

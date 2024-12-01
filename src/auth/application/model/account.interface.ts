@@ -7,5 +7,7 @@ export interface IAccount {
     password: string
     created_at: Date
     isConfirmed:boolean,
+    code?: string
+    code_created_at?:Date
     idUser:string
 }

@@ -9,6 +9,7 @@ import { UserDirectionAdded } from "../domain-events/user-direction-added";
 import { UserDirectionDeleted } from "../domain-events/user-direction-deleted";
 import { DomainExceptionNotHandled } from "src/common/domain/domain-exception-not-handled/domain-exception-not-handled";
 import { UserRole } from "../value-object/user-role";
+import { InvalidUserException } from "../domain-exceptions/invalid-user-exception";
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -33,14 +34,23 @@ export class User extends AggregateRoot <UserId>{
         }
     }
     protected validateState(): void {
+        if(
+            !this.getId() ||
+            !this.userName ||
+            !this.UserPhone ||
+            !this.userRole ||
+            !this.userDirections
+        )
+        throw new InvalidUserException()
+
     }
     private constructor(
         userId:UserId,
         private userName:UserName,
         private userPhone:UserPhone,
         private userRole:UserRole,
+        private userDirections:UserDirection[],
         private userImage?:UserImage,
-        private userDirections?:UserDirection[],
     ){
         super(userId)
     }
@@ -50,16 +60,16 @@ export class User extends AggregateRoot <UserId>{
         userName:UserName,
         userPhone:UserPhone,
         userRole:UserRole,
+        userDirections:UserDirection[],
         userImage?:UserImage,
-        userDirections?:UserDirection[],
     ):User{
         const user = new User(
             userId,
             userName,
             userPhone,
             userRole,
-            userImage,
             userDirections,
+            userImage,
         )
         user.apply(
             UserRegistered.create(
@@ -76,16 +86,16 @@ export class User extends AggregateRoot <UserId>{
         userName:UserName,
         userPhone:UserPhone,
         userRole:UserRole,
-        userImage?:UserImage,
         userDirection?:UserDirection[],
+        userImage?:UserImage,
     ):User{
         const user = new User(
             userId,
             userName,
             userPhone,
             userRole,
-            userImage,
             userDirection,
+            userImage,
         )
         user.validateState()
         return user

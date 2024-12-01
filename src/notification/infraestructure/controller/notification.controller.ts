@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Logger, Post } from "@nestjs/common";
+import { Body, Controller, Inject, Logger, Post, UseGuards } from "@nestjs/common";
 import { Channel } from "amqp-connection-manager";
 import { FirebaseNotifier } from '../firebase-notifier/firebase-notifier-singleton';
 import { IPushNotifier } from "src/common/application/notification-handler/notification-interface";
@@ -18,6 +18,9 @@ import { NewProductsPushNotificationApplicationService } from "src/notification/
 import { SendGridNewOrderEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-order-email-sender.service";
 import { NewOrderPushNotificationApplicationService } from "src/notification/application/services/command/new-order-push-notification-application.service";
 import { NewOrderPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-order-push-notification-application-request-dto";
+import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard";
+import { ICredential } from "src/auth/application/model/credential.interface";
+import { GetCredential } from "src/auth/infraestructure/jwt/decorator/get-credential.decorator";
 
 @Controller('notification')
 export class NotificationController {
@@ -185,9 +188,12 @@ export class NotificationController {
         service.execute(data)
     }
 
-
+    @UseGuards(JwtAuthGuard)
     @Post('savetoken')
-    async saveToken(@Body() entry:SaveTokenInfraestructureEntryDTO){
+    async saveToken(
+        @GetCredential() credential:ICredential,
+        @Body() entry:SaveTokenInfraestructureEntryDTO
+    ){
         this.tokens.push(entry.token)
         return {success:true}
     }

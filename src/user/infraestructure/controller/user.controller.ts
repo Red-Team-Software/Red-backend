@@ -19,6 +19,9 @@ import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard
 import { ISession } from "src/auth/application/model/session.interface"
 import { GetCredential } from "src/auth/infraestructure/jwt/decorator/get-credential.decorator"
 import { ICredential } from "src/auth/application/model/credential.interface"
+import { Roles } from "src/auth/infraestructure/jwt/decorator/roles.decorator"
+import { UserRoles } from "src/user/domain/value-object/enum/user.roles"
+import { RolesGuard } from "src/auth/infraestructure/jwt/guards/roles.guard"
 
 @ApiTags('User')
 @Controller('user')
@@ -36,28 +39,34 @@ export class UserController {
     this.ormUserCommandRepo=new OrmUserCommandRepository(PgDatabaseSingleton.getInstance())
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch('update/profile')
   @ApiResponse({
     status: 200,
     description: 'User information',
     type: UpdateProfileInfraestructureResponseDTO,
   })
-  async UpdateProfile( @Body() entry:UpdateProfileInfraestructureRequestDTO ) {        
+  async UpdateProfile( 
+    @GetCredential() credential:ICredential,
+    @Body() entry:UpdateProfileInfraestructureRequestDTO ) {        
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('')
   async findUserById(@Query() entry:{id:string}){
     let response=await this.ormUserQueryRepo.findUserById(UserId.create(entry.id))
     return response.getValue
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('directions')
-  async findUserDirectionById(@Query() entry:{id:string}){
+  async findUserDirectionById(@GetCredential() credential:ICredential,
+    @Query() entry:{id:string}){
     let response=await this.ormUserQueryRepo.findUserDirectionsByUserId(UserId.create(entry.id))
     return response
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)  
   @Post('add-directions')
   @ApiResponse({
     status: 200,

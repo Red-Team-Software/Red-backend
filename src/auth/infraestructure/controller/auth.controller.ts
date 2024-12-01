@@ -1,5 +1,5 @@
-import { Controller, Inject, Post, Body, Logger } from "@nestjs/common"
-import { ApiResponse, ApiTags } from "@nestjs/swagger"
+import { Controller, Inject, Post, Body, Logger, Put } from "@nestjs/common"
+import { ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { IDateHandler } from "src/common/application/date-handler/date-handler.interface"
 import { IEncryptor } from "src/common/application/encryptor/encryptor.interface"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
@@ -37,6 +37,18 @@ import { OrmTokenCommandRepository } from "../repositories/orm-repository/orm-to
 import { IJwtGenerator } from "src/common/application/jwt-generator/jwt-generator.interface"
 import { JwtGenerator } from "../jwt/jwt-generator"
 import { JwtService } from "@nestjs/jwt"
+import { ForgetPasswordInfraestructureRequestDTO } from "../dto/request/forget-password-infraestructure-request-dto"
+import { ForgetPasswordInfraestructureResponseDTO } from "../dto/response/forget-password-infraestructure-response-dto"
+import { ForgetPasswordApplicationService } from "src/auth/application/services/command/forget-password-application.service"
+import { ICodeGenerator } from "src/common/application/code-generator-interface/code-generator.interface"
+import { CodeGenerator } from "src/common/infraestructure/code-generator/codegenerator"
+import { SendGridSendCodeEmailSender } from "src/common/infraestructure/email-sender/send-grid-send-code-email-sender.service"
+import { CodeValidateInfraestructureResponseDTO } from "../dto/response/code-validate-infraestructure-response-dto"
+import { CodeValidateApplicationService } from "src/auth/application/services/command/code-validate-application.service"
+import { CodeValidateInfraestructureRequestDTO } from "../dto/request/code-validate-infraestructure-request-dto"
+import { ChangePasswordApplicationService } from "src/auth/application/services/command/change-password-application.service"
+import { ChangePasswordInfraestructureRequestDTO } from "../dto/request/change-password-infraestructure-request-dto"
+import { ChangePasswordInfraestructureResponseDTO } from "../dto/response/change-password-infraestructure-response-dto"
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -53,6 +65,7 @@ export class AuthController {
   private readonly queryUserRepository: IQueryUserRepository
   private readonly commandTokenSessionRespository:ICommandTokenSessionRepository<ISession>
   private readonly eventPublisher:IEventPublisher
+  private readonly codeGenerator:ICodeGenerator<string>
   
   constructor(
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
@@ -69,7 +82,7 @@ export class AuthController {
     this.queryUserRepository=new OrmUserQueryRepository(PgDatabaseSingleton.getInstance())
     this.commandTokenSessionRespository= new OrmTokenCommandRepository(PgDatabaseSingleton.getInstance())
     this.eventPublisher= new RabbitMQPublisher(this.channel)
-    
+    this.codeGenerator= new CodeGenerator()
   }
 
   @Post('register')
@@ -87,6 +100,7 @@ export class AuthController {
               this.commandAccountRepository,
               this.queryAccountRepository,
               this.commandUserRepository,
+              this.queryUserRepository,
               this.idGen,
               this.encryptor,
               this.dateHandler,
@@ -130,6 +144,74 @@ export class AuthController {
       
       let response=await service.execute({userId:'none',...entry})
       return response.getValue
+  }
+
+  @Post('forget/password')
+  @ApiResponse({
+    status: 200,
+    description: 'User recieve a email and a push with the code',
+    type: ForgetPasswordInfraestructureResponseDTO,
+  })
+  async forgetPassword( @Body() entry: ForgetPasswordInfraestructureRequestDTO ) {        
+
+      let service=
+        new ExceptionDecorator(
+          new LoggerDecorator(
+            new ForgetPasswordApplicationService(
+              this.queryAccountRepository,
+              this.commandAccountRepository,
+              this.queryUserRepository,
+              this.encryptor,
+              this.codeGenerator,
+              this.dateHandler,
+              new SendGridSendCodeEmailSender()
+            )
+            ,new NestLogger(new Logger())
+          )
+        )
+      
+      let response=await service.execute({userId:'none',...entry})
+      return response.getValue
+  }
+
+  @Post('code/validate')
+  @ApiOkResponse({  description: 'Validar codigo de cambio de contraseña', type: CodeValidateInfraestructureResponseDTO })
+  async validateCodeForgetPassword( @Body() entry: CodeValidateInfraestructureRequestDTO ) {
+    let service=
+    new ExceptionDecorator(
+      new LoggerDecorator(
+        new CodeValidateApplicationService(
+          this.queryAccountRepository,
+          this.queryUserRepository,
+          this.encryptor,
+          this.dateHandler,
+        )
+        ,new NestLogger(new Logger())
+      )
+    )
+  
+  let response=await service.execute({userId:'none',...entry})
+  return response.getValue
+  }
+
+  @Put('change/password')
+  @ApiOkResponse({  description: 'Validar codigo de cambio de contraseña', type: ChangePasswordInfraestructureResponseDTO })
+  async changePassword( @Body() entry: ChangePasswordInfraestructureRequestDTO ) {
+    let service=
+    new ExceptionDecorator(
+      new LoggerDecorator(
+        new ChangePasswordApplicationService(
+          this.queryAccountRepository,
+          this.commandAccountRepository,
+          this.encryptor,
+          this.dateHandler
+        )
+        ,new NestLogger(new Logger())
+      )
+    )
+  
+  let response=await service.execute({userId:'none',...entry})
+  return response.getValue
   }
 
 }

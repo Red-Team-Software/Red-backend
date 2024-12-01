@@ -13,6 +13,9 @@ export class OrmAccountEntity implements IAccount{
     @Column( 'timestamp', { default: () => 'CURRENT_TIMESTAMP' } )  created_at: Date;
     @Column( 'boolean')  isConfirmed: boolean;
     @Column( 'varchar' ) idUser: string;
+    @Column( 'varchar' ,{nullable:true}) code: string;
+    @Column( 'timestamp', { nullable:true } )  code_created_at: Date;
+
 
     @OneToMany( () => OrmSessionEntity, session => session.account,{ eager: true })  
     sessions: ISession[];
