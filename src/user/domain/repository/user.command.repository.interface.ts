@@ -3,4 +3,5 @@ import { User } from "../aggregate/user.aggregate";
 
 export interface ICommandUserRepository {
     saveUser(user:User):Promise<Result<User>>
+    updateUser(user:User):Promise<Result<User>>
 }

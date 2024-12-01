@@ -18,6 +18,10 @@ import { IEventPublisher } from "src/common/application/events/event-publisher/e
 import { ErrorRegisteringAccountApplicationException } from "../../application-exeption/error-registering-account-application-exception";
 import { ErrorRegisteringUserApplicationException } from "../../application-exeption/error-registering-user-application-exception";
 import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface";
+import { UserRole } from "src/user/domain/value-object/user-role";
+import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
+import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
+import { UserAlreadyExistPhoneNumberApplicationException } from "../../application-exeption/user-already-exist-phone-number-application-exception";
 
 
 export class RegisterUserApplicationService extends IApplicationService 
@@ -27,6 +31,7 @@ export class RegisterUserApplicationService extends IApplicationService
         private readonly commandAccountRepository:ICommandAccountRepository<IAccount>,
         private readonly queryAccountRepository:IQueryAccountRepository<IAccount>,
         private readonly commandUserRepository:ICommandUserRepository,
+        private readonly queryUserRepository:IQueryUserRepository,
         private readonly idGen:IIdGen<string>,
         private readonly encryptor:IEncryptor,
         private readonly dateHandler:IDateHandler,
@@ -45,9 +50,30 @@ export class RegisterUserApplicationService extends IApplicationService
         if(queryResult.getValue)
             return Result.fail(new UserAlreadyExistApplicationException(data.email))
 
+        let userResult= await this.queryUserRepository.verifyUserExistenceByPhoneNumber(
+            UserPhone.create(data.phone)
+        )
+
+        if(!userResult.isSuccess())
+            return Result.fail(new ErrorRegisteringAccountApplicationException())
+
+        
+        if(userResult.getValue)
+            return Result.fail(new UserAlreadyExistPhoneNumberApplicationException(data.phone))
+
+
         let id= await this.idGen.genId()
 
         let password= await this.encryptor.hashPassword(data.password)
+
+        let user=User.RegisterUser(
+            UserId.create(await this.idGen.genId()),
+            UserName.create(data.name),
+            UserPhone.create(data.phone),
+            UserRole.create(UserRoles.CLIENT),
+            []
+        )
+
 
         let account:IAccount={
             sessions: [] ,
@@ -56,24 +82,19 @@ export class RegisterUserApplicationService extends IApplicationService
             password: password,
             created_at: this.dateHandler.currentDate(),
             isConfirmed:false,
+            idUser:user.getId().Value
         }
-
-        let user=User.RegisterUser(
-            UserId.create(await this.idGen.genId()),
-            UserEmail.create(data.email),
-            UserName.create(data.name),
-            UserPhone.create(data.phone)
-        )
-
-        let commandResult=await this.commandAccountRepository.createAccount(account)
-        
-        if (!commandResult.isSuccess())
-            return Result.fail(new ErrorRegisteringAccountApplicationException())
 
         let userResponse=await this.commandUserRepository.saveUser(user)
 
         if(!userResponse.isSuccess())
             return Result.fail(new ErrorRegisteringUserApplicationException())
+
+        let commandResult=await this.commandAccountRepository.createAccount(account)
+
+        
+        if (!commandResult.isSuccess())
+            return Result.fail(new ErrorRegisteringAccountApplicationException())
         
         this.eventPublisher.publish(user.pullDomainEvents())
         

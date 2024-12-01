@@ -14,7 +14,6 @@ export class UserName implements ValueObject<UserName> {
 
     static create ( name: string ): UserName {
         const regex=new RegExp(/^[A-Za-zÁÉÍÓÚáéíóúÑñ]{1,50}$/)
-        console.log(regex.test(name))
         if (!regex.test(name))
             throw new InvalidUserNameException()
         return new UserName( name )

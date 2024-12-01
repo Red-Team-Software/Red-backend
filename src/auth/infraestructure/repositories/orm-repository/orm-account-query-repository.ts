@@ -46,4 +46,15 @@ export class OrmAccountQueryRepository extends Repository<OrmAccountEntity> impl
         }
     }
 
+    async findAllEmails(): Promise<Result<string[]>> {
+        try{
+            const accounts = await this.createQueryBuilder("account")
+            .select("account.email")
+            .getMany()
+            const emails = accounts.map(account => account.email) 
+            return Result.success(emails);
+        }catch(e){
+            return Result.fail( new NotFoundException('Error finding all emails'))
+        }    
+    }
 }

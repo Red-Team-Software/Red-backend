@@ -10,6 +10,7 @@ import { BundleController } from './bundle/infraestructure/controller/bundle.con
 import { CourierController } from './courier/infraestructure/controller/courier.controller';
 import { AuthController } from './auth/infraestructure/controller/auth.controller';
 import { UserController } from './user/infraestructure/controller/user.controller';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -17,7 +18,11 @@ import { UserController } from './user/infraestructure/controller/user.controlle
       isGlobal: true,
     }),
     RabbitMQModule,
-    NotificationModule
+    NotificationModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET_KEY,
+      signOptions: { expiresIn: '24h' }
+    })
   ],
   controllers: [
     ProductController,
