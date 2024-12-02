@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from "typeorm";
-import { IDirection } from "../../model-entity/orm-model-entity/direction-interface";
 import { OrmDirectionUserEntity } from "./orm-direction-user-entity";
+import { IDirection } from "src/user/application/model/direction-interface";
 
 
 

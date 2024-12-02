@@ -1,18 +1,19 @@
+import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract"
 import { IApplicationService } from "src/common/application/services"
 import { Result } from "src/common/utils/result-handler/result"
 import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface"
 import { UserDirection } from "src/user/domain/value-object/user-direction"
 import { UserId } from "src/user/domain/value-object/user-id"
 import { ErrorUpdatinDirectionApplicationException } from "../../application-exeption/error-updating-directions-application-exception"
+import { UpdateUserDirectionsApplicationRequestDTO } from "../../dto/request/update-user-direction-application-request-dto"
+import { UpdateUserDirectionsApplicationResponseDTO } from "../../dto/response/update-user-direction-application-response-dto"
 import { IQueryUserRepository } from "../../repository/user.query.repository.interface"
-import { AddUserDirectionsApplicationRequestDTO } from "../../dto/request/add-user-direction-application-request-dto"
-import { AddUserDirectionApplicationResponseDTO } from "../../dto/response/add-user-direction-application-response-dto"
-import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract"
 
 
 
-export class AddUserDirectionApplicationService extends IApplicationService 
-<AddUserDirectionsApplicationRequestDTO,AddUserDirectionApplicationResponseDTO> {
+
+export class UpdateUserDirectionApplicationService extends IApplicationService 
+<UpdateUserDirectionsApplicationRequestDTO,UpdateUserDirectionsApplicationResponseDTO> {
 
     constructor(
         private readonly commandUserRepository:ICommandUserRepository,
@@ -22,7 +23,7 @@ export class AddUserDirectionApplicationService extends IApplicationService
         super()
     }
     
-    async execute(data: AddUserDirectionsApplicationRequestDTO): Promise<Result<AddUserDirectionApplicationResponseDTO>> {
+    async execute(data: UpdateUserDirectionsApplicationRequestDTO): Promise<Result<UpdateUserDirectionsApplicationResponseDTO>> {
         let userRepoResponse = await this.queryUserRepository.findUserById(UserId.create(data.userId))
 
 
@@ -38,9 +39,7 @@ export class AddUserDirectionApplicationService extends IApplicationService
 
         let user=userRepoResponse.getValue
 
-        userDirections.forEach(direction=>{
-            user.addDirection(direction)
-        })
+        user.updateDirection(userDirections)
 
         let userResponse= await this.commandUserRepository.updateUser(user)
         

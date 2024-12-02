@@ -15,6 +15,7 @@ import { UserPhone } from "src/user/domain/value-object/user-phone";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { IUserDirection } from "src/user/application/model/user.direction.interface";
 import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton";
+import { IDirection } from "src/user/application/model/direction-interface";
 
 
 
@@ -37,7 +38,6 @@ export class OrmUserQueryRepository extends Repository<OrmUserEntity> implements
             return Result.success(false)
         }
     catch(e){
-        console.log(e)
             return Result.fail( new NotFoundException('Veify User existance unsucssessfully '))
         }
     }
@@ -61,7 +61,6 @@ export class OrmUserQueryRepository extends Repository<OrmUserEntity> implements
             let user= await this.mapper.fromPersistencetoDomain(ormUser)
             return Result.success(user)
         }catch(e){
-            console.log(e)
             return Result.fail(new PersistenceException('Find user by id unsucssessfully'))
         }
     }
@@ -80,6 +79,23 @@ export class OrmUserQueryRepository extends Repository<OrmUserEntity> implements
             return Result.success(directions)
         }catch(e){
             return Result.fail(new PersistenceException('Find user direcction by id unsucssessfully'))
+        }    
+    }
+
+    async findDirectionsByLatAndLng(userDirection:UserDirection[]): Promise<Result<IDirection[]>> {
+        try{
+            let directions:IDirection[]=[]
+            for (const direction of userDirection){
+                let ormDirection=await this.ormDirectionRepository.findOneBy({
+                    lat:direction.Lat,
+                    lng:direction.Lng
+                })
+                if (ormDirection)
+                    directions.push(ormDirection)
+            }
+            return Result.success(directions)
+        }catch(e){
+            return Result.fail(new PersistenceException('Find direcction by lat and lng unsucssessfully'))
         }    
     }
 

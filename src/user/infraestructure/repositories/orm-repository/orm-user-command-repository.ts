@@ -38,7 +38,6 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
             
             return Result.success(idUser)
             } catch (e) {
-                console.log(e)
                 return Result.fail(new PersistenceException('Update user unsucssessfully'))
             }  
         }    
@@ -59,7 +58,6 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
           
         return Result.success(user)
         } catch (e) {
-            console.log(e)
             return Result.fail(new PersistenceException('Update user unsucssessfully'))
         }  
     }

@@ -27,7 +27,7 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
         let ormDirectionEntities:OrmDirectionEntity[]=[]
         let ormDirectionUserEntities:OrmDirectionUserEntity[]=[]
 
-        let directionsResponse=await this.userQueryRepository.findUserDirectionsByUserId(domainEntity.getId())
+        let directionsResponse=await this.userQueryRepository.findDirectionsByLatAndLng(domainEntity.UserDirections)
 
         if (!directionsResponse.isSuccess())
             throw directionsResponse.getError
@@ -43,14 +43,16 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
         )
 
         for (const direction of domainEntity.UserDirections){
-            let directionFound= directions.find(ormDirection=>{
+            let directionFound= directions.find(ormDirection=>
                 ormDirection.lat==direction.Lat &&
                 ormDirection.lng==direction.Lng
-            })
+            )
 
             let id = directionFound ? directionFound.id : await this.IdGen.genId()
             
-            console.log(id)
+            console.log('id:',id)
+            console.log('id:',directionFound)
+
             let ormDirection=OrmDirectionEntity.create(id,direction.Lat,direction.Lng)
             ormDirectionEntities.push(ormDirection)
 
@@ -85,10 +87,6 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
             : [],
             infraEstructure.image ? UserImage.create(infraEstructure.image) : undefined
         )
-        console.log(direction.getValue)
-        console.log('dieecciones del user',user.UserDirections.length)
-        console.log('mapper user',user)
-
         return user
     }
 }
