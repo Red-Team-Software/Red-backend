@@ -1,8 +1,9 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { IUser } from "../../model-entity/orm-model-entity/user-interface";
 import { OrmAccountEntity } from "src/auth/infraestructure/orm/orm-entities/orm-account-entity";
 import { OrmDirectionUserEntity } from "../../model-entity/orm-model-entity/orm-direction-user-entity";
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
+import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-order-entity";
 
 
 @Entity('user')
@@ -20,6 +21,9 @@ export class OrmUserEntity implements IUser{
 
     @OneToMany( () => OrmDirectionUserEntity, direction => direction.direction,{ eager: true, nullable:true })  
     direcction: OrmDirectionUserEntity[];
+
+    @OneToMany( () => OrmOrderEntity, order => order.user)
+    orders?: OrmOrderEntity[]
 
     static create ( 
         id:string,

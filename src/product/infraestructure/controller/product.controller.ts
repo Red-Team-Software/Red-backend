@@ -25,11 +25,13 @@ import { FindAllProductsbyNameApplicationRequestDTO } from 'src/product/applicat
 import { FindProductByIdInfraestructureRequestDTO } from '../dto-request/find-product-by-id-infraestructure-request-dto';
 import { FindProductByIdApplicationService } from 'src/product/application/services/query/find-product-by-id-application.service';
 import { RabbitMQPublisher } from 'src/common/infraestructure/events/publishers/rabbit-mq-publisher';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/infraestructure/jwt/guards/jwt-auth.guard';
 import { ICredential } from 'src/auth/application/model/credential.interface';
 import { GetCredential } from 'src/auth/infraestructure/jwt/decorator/get-credential.decorator';
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Product')
 @Controller('product')
 export class ProductController {

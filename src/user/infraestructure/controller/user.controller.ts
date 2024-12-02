@@ -2,7 +2,7 @@ import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 import { UpdateProfileInfraestructureRequestDTO } from "../dto/request/update-profile-infraestructure-request-dto"
 import { Controller, Inject, Patch, Body, Get, Query, Post, UseGuards, BadRequestException, Logger } from "@nestjs/common"
-import { ApiResponse, ApiTags } from "@nestjs/swagger"
+import { ApiBearerAuth, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { UpdateProfileInfraestructureResponseDTO } from "../dto/response/update-profile-infraestructure-response-dto"
 import { OrmUserQueryRepository } from "../repositories/orm-repository/orm-user-query-repository"
 import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton"
@@ -38,6 +38,8 @@ import { OrmAccountQueryRepository } from "src/auth/infraestructure/repositories
 import { IEncryptor } from "src/common/application/encryptor/encryptor.interface"
 import { BcryptEncryptor } from "src/common/infraestructure/encryptor/bcrypt-encryptor"
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('User')
 @Controller('user')
 export class UserController {

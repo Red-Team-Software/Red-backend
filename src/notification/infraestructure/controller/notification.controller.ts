@@ -12,12 +12,16 @@ import { SaveTokenInfraestructureEntryDTO } from "../dto-request/save-token-infr
 import { ICreateBundle } from "../interfaces/create-bundle.interface";
 import { SendGridNewBundleEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-bundle-email-sender.service";
 import { SendGridNewProductEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-product-email-sender.service";
-import { ICreateOrder } from "../interfaces/create-order.interface";
 import { NewBundlePushNotificationApplicationService } from "src/notification/application/services/command/new-bundle-push-notification-application.service";
 import { NewProductsPushNotificationApplicationService } from "src/notification/application/services/command/new-product-push-notification-application.service";
 import { SendGridNewOrderEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-order-email-sender.service";
 import { NewOrderPushNotificationApplicationService } from "src/notification/application/services/command/new-order-push-notification-application.service";
 import { NewOrderPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-order-push-notification-application-request-dto";
+import { CancelOrderPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/cancel-order-push-notification-application-request-dto";
+import { CanceledOrderPushNotificationApplicationService } from "src/notification/application/services/command/cancel-order-push-notification-application.service";
+import { SendGridCanceledOrderEmailSender } from "src/common/infraestructure/email-sender/send-grid-canceled-order-email-sender.service";
+import { ICreateOrder } from "../interfaces/create-order.interface";
+import { ICancelOrder } from "../interfaces/cancel-order.interface";
 import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard";
 import { ICredential } from "src/auth/application/model/credential.interface";
 import { GetCredential } from "src/auth/infraestructure/jwt/decorator/get-credential.decorator";
@@ -31,25 +35,28 @@ import { OrmAccountQueryRepository } from "src/auth/infraestructure/repositories
 import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton";
 import { OrmTokenQueryRepository } from "src/auth/infraestructure/repositories/orm-repository/orm-token-query-session-repository";
 import { OrmTokenCommandRepository } from "src/auth/infraestructure/repositories/orm-repository/orm-token-command-session-repository";
+import { IDeliveredOrder } from "../interfaces/delivered-order.interface";
+import { OrderDeliveredPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/order-delivered-push-notification-application-request-dto";
+import { OrderDeliveredPushNotificationApplicationService } from "src/notification/application/services/command/order-delivered-push-notification-application.service";
 
 @Controller('notification')
 export class NotificationController {
 
-    private readonly subscriber:RabbitMQSubscriber
-    private readonly pushsender:IPushNotifier
-    private readonly commandTokenSessionRepository:ICommandTokenSessionRepository<ISession>
-    private readonly queryAccountRepository:IQueryAccountRepository<IAccount>
-    private readonly querySessionRepository:IQueryTokenSessionRepository<ISession>
-    private readonly tokens:string[]=[]
+    private readonly subscriber:RabbitMQSubscriber;
+    private readonly pushsender:IPushNotifier;
+    private readonly commandTokenSessionRepository:ICommandTokenSessionRepository<ISession>;
+    private readonly queryAccountRepository:IQueryAccountRepository<IAccount>;
+    private readonly querySessionRepository:IQueryTokenSessionRepository<ISession>;
+    private readonly tokens:string[]=[];
 
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
     ){
-        this.pushsender=FirebaseNotifier.getInstance()
-        this.subscriber=new RabbitMQSubscriber(this.channel)
-        this.commandTokenSessionRepository= new OrmTokenCommandRepository(PgDatabaseSingleton.getInstance())
-        this.queryAccountRepository= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance())
-        this.querySessionRepository= new OrmTokenQueryRepository(PgDatabaseSingleton.getInstance())
+        this.pushsender=FirebaseNotifier.getInstance();
+        this.subscriber=new RabbitMQSubscriber(this.channel);
+        this.commandTokenSessionRepository= new OrmTokenCommandRepository(PgDatabaseSingleton.getInstance());
+        this.queryAccountRepository= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance());
+        this.querySessionRepository= new OrmTokenQueryRepository(PgDatabaseSingleton.getInstance());
 
         this.subscriber.buildQueue({
             name:'ProductEvents',
@@ -61,7 +68,7 @@ export class NotificationController {
                     durable:false,
                 }
             }
-        })
+        });
 
         this.subscriber.buildQueue({
             name:'BundleEvents',
@@ -73,7 +80,7 @@ export class NotificationController {
                     durable:false,
                 }
             }
-        })
+        });
 
         this.subscriber.buildQueue({
             name:'OrderEvents',
@@ -85,7 +92,31 @@ export class NotificationController {
                     durable:false,
                 }
             }
-        })
+        });
+
+        this.subscriber.buildQueue({
+            name:'OrderEvents/CancelOrder',
+            pattern: 'OrderStatusCanceled',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        });
+
+        this.subscriber.buildQueue({
+            name:'OrderEvents/OrderStatusDelivered',
+            pattern: 'OrderStatusDelivered',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        });
 
         this.subscriber.consume<ICreateProduct>(
             { name: 'ProductEvents'}, 
@@ -94,7 +125,7 @@ export class NotificationController {
                 this.sendPushToCreatedProduct(data)
                 return
             }
-        )
+        );
 
         this.subscriber.consume<ICreateBundle>(
             { name: 'BundleEvents'}, 
@@ -103,7 +134,7 @@ export class NotificationController {
                 this.sendEmailToCreateBundle(data)
                 return
             }
-        )
+        );
 
         this.subscriber.consume<ICreateOrder>(
             { name: 'OrderEvents'}, 
@@ -112,8 +143,72 @@ export class NotificationController {
                 this.sendEmailOrderCreated(data)
                 return
             }
-        )
+        );
+
+        this.subscriber.consume<ICancelOrder>(
+            { name: 'OrderEvents/CancelOrder'}, 
+            (data):Promise<void>=>{
+                this.sendPushOrderCanceled(data)
+                this.sendEmailOrderCanceled(data)
+                return
+            }
+        );
+
+        this.subscriber.consume<IDeliveredOrder>(
+            { name: 'OrderEvents/OrderStatusDelivered'}, 
+            (data):Promise<void>=>{
+                this.sendPushOrderDelivered(data)
+                return
+            }
+        );
+
     }
+
+    async sendPushOrderDelivered(entry:IDeliveredOrder){
+        let service= new ExceptionDecorator(
+            new LoggerDecorator(
+                new OrderDeliveredPushNotificationApplicationService(
+                    this.pushsender
+                ),
+            new NestLogger(new Logger())
+            )
+        );
+        let data: OrderDeliveredPushNotificationApplicationRequestDTO={
+            userId:'none',
+            tokens:this.tokens,
+            orderState:entry.orderState,
+            orderId:entry.orderId
+        };
+        service.execute(data);
+    };
+
+    async sendPushOrderCanceled(entry:ICancelOrder){
+        let service= new ExceptionDecorator(
+            new LoggerDecorator(
+                new CanceledOrderPushNotificationApplicationService(
+                    this.pushsender
+                ),
+            new NestLogger(new Logger())
+            )
+        );
+        let data: CancelOrderPushNotificationApplicationRequestDTO={
+            userId:'none',
+            tokens:this.tokens,
+            orderState:entry.orderState,
+            orderId:entry.orderId
+        };
+        service.execute(data);
+    };
+
+
+    async sendEmailOrderCanceled(entry:ICancelOrder){
+        let emailsender=new SendGridCanceledOrderEmailSender();
+        emailsender.setVariablesToSend({
+            username:'customer',
+            orderid: entry.orderId
+        });
+        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve');
+    };
 
     async sendPushOrderCreated(entry:ICreateOrder){
         
@@ -122,9 +217,9 @@ export class NotificationController {
                 new NewOrderPushNotificationApplicationService(
                     this.pushsender
                 ),
-              new NestLogger(new Logger())
+            new NestLogger(new Logger())
             )
-          )
+        );
         
         let data:NewOrderPushNotificationApplicationRequestDTO={
             userId:'none',
@@ -133,9 +228,9 @@ export class NotificationController {
             orderCreateDate:entry.orderCreateDate,
             totalAmount:entry.totalAmount.amount,
             currency:entry.totalAmount.currency
-        }
-        service.execute(data)
-    }
+        };
+        service.execute(data);
+    };
 
     async sendEmailOrderCreated(entry:ICreateOrder){
         let emailsender=new SendGridNewOrderEmailSender()
@@ -143,23 +238,24 @@ export class NotificationController {
             price:entry.totalAmount.amount,
             currency:entry.totalAmount.currency
         })
-        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')     }
+        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')     
+    };
 
     async sendPushToCreatedProduct(entry:ICreateProduct):Promise<void> {
 
-        const tokens=await this.querySessionRepository.findAllTokenSessions()
+        const tokens=await this.querySessionRepository.findAllTokenSessions();
 
         if (!tokens.isSuccess())
-            throw tokens.getError
+            throw tokens.getError;
         
         let service= new ExceptionDecorator(
             new LoggerDecorator(
                 new NewProductsPushNotificationApplicationService(
                     this.pushsender
                 ),
-              new NestLogger(new Logger())
+            new NestLogger(new Logger())
             )
-          )
+        );
 
         let data:NewProductPushNotificationApplicationRequestDTO={
             userId:'none',
@@ -167,39 +263,39 @@ export class NotificationController {
             name:entry.productName,
             price:entry.productPrice.price,
             currency:entry.productPrice.currency
-        }
-        service.execute(data)
-    }
+        };
+        service.execute(data);
+    };
 
     async sendEmailToCreateProduct(entry:ICreateProduct):Promise<void> {
 
-        const emailsResponse=await this.queryAccountRepository.findAllEmails()
+        const emailsResponse=await this.queryAccountRepository.findAllEmails();
 
         if (!emailsResponse.isSuccess())
-            throw emailsResponse.getError
+            throw emailsResponse.getError;
 
-        let emailsender=new SendGridNewProductEmailSender()
+        let emailsender=new SendGridNewProductEmailSender();
         emailsender.setVariablesToSend({
             name:entry.productName,
             price:entry.productPrice.price,
             currency:entry.productPrice.currency,
             image:entry.productImage.pop()
-        })
+        });
         for (const email of emailsResponse.getValue){
             let pepe=await emailsender.sendEmail(email)
-        }        
-    }
+        };      
+    };
 
     async sendEmailToCreateBundle(entry:ICreateBundle):Promise<void> {
-        let emailsender=new SendGridNewBundleEmailSender()
+        let emailsender=new SendGridNewBundleEmailSender();
         emailsender.setVariablesToSend({
             name:entry.bundleName,
             price:entry.bundlePrice.price,
             currency:entry.bundlePrice.currency,
             image:entry.bundleImages.pop()
-        })
-        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')
-    }
+        });
+        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve');
+    };
 
     async sendPushToCreatedBundle(entry:ICreateBundle){
         let service= new ExceptionDecorator(
@@ -207,9 +303,9 @@ export class NotificationController {
                 new NewBundlePushNotificationApplicationService(
                     this.pushsender
                 ),
-              new NestLogger(new Logger())
+            new NestLogger(new Logger())
             )
-          )
+        );
 
         let data:NewProductPushNotificationApplicationRequestDTO={
             userId:'none',
@@ -217,9 +313,9 @@ export class NotificationController {
             name:entry.bundleName,
             price:entry.bundlePrice.price,
             currency:entry.bundlePrice.currency
-        }
-        service.execute(data)
-    }
+        };
+        service.execute(data);
+    };
 
     @UseGuards(JwtAuthGuard)
     @Post('savetoken')
@@ -227,9 +323,9 @@ export class NotificationController {
         @GetCredential() credential:ICredential,
         @Body() entry:SaveTokenInfraestructureEntryDTO
     ){
-        credential.session.push_token=entry.token
-        let response=await this.commandTokenSessionRepository.updateSession(credential.session)
+        credential.session.push_token=entry.token;
+        let response=await this.commandTokenSessionRepository.updateSession(credential.session);
         if (!response.isSuccess())
-            throw new PersistenceException('error registering token')
-    }
+            throw new PersistenceException('error registering token');
+    };
 }

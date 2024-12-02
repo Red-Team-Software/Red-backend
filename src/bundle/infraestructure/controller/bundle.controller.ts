@@ -23,11 +23,13 @@ import { FindAllBundlesByNameApplicationService } from "src/bundle/application/s
 import { FindBundleByIdInfraestructureRequestDTO } from "../dto-request/find-bundle-by-id-infraestructure-request-dto"
 import { FindBundleByIdApplicationService } from "src/bundle/application/services/query/find-bundle-by-id-application.service"
 import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher"
-import { ApiTags } from "@nestjs/swagger"
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
 import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard"
 import { ICredential } from "src/auth/application/model/credential.interface"
 import { GetCredential } from "src/auth/infraestructure/jwt/decorator/get-credential.decorator"
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Bundle')
 @Controller('bundle')
 export class BundleController {

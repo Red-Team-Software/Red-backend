@@ -7,6 +7,7 @@ import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { OrmOrderPayEntity } from "../../entities/orm-order-payment";
 import { FindAllOrdersApplicationServiceRequestDto } from "src/order/application/dto/request/find-all-orders-request.dto";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
+import { OrderId } from "src/order/domain/value_objects/order-id";
 
 
 export class OrderQueryRepository extends Repository<OrmOrderEntity> implements IQueryOrderRepository {
@@ -25,17 +26,18 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
     
     async findAllOrders(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>> {
         try {
-            const ormOrders = await this.createQueryBuilder("order")
-                .leftJoinAndSelect("order.pay", "payment")
-                .getMany();
-
-                if(ormOrders.length==0) return Result.fail( new NotFoundException('products empty please try again'))
+            const ormOrders = await this.find({
+                relations: ["pay", "order_products", "order_bundles","order_report","order_courier", "user"]
+            });
+            
+                if(!ormOrders || ormOrders.length === 0) return Result.fail( new NotFoundException('Orders empty, please try again'))
             
                 let domainOrders: Order[] = [];
 
-                ormOrders.forEach( async (ormOrder) => {
-                    domainOrders.push(await this.orderMapper.fromPersistencetoDomain(ormOrder));
-                });
+                for(let ormOrder of ormOrders){
+                    let or = await this.orderMapper.fromPersistencetoDomain(ormOrder)
+                    domainOrders.push(or);
+                };
 
                 if (data.perPage) {
                     let page = data.page;
@@ -46,7 +48,25 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
 
             return Result.success(domainOrders);
         } catch (error) {
-            return Result.fail(new NotFoundException('products empty please try again'));
+            console.log("error", error);
+            return Result.fail(new NotFoundException('Orders empty, please try again'));
         }
     }
+
+    async findOrderById(orderId: OrderId): Promise<Result<Order>> {
+        try {
+            const ormOrder = await this.findOne({
+                where: { id: orderId.orderId },
+                relations: ["pay", "order_products", "order_bundles","order_report","order_courier", "user"]
+            });
+
+            if (!ormOrder) return Result.fail(new NotFoundException('Order not found'));
+
+            const domainOrder = await this.orderMapper.fromPersistencetoDomain(ormOrder);
+            return Result.success(domainOrder);
+        } catch (error) {
+            return Result.fail(new NotFoundException('Order not found'));
+        }
+    }
+
 }
