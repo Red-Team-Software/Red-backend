@@ -7,7 +7,7 @@ import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { OrmOrderPayEntity } from "../../entities/orm-order-payment";
 import { FindAllOrdersApplicationServiceRequestDto } from "src/order/application/dto/request/find-all-orders-request.dto";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
-import { OrderId } from "src/order/domain/value_objects/orderId";
+import { OrderId } from "src/order/domain/value_objects/order-id";
 
 
 export class OrderQueryRepository extends Repository<OrmOrderEntity> implements IQueryOrderRepository {

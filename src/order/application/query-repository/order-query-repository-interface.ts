@@ -1,7 +1,7 @@
 import { Result } from "src/common/utils/result-handler/result";
 import { Order } from "src/order/domain/aggregate/order";
 import { FindAllOrdersApplicationServiceRequestDto } from "../dto/request/find-all-orders-request.dto";
-import { OrderId } from "src/order/domain/value_objects/orderId";
+import { OrderId } from "src/order/domain/value_objects/order-id";
 
 
 

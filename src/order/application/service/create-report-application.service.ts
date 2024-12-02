@@ -5,7 +5,7 @@ import { IQueryOrderRepository } from "../query-repository/order-query-repositor
 import { ICommandOrderRepository } from "src/order/domain/command-repository/order-command-repository-interface";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { Result } from "src/common/utils/result-handler/result";
-import { OrderId } from "src/order/domain/value_objects/orderId";
+import { OrderId } from "src/order/domain/value_objects/order-id";
 import { NotFoundOrderApplicationException } from "../application-exception/not-found-order-application.exception";
 import { ErrorSavingOrderReportApplicationException } from "../application-exception/error-saving-order-report-application.exception";
 import { OrderReport } from '../../domain/entities/report/report-entity';

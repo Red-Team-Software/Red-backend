@@ -3,7 +3,7 @@ import { IPaymentMethodService } from "../../domain/domain-services/payment-meth
 import { Result } from "src/common/utils/result-handler/result";
 import { OrderPayment } from "src/order/domain/entities/payment/order-payment-entity";
 import { Order } from "src/order/domain/aggregate/order";
-import { OrderState } from "src/order/domain/value_objects/orderState";
+import { OrderState } from "src/order/domain/value_objects/order-state";
 import { PaymentId } from "src/order/domain/entities/payment/value-object/payment-id";
 import { PaymentMethod } from "src/order/domain/entities/payment/value-object/payment-method";
 import { PaymentAmount } from "src/order/domain/entities/payment/value-object/payment-amount";

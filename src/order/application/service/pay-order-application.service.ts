@@ -16,8 +16,8 @@ import { ICommandOrderRepository } from 'src/order/domain/command-repository/ord
 import { Order } from 'src/order/domain/aggregate/order';
 import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
 import { OrderCreatedDate } from 'src/order/domain/value_objects/order-created-date';
-import { OrderId } from 'src/order/domain/value_objects/orderId';
-import { OrderState } from 'src/order/domain/value_objects/orderState';
+import { OrderId } from 'src/order/domain/value_objects/order-id';
+import { OrderState } from 'src/order/domain/value_objects/order-state';
 import { OrderShippingFee } from 'src/order/domain/value_objects/order-shipping-fee';
 import { OrderReceivedDate } from 'src/order/domain/value_objects/order-received-date';
 import { ErrorCreatingOrderApplicationException } from '../application-exception/error-creating-order-application.exception';

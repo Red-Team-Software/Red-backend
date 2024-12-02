@@ -1,6 +1,6 @@
 import { DomainEvent } from "src/common/domain";
-import { OrderId } from "../value_objects/orderId";
-import { OrderState } from "../value_objects/orderState";
+import { OrderId } from "../value_objects/order-id";
+import { OrderState } from "../value_objects/order-state";
 
 export class OrderStatusUpdated extends DomainEvent {
     
