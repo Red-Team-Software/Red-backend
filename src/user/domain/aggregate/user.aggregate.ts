@@ -52,12 +52,14 @@ export class User extends AggregateRoot <UserId>{
         }
     }
     protected validateState(): void {
+        
         if(
             !this.getId() ||
             !this.userName ||
             !this.UserPhone ||
             !this.userRole ||
-            !this.userDirections
+            !this.userDirections ||
+            this.userDirections.length>=6
         )
         throw new InvalidUserException()
 
@@ -124,7 +126,8 @@ export class User extends AggregateRoot <UserId>{
                 this.getId(),
                 direction
             )
-        )    
+        )
+        this.validateState()  
     }
     deleteDirection(direction:UserDirection):void{
         this.apply(

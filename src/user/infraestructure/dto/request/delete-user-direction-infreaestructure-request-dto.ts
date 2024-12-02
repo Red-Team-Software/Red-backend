@@ -1,9 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ArrayNotEmpty, IsArray, IsBoolean, IsNotEmpty, IsNumber, IsString, MinLength, ValidateNested } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsBoolean, IsNotEmpty, IsNumber, IsString, IsUUID, MinLength, ValidateNested } from 'class-validator';
 
 
 export class UserDirectionsInfraestructureRequestDTO {
+
+    @ApiProperty({ required:true ,example: '65302e02-69e4-4c6a-9096-2ce00427d498' })
+    @IsUUID()
+    id: string
 
     @ApiProperty( { required: true, default: 'casa' })
     @IsNotEmpty()
@@ -24,14 +28,15 @@ export class UserDirectionsInfraestructureRequestDTO {
     lng:number
 }
 
-export class AddUserDirectionsInfraestructureRequestDTO {
+export class DeleteUserDirectionsInfraestructureRequestDTO {
     @IsArray() 
     @ArrayNotEmpty() 
     @ValidateNested({ each: true })
     @Type(() => UserDirectionsInfraestructureRequestDTO)
     @ApiProperty({
-        description: 'The products with their ids and quantities',
-        example: [{ 
+        description: 'Delete User direction',
+        example: [{
+            id:'65302e02-69e4-4c6a-9096-2ce00427d498',
             name: 'casa',
             favorite: true,
             lat: 38.8951,

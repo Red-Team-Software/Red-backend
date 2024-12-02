@@ -16,8 +16,11 @@ export class ExceptionDecorator<
 			}
 			return res;
 		} catch (error) {
+			console.log('despues',error)
 			if (error.Type==BaseExceptionEnum.DOMAIN_EXCEPTION)
 				ExceptionMapper.toHttp(error,error.message);
+			console.log('antes',error.name)
+
 			throw error
 		}
 	}

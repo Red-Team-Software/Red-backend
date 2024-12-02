@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from "typeorm";
 import { IDirection } from "../../model-entity/orm-model-entity/direction-interface";
-import { OrmDirectionUserEntity } from "../../model-entity/orm-model-entity/orm-direction-user-entity";
+import { OrmDirectionUserEntity } from "./orm-direction-user-entity";
 
 
 
@@ -11,7 +11,7 @@ export class OrmDirectionEntity implements IDirection{
     @Column( 'numeric') lat: number;
     @Column( 'numeric') lng: number;
 
-    @OneToMany( () => OrmDirectionUserEntity, user => user,{ eager: true, nullable:true })  
+    @OneToMany( () => OrmDirectionUserEntity, user => user,{ nullable:true })  
     accounts?: OrmDirectionUserEntity[];
 
     static create ( 

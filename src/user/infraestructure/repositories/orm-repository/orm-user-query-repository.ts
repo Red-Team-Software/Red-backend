@@ -10,8 +10,11 @@ import { IQueryUserRepository } from "src/user/application/repository/user.query
 import { UserDirection } from "src/user/domain/value-object/user-direction";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { OrmDirectionEntity } from "../../entities/orm-entities/orm-direction-entity";
-import { OrmDirectionUserEntity } from "../../model-entity/orm-model-entity/orm-direction-user-entity";
+import { OrmDirectionUserEntity } from "../../entities/orm-entities/orm-direction-user-entity";
 import { UserPhone } from "src/user/domain/value-object/user-phone";
+import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
+import { IUserDirection } from "src/user/application/model/user.direction.interface";
+import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton";
 
 
 
@@ -23,7 +26,7 @@ export class OrmUserQueryRepository extends Repository<OrmUserEntity> implements
 
     constructor(dataSource:DataSource){
         super(OrmUserEntity, dataSource.createEntityManager())
-        this.mapper=new OrmUserMapper()
+        this.mapper=new OrmUserMapper(new UuidGen(),this)
         this.ormDirectionRepository=dataSource.getRepository(OrmDirectionEntity)
         this.ormDirectionUserRepository=dataSource.getRepository(OrmDirectionUserEntity)
     }
@@ -58,16 +61,23 @@ export class OrmUserQueryRepository extends Repository<OrmUserEntity> implements
             let user= await this.mapper.fromPersistencetoDomain(ormUser)
             return Result.success(user)
         }catch(e){
+            console.log(e)
             return Result.fail(new PersistenceException('Find user by id unsucssessfully'))
         }
     }
-    async findUserDirectionsByUserId(id: UserId): Promise<Result<UserDirection[]>> {
+    async findUserDirectionsByUserId(id: UserId): Promise<Result<IUserDirection[]>> {
         try{
-            let ormUser=await this.findOneBy({id:id.Value})
+            let ormUser=await this.ormDirectionUserRepository.findBy({user_id:id.Value})
             if (!ormUser)
                 return Result.fail(new PersistenceException('Find user direcction by id unsucssessfully'))
-            let user= await this.mapper.fromPersistencetoDomain(ormUser)
-            return Result.success(user.UserDirections)
+            let directions = ormUser.map(direction => ({
+                id: direction.direction_id,
+                name: direction.name,
+                favorite: direction.isFavorite,
+                lat: Number(direction.direction.lat),
+                lng: Number(direction.direction.lng)
+            }))
+            return Result.success(directions)
         }catch(e){
             return Result.fail(new PersistenceException('Find user direcction by id unsucssessfully'))
         }    

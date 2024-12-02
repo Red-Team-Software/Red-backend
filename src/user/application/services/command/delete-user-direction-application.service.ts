@@ -8,11 +8,13 @@ import { IQueryUserRepository } from "../../repository/user.query.repository.int
 import { AddUserDirectionsApplicationRequestDTO } from "../../dto/request/add-user-direction-application-request-dto"
 import { AddUserDirectionApplicationResponseDTO } from "../../dto/response/add-user-direction-application-response-dto"
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract"
+import { DeleteUserDirectionInfraestructureResponseDTO } from "src/user/infraestructure/dto/response/delete-user-direction-infreaestructure-response-dto"
+import { DeleteUserDirectionsApplicationRequestDTO } from "../../dto/request/delete-user-direction-application-request-dto"
 
 
 
-export class AddUserDirectionApplicationService extends IApplicationService 
-<AddUserDirectionsApplicationRequestDTO,AddUserDirectionApplicationResponseDTO> {
+export class DeleteUserDirectionApplicationService extends IApplicationService 
+<DeleteUserDirectionsApplicationRequestDTO,AddUserDirectionApplicationResponseDTO> {
 
     constructor(
         private readonly commandUserRepository:ICommandUserRepository,
@@ -22,9 +24,10 @@ export class AddUserDirectionApplicationService extends IApplicationService
         super()
     }
     
-    async execute(data: AddUserDirectionsApplicationRequestDTO): Promise<Result<AddUserDirectionApplicationResponseDTO>> {
+    async execute(data: DeleteUserDirectionsApplicationRequestDTO): Promise<Result<AddUserDirectionApplicationResponseDTO>> {
         let userRepoResponse = await this.queryUserRepository.findUserById(UserId.create(data.userId))
 
+        console.log(userRepoResponse)
 
         if (!userRepoResponse.isSuccess())
             return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
@@ -39,15 +42,21 @@ export class AddUserDirectionApplicationService extends IApplicationService
         let user=userRepoResponse.getValue
 
         userDirections.forEach(direction=>{
-            user.addDirection(direction)
+            user.deleteDirection(direction)
         })
 
-        let userResponse= await this.commandUserRepository.updateUser(user)
-        
-        console.log(userRepoResponse)
+        for (const userDirection of data.directions){
 
-        if (!userResponse.isSuccess())
-            return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
+            let userResponse= await this.commandUserRepository.deleteUserDirection(
+                user.getId().Value,
+                userDirection.id
+            )
+
+            if (!userResponse.isSuccess())
+                return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
+        }
+
+
 
         this.eventPublisher.publish(user.pullDomainEvents())
 

@@ -71,7 +71,6 @@ export class CourierQueryRepository extends Repository<OrmCourierEntity> impleme
 
             return Result.success(courier);
         }catch(error){
-            console.log(error);
             return Result.fail( new NotFoundException('Courier not found') );
         }
     }
