@@ -155,9 +155,7 @@ export class NotificationController {
         );
 
         this.subscriber.consume<IDeliveredOrder>(
-            { name: 'OrderEvents/OrderStatusDelivered',
-                pattern: 'OrderStatusDelivered'
-            }, 
+            { name: 'OrderEvents/OrderStatusDelivered'}, 
             (data):Promise<void>=>{
                 this.sendPushOrderDelivered(data)
                 return
