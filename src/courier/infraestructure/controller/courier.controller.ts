@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Inject, ParseFilePipe, Post, UploadedFile, UploadedFiles, UseInterceptors } from "@nestjs/common"
+import { Body, Controller, FileTypeValidator, Inject, ParseFilePipe, Post, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
 import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express"
 import { Channel } from "amqplib"
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract"
@@ -17,8 +17,11 @@ import { ExceptionDecorator } from "src/common/application/aspects/exeption-deco
 import { CreateCourierApplicationService } from "src/courier/application/services/create-courier-application.service"
 import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher"
 import { CloudinaryService } from "src/common/infraestructure/file-uploader/cloudinary-uploader"
-import { ApiTags } from "@nestjs/swagger"
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
+import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard"
 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Courier')
 @Controller('courier')
 export class CourierController {
