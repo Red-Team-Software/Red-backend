@@ -7,7 +7,7 @@ export class OrderShippingFee extends ValueObject<OrderShippingFee> {
     private constructor(fee: number) {
         super();
 
-        if(fee<0) { throw new NegativeOrderShippingFeeException() }
+        if(fee<0) { throw new NegativeOrderShippingFeeException('El shipping de la orden no puede ser negativo') /* throw DomainException NullCourseId */}
 
         this.fee = fee;
     }

@@ -7,7 +7,7 @@ export class OrderTaxes extends ValueObject<OrderTaxes> {
     private constructor(tax: number) {
         super();
 
-        if(tax<0) { throw new NegativeOrderTaxException()}
+        if(tax<0) { throw new NegativeOrderTaxException('Los taxes de la orden no puede ser negativos')}
 
 
         this.tax = tax;

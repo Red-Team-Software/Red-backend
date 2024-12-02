@@ -2,7 +2,7 @@ import { DomainException } from "src/common/domain/domain-exeption/domain-except
 
 
 export class InvalidOrderStateException extends DomainException {
-  constructor() {
-    super('The provided state is not valid');
+  constructor(message: string) {
+    super(message);
   }
 }

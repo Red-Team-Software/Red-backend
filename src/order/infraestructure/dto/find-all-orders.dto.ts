@@ -4,13 +4,13 @@ import { Transform } from "class-transformer";
 
 
 export class FindAllOrdersEntryDto {
-    @ApiProperty( { required: false })
+    @ApiProperty( { required: false, default: 1, minimum: 1 })
     @IsOptional()
     @IsPositive()
     @Transform(({ value }) => { return Number(value); })  
     page?: number
 
-    @ApiProperty( { required: false, default: 5, minimum: 1 })
+    @ApiProperty( { required: false, default: 10, minimum: 1 })
     @IsOptional()
     @IsPositive()
     @Transform(({ value }) => { return Number(value); })  

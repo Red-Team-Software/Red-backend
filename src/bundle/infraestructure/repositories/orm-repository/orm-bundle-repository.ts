@@ -9,7 +9,7 @@ import { BundleId } from "src/bundle/domain/value-object/bundle-id"
 import { BundleName } from "src/bundle/domain/value-object/bundle-name"
 import { Result } from "src/common/utils/result-handler/result"
 import { NotFoundException, PersistenceException } from "src/common/infraestructure/infraestructure-exception"
-import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface"
+import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry"
 
 export class OrmBundleRepository extends Repository<OrmBundleEntity> implements IBundleRepository{
 

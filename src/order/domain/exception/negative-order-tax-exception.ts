@@ -2,7 +2,7 @@ import { DomainException } from "src/common/domain/domain-exeption/domain-except
 
 
 export class NegativeOrderTaxException extends DomainException {
-    constructor() {
-        super('The tax must be positive');
+    constructor(message: string) {
+        super(message);
     }
 }

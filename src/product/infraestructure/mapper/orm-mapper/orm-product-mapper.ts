@@ -27,16 +27,17 @@ export class OrmProductMapper implements IMapper <Product,OrmProductEntity>{
         }
 
         let data:OrmProductEntity={
-            id:domainEntity.getId().Value,
+            id: domainEntity.getId().Value,
             name: domainEntity.ProductName.Value,
             desciption: domainEntity.ProductDescription.Value,
             caducityDate: domainEntity.ProductCaducityDate.Value,
             stock: domainEntity.ProductStock.Value,
             images: ormImages,
-            price:domainEntity.ProductPrice.Price,
-            currency:domainEntity.ProductPrice.Currency,
-            weigth:domainEntity.ProductWeigth.Weigth,
-            measurament:domainEntity.ProductWeigth.Measure
+            price: domainEntity.ProductPrice.Price,
+            currency: domainEntity.ProductPrice.Currency,
+            weigth: domainEntity.ProductWeigth.Weigth,
+            measurament: domainEntity.ProductWeigth.Measure,
+            categories: []
         }
         return data
     }

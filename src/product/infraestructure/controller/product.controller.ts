@@ -1,10 +1,11 @@
-import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
-import { IProductRepository } from 'src/product/domain/repository/product.repositry.interface';
+import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { IProductRepository } from 'src/product/domain/repository/product.interface.repositry';
 import { OrmProductRepository } from '../repositories/orm-repository/orm-product-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateProductInfraestructureRequestDTO } from '../dto-request/create-product-infraestructure-request-dto';
 import { ExceptionDecorator } from 'src/common/application/aspects/exeption-decorator/exception-decorator';
 import { CreateProductApplicationService } from 'src/product/application/services/command/create-product-application.service';
+import { EventBus } from 'src/common/infraestructure/events/publishers/event-bus';
 import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
 import { UuidGen } from 'src/common/infraestructure/id-gen/uuid-gen';
 import { LoggerDecorator } from 'src/common/application/aspects/logger-decorator/logger-decorator';
@@ -25,17 +26,12 @@ import { FindAllProductsbyNameApplicationRequestDTO } from 'src/product/applicat
 import { FindProductByIdInfraestructureRequestDTO } from '../dto-request/find-product-by-id-infraestructure-request-dto';
 import { FindProductByIdApplicationService } from 'src/product/application/services/query/find-product-by-id-application.service';
 import { RabbitMQPublisher } from 'src/common/infraestructure/events/publishers/rabbit-mq-publisher';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/infraestructure/jwt/guards/jwt-auth.guard';
-import { ICredential } from 'src/auth/application/model/credential.interface';
-import { GetCredential } from 'src/auth/infraestructure/jwt/decorator/get-credential.decorator';
 
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
-@ApiTags('Product')
+
 @Controller('product')
 export class ProductController {
 
+  //todo modulo seatrch para este 
   private readonly ormProductRepo:IProductRepository
   private readonly idGen: IIdGen<string> 
   private readonly ormProductQueryRepo:IQueryProductRepository
@@ -50,13 +46,10 @@ export class ProductController {
     this.ormBundleQueryRepo= new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('create')
   @UseInterceptors(FilesInterceptor('images'))  
-  async createProduct(
-    @GetCredential() credential:ICredential,
-    @Body() entry: CreateProductInfraestructureRequestDTO,
-    @UploadedFiles(
+  async createProduct(@Body() entry: CreateProductInfraestructureRequestDTO,
+  @UploadedFiles(
     new ParseFilePipe({
       validators: [new FileTypeValidator({
         fileType:/(jpeg|.jpg|.png)$/
@@ -74,22 +67,19 @@ export class ProductController {
           ),
       )
       let buffers=images.map(image=>image.buffer)
-    let response= await service.execute({userId:credential.account.idUser,...entry,images:buffers})
+    let response= await service.execute({userId:'none',...entry,images:buffers})
     return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('all')
-  async getAllProducts(
-    @GetCredential() credential:ICredential,
-    @Query() entry:FindAllProductsInfraestructureRequestDTO
-  ){
+  async getAllProducts(@Query() entry:FindAllProductsInfraestructureRequestDTO){
+
     if(!entry.page)
       entry.page=1
     if(!entry.perPage)
       entry.perPage=10
 
-    const pagination:PaginationRequestDTO={userId:credential.account.idUser,page:entry.page, perPage:entry.perPage}
+    const pagination:PaginationRequestDTO={userId:'none',page:entry.page, perPage:entry.perPage}
 
     let service= new ExceptionDecorator(
         new LoggerDecorator(
@@ -103,18 +93,15 @@ export class ProductController {
     return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('all-product-bundle')
-  async getAllProductsAndBundles(
-    @GetCredential() credential:ICredential,
-    @Query() entry:FindAllProductsAndBundlesInfraestructureRequestDTO
-  ){
+  async getAllProductsAndBundles(@Query() entry:FindAllProductsAndBundlesInfraestructureRequestDTO){
+
     if(!entry.page)
       entry.page=1
     if(!entry.perPage)
       entry.perPage=10
 
-    const pagination:FindAllProductsbyNameApplicationRequestDTO={userId:credential.account.idUser,page:entry.page, perPage:entry.perPage,name:entry.term}
+    const pagination:FindAllProductsbyNameApplicationRequestDTO={userId:'none',page:entry.page, perPage:entry.perPage,name:entry.term}
 
     let service= new ExceptionDecorator(
         new LoggerDecorator(
@@ -129,12 +116,9 @@ export class ProductController {
     return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('')
-  async getProductById(
-    @GetCredential() credential:ICredential,
-    @Query() entry:FindProductByIdInfraestructureRequestDTO
-  ){
+  async getProductById(@Query() entry:FindProductByIdInfraestructureRequestDTO){
+
     let service= new ExceptionDecorator(
         new LoggerDecorator(
           new FindProductByIdApplicationService(
@@ -143,7 +127,7 @@ export class ProductController {
           new NestLogger(new Logger())
         )
       )
-    let response= await service.execute({userId:credential.account.idUser,...entry})
+    let response= await service.execute({userId:'none',...entry})
     return response.getValue
   }
 }

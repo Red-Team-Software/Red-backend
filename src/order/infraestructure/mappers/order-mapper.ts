@@ -1,118 +1,40 @@
-import { Order } from "src/Order/domain/aggregate/order";
+import { Order } from "src/order/domain/aggregate/order";
 import { OrmOrderEntity } from "../entities/orm-order-entity";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
-import { OrderId } from "src/order/domain/value_objects/order-id";
-import { OrderState } from "src/order/domain/value_objects/order-state";
+import { OrderId } from "src/order/domain/value_objects/orderId";
+import { OrderState } from "src/order/domain/value_objects/orderState";
 import { OrderTotalAmount } from "src/order/domain/value_objects/order-totalAmount";
 import { OrderDirection } from "src/order/domain/value_objects/order-direction";
 import { OrderCreatedDate } from "src/order/domain/value_objects/order-created-date";
 import { OrmOrderPayEntity } from '../entities/orm-order-payment';
-import { IProductRepository } from "src/product/domain/repository/product.repositry.interface";
+import { OrderPayment } from "src/order/domain/value_objects/order-payment";
+import { IProductRepository } from "src/product/domain/repository/product.interface.repositry";
 import { OrmOrderProductEntity } from "../entities/orm-order-product-entity";
 import { OrmOrderBundleEntity } from "../entities/orm-order-bundle-entity";
-import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface";
+import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry";
 import { NotFoundException } from "@nestjs/common";
-import { ProductID } from '../../../product/domain/value-object/product-id';
-import { BundleId } from "src/bundle/domain/value-object/bundle-id";
-import { OrderProduct } from "src/order/domain/entities/order-product/order-product-entity";
-import { OrderBundle } from "src/order/domain/entities/order-bundle/order-bundle-entity";
-import { OrderProductId } from "src/order/domain/entities/order-product/value_object/order-productId";
-import { OrderProductQuantity } from "src/order/domain/entities/order-product/value_object/order-product-quantity";
-import { OrderBundleQuantity } from "src/order/domain/entities/order-bundle/value_object/order-bundle-quantity";
-import { OrderBundleId } from "src/order/domain/entities/order-bundle/value_object/order-bundlesId";
-import { OrderReceivedDate } from "src/order/domain/value_objects/order-received-date";
-import { OrderReport } from "src/order/domain/entities/report/report-entity";
-import { OrderReportId } from '../../domain/entities/report/value-object/order-report-id';
-import { OrderReportDescription } from '../../domain/entities/report/value-object/order-report-description';
-import { OrmOrderReportEntity } from "../entities/orm-order-report-entity";
-import { OrderPayment } from "src/order/domain/entities/payment/order-payment-entity";
-import { PaymentId } from '../../domain/entities/payment/value-object/payment-id';
-import { PaymentMethod } from "src/order/domain/entities/payment/value-object/payment-method";
-import { PaymentAmount } from "src/order/domain/entities/payment/value-object/payment-amount";
-import { PaymentCurrency } from "src/order/domain/entities/payment/value-object/payment-currency";
-import { OrderCourier } from "src/order/domain/entities/order-courier/order-courier-entity";
-import { OrderCourierId } from "src/order/domain/entities/order-courier/value-object/order-courier-id";
-import { OrderCourierDirection } from '../../domain/entities/order-courier/value-object/order-courier-direction';
-import { ICourierRepository } from "src/courier/domain/repositories/courier-repository-interface";
-import { OrmOrderCourierEntity } from "../entities/orm-order-courier-entity";
-import { OrderUserId } from "src/order/domain/value_objects/order-user-id";
-import { OrmUserQueryRepository } from '../../../user/infraestructure/repositories/orm-repository/orm-user-query-repository';
-import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
-import { UserId } from "src/user/domain/value-object/user-id";
-import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-user-entity";
-import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
 
 
 export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
     
-
     constructor(
         private readonly idGen:IIdGen<string>,
         private readonly ormProductRepository: IProductRepository,
-        private readonly ormBundleRepository: IBundleRepository,
-        private readonly ormCourierRepository: ICourierRepository,
-        private readonly ormUserQueryRepository: IQueryUserRepository
-    ){
-    }
+        private readonly ormBundleRepository: IBundleRepository
+    ){}
     
     async fromPersistencetoDomain(infraEstructure: OrmOrderEntity): Promise<Order> {
 
-        let products: OrderProduct[] = [];
-        let bundles: OrderBundle[] = [];
-        let recievedDate: OrderReceivedDate;
-        let orderReport: OrderReport;
-        let orderPayment: OrderPayment;
-        let orderCourier: OrderCourier;
+        // const ormProducts = await this.ormOrderProductRepository.findProductsByOrderId(domainEntity.getId());
 
-        const ormProducts:OrmOrderProductEntity[] = infraEstructure.order_products;
-        const ormBundles:OrmOrderBundleEntity[] = infraEstructure.order_bundles;
+        // const products: Product[] = [];
 
-        if(ormProducts){
-            for (let product of ormProducts){
-                let response = await this.ormProductRepository.findProductById(ProductID.create(product.product_id));
-                products.push( OrderProduct.create(
-                    OrderProductId.create(response.getValue.getId().Value),
-                    OrderProductQuantity.create(product.quantity)
-                ))
-            }
-        }
+        // products.forEach( (product) => {
+            
+        // });
 
-        if(ormBundles){
-            for (let bundle of ormBundles){
-                let response = await this.ormBundleRepository.findBundleById(BundleId.create(bundle.bundle_id));
-                bundles.push( OrderBundle.create(
-                    OrderBundleId.create(response.getValue.getId().Value),
-                    OrderBundleQuantity.create(bundle.quantity)
-                ))
-            }
-        }
 
-        if(infraEstructure.orderReceivedDate){
-            recievedDate = OrderReceivedDate.create(infraEstructure.orderReceivedDate);
-        }
-
-        if(infraEstructure.order_report){
-            orderReport = OrderReport.create(
-                OrderReportId.create(infraEstructure.order_report.id),
-                OrderReportDescription.create(infraEstructure.order_report.description));
-        }
-
-        if(infraEstructure.pay){
-        orderPayment = OrderPayment.create(
-            PaymentId.create(infraEstructure.pay.id),
-            PaymentMethod.create(infraEstructure.pay.paymentMethod),
-            PaymentAmount.create(infraEstructure.pay.amount),
-            PaymentCurrency.create(infraEstructure.pay.currency)
-        )}
-
-        orderCourier = OrderCourier.create(
-            OrderCourierId.create(infraEstructure.order_courier.courier_id),
-            OrderCourierDirection.create(
-                Number(infraEstructure.order_courier.latitude),
-                Number(infraEstructure.order_courier.longitude)
-            )
-        );
 
         let order = Order.initializeAggregate(
             OrderId. create(infraEstructure.id),
@@ -120,13 +42,11 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             OrderCreatedDate.create(infraEstructure.orderCreatedDate),
             OrderTotalAmount.create(infraEstructure.totalAmount,infraEstructure.currency),
             OrderDirection.create(infraEstructure.latitude,infraEstructure.longitude),
-            orderCourier,
-            OrderUserId.create(infraEstructure.user.id),
-            products,
-            bundles,
-            recievedDate,
-            orderReport,
-            orderPayment
+            null,
+            null,
+            null,
+            null,
+            OrderPayment.create(infraEstructure.pay.amount,infraEstructure.pay.currency,infraEstructure.pay.paymentMethod)
         );
 
         return order;
@@ -137,10 +57,10 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         let ormOrderPayEntity: OrmOrderPayEntity;
         if(domainEntity.OrderPayment){
             ormOrderPayEntity = OrmOrderPayEntity.create(
-                domainEntity.OrderPayment.OrderPaymentId.Value,
-                domainEntity.OrderPayment.PaymentAmount.Value,
-                domainEntity.OrderPayment.PaymentCurrency.Value,
-                domainEntity.OrderPayment.PaymentMethods.Value,
+                await this.idGen.genId(),
+                domainEntity.OrderPayment.Amount,
+                domainEntity.OrderPayment.Currency,
+                domainEntity.OrderPayment.PaymentMethod,
                 domainEntity.getId().orderId
             );
         }  
@@ -148,7 +68,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         let ormProducts: OrmOrderProductEntity[] = [];
 
         for (let product of domainEntity.Products){
-            let response = await this.ormProductRepository.findProductById(ProductID.create(product.OrderProductId.OrderProductId));
+            let response = await this.ormProductRepository.findProductById(product.getId().OrderProductId);
             if(!response.isSuccess())
                 throw new NotFoundException('Find product id not registered')
 
@@ -164,7 +84,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         let ormBundles: OrmOrderBundleEntity[] = [];
 
         for (let bundle of domainEntity.Bundles){
-            let response = await this.ormBundleRepository.findBundleById(BundleId.create(bundle.getId().OrderBundleId));
+            let response = await this.ormBundleRepository.findBundleById(bundle.getId().OrderBundleId);
             
             if(!response.isSuccess())
                 throw new NotFoundException('Find bundle id not registered')
@@ -178,35 +98,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             )
         }
 
-        let orderOrmReport: OrmOrderReportEntity;
-        if(domainEntity.OrderReport){
-            orderOrmReport = OrmOrderReportEntity.create(
-                domainEntity.OrderReport.getId().OrderReportId,
-                domainEntity.OrderReport.Description.Value,
-                domainEntity.getId().orderId
-            )
-        }
-
-        let orderCourier = OrmOrderCourierEntity.create(
-            domainEntity.getId().orderId,
-            domainEntity.OrderCourier.getId().OrderCourierId,
-            domainEntity.OrderCourier.CourierDirection.Latitude,
-            domainEntity.OrderCourier.CourierDirection.Longitude
-        )
-
-        let orderReceivedDate = domainEntity.OrderReceivedDate ? domainEntity.OrderReceivedDate.OrderReceivedDate : null;
-
-        let userDomain = await this.ormUserQueryRepository.findUserById(UserId.create(domainEntity.OrderUserId.userId));
-
-        let ormUser = OrmUserEntity.create(
-            userDomain.getValue.getId().Value,
-            userDomain.getValue.UserName.Value,
-            userDomain.getValue.UserPhone.Value,
-            userDomain.getValue.UserRole.Value as UserRoles,
-            userDomain.getValue.UserImage ? userDomain.getValue.UserImage.Value : null 
-        )
-
-        let orrOrder = OrmOrderEntity.create(
+        return OrmOrderEntity.create(
             domainEntity.getId().orderId,
             domainEntity.OrderState.orderState,
             domainEntity.OrderCreatedDate.OrderCreatedDate,
@@ -214,15 +106,10 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             domainEntity.TotalAmount.OrderCurrency,
             domainEntity.OrderDirection.Latitude,
             domainEntity.OrderDirection.Longitude,
-            orderCourier,
-            ormUser,
             ormOrderPayEntity,
             ormProducts,
             ormBundles,
-            orderReceivedDate,
-            domainEntity.OrderReport ? orderOrmReport : null,
+            domainEntity.OrderReciviedDate.OrderReciviedDate,
         );
-
-        return orrOrder;
     }
 }

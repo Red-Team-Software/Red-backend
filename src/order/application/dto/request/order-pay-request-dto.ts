@@ -2,9 +2,10 @@ import { IServiceRequestDto } from "src/common/application/services"
 
 export interface OrderPayApplicationServiceRequestDto extends IServiceRequestDto {
     userId: string;
-    paymentId: string;
+    amount: number;
     currency: string;
     paymentMethod: string;
+    stripePaymentMethod: string;
     address: string;
     products?: {
         id: string,
@@ -15,4 +16,5 @@ export interface OrderPayApplicationServiceRequestDto extends IServiceRequestDto
         quantity: number
     }[];
     
+
 }

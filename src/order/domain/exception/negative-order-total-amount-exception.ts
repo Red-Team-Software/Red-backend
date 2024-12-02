@@ -2,7 +2,7 @@ import { DomainException } from "src/common/domain/domain-exeption/domain-except
 
 
 export class NegativeOrderTotalAmountException extends DomainException {
-    constructor() {
-        super('The amount cannot be negative');
+    constructor(message: string) {
+        super(message);
     }
 }

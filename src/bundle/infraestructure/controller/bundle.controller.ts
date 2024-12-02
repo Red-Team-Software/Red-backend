@@ -1,6 +1,6 @@
-import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
+import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFiles, UseInterceptors } from "@nestjs/common"
 import { FilesInterceptor } from "@nestjs/platform-express/multer"
-import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface"
+import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 import { CreateBundleInfraestructureRequestDTO } from "../dto-request/create-bundle-infraestructure-request-dto"
@@ -23,14 +23,7 @@ import { FindAllBundlesByNameApplicationService } from "src/bundle/application/s
 import { FindBundleByIdInfraestructureRequestDTO } from "../dto-request/find-bundle-by-id-infraestructure-request-dto"
 import { FindBundleByIdApplicationService } from "src/bundle/application/services/query/find-bundle-by-id-application.service"
 import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher"
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
-import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard"
-import { ICredential } from "src/auth/application/model/credential.interface"
-import { GetCredential } from "src/auth/infraestructure/jwt/decorator/get-credential.decorator"
 
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
-@ApiTags('Bundle')
 @Controller('bundle')
 export class BundleController {
 
@@ -46,13 +39,10 @@ export class BundleController {
     this.ormQueryBundletRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('create')
   @UseInterceptors(FilesInterceptor('images'))  
-  async createBundle(
-    @GetCredential() credential:ICredential,
-    @Body() entry: CreateBundleInfraestructureRequestDTO,
-    @UploadedFiles(
+  async createBundle(@Body() entry: CreateBundleInfraestructureRequestDTO,
+  @UploadedFiles(
     new ParseFilePipe({
       validators: [new FileTypeValidator({
         fileType:/(jpeg|.jpg|.png)$/
@@ -70,23 +60,20 @@ export class BundleController {
           ),
       )
       let buffers=images.map(image=>image.buffer)
-    let response= await service.execute({userId:credential.account.idUser,...entry,images:buffers})
+    let response= await service.execute({userId:'none',...entry,images:buffers})
     return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('all-name')
-  async getAllBundlesByName(
-    @GetCredential() credential:ICredential,
-    @Query() entry:FindAllBundlesByNameInfraestructureRequestDTO
-  ){
+  async getAllBundlesByName(@Query() entry:FindAllBundlesByNameInfraestructureRequestDTO){
+
     if(!entry.page)
       entry.page=1
     if(!entry.perPage)
       entry.perPage=10
 
     const pagination:FindAllBundlesbyNameApplicationRequestDTO={
-      userId:credential.account.idUser,
+      userId:'none',
       page:entry.page,
       perPage:entry.perPage,
       name:entry.term
@@ -102,20 +89,18 @@ export class BundleController {
     )
   let response= await service.execute({...pagination})
   return response.getValue
-  }
 
-  @UseGuards(JwtAuthGuard)
+
+  }
   @Get('all')
-  async getAllBundles(
-    @GetCredential() credential:ICredential,
-    @Query() entry:FindAllBundlesInfraestructureRequestDTO
-  ){
+  async getAllBundles(@Query() entry:FindAllBundlesInfraestructureRequestDTO){
+
     if(!entry.page)
       entry.page=1
     if(!entry.perPage)
       entry.perPage=10
 
-    const pagination:PaginationRequestDTO={userId:credential.account.idUser,page:entry.page, perPage:entry.perPage}
+    const pagination:PaginationRequestDTO={userId:'none',page:entry.page, perPage:entry.perPage}
 
     let service= new ExceptionDecorator(
         new LoggerDecorator(
@@ -129,12 +114,9 @@ export class BundleController {
     return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('')
-  async getBundleById(
-    @GetCredential() credential:ICredential,
-    @Query() entry:FindBundleByIdInfraestructureRequestDTO
-  ){
+  async getBundleById(@Query() entry:FindBundleByIdInfraestructureRequestDTO){
+
     let service= new ExceptionDecorator(
         new LoggerDecorator(
           new FindBundleByIdApplicationService(
@@ -143,7 +125,7 @@ export class BundleController {
           new NestLogger(new Logger())
         )
       )
-    let response= await service.execute({userId:credential.account.idUser,...entry})
+    let response= await service.execute({userId:'none',...entry})
     return response.getValue
   }
 }

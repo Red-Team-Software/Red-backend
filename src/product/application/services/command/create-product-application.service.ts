@@ -2,7 +2,7 @@ import { IApplicationService } from "src/common/application/services/application
 import { Result } from "src/common/utils/result-handler/result";
 import { CreateProductApplicationRequestDTO } from "../../dto/request/create-product-application-request-dto";
 import { CreateProductApplicationResponseDTO } from "../../dto/response/create-product-application-response-dto";
-import { IProductRepository } from "src/product/domain/repository/product.repositry.interface";
+import { IProductRepository } from "src/product/domain/repository/product.interface.repositry";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { ProductID } from "src/product/domain/value-object/product-id";

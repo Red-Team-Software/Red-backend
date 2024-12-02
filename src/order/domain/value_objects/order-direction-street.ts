@@ -1,5 +1,4 @@
 import { ValueObject } from "src/common/domain";
-import { EmptyOrderDirectionStreetException } from "../exception/empty-order-direction-street.exception";
 
 export class OrderAddressStreet extends ValueObject<OrderAddressStreet> {
     private address: string;
@@ -7,8 +6,8 @@ export class OrderAddressStreet extends ValueObject<OrderAddressStreet> {
 
     private constructor(address: string) {
         super();
-
-        if(!address)  throw new EmptyOrderDirectionStreetException() 
+ 
+        //if(!lat) { throw new EmptyOrderAddressStreetException('No se pudo obtener un Lat de curso') /* throw DomainException NullCourseLat */}
 
         this.address = address;
     }

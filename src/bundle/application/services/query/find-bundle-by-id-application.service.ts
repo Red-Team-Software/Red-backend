@@ -1,4 +1,4 @@
-import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface"
+import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry"
 import { IApplicationService } from "src/common/application/services"
 import { Result } from "src/common/utils/result-handler/result"
 import { NotFoundBundleApplicationException } from "../../application-exeption/not-found-bundle-application-exception"
