@@ -1,27 +1,65 @@
-import { IServiceResponseDto } from "src/common/application/services"
-import { Order } from "src/order/domain/aggregate/order";
+import { IServiceResponseDto } from "src/common/application/services/dto/response/service-response-dto.interface";
 
-export type order = {
+export type productsOrderResponse = {
+    id: string
+    name: string 
+    descripcion: string
+    quantity: number
+    price:number 
+    images:string[]
+    currency:string
+    orderid: string
+}
+
+export type bundlesOrderResponse = {
+    id: string
+    name: string 
+    descripcion: string
+    quantity: number
+    price:number 
+    images:string[]
+    currency:string
+    orderid: string
+}
+
+export type reportOrderResponse = {
+    id: string
+    description: string
+    orderid: string
+}
+
+export type courierOrderResponse = {
+    courierName: string
+    courierImage: string
+}
+
+export type orderResponse = {
     orderId: string;
     orderState: string;
     orderCreatedDate: Date;
+    orderTimeCreated: string;
     totalAmount: number;
-    orderReciviedDate?: Date;
+    orderReceivedDate?: Date;
     orderPayment?: {
         paymetAmount: number;
         paymentCurrency: string;
         payementMethod: string;
     };
-    //orderDirection: OrderDirection;
-    //products?: OrderProductId[];
-    //bundles?: OrderBundleId[];
-    //orderReport?: OrderReportId;
+    orderDirection: {
+        lat: number;
+        long: number;
+    };
+    //orderDirection: string;
+    products?: productsOrderResponse[];
+    bundles?: bundlesOrderResponse[];
+    orderReport?: reportOrderResponse;
+    orderCourier: courierOrderResponse;
 }
 
 export class FindAllOrdersApplicationServiceResponseDto implements IServiceResponseDto {
     
     constructor(
-        readonly orders: order[]
+        readonly orders: orderResponse[]
     ){
         
     }

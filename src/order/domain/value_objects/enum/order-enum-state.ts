@@ -1,6 +1,6 @@
 export enum OrderStateEnum{
     ongoing = "ongoing",
     delivered = "delivered",
-    wainting    = "wainting",
-    cancelled = "cancelled"
+    waiting    = "waiting",
+    canceled = "canceled"
 }

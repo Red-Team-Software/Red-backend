@@ -6,7 +6,7 @@ import { OrmBundleEntity } from "src/bundle/infraestructure/entities/orm-entitie
 @Entity('order_bundle')
 export class OrmOrderBundleEntity {
 
-    @ManyToOne(() => OrmOrderEntity, (order) => order.order_bundles)
+    @ManyToOne(() => OrmOrderEntity, (order) => order.order_bundles, { eager: true })
     @JoinColumn({ name: 'order_id' })
     order: OrmOrderEntity;
 

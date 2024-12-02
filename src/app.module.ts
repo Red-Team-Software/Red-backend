@@ -7,6 +7,10 @@ import { NotificationModule } from './notification/infraestructure/notification.
 import { CategoryController } from './category/infraestructure/controller/category.controller';
 import { OrderController } from './order/infraestructure/controller/order.controller';
 import { BundleController } from './bundle/infraestructure/controller/bundle.controller';
+import { CourierController } from './courier/infraestructure/controller/courier.controller';
+import { AuthController } from './auth/infraestructure/controller/auth.controller';
+import { UserController } from './user/infraestructure/controller/user.controller';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -14,13 +18,20 @@ import { BundleController } from './bundle/infraestructure/controller/bundle.con
       isGlobal: true,
     }),
     RabbitMQModule,
-    NotificationModule
+    NotificationModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET_KEY,
+      signOptions: { expiresIn: '24h' }
+    })
   ],
   controllers: [
     ProductController,
     CategoryController,
     BundleController,
-    OrderController
+    OrderController,
+    AuthController,
+    UserController,
+    CourierController
   ],
   providers:[CloudinaryProvider]
 })

@@ -4,7 +4,8 @@ import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
 import { ErrorSendingPushProductApplicationException } from "../../application-exception/error-sending-push-product-application-exception";
 import { NewOrderPushNotificationApplicationRequestDTO } from "../../dto/request/new-order-push-notification-application-request-dto";
-import { NewOrderPushNotificationApplicationResponseDTO } from "../../dto/response/new-bundle-push-notification-application-response-dto copy";
+import { NewOrderPushNotificationApplicationResponseDTO } from "../../dto/response/new-order-push-notification-application-response-dto";
+import { ErrorSendingPushNewOrderApplicationException } from "../../application-exception/error-sending-push-new-order-application-exception";
 
 
 
@@ -35,7 +36,7 @@ export class NewOrderPushNotificationApplicationService extends IApplicationServ
         for (const sendData of sendDTO){
             let result= await this.pushNotifier.sendNotificationByToken(sendData)
             if (!result.isSuccess())
-                return Result.fail(new ErrorSendingPushProductApplicationException())
+                return Result.fail(new ErrorSendingPushNewOrderApplicationException())
 
         }
 

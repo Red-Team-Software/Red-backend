@@ -2,7 +2,7 @@ import { DomainException } from "src/common/domain/domain-exeption/domain-except
 
 
 export class InvalidPaymentCurrencyException extends DomainException {
-    constructor(message: string) {
-        super(message);
+    constructor() {
+        super("The payment currency is not valid");
     }
 }

@@ -3,4 +3,5 @@ import { ApplicationException } from "src/common/application/application-exeptio
 export class ErrorUploadingImagesApplicationException extends ApplicationException{
     constructor() {
         super('Error uploading products images');
-    }}
+    }
+}
