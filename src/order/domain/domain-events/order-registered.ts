@@ -1,14 +1,16 @@
 import { DomainEvent } from "src/common/domain";
 import { OrderCreatedDate } from "../value_objects/order-created-date";
-import { OrderPayment } from "../value_objects/order-payment";
-import { OrderReciviedDate } from "../value_objects/order-recivied-date";
-import { OrderReportId } from "../value_objects/order-reportId";
+import { OrderReceivedDate } from "../value_objects/order-received-date";
 import { OrderTotalAmount } from "../value_objects/order-totalAmount";
-import { OrderId } from "../value_objects/orderId";
-import { OrderState } from "../value_objects/orderState";
+import { OrderId } from "../value_objects/order-id";
+import { OrderState } from "../value_objects/order-state";
 import { OrderDirection } from '../value_objects/order-direction';
 import { OrderProduct } from "../entities/order-product/order-product-entity";
 import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
+import { OrderReport } from "../entities/report/report-entity";
+import { OrderPayment } from "../entities/payment/order-payment-entity";
+import { OrderCourier } from "../entities/order-courier/order-courier-entity";
+import { OrderUserId } from "../value_objects/order-user-id";
 
 
 export class OrderRegistered extends DomainEvent {
@@ -20,10 +22,12 @@ export class OrderRegistered extends DomainEvent {
             orderCreateDate: this.orderCreateDate.OrderCreatedDate,
             totalAmount: this.totalAmount,
             orderDirection: this.orderDirection,
+            orderCourier: this.orderCourier,
+            orderUserId: this.orderUserId,
             products: this.products,
             bundles: this.bundles,
-            orderReciviedDate: this.orderReciviedDate?.OrderReciviedDate,
-            orderReport: this.orderReport?.OrderReportId,
+            orderReceivedDate: this.orderReceivedDate?.OrderReceivedDate,
+            orderReport: this.orderReport?.getId(),
             orderPayment: this.orderPayment
         }
         
@@ -36,10 +40,12 @@ export class OrderRegistered extends DomainEvent {
         public orderCreateDate: OrderCreatedDate,
         public totalAmount: OrderTotalAmount,
         public orderDirection: OrderDirection,
+        public orderCourier: OrderCourier,
+        public orderUserId: OrderUserId,
         public products?: OrderProduct[],
         public bundles?: OrderBundle[],
-        public orderReciviedDate?: OrderReciviedDate,
-        public orderReport?: OrderReportId,
+        public orderReceivedDate?: OrderReceivedDate,
+        public orderReport?: OrderReport,
         public orderPayment?: OrderPayment,
     ){
         super();
@@ -51,10 +57,12 @@ export class OrderRegistered extends DomainEvent {
         orderCreatedDate: OrderCreatedDate,
         totalAmount: OrderTotalAmount,
         orderDirection: OrderDirection,
+        orderCourier: OrderCourier,
+        orderUserId: OrderUserId,
         products?: OrderProduct[],
         bundles?: OrderBundle[],
-        orderReciviedDate?: OrderReciviedDate,
-        orderReport?: OrderReportId,
+        orderReceivedDate?: OrderReceivedDate,
+        orderReport?: OrderReport,
         orderPayment?: OrderPayment
     ){
         let order = new OrderRegistered(
@@ -63,9 +71,11 @@ export class OrderRegistered extends DomainEvent {
             orderCreatedDate,
             totalAmount,
             orderDirection,
+            orderCourier,
+            orderUserId,
             products,
             bundles,
-            orderReciviedDate,
+            orderReceivedDate,
             orderReport,
             orderPayment
         );

@@ -1,8 +1,11 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
 import { IOrderInterface } from "../orm-model-entity/order-interface";
 import { OrmOrderPayEntity } from "./orm-order-payment";
 import { OrmOrderProductEntity } from "./orm-order-product-entity";
 import { OrmOrderBundleEntity } from "./orm-order-bundle-entity";
+import { OrmOrderReportEntity } from "./orm-order-report-entity";
+import { OrmOrderCourierEntity } from "./orm-order-courier-entity";
+import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-user-entity";
 
 @Entity('order')
 export class OrmOrderEntity implements IOrderInterface {
@@ -27,19 +30,32 @@ export class OrmOrderEntity implements IOrderInterface {
 
     @Column('float')
     longitude: number;
+
+    @ManyToOne( () => OrmUserEntity, (user) => user.orders)
+    @JoinColumn()
+    user: OrmUserEntity;
     
-    @OneToOne( () => OrmOrderPayEntity, (pay) => pay.order, { eager: true } )
+    @OneToOne( () => OrmOrderPayEntity, (pay) => pay.order, { cascade: true, eager: true } )
     @JoinColumn()
     pay?: OrmOrderPayEntity;
 
     @Column('date', { nullable: true })
-    orderReciviedDate?: Date;
+    orderReceivedDate?: Date;
 
-    @OneToMany(() => OrmOrderProductEntity, (orderProduct) => orderProduct.order)
+    @OneToMany(() => OrmOrderProductEntity, (orderProduct) => orderProduct.order, { cascade: true } )
     order_products?: OrmOrderProductEntity[];
 
-    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.order)
+    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.order, { cascade: true } )
     order_bundles?: OrmOrderBundleEntity[]
+
+    @OneToOne( () => OrmOrderReportEntity, (orderReport) => orderReport.order, { cascade: true })
+    @JoinColumn()
+    order_report?: OrmOrderReportEntity;
+
+    @OneToOne( () => OrmOrderCourierEntity, (orderCourier) => orderCourier.order_id, { cascade: true })
+    @JoinColumn()
+    order_courier?: OrmOrderCourierEntity;
+
 
     static create(
         id: string,
@@ -49,10 +65,13 @@ export class OrmOrderEntity implements IOrderInterface {
         currency: string,
         latitude: number,
         longitude: number,
+        orderCourier: OrmOrderCourierEntity,
+        orderUser: OrmUserEntity,
         pay?: OrmOrderPayEntity,
         orderProducts?: OrmOrderProductEntity[],
         orderBundles?: OrmOrderBundleEntity[],
-        orderReciviedDate?: Date,
+        orderReceivedDate?: Date,
+        orderReport?: OrmOrderReportEntity
     ): OrmOrderEntity {
         const order = new OrmOrderEntity();
         order.id = id;
@@ -62,10 +81,13 @@ export class OrmOrderEntity implements IOrderInterface {
         order.currency = currency;
         order.latitude = latitude;
         order.longitude = longitude;
+        order.order_courier = orderCourier;
+        order.user = orderUser;
         order.pay = pay;
         order.order_products = orderProducts;
         order.order_bundles = orderBundles;
-        order.orderReciviedDate = orderReciviedDate;
+        order.orderReceivedDate = orderReceivedDate;
+        order.order_report = orderReport;
         return order;
     }
 

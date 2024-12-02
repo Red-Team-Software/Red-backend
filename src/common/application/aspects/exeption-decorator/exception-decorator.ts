@@ -16,7 +16,6 @@ export class ExceptionDecorator<
 			}
 			return res;
 		} catch (error) {
-			console.log("El error del decoradorado es ",error);
 			if (error.Type==BaseExceptionEnum.DOMAIN_EXCEPTION)
 				ExceptionMapper.toHttp(error,error.message);
 			throw error
