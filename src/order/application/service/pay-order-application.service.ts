@@ -45,6 +45,9 @@ import { ICourierQueryRepository } from 'src/courier/application/query-repositor
 import { OrderCourier } from 'src/order/domain/entities/order-courier/order-courier-entity';
 import { OrderCourierId } from 'src/order/domain/entities/order-courier/value-object/order-courier-id';
 import { OrderCourierDirection } from 'src/order/domain/entities/order-courier/value-object/order-courier-direction';
+import { OrderUserId } from 'src/order/domain/value_objects/order-user-id';
+import { IDateHandler } from 'src/common/application/date-handler/date-handler.interface';
+import { date } from 'joi';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -61,7 +64,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly geocodificationAddress: IGeocodification,
         private readonly productRepository:IProductRepository,
         private readonly bundleRepository:IBundleRepository,
-        private readonly ormCourierQueryRepository: ICourierQueryRepository
+        private readonly ormCourierQueryRepository: ICourierQueryRepository,
+        private readonly dateHandler: IDateHandler
         
     ){
         super()
@@ -138,7 +142,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let total = OrderTotalAmount.create(amountTotal, data.currency);
             
-            let orderPayment: OrderPayment 
+            let orderPayment: OrderPayment;
 
             let orderReceivedDate: OrderReceivedDate = null;
             let orderReport: OrderReport = null;
@@ -151,14 +155,17 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 OrderCourierId.create(selectedCourierId.courierId),
                 OrderCourierDirection.create(orderDirection.Latitude, orderDirection.Longitude)
             );
+
+            let orderUserId: OrderUserId = OrderUserId.create(data.userId);
             
             let order = Order.initializeAggregate(
                 OrderId.create(await this.idGen.genId()),
                 OrderState.create('waiting'),
-                OrderCreatedDate.create(new Date()),
+                OrderCreatedDate.create(this.dateHandler.currentDate()),
                 total,
                 orderDirection,
                 orderCourier,
+                orderUserId,
                 orderproducts,
                 orderBundles,
                 orderReceivedDate, 
@@ -168,11 +175,11 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let response = await this.payOrder.createPayment(order);
 
-            if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException());
+            if (response.isFailure()) return Result.fail(new ErrorCreatingPaymentApplicationException());
             
             let responseDB = await this.orderRepository.saveOrder(response.getValue); 
 
-            if (!responseDB.isSuccess()) 
+            if (responseDB.isFailure()) 
                 return Result.fail(new ErrorCreatingOrderApplicationException());
 
             await this.eventPublisher.publish(order.pullDomainEvents());
@@ -250,7 +257,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 orderCourier: {
                     courierName: selectedCourier.CourierName.courierName,
                     courierImage: selectedCourier.CourierImage.Value
-                }
+                },
+                orderUserId: data.userId
             }
 
 

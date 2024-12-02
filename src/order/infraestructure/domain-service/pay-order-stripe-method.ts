@@ -56,14 +56,13 @@ export class StripePayOrderMethod implements IPaymentMethodService {
                 order.TotalAmount,
                 order.OrderDirection,
                 order.OrderCourier,
+                order.OrderUserId,
                 order.Products,
                 order.Bundles,
                 order.OrderReceivedDate, 
                 order.OrderReport, 
                 orderPayment
             );
-            
-            order.updateOrderStatus(OrderState.create("ongoing"));
             
             return Result.success(newOrder);
         } catch (error) {

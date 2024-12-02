@@ -10,6 +10,7 @@ import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
 import { OrderReport } from "../entities/report/report-entity";
 import { OrderPayment } from "../entities/payment/order-payment-entity";
 import { OrderCourier } from "../entities/order-courier/order-courier-entity";
+import { OrderUserId } from "../value_objects/order-user-id";
 
 
 export class OrderRegistered extends DomainEvent {
@@ -22,6 +23,7 @@ export class OrderRegistered extends DomainEvent {
             totalAmount: this.totalAmount,
             orderDirection: this.orderDirection,
             orderCourier: this.orderCourier,
+            orderUserId: this.orderUserId,
             products: this.products,
             bundles: this.bundles,
             orderReceivedDate: this.orderReceivedDate?.OrderReceivedDate,
@@ -39,6 +41,7 @@ export class OrderRegistered extends DomainEvent {
         public totalAmount: OrderTotalAmount,
         public orderDirection: OrderDirection,
         public orderCourier: OrderCourier,
+        public orderUserId: OrderUserId,
         public products?: OrderProduct[],
         public bundles?: OrderBundle[],
         public orderReceivedDate?: OrderReceivedDate,
@@ -55,6 +58,7 @@ export class OrderRegistered extends DomainEvent {
         totalAmount: OrderTotalAmount,
         orderDirection: OrderDirection,
         orderCourier: OrderCourier,
+        orderUserId: OrderUserId,
         products?: OrderProduct[],
         bundles?: OrderBundle[],
         orderReceivedDate?: OrderReceivedDate,
@@ -68,6 +72,7 @@ export class OrderRegistered extends DomainEvent {
             totalAmount,
             orderDirection,
             orderCourier,
+            orderUserId,
             products,
             bundles,
             orderReceivedDate,

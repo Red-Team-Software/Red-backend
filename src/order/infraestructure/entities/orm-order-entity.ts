@@ -1,10 +1,11 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
 import { IOrderInterface } from "../orm-model-entity/order-interface";
 import { OrmOrderPayEntity } from "./orm-order-payment";
 import { OrmOrderProductEntity } from "./orm-order-product-entity";
 import { OrmOrderBundleEntity } from "./orm-order-bundle-entity";
 import { OrmOrderReportEntity } from "./orm-order-report-entity";
 import { OrmOrderCourierEntity } from "./orm-order-courier-entity";
+import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-user-entity";
 
 @Entity('order')
 export class OrmOrderEntity implements IOrderInterface {
@@ -29,8 +30,12 @@ export class OrmOrderEntity implements IOrderInterface {
 
     @Column('float')
     longitude: number;
+
+    @ManyToOne( () => OrmUserEntity, (user) => user.orders)
+    @JoinColumn()
+    user: OrmUserEntity;
     
-    @OneToOne( () => OrmOrderPayEntity, (pay) => pay.order, { cascade: true } )
+    @OneToOne( () => OrmOrderPayEntity, (pay) => pay.order, { cascade: true, eager: true } )
     @JoinColumn()
     pay?: OrmOrderPayEntity;
 
@@ -51,6 +56,7 @@ export class OrmOrderEntity implements IOrderInterface {
     @JoinColumn()
     order_courier?: OrmOrderCourierEntity;
 
+
     static create(
         id: string,
         orderState: string,
@@ -60,6 +66,7 @@ export class OrmOrderEntity implements IOrderInterface {
         latitude: number,
         longitude: number,
         orderCourier: OrmOrderCourierEntity,
+        orderUser: OrmUserEntity,
         pay?: OrmOrderPayEntity,
         orderProducts?: OrmOrderProductEntity[],
         orderBundles?: OrmOrderBundleEntity[],
@@ -75,6 +82,7 @@ export class OrmOrderEntity implements IOrderInterface {
         order.latitude = latitude;
         order.longitude = longitude;
         order.order_courier = orderCourier;
+        order.user = orderUser;
         order.pay = pay;
         order.order_products = orderProducts;
         order.order_bundles = orderBundles;

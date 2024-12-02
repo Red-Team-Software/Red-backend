@@ -17,8 +17,9 @@ import { ExceptionDecorator } from "src/common/application/aspects/exeption-deco
 import { CreateCourierApplicationService } from "src/courier/application/services/create-courier-application.service"
 import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher"
 import { CloudinaryService } from "src/common/infraestructure/file-uploader/cloudinary-uploader"
+import { ApiTags } from "@nestjs/swagger"
 
-
+@ApiTags('Courier')
 @Controller('courier')
 export class CourierController {
 

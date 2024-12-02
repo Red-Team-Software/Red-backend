@@ -8,7 +8,7 @@ export class OrderId extends ValueObject<OrderId> {
         super();
 
         const regex = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
-        if (!regex.test(value)) { throw new InvalidOrderIdException('El id proporcionado no es Uuid')}
+        if (!regex.test(value)) { throw new InvalidOrderIdException()}
 
         this.value = value;
     }

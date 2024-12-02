@@ -29,7 +29,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
 
         let response = await this.orderRepository.findAllOrders(data);
 
-        if (!response.isSuccess) return Result.fail(new NotFoundOrderApplicationException());
+        if (response.isFailure()) return Result.fail(new NotFoundOrderApplicationException());
 
         let orders = response.getValue;
 
@@ -129,7 +129,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
                 },
                 orderDirection: {
                     lat: order.OrderDirection.Latitude,
-                    lng: order.OrderDirection.Longitude
+                    long: order.OrderDirection.Longitude
                 },
                 products: associatedProducts,
                 bundles: associatedBundles,

@@ -1,4 +1,5 @@
 import { ValueObject } from "src/common/domain";
+import { EmptyOrderReceivedDateException } from "../exception/empty-order-received-date.exception";
 
 export class OrderReceivedDate extends ValueObject<OrderReceivedDate> {
     private date: Date;
@@ -6,7 +7,7 @@ export class OrderReceivedDate extends ValueObject<OrderReceivedDate> {
     private constructor(date: Date) {
         super();
 
-        //if(!date) { throw new EmptyOrderReceivedDateException('No se pudo obtener un Id de curso') /* throw DomainException NullCourseId */}
+        if(!date) { throw new EmptyOrderReceivedDateException()}
 
         this.date = date;
     }

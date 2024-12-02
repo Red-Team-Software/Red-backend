@@ -15,6 +15,7 @@ import { OrderStatusCanceled } from "../domain-events/order-state-canceled";
 import { OrderPayment } from "../entities/payment/order-payment-entity";
 import { OrderStatusUpdated } from "../domain-events/order-state-updated";
 import { OrderCourier } from "../entities/order-courier/order-courier-entity";
+import { OrderUserId } from '../value_objects/order-user-id';
 
 export class Order extends AggregateRoot<OrderId>{
     
@@ -46,7 +47,9 @@ export class Order extends AggregateRoot<OrderId>{
             !this.orderState ||
             !this.orderCreatedDate ||
             !this.totalAmount ||
-            !this.orderDirection 
+            !this.orderDirection ||
+            !this.orderCourier ||
+            !this.orderUserId
         ) {
             throw new MissingOrderAtributes('The order is invalid, information is missing');
         }
@@ -63,6 +66,7 @@ export class Order extends AggregateRoot<OrderId>{
         private totalAmount: OrderTotalAmount,
         private orderDirection: OrderDirection,
         private orderCourier: OrderCourier,
+        private orderUserId: OrderUserId,
         private products?: OrderProduct[],
         private bundles?: OrderBundle[],
         private orderReceivedDate?: OrderReceivedDate,
@@ -79,6 +83,7 @@ export class Order extends AggregateRoot<OrderId>{
         totalAmount: OrderTotalAmount,
         orderDirection: OrderDirection,
         orderCourier: OrderCourier,
+        orderUserId: OrderUserId,
         products?: OrderProduct[],
         bundles?: OrderBundle[],
         orderReceivedDate?: OrderReceivedDate,
@@ -92,6 +97,7 @@ export class Order extends AggregateRoot<OrderId>{
             totalAmount,
             orderDirection,
             orderCourier,
+            orderUserId,
             products,
             bundles,
             orderReceivedDate,
@@ -106,6 +112,7 @@ export class Order extends AggregateRoot<OrderId>{
                 totalAmount,
                 orderDirection,
                 orderCourier,
+                orderUserId,
                 products,
                 bundles,
                 orderReceivedDate,
@@ -123,6 +130,7 @@ export class Order extends AggregateRoot<OrderId>{
         totalAmount: OrderTotalAmount,
         orderDirection: OrderDirection,
         orderCourier: OrderCourier,
+        orderUserId: OrderUserId,
         products?: OrderProduct[],
         bundles?: OrderBundle[],
         orderReceivedDate?: OrderReceivedDate,
@@ -137,6 +145,7 @@ export class Order extends AggregateRoot<OrderId>{
             totalAmount,
             orderDirection,
             orderCourier,
+            orderUserId,
             products,
             bundles,
             orderReceivedDate,
@@ -207,6 +216,10 @@ export class Order extends AggregateRoot<OrderId>{
 
     get OrderCourier(): OrderCourier {
         return this.orderCourier;
+    }
+
+    get OrderUserId(): OrderUserId {
+        return this.orderUserId;
     }
 
 }

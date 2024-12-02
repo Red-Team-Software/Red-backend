@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Inject, Logger, Post, Query } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Get, Inject, Logger, Post, Query, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { StripeSingelton } from "src/payments/infraestructure/stripe-singelton";
 import { StripePaymentEntryDto } from "../dto/stripe-payment-entry-dto";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
@@ -9,7 +9,6 @@ import { PayOrderAplicationService } from "src/order/application/service/pay-ord
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IApplicationService } from "src/common/application/services";
 import { OrderPayApplicationServiceRequestDto } from "src/order/application/dto/request/order-pay-request-dto";
-import { OrderPayResponseDto } from "src/order/application/dto/response/order-pay-response-dto";
 import { LoggerDecorator } from "src/common/application/aspects/logger-decorator/logger-decorator";
 import { ICalculateShippingFee } from "src/order/domain/domain-services/calculate-shippping-fee.interfafe";
 import { ICalculateTaxesFee } from "src/order/domain/domain-services/calculate-taxes-fee.interface";
@@ -41,9 +40,6 @@ import { GeocodificationHereMapsDomainService } from "../domain-service/geocodif
 import { OrmProductQueryRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-query-repository";
 import { IProductRepository } from "src/product/domain/repository/product.repositry.interface";
 import { OrmProductRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-repository";
-import { Product } from "src/product/domain/aggregate/product.aggregate";
-import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
-import { OrmProductMapper } from "src/product/infraestructure/mapper/orm-mapper/orm-product-mapper";
 import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface";
 import { OrmBundleRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-repository";
 import { CancelOrderApplicationServiceRequestDto } from "src/order/application/dto/request/cancel-order-request-dto";
@@ -61,7 +57,16 @@ import { OrmCourierMapper } from "src/courier/infraestructure/mapper/orm-courier
 import { CourierRepository } from "src/courier/infraestructure/repository/orm-repository/orm-courier-repository";
 import { ICourierQueryRepository } from "src/courier/application/query-repository/courier-query-repository-interface";
 import { CourierQueryRepository } from "src/courier/infraestructure/repository/orm-repository/orm-courier-query-repository";
+import { GetCredential } from "src/auth/infraestructure/jwt/decorator/get-credential.decorator";
+import { ICredential } from "src/auth/application/model/credential.interface";
+import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard";
+import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
+import { OrmUserQueryRepository } from "src/user/infraestructure/repositories/orm-repository/orm-user-query-repository";
+import { DateHandler } from "src/common/infraestructure/date-handler/date-handler";
 
+
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @ApiTags('Order')
 @Controller('order')
 export class OrderController {
@@ -91,6 +96,7 @@ export class OrderController {
     private readonly ormBundleRepository: IBundleRepository;
     private readonly ormCourierRepository: ICourierRepository;
     private readonly ormCourierQueryRepository: ICourierQueryRepository;
+    private readonly ormUserQueryRepository: IQueryUserRepository;
 
     //*IdGen
     private readonly idGen: IIdGen<string>;
@@ -128,9 +134,18 @@ export class OrderController {
             PgDatabaseSingleton.getInstance(),
             new OrmCourierMapper(this.idGen)
         );
+        this.ormUserQueryRepository = new OrmUserQueryRepository(
+            PgDatabaseSingleton.getInstance()
+        );
 
         //*Mappers
-        this.orderMapper = new OrmOrderMapper(this.idGen,this.ormProductRepository,this.ormBundleRepository,this.ormCourierRepository);
+        this.orderMapper = new OrmOrderMapper(
+            this.idGen,
+            this.ormProductRepository,
+            this.ormBundleRepository,
+            this.ormCourierRepository,
+            this.ormUserQueryRepository
+        );
 
         //*Repositories
         this.orderQueryRepository = new OrderQueryRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
@@ -194,10 +209,14 @@ export class OrderController {
     }
 
 
+    //@UseGuards(JwtAuthGuard)
     @Post('/pay/stripe')
-    async realizePayment(@Body() data: StripePaymentEntryDto) {
+    async realizePayment(
+        @GetCredential() credential:ICredential,
+        @Body() data: StripePaymentEntryDto
+    ) {
         let payment: OrderPayApplicationServiceRequestDto = {
-            userId: 'none',
+            userId: credential.account.idUser,
             paymentId: data.paymentId,
             currency: data.currency.toLowerCase(),
             paymentMethod: data.paymentMethod,
@@ -218,7 +237,8 @@ export class OrderController {
                     this.geocodificationAddress,
                     this.ormProductRepository,
                     this.ormBundleRepository,
-                    this.ormCourierQueryRepository
+                    this.ormCourierQueryRepository,
+                    new DateHandler()
                 ),
                 new NestLogger(new Logger())
             )
@@ -230,10 +250,14 @@ export class OrderController {
         return response.getValue;
     }
 
+    //@UseGuards(JwtAuthGuard)
     @Post('/tax-shipping-fee')
-    async calculateTaxesAndShipping(@Body() data: TaxesShippingFeeEntryDto) {
+    async calculateTaxesAndShipping(
+        @GetCredential() credential:ICredential,
+        @Body() data: TaxesShippingFeeEntryDto
+    ) {
         let payment: TaxesShippingFeeApplicationServiceEntryDto = {
-            userId: 'none',
+            userId: credential.account.idUser,
             amount: data.amount,
             currency: data.currency.toLowerCase(),
             address: data.address,
@@ -244,10 +268,14 @@ export class OrderController {
         return response.getValue;
     }
 
+    //@UseGuards(JwtAuthGuard)
     @Get('/all')
-    async findAllOrders(@Query() data: FindAllOrdersEntryDto) {
+    async findAllOrders(
+        @GetCredential() credential:ICredential,
+        @Query() data: FindAllOrdersEntryDto
+    ) {
         let values: FindAllOrdersApplicationServiceRequestDto = {
-            userId: 'none',
+            userId: credential.account.idUser,
             ...data
         }
         
@@ -256,10 +284,13 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Post('/cancel-order')
-    async cancelOrder(@Body() data: CancelOrderDto) {
+    //@UseGuards(JwtAuthGuard)
+    @Post('/cancel/order')
+    async cancelOrder(
+        @GetCredential() credential:ICredential,
+        @Body() data: CancelOrderDto) {
         let request: CancelOrderApplicationServiceRequestDto = {
-            userId: 'none',
+            userId: credential.account.idUser,
             orderId: data.orderId
         }
         
@@ -268,10 +299,14 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Post('/report-order')
-    async reportOrder(@Body() data: CreateReportEntryDto) {
+    //@UseGuards(JwtAuthGuard)
+    @Post('/report/order')
+    async reportOrder(
+        @GetCredential() credential:ICredential,
+        @Body() data: CreateReportEntryDto
+    ) {
         let request: CreateOrderReportApplicationServiceRequestDto = {
-            userId: 'none',
+            userId: credential.account.idUser,
             orderId: data.orderId,
             description: data.description
         }

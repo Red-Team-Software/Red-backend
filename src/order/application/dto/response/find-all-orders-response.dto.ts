@@ -47,7 +47,7 @@ export type orderResponse = {
     };
     orderDirection: {
         lat: number;
-        lng: number;
+        long: number;
     };
     //orderDirection: string;
     products?: productsOrderResponse[];
