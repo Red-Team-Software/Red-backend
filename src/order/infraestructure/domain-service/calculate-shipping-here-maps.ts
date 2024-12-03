@@ -34,8 +34,9 @@ export class CalculateShippingFeeHereMaps implements ICalculateShippingFee {
             let data:IhereMapsResponse = await response.json();
             let distance = data.routes[0].sections[0].summary.length;
             let distanceKm = distance / 1000;
-            let monto = distanceKm * 0.05;  
-            return Result.success(OrderShippingFee.create(monto));
+            let monto = distanceKm * 0.05;
+            let montoReduce = parseFloat(monto.toFixed(2));
+            return Result.success(OrderShippingFee.create(montoReduce));
         }catch(e){
             Result.fail(new BadRequestException());
         }
