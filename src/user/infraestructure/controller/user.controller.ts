@@ -75,7 +75,6 @@ export class UserController {
 
   }
 
-  @UseGuards(JwtAuthGuard)
   @Patch('update/profile')
   @ApiResponse({
     status: 200,
@@ -118,21 +117,18 @@ export class UserController {
     return response.getValue       
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('')
   async findUserById(@Query() entry:{id:string}){
     let response=await this.ormUserQueryRepo.findUserById(UserId.create(entry.id))
     return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('directions')
   async findUserDirectionById(@GetCredential() credential:ICredential){
     let response=await this.ormUserQueryRepo.findUserDirectionsByUserId(UserId.create(credential.account.idUser))
     return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)  
   @Post('add-directions')
   @ApiResponse({
     status: 200,
@@ -154,7 +150,6 @@ export class UserController {
   return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)  
   @Delete('delete-directions')
   @ApiResponse({
     status: 200,
@@ -176,7 +171,6 @@ export class UserController {
   return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)  
   @Put('update-directions')
   @ApiResponse({
     status: 200,
