@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Logger, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, FileTypeValidator, Inject, Logger, ParseFilePipe, Post, UploadedFile, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
@@ -23,6 +23,7 @@ import { ExceptionDecorator } from "src/common/application/aspects/exeption-deco
 import { LoggerDecorator } from "src/common/application/aspects/logger-decorator/logger-decorator";
 import { NestLogger } from "src/common/infraestructure/logger/nest-logger";
 import { CreatePaymentMethodApplicationService } from "src/payment-methods/application/service/create-payment-method.application.service";
+import { CloudinaryService } from "src/common/infraestructure/file-uploader/cloudinary-uploader";
 
 
 @ApiBearerAuth()
@@ -65,11 +66,20 @@ export class PaymentMethodController {
     @Post('/create')
     async createPaymentMethod(
         @GetCredential() credential:ICredential,
-        @Body() data: CreatePaymentMethodInfraestructureRequestDTO
-    ) {
+        @Body() data: CreatePaymentMethodInfraestructureRequestDTO,
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: [
+                    new FileTypeValidator({
+                    fileType:/(jpeg|.jpg|.png)$/
+                    }),
+                ]
+            }),
+        ) image: Express.Multer.File) {
         let method: CreatePaymentMethodRequestDto = {
             userId: credential.account.idUser,
-            name: data.name
+            name: data.name,
+            image: image.buffer
         }
 
         let payOrderService = new ExceptionDecorator(
@@ -77,7 +87,8 @@ export class PaymentMethodController {
                 new CreatePaymentMethodApplicationService(
                     this.paymentMethodRepository,
                     this.rabbitMq,
-                    this.idGen
+                    this.idGen,
+                    new CloudinaryService()
                 ),
                 new NestLogger(new Logger())
             )

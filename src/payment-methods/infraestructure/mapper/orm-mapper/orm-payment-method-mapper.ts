@@ -4,6 +4,7 @@ import { PaymentMethodEntity } from '../../entity/orm-entity/orm-payment-method-
 import { PaymentMethodId } from '../../../domain/value-objects/payment-method-id';
 import { PaymentMethodName } from 'src/payment-methods/domain/value-objects/payment-method-name';
 import { PaymentMethodState } from '../../../domain/value-objects/payment-method-state';
+import { PaymentMethodImage } from 'src/payment-methods/domain/value-objects/payment-method-image';
 
 
 export class OrmPaymentMethodMapper implements IMapper<PaymentMethodAgregate,PaymentMethodEntity>{
@@ -13,7 +14,8 @@ export class OrmPaymentMethodMapper implements IMapper<PaymentMethodAgregate,Pay
         let method = PaymentMethodAgregate.initializeAgregate(
             PaymentMethodId.create(infraEstructure.id),
             PaymentMethodName.create(infraEstructure.name),
-            PaymentMethodState.create(infraEstructure.state)
+            PaymentMethodState.create(infraEstructure.state),
+            PaymentMethodImage.create(infraEstructure.imageUrl)
         );
         
         return method;
@@ -24,7 +26,8 @@ export class OrmPaymentMethodMapper implements IMapper<PaymentMethodAgregate,Pay
         let method = PaymentMethodEntity.create(
             domainEntity.getId().paymentMethodId,
             domainEntity.name.paymentMethodName,
-            domainEntity.state.paymentMethodState
+            domainEntity.state.paymentMethodState,
+            domainEntity.image.Value
         );
         
         return method;

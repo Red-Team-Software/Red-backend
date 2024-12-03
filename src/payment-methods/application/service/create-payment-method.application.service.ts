@@ -10,6 +10,11 @@ import { PaymentMethodId } from "src/payment-methods/domain/value-objects/paymen
 import { PaymentMethodName } from '../../domain/value-objects/payment-method-name';
 import { PaymentMethodState } from '../../domain/value-objects/payment-method-state';
 import { ErrorSavingPaymentMethodApplicationException } from "../application-exception/error-saving-payment-method-application.exception";
+import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface";
+import { FileUploaderResponseDTO } from "src/common/application/file-uploader/dto/response/file-uploader-response-dto";
+import { TypeFile } from "src/common/application/file-uploader/enums/type-file.enum";
+import { ErrorUploadingPaymentMethodImageApplicationException } from "../application-exception/error-uploading-payment-method-image-application-service-exception";
+import { PaymentMethodImage } from "src/payment-methods/domain/value-objects/payment-method-image";
 
 
 export class CreatePaymentMethodApplicationService extends IApplicationService<CreatePaymentMethodRequestDto,CreatePaymentMethodResponseDto>{
@@ -18,16 +23,28 @@ export class CreatePaymentMethodApplicationService extends IApplicationService<C
         private readonly paymentMethodRepository: IPaymentMethodRepository,
         private readonly eventPublisher: IEventPublisher,
         private readonly idGen: IIdGen<string>,
+        private readonly fileUploader:IFileUploader
     ){
         super();
     }
 
     async execute(data: CreatePaymentMethodRequestDto): Promise<Result<CreatePaymentMethodResponseDto>> {
         
+
+        let uploaded:FileUploaderResponseDTO;
+
+        let idImage=await this.idGen.genId();
+        let imageuploaded=await this.fileUploader.uploadFile(data.image,TypeFile.image,idImage);
+            
+        if(!imageuploaded.isSuccess()) return Result.fail(new ErrorUploadingPaymentMethodImageApplicationException());
+
+        uploaded = imageuploaded.getValue;
+
         let method = PaymentMethodAgregate.RegisterPaymentMethod(
             PaymentMethodId.create(await this.idGen.genId()),
             PaymentMethodName.create(data.name),
-            PaymentMethodState.create("active")
+            PaymentMethodState.create("active"),
+            PaymentMethodImage.create(uploaded.url)
         );
 
         let response = await this.paymentMethodRepository.savePaymentMethod(method);
@@ -37,7 +54,8 @@ export class CreatePaymentMethodApplicationService extends IApplicationService<C
         let responseDto: CreatePaymentMethodResponseDto = {
             paymentMethodId: method.getId().paymentMethodId,
             name: method.name.paymentMethodName,
-            state: method.state.paymentMethodState
+            state: method.state.paymentMethodState,
+            imageUrl: uploaded.url
         };
 
         return Result.success(responseDto);

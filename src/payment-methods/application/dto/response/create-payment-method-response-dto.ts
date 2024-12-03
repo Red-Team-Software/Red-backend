@@ -5,5 +5,6 @@ export interface CreatePaymentMethodResponseDto extends IServiceResponseDto {
     paymentMethodId: string;
     name: string;
     state: string;
+    imageUrl: string;
     
 }

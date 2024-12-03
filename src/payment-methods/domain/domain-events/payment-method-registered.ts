@@ -2,6 +2,7 @@ import { DomainEvent } from "src/common/domain";
 import { PaymentMethodId } from "../value-objects/payment-method-id";
 import { PaymentMethodState } from "../value-objects/payment-method-state";
 import { PaymentMethodName } from "../value-objects/payment-method-name";
+import { PaymentMethodImage } from "../value-objects/payment-method-image";
 
 
 export class PaymentMethodRegistered extends DomainEvent {
@@ -10,7 +11,8 @@ export class PaymentMethodRegistered extends DomainEvent {
         let data = {
             paymentMethodId: this.paymentMethodId.paymentMethodId,
             paymentMethodState: this.paymentMethodState.paymentMethodState,
-            paymentMethodName: this.paymentMethodName.paymentMethodName
+            paymentMethodName: this.paymentMethodName.paymentMethodName,
+            paymentMethodImage: this.paymentMethodImage.Value
         }
         
         return JSON.stringify(data);
@@ -20,6 +22,7 @@ export class PaymentMethodRegistered extends DomainEvent {
         public paymentMethodId: PaymentMethodId,
         public paymentMethodState: PaymentMethodState,
         public paymentMethodName: PaymentMethodName,
+        public paymentMethodImage: PaymentMethodImage
     ){
         super();
     }
@@ -27,12 +30,14 @@ export class PaymentMethodRegistered extends DomainEvent {
     static create (
         id: PaymentMethodId,
         paymentMethodState: PaymentMethodState,
-        paymentMethodName: PaymentMethodName
+        paymentMethodName: PaymentMethodName,
+        paymentMethodImage: PaymentMethodImage
     ){
         let paymentMethod = new PaymentMethodRegistered(
             id,
             paymentMethodState,
-            paymentMethodName
+            paymentMethodName,
+            paymentMethodImage
         );
         return paymentMethod;
     }

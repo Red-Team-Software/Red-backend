@@ -5,6 +5,7 @@ import { PaymentMethodName } from "../value-objects/payment-method-name";
 import { PaymentMethodState } from "../value-objects/payment-method-state";
 import { MissingPaymentMethodAtributes } from "../exceptions/missing-payment-method-atributes.exception";
 import { PaymentMethodRegistered } from "../domain-events/payment-method-registered";
+import { PaymentMethodImage } from "../value-objects/payment-method-image";
 
 
 export class PaymentMethodAgregate extends AggregateRoot <PaymentMethodId>{
@@ -13,12 +14,14 @@ export class PaymentMethodAgregate extends AggregateRoot <PaymentMethodId>{
         if (event instanceof PaymentMethodRegistered) {
             this.paymentMethodName = event.paymentMethodName;
             this.paymentMethodState = event.paymentMethodState;
+            this.paymentMethodImage = event.paymentMethodImage;
         };
     };
     protected validateState(): void {
         if (!this.paymentMethodName || 
             !this.paymentMethodName ||
-            !this.paymentMethodState
+            !this.paymentMethodState ||
+            !this.paymentMethodImage
         ) throw new MissingPaymentMethodAtributes();
         
     };
@@ -26,7 +29,8 @@ export class PaymentMethodAgregate extends AggregateRoot <PaymentMethodId>{
     private constructor(
         paymentMethodId:PaymentMethodId,
         private paymentMethodName: PaymentMethodName,
-        private paymentMethodState: PaymentMethodState
+        private paymentMethodState: PaymentMethodState,
+        private paymentMethodImage: PaymentMethodImage
     ){
         super(paymentMethodId)
     }
@@ -34,18 +38,21 @@ export class PaymentMethodAgregate extends AggregateRoot <PaymentMethodId>{
     static RegisterPaymentMethod(
         paymentMethodId:PaymentMethodId,
         paymentMethodName:PaymentMethodName,
-        paymentMethodState:PaymentMethodState
+        paymentMethodState:PaymentMethodState,
+        paymentMethodImage: PaymentMethodImage
     ):PaymentMethodAgregate{
         const paymentMethod = new PaymentMethodAgregate(
             paymentMethodId,
             paymentMethodName,
-            paymentMethodState
+            paymentMethodState,
+            paymentMethodImage
         );
         paymentMethod.apply(
             new PaymentMethodRegistered(
                 paymentMethodId,
                 paymentMethodState,
-                paymentMethodName
+                paymentMethodName,
+                paymentMethodImage
             )
         );
         return paymentMethod;
@@ -54,12 +61,14 @@ export class PaymentMethodAgregate extends AggregateRoot <PaymentMethodId>{
     static initializeAgregate(
         paymentMethodId:PaymentMethodId,
         paymentMethodName:PaymentMethodName,
-        paymentMethodState:PaymentMethodState
+        paymentMethodState:PaymentMethodState,
+        paymentMethodImage: PaymentMethodImage
     ):PaymentMethodAgregate{
         return new PaymentMethodAgregate(
             paymentMethodId,
             paymentMethodName,
-            paymentMethodState
+            paymentMethodState,
+            paymentMethodImage
         );
     }
     
@@ -70,5 +79,9 @@ export class PaymentMethodAgregate extends AggregateRoot <PaymentMethodId>{
 
     get state(){
         return this.paymentMethodState;
+    }
+
+    get image(){
+        return this.paymentMethodImage;
     }
 }

@@ -12,15 +12,20 @@ export class PaymentMethodEntity implements IPaymentMethod {
     @Column()
     state: string;
 
+    @Column()
+    imageUrl: string;
+
     static create(
         id: string,
         name: string, 
-        state: string
+        state: string,
+        imageUrl: string
     ): PaymentMethodEntity  {
             const paymentMethod = new PaymentMethodEntity();
             paymentMethod.id = id;
             paymentMethod.name = name;
             paymentMethod.state = state;
+            paymentMethod.imageUrl = imageUrl;
             return paymentMethod;
         }
 }
