@@ -240,6 +240,13 @@ export class AuthController {
       phone: user.UserPhone.Value,
       image: user.UserImage ? user.UserImage.Value : null,
       type: user.UserRole.Value as UserRoles,
+      wallet: {
+        walletId: user.Wallet.getId().Value,
+        Ballance:{
+          currency: user.Wallet.Ballance.Currency,
+          amount: user.Wallet.Ballance.Amount
+        },
+      }
     }
     return response
   }

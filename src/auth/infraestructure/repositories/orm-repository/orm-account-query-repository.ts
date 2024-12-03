@@ -12,6 +12,15 @@ export class OrmAccountQueryRepository extends Repository<OrmAccountEntity> impl
     constructor(dataSource:DataSource){
         super(OrmAccountEntity, dataSource.createEntityManager())
     }
+    async findAccountByUserId(userId: string): Promise<Result<IAccount>> {
+        try{
+            let account=await this.findOneBy({idUser:userId})
+            if (!account)
+                return Result.fail( new NotFoundException('Find user by user id unsucssessfully'))
+            return Result.success({...account})
+        }catch(e){
+            return Result.fail( new NotFoundException('Find user by user id unsucssessfully'))
+        }        }
 
     async findAccountByEmail(email: string): Promise<Result<IAccount>> {
         try{

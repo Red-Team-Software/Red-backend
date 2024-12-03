@@ -14,6 +14,7 @@ import { UserImageUpdated } from "../domain-events/user-image-updated";
 import { UserNameUpdated } from "../domain-events/user-name-updated";
 import { UserPhoneUpdated } from "../domain-events/user-phone-updated";
 import { UserDirectionUpdated } from "../domain-events/user-direction-updated";
+import { Wallet } from "../entities/wallet/wallet.entity";
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -75,6 +76,7 @@ export class User extends AggregateRoot <UserId>{
         private userPhone:UserPhone,
         private userRole:UserRole,
         private userDirections:UserDirection[],
+        private wallet:Wallet,
         private userImage?:UserImage,
     ){
         super(userId)
@@ -86,6 +88,7 @@ export class User extends AggregateRoot <UserId>{
         userPhone:UserPhone,
         userRole:UserRole,
         userDirections:UserDirection[],
+        wallet:Wallet,
         userImage?:UserImage,
     ):User{
         const user = new User(
@@ -94,6 +97,7 @@ export class User extends AggregateRoot <UserId>{
             userPhone,
             userRole,
             userDirections,
+            wallet,
             userImage,
         )
         user.apply(
@@ -101,7 +105,8 @@ export class User extends AggregateRoot <UserId>{
                 userId,
                 userName,
                 userPhone,
-                userImage
+                userImage,
+                wallet
             )
         )
         return user
@@ -112,6 +117,7 @@ export class User extends AggregateRoot <UserId>{
         userPhone:UserPhone,
         userRole:UserRole,
         userDirection:UserDirection[],
+        wallet:Wallet,
         userImage?:UserImage,
     ):User{
         const user = new User(
@@ -120,7 +126,8 @@ export class User extends AggregateRoot <UserId>{
             userPhone,
             userRole,
             userDirection,
-            userImage,
+            wallet,
+            userImage
         )
         user.validateState()
         return user
@@ -179,4 +186,5 @@ export class User extends AggregateRoot <UserId>{
     get UserImage():UserImage {return this.userImage}
     get UserDirections():UserDirection[] {return this.userDirections}
     get UserRole():UserRole{ return this.userRole}
+    get Wallet():Wallet{return this.wallet}
 }
