@@ -46,7 +46,6 @@ export class BundleController {
     this.ormQueryBundletRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('create')
   @UseInterceptors(FilesInterceptor('images'))  
   async createBundle(
@@ -74,7 +73,6 @@ export class BundleController {
     return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('all-name')
   async getAllBundlesByName(
     @GetCredential() credential:ICredential,
@@ -104,7 +102,6 @@ export class BundleController {
   return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('all')
   async getAllBundles(
     @GetCredential() credential:ICredential,
@@ -129,7 +126,6 @@ export class BundleController {
     return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('')
   async getBundleById(
     @GetCredential() credential:ICredential,

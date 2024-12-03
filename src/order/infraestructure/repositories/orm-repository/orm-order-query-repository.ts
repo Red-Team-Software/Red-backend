@@ -48,7 +48,6 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
 
             return Result.success(domainOrders);
         } catch (error) {
-            console.log("error", error);
             return Result.fail(new NotFoundException('Orders empty, please try again'));
         }
     }

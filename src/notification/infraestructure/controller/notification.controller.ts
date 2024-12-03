@@ -38,6 +38,7 @@ import { OrmTokenCommandRepository } from "src/auth/infraestructure/repositories
 import { IDeliveredOrder } from "../interfaces/delivered-order.interface";
 import { OrderDeliveredPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/order-delivered-push-notification-application-request-dto";
 import { OrderDeliveredPushNotificationApplicationService } from "src/notification/application/services/command/order-delivered-push-notification-application.service";
+import { ApiBearerAuth } from "@nestjs/swagger";
 
 @Controller('notification')
 export class NotificationController {
@@ -282,11 +283,17 @@ export class NotificationController {
             image:entry.productImage.pop()
         });
         for (const email of emailsResponse.getValue){
-            let pepe=await emailsender.sendEmail(email)
+            await emailsender.sendEmail(email)
         };      
     };
 
     async sendEmailToCreateBundle(entry:ICreateBundle):Promise<void> {
+
+        const emailsResponse=await this.queryAccountRepository.findAllEmails();
+
+        if (!emailsResponse.isSuccess())
+            throw emailsResponse.getError;
+        
         let emailsender=new SendGridNewBundleEmailSender();
         emailsender.setVariablesToSend({
             name:entry.bundleName,
@@ -294,10 +301,18 @@ export class NotificationController {
             currency:entry.bundlePrice.currency,
             image:entry.bundleImages.pop()
         });
-        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve');
-    };
+        for (const email of emailsResponse.getValue){
+            await emailsender.sendEmail(email)
+        };        
+    }
 
     async sendPushToCreatedBundle(entry:ICreateBundle){
+
+        const tokensResponse=await this.querySessionRepository.findAllTokenSessions();
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
+
         let service= new ExceptionDecorator(
             new LoggerDecorator(
                 new NewBundlePushNotificationApplicationService(
@@ -309,7 +324,7 @@ export class NotificationController {
 
         let data:NewProductPushNotificationApplicationRequestDTO={
             userId:'none',
-            tokens:this.tokens,
+            tokens:tokensResponse.getValue,
             name:entry.bundleName,
             price:entry.bundlePrice.price,
             currency:entry.bundlePrice.currency
@@ -317,6 +332,7 @@ export class NotificationController {
         service.execute(data);
     };
 
+    @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     @Post('savetoken')
     async saveToken(

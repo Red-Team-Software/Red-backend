@@ -13,6 +13,7 @@ import { InvalidUserException } from "../domain-exceptions/invalid-user-exceptio
 import { UserImageUpdated } from "../domain-events/user-image-updated";
 import { UserNameUpdated } from "../domain-events/user-name-updated";
 import { UserPhoneUpdated } from "../domain-events/user-phone-updated";
+import { UserDirectionUpdated } from "../domain-events/user-direction-updated";
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -31,6 +32,11 @@ export class User extends AggregateRoot <UserId>{
             case 'UserDirectionDeleted':{
                 const userDirectionDeleted: UserDirectionAdded = event as UserDirectionAdded
                 this.UserDirections.filter(userDirection=>!userDirection.equals(userDirectionDeleted.userDirection))
+                break;
+            }
+            case 'UserDirectionUpdated':{
+                const userDirectionUpdated: UserDirectionUpdated = event as UserDirectionUpdated
+                this.userDirections=userDirectionUpdated.userDirection
                 break;
             }
             case 'UserImageUpdated':{
@@ -57,7 +63,8 @@ export class User extends AggregateRoot <UserId>{
             !this.userName ||
             !this.UserPhone ||
             !this.userRole ||
-            !this.userDirections
+            !this.userDirections ||
+            this.userDirections.length>6
         )
         throw new InvalidUserException()
 
@@ -124,7 +131,8 @@ export class User extends AggregateRoot <UserId>{
                 this.getId(),
                 direction
             )
-        )    
+        )
+        this.validateState()  
     }
     deleteDirection(direction:UserDirection):void{
         this.apply(
@@ -159,7 +167,14 @@ export class User extends AggregateRoot <UserId>{
             )
         )
     }
-    get UserName():UserName {return this.userName}
+    updateDirection(direction:UserDirection[]):void{
+        this.apply(
+            UserDirectionUpdated.create(
+                this.getId(),
+                direction
+            )
+        )    
+    }    get UserName():UserName {return this.userName}
     get UserPhone():UserPhone {return this.userPhone}
     get UserImage():UserImage {return this.userImage}
     get UserDirections():UserDirection[] {return this.userDirections}

@@ -7,7 +7,9 @@ import { PersistenceException } from "src/common/infraestructure/infraestructure
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { OrmUserMapper } from "../../mapper/orm-mapper/orm-user-mapper";
 import { OrmDirectionEntity } from "../../entities/orm-entities/orm-direction-entity";
-import { OrmDirectionUserEntity } from "../../model-entity/orm-model-entity/orm-direction-user-entity";
+import { OrmDirectionUserEntity } from "../../entities/orm-entities/orm-direction-user-entity";
+import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
+import { OrmUserQueryRepository } from "./orm-user-query-repository";
 
 
 
@@ -19,20 +21,42 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
 
     constructor(dataSource:DataSource){
         super(OrmUserEntity, dataSource.createEntityManager())
-        this.mapper=new OrmUserMapper()
+        this.mapper=new OrmUserMapper(new UuidGen(),new OrmUserQueryRepository(dataSource))
         this.ormDirectionRepository=dataSource.getRepository(OrmDirectionEntity)
         this.ormDirectionUserRepository=dataSource.getRepository(OrmDirectionUserEntity)
     }
+    async deleteUserDirection(idUser:string,idDirection:string): Promise<Result<string>> {
+        try {
+    
+            let resultDelete = await this.ormDirectionUserRepository.delete({
+                direction_id:idDirection,
+                user_id:idUser
+            })
+                    
+            if (!resultDelete)
+                return Result.fail(new PersistenceException('Update user unsucssessfully'))
+            
+            return Result.success(idUser)
+            } catch (e) {
+                return Result.fail(new PersistenceException('Update user unsucssessfully'))
+            }  
+        }    
+
     async updateUser(user: User): Promise<Result<User>> {
     try {
         let ormModel=await this.mapper.fromDomaintoPersistence(user)
 
-        let resultUpdate = await this.upsert(ormModel,['id'])         
+        let resultUpdate = await this.upsert(ormModel,['id'])
+        
+        for (const directionUser of ormModel.direcction){
+            await this.ormDirectionRepository.upsert(directionUser.direction,['id'])
+            await this.ormDirectionUserRepository.upsert(directionUser,['direction_id','user_id'])
+        }
     
-            if (!resultUpdate)
-                return Result.fail(new PersistenceException('Update user unsucssessfully'))
+        if (!resultUpdate)
+            return Result.fail(new PersistenceException('Update user unsucssessfully'))
           
-            return Result.success(user)
+        return Result.success(user)
         } catch (e) {
             return Result.fail(new PersistenceException('Update user unsucssessfully'))
         }  
