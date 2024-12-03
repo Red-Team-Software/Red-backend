@@ -1,4 +1,4 @@
-import { Order } from "src/Order/domain/aggregate/order";
+import { Order } from "src/order/domain/aggregate/order";
 import { OrmOrderEntity } from "../entities/orm-order-entity";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
