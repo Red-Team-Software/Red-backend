@@ -7,6 +7,6 @@ export class CreatePaymentMethodInfraestructureRequestDTO{
     @ApiProperty( { required: true, default: 'Stripe' })
     @IsString()
     @MinLength( 3 )
-    name: string
+    name: string;
 
 }

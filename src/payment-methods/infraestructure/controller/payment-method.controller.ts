@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Inject, Logger, ParseFilePipe, Post, UploadedFile, UseGuards } from "@nestjs/common";
+import { Body, Controller, FileTypeValidator, Inject, Logger, ParseFilePipe, Post, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
@@ -24,6 +24,7 @@ import { LoggerDecorator } from "src/common/application/aspects/logger-decorator
 import { NestLogger } from "src/common/infraestructure/logger/nest-logger";
 import { CreatePaymentMethodApplicationService } from "src/payment-methods/application/service/create-payment-method.application.service";
 import { CloudinaryService } from "src/common/infraestructure/file-uploader/cloudinary-uploader";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 
 @ApiBearerAuth()
@@ -64,6 +65,7 @@ export class PaymentMethodController {
     }
 
     @Post('/create')
+    @UseInterceptors(FileInterceptor('image')) 
     async createPaymentMethod(
         @GetCredential() credential:ICredential,
         @Body() data: CreatePaymentMethodInfraestructureRequestDTO,

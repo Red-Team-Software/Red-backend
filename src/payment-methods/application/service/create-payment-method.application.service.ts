@@ -55,7 +55,7 @@ export class CreatePaymentMethodApplicationService extends IApplicationService<C
             paymentMethodId: method.getId().paymentMethodId,
             name: method.name.paymentMethodName,
             state: method.state.paymentMethodState,
-            imageUrl: uploaded.url
+            imageUrl: method.image.Value
         };
 
         return Result.success(responseDto);
