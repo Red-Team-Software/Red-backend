@@ -45,14 +45,10 @@ export class ChangePasswordApplicationService extends IApplicationService
             return Result.fail(new CodeExpiredApplicationException());
 
         let newPassword= await this.encryptor.hashPassword(data.password)
-
-        console.log(account.password)
         
         account.password=newPassword
         account.code=null
         account.code_created_at=null
-
-        console.log(account.password)
 
         let accountResult=await this.commandAccountRepository.updateAccount(account)
 

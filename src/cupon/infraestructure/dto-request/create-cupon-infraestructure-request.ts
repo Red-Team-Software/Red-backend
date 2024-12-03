@@ -15,7 +15,7 @@ export class CreateCuponInfraestructureRequestDTO{
     @MinLength( 3 )
     code: string
 
-    @ApiProperty( { required: true, default: 10 })
+    @ApiProperty( { required: true, default: 0.1 })
     @IsNumber()
     @IsPositive()
     discount: number

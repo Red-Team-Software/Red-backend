@@ -7,6 +7,7 @@ import { ErrorUpdatinDirectionApplicationException } from "../../application-exe
 import { IQueryUserRepository } from "../../repository/user.query.repository.interface"
 import { AddUserDirectionsApplicationRequestDTO } from "../../dto/request/add-user-direction-application-request-dto"
 import { AddUserDirectionApplicationResponseDTO } from "../../dto/response/add-user-direction-application-response-dto"
+import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract"
 
 
 
@@ -16,12 +17,14 @@ export class AddUserDirectionApplicationService extends IApplicationService
     constructor(
         private readonly commandUserRepository:ICommandUserRepository,
         private readonly queryUserRepository:IQueryUserRepository,
+        private readonly eventPublisher: IEventPublisher,
     ){
         super()
     }
     
     async execute(data: AddUserDirectionsApplicationRequestDTO): Promise<Result<AddUserDirectionApplicationResponseDTO>> {
         let userRepoResponse = await this.queryUserRepository.findUserById(UserId.create(data.userId))
+
 
         if (!userRepoResponse.isSuccess())
             return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
@@ -38,6 +41,13 @@ export class AddUserDirectionApplicationService extends IApplicationService
         userDirections.forEach(direction=>{
             user.addDirection(direction)
         })
+
+        let userResponse= await this.commandUserRepository.updateUser(user)
+        
+        if (!userResponse.isSuccess())
+            return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
+
+        this.eventPublisher.publish(user.pullDomainEvents())
 
         return Result.success({userId:data.userId})
     }

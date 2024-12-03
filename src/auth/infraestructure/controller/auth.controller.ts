@@ -1,5 +1,5 @@
 import { Controller, Inject, Post, Body, Logger, Put, Get, UseGuards } from "@nestjs/common"
-import { ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger"
+import { ApiBearerAuth, ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { IDateHandler } from "src/common/application/date-handler/date-handler.interface"
 import { IEncryptor } from "src/common/application/encryptor/encryptor.interface"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
@@ -221,8 +221,9 @@ export class AuthController {
   return response.getValue
   }
 
-  @Get('current')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @Get('current')
   @ApiOkResponse({  description: 'Get current User data', type: CurrentUserInfraestructureResponseDTO })
   async currentUser( @GetCredential() credential:ICredential ) {
 
@@ -239,6 +240,13 @@ export class AuthController {
       phone: user.UserPhone.Value,
       image: user.UserImage ? user.UserImage.Value : null,
       type: user.UserRole.Value as UserRoles,
+      wallet: {
+        walletId: user.Wallet.getId().Value,
+        Ballance:{
+          currency: user.Wallet.Ballance.Currency,
+          amount: user.Wallet.Ballance.Amount
+        },
+      }
     }
     return response
   }

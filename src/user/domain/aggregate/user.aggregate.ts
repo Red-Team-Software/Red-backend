@@ -13,6 +13,8 @@ import { InvalidUserException } from "../domain-exceptions/invalid-user-exceptio
 import { UserImageUpdated } from "../domain-events/user-image-updated";
 import { UserNameUpdated } from "../domain-events/user-name-updated";
 import { UserPhoneUpdated } from "../domain-events/user-phone-updated";
+import { UserDirectionUpdated } from "../domain-events/user-direction-updated";
+import { Wallet } from "../entities/wallet/wallet.entity";
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -31,6 +33,11 @@ export class User extends AggregateRoot <UserId>{
             case 'UserDirectionDeleted':{
                 const userDirectionDeleted: UserDirectionAdded = event as UserDirectionAdded
                 this.UserDirections.filter(userDirection=>!userDirection.equals(userDirectionDeleted.userDirection))
+                break;
+            }
+            case 'UserDirectionUpdated':{
+                const userDirectionUpdated: UserDirectionUpdated = event as UserDirectionUpdated
+                this.userDirections=userDirectionUpdated.userDirection
                 break;
             }
             case 'UserImageUpdated':{
@@ -57,7 +64,8 @@ export class User extends AggregateRoot <UserId>{
             !this.userName ||
             !this.UserPhone ||
             !this.userRole ||
-            !this.userDirections
+            !this.userDirections ||
+            this.userDirections.length>6
         )
         throw new InvalidUserException()
 
@@ -68,6 +76,7 @@ export class User extends AggregateRoot <UserId>{
         private userPhone:UserPhone,
         private userRole:UserRole,
         private userDirections:UserDirection[],
+        private wallet:Wallet,
         private userImage?:UserImage,
     ){
         super(userId)
@@ -79,6 +88,7 @@ export class User extends AggregateRoot <UserId>{
         userPhone:UserPhone,
         userRole:UserRole,
         userDirections:UserDirection[],
+        wallet:Wallet,
         userImage?:UserImage,
     ):User{
         const user = new User(
@@ -87,6 +97,7 @@ export class User extends AggregateRoot <UserId>{
             userPhone,
             userRole,
             userDirections,
+            wallet,
             userImage,
         )
         user.apply(
@@ -94,7 +105,8 @@ export class User extends AggregateRoot <UserId>{
                 userId,
                 userName,
                 userPhone,
-                userImage
+                userImage,
+                wallet
             )
         )
         return user
@@ -105,6 +117,7 @@ export class User extends AggregateRoot <UserId>{
         userPhone:UserPhone,
         userRole:UserRole,
         userDirection:UserDirection[],
+        wallet:Wallet,
         userImage?:UserImage,
     ):User{
         const user = new User(
@@ -113,7 +126,8 @@ export class User extends AggregateRoot <UserId>{
             userPhone,
             userRole,
             userDirection,
-            userImage,
+            wallet,
+            userImage
         )
         user.validateState()
         return user
@@ -124,7 +138,8 @@ export class User extends AggregateRoot <UserId>{
                 this.getId(),
                 direction
             )
-        )    
+        )
+        this.validateState()  
     }
     deleteDirection(direction:UserDirection):void{
         this.apply(
@@ -159,9 +174,17 @@ export class User extends AggregateRoot <UserId>{
             )
         )
     }
-    get UserName():UserName {return this.userName}
+    updateDirection(direction:UserDirection[]):void{
+        this.apply(
+            UserDirectionUpdated.create(
+                this.getId(),
+                direction
+            )
+        )    
+    }    get UserName():UserName {return this.userName}
     get UserPhone():UserPhone {return this.userPhone}
     get UserImage():UserImage {return this.userImage}
     get UserDirections():UserDirection[] {return this.userDirections}
     get UserRole():UserRole{ return this.userRole}
+    get Wallet():Wallet{return this.wallet}
 }

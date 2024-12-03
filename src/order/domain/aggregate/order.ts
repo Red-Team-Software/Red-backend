@@ -160,7 +160,8 @@ export class Order extends AggregateRoot<OrderId>{
         this.apply(
             OrderStatusCanceled.create(
                 this.getId(),
-                orderState
+                orderState,
+                this.orderUserId
             )
         );
     }
@@ -169,7 +170,8 @@ export class Order extends AggregateRoot<OrderId>{
         this.apply(
             OrderStatusDelivered.create(
                 this.getId(),
-                orderState
+                orderState,
+                this.orderUserId
             )
         );
     }

@@ -16,4 +16,12 @@ export class CurrentUserInfraestructureResponseDTO {
     image: string
     @ApiProperty({ example: 'client' })
     type: UserRoles
+    @ApiProperty({ example: 'client' })
+    wallet: {
+        walletId: string,
+        Ballance:{
+          currency: string,
+          amount: number
+        }
+    }
 }

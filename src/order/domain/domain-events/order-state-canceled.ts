@@ -1,6 +1,7 @@
 import { DomainEvent } from "src/common/domain";
 import { OrderId } from "../value_objects/order-id";
 import { OrderState } from "../value_objects/order-state";
+import { OrderUserId } from "../value_objects/order-user-id";
 
 
 
@@ -10,6 +11,7 @@ export class OrderStatusCanceled extends DomainEvent {
         let data = {
             orderId: this.orderId.orderId,
             orderState: this.orderState.orderState,
+            orderUserId: this.orderUserId,
         }
         
         return JSON.stringify(data);
@@ -18,6 +20,7 @@ export class OrderStatusCanceled extends DomainEvent {
     constructor(
         public orderId: OrderId,
         public orderState: OrderState,
+        public orderUserId:OrderUserId
     ){
         super();
     }
@@ -25,10 +28,12 @@ export class OrderStatusCanceled extends DomainEvent {
     static create (
         id: OrderId,
         orderState: OrderState,
+        orderUserId:OrderUserId
     ){
         let order = new OrderStatusCanceled(
             id,
-            orderState
+            orderState,
+            orderUserId
         );
         return order;
     }

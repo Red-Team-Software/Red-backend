@@ -17,7 +17,7 @@ export class CuponDiscount implements ValueObject<CuponDiscount> {
     }
 
     private constructor(discount: number) {
-        if (discount <= 0 || discount > 100) throw new InvalidCuponDiscountException();
+        if (discount <= 0 || discount > 1) throw new InvalidCuponDiscountException();
         this.discount = discount;
     }
 }

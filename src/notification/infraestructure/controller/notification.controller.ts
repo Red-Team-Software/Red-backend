@@ -17,6 +17,9 @@ import { NewProductsPushNotificationApplicationService } from "src/notification/
 import { SendGridNewOrderEmailSender } from "src/common/infraestructure/email-sender/send-grid-new-order-email-sender.service";
 import { NewOrderPushNotificationApplicationService } from "src/notification/application/services/command/new-order-push-notification-application.service";
 import { NewOrderPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-order-push-notification-application-request-dto";
+import { ICreateCupon } from "../interfaces/create-cupon.interface";
+import { NewCuponPushNotificationApplicationService } from "src/notification/application/services/command/new-cupon-push-notification-application.service";
+import { NewCuponPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-cupon-push-notification-application-request-dto";
 import { CancelOrderPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/cancel-order-push-notification-application-request-dto";
 import { CanceledOrderPushNotificationApplicationService } from "src/notification/application/services/command/cancel-order-push-notification-application.service";
 import { SendGridCanceledOrderEmailSender } from "src/common/infraestructure/email-sender/send-grid-canceled-order-email-sender.service";
@@ -38,7 +41,9 @@ import { OrmTokenCommandRepository } from "src/auth/infraestructure/repositories
 import { IDeliveredOrder } from "../interfaces/delivered-order.interface";
 import { OrderDeliveredPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/order-delivered-push-notification-application-request-dto";
 import { OrderDeliveredPushNotificationApplicationService } from "src/notification/application/services/command/order-delivered-push-notification-application.service";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiTags('Notification')
 @Controller('notification')
 export class NotificationController {
 
@@ -47,7 +52,6 @@ export class NotificationController {
     private readonly commandTokenSessionRepository:ICommandTokenSessionRepository<ISession>;
     private readonly queryAccountRepository:IQueryAccountRepository<IAccount>;
     private readonly querySessionRepository:IQueryTokenSessionRepository<ISession>;
-    private readonly tokens:string[]=[];
 
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -118,6 +122,18 @@ export class NotificationController {
             }
         });
 
+        this.subscriber.buildQueue({
+            name:'CuponEvents',
+            pattern: 'CuponRegistered',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        })
+
         this.subscriber.consume<ICreateProduct>(
             { name: 'ProductEvents'}, 
             (data):Promise<void>=>{
@@ -143,7 +159,42 @@ export class NotificationController {
                 this.sendEmailOrderCreated(data)
                 return
             }
-        );
+        )
+        
+        this.subscriber.consume<ICreateCupon>(
+            { name: 'CuponEvents'}, 
+            (data):Promise<void>=>{
+                this.sendPushCuponCreated(data)
+                return
+            }
+        )
+    }
+
+    
+    async sendPushCuponCreated(entry:ICreateCupon){
+        let service=new ExceptionDecorator(
+            new LoggerDecorator(
+                new NewCuponPushNotificationApplicationService(
+                    this.pushsender
+                ),
+                new NestLogger(new Logger())
+            )
+        )
+
+        const tokensResponse=await this.querySessionRepository.findAllTokenSessions();
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
+
+        let data:NewCuponPushNotificationApplicationRequestDTO={
+            userId:'none',
+            tokens:tokensResponse.getValue,
+            name:entry.cuponName,
+            discount: entry.cuponDiscount,
+            code:entry.cuponCode,
+            state:entry.cuponState
+        }
+        service.execute(data)
 
         this.subscriber.consume<ICancelOrder>(
             { name: 'OrderEvents/CancelOrder'}, 
@@ -173,9 +224,15 @@ export class NotificationController {
             new NestLogger(new Logger())
             )
         );
+        
+        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
+
         let data: OrderDeliveredPushNotificationApplicationRequestDTO={
             userId:'none',
-            tokens:this.tokens,
+            tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderId:entry.orderId
         };
@@ -191,9 +248,15 @@ export class NotificationController {
             new NestLogger(new Logger())
             )
         );
+
+        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
+
         let data: CancelOrderPushNotificationApplicationRequestDTO={
             userId:'none',
-            tokens:this.tokens,
+            tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderId:entry.orderId
         };
@@ -202,12 +265,19 @@ export class NotificationController {
 
 
     async sendEmailOrderCanceled(entry:ICancelOrder){
+
+        const accountResponse=await this.queryAccountRepository.findAccountByUserId(entry.orderUserId);
+
+        if (!accountResponse.isSuccess())
+            throw accountResponse.getError;
+
+
         let emailsender=new SendGridCanceledOrderEmailSender();
         emailsender.setVariablesToSend({
             username:'customer',
             orderid: entry.orderId
         });
-        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve');
+        await emailsender.sendEmail(accountResponse.getValue.email);
     };
 
     async sendPushOrderCreated(entry:ICreateOrder){
@@ -220,10 +290,15 @@ export class NotificationController {
             new NestLogger(new Logger())
             )
         );
+
+        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
         
         let data:NewOrderPushNotificationApplicationRequestDTO={
             userId:'none',
-            tokens:this.tokens,
+            tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderCreateDate:entry.orderCreateDate,
             totalAmount:entry.totalAmount.amount,
@@ -233,12 +308,18 @@ export class NotificationController {
     };
 
     async sendEmailOrderCreated(entry:ICreateOrder){
+
+        const accountResponse=await this.queryAccountRepository.findAccountByUserId(entry.orderUserId);
+
+        if (!accountResponse.isSuccess())
+            throw accountResponse.getError;
+
         let emailsender=new SendGridNewOrderEmailSender()
         emailsender.setVariablesToSend({
             price:entry.totalAmount.amount,
             currency:entry.totalAmount.currency
         })
-        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')     
+        await emailsender.sendEmail(accountResponse.getValue.email)     
     };
 
     async sendPushToCreatedProduct(entry:ICreateProduct):Promise<void> {
@@ -282,11 +363,17 @@ export class NotificationController {
             image:entry.productImage.pop()
         });
         for (const email of emailsResponse.getValue){
-            let pepe=await emailsender.sendEmail(email)
+            await emailsender.sendEmail(email)
         };      
     };
 
     async sendEmailToCreateBundle(entry:ICreateBundle):Promise<void> {
+
+        const emailsResponse=await this.queryAccountRepository.findAllEmails();
+
+        if (!emailsResponse.isSuccess())
+            throw emailsResponse.getError;
+        
         let emailsender=new SendGridNewBundleEmailSender();
         emailsender.setVariablesToSend({
             name:entry.bundleName,
@@ -294,10 +381,18 @@ export class NotificationController {
             currency:entry.bundlePrice.currency,
             image:entry.bundleImages.pop()
         });
-        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve');
-    };
+        for (const email of emailsResponse.getValue){
+            await emailsender.sendEmail(email)
+        };        
+    }
 
     async sendPushToCreatedBundle(entry:ICreateBundle){
+
+        const tokensResponse=await this.querySessionRepository.findAllTokenSessions();
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
+
         let service= new ExceptionDecorator(
             new LoggerDecorator(
                 new NewBundlePushNotificationApplicationService(
@@ -309,7 +404,7 @@ export class NotificationController {
 
         let data:NewProductPushNotificationApplicationRequestDTO={
             userId:'none',
-            tokens:this.tokens,
+            tokens:tokensResponse.getValue,
             name:entry.bundleName,
             price:entry.bundlePrice.price,
             currency:entry.bundlePrice.currency
@@ -317,6 +412,7 @@ export class NotificationController {
         service.execute(data);
     };
 
+    @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     @Post('savetoken')
     async saveToken(
