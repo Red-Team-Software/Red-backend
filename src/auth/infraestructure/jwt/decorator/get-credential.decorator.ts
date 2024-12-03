@@ -1,0 +1,11 @@
+import { ExecutionContext, NotFoundException, createParamDecorator } from "@nestjs/common"
+
+export const GetCredential = createParamDecorator(
+    (_data, context: ExecutionContext) => {
+        const request = context.switchToHttp().getRequest()
+        if (!request.credential) 
+            throw new NotFoundException(' 404 credential not found')
+        // console.log(request.credential)
+        return request.credential
+    }
+)

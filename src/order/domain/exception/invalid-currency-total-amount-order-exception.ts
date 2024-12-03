@@ -2,7 +2,7 @@ import { DomainException } from "src/common/domain/domain-exeption/domain-except
 
 
 export class InvalidCurrencyOrderTotalAmountException extends DomainException {
-    constructor(message: string) {
-        super(message);
+    constructor() {
+        super('The currency is not in the list of valid currencies');
     }
 }

@@ -4,6 +4,7 @@ export interface OrderPayResponseDto extends IServiceResponseDto {
         id: string,
         orderState: string,
         orderCreatedDate: Date,
+        orderTimeCreated: string,
         totalAmount: number,
         currency: string,
         orderDirection: {
@@ -28,11 +29,14 @@ export interface OrderPayResponseDto extends IServiceResponseDto {
             currency:string
             images:string[]
         }[],
-        orderReciviedDate?: Date,
-        orderReport?: string,
         orderPayment?: {
             amount: number,
             currency: string,
             paymentMethod: string
-        }
+        },
+        orderCourier: {
+            courierName: string,
+            courierImage: string,
+        },
+        orderUserId: string
 }

@@ -13,7 +13,7 @@ import { ErrorNameAlreadyApplicationException } from "../../application-exeption
 import { ErrorUploadingImagesApplicationException } from "../../application-exeption/error-uploading-images-application-exception"
 import { FileUploaderResponseDTO } from "src/common/application/file-uploader/dto/response/file-uploader-response-dto"
 import { IApplicationService } from "src/common/application/services"
-import { IBundleRepository } from "src/bundle/domain/repository/product.interface.repositry"
+import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface"
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract"
 import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
