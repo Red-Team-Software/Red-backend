@@ -30,7 +30,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
                 relations: ["pay", "order_products", "order_bundles","order_report","order_courier", "user"]
             });
             
-                if(!ormOrders || ormOrders.length === 0) return Result.fail( new NotFoundException('Orders empty, please try again'))
+                if(!ormOrders) return Result.fail( new NotFoundException('Orders empty, please try again'))
             
                 let domainOrders: Order[] = [];
 
