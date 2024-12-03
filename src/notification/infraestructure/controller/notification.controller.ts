@@ -51,7 +51,6 @@ export class NotificationController {
     private readonly commandTokenSessionRepository:ICommandTokenSessionRepository<ISession>;
     private readonly queryAccountRepository:IQueryAccountRepository<IAccount>;
     private readonly querySessionRepository:IQueryTokenSessionRepository<ISession>;
-    private readonly tokens:string[]=[];
 
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -180,16 +179,21 @@ export class NotificationController {
                 new NestLogger(new Logger())
             )
         )
+
+        const tokensResponse=await this.querySessionRepository.findAllTokenSessions();
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
+
         let data:NewCuponPushNotificationApplicationRequestDTO={
             userId:'none',
-            tokens:this.tokens,
+            tokens:tokensResponse.getValue,
             name:entry.cuponName,
             discount: entry.cuponDiscount,
             code:entry.cuponCode,
             state:entry.cuponState
         }
         service.execute(data)
-        );
 
         this.subscriber.consume<ICancelOrder>(
             { name: 'OrderEvents/CancelOrder'}, 
@@ -219,9 +223,15 @@ export class NotificationController {
             new NestLogger(new Logger())
             )
         );
+        
+        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
+
         let data: OrderDeliveredPushNotificationApplicationRequestDTO={
             userId:'none',
-            tokens:this.tokens,
+            tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderId:entry.orderId
         };
@@ -237,9 +247,15 @@ export class NotificationController {
             new NestLogger(new Logger())
             )
         );
+
+        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
+
         let data: CancelOrderPushNotificationApplicationRequestDTO={
             userId:'none',
-            tokens:this.tokens,
+            tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderId:entry.orderId
         };
@@ -248,12 +264,19 @@ export class NotificationController {
 
 
     async sendEmailOrderCanceled(entry:ICancelOrder){
+
+        const accountResponse=await this.queryAccountRepository.findAccountByUserId(entry.orderUserId);
+
+        if (!accountResponse.isSuccess())
+            throw accountResponse.getError;
+
+
         let emailsender=new SendGridCanceledOrderEmailSender();
         emailsender.setVariablesToSend({
             username:'customer',
             orderid: entry.orderId
         });
-        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve');
+        await emailsender.sendEmail(accountResponse.getValue.email);
     };
 
     async sendPushOrderCreated(entry:ICreateOrder){
@@ -266,10 +289,15 @@ export class NotificationController {
             new NestLogger(new Logger())
             )
         );
+
+        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
         
         let data:NewOrderPushNotificationApplicationRequestDTO={
             userId:'none',
-            tokens:this.tokens,
+            tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderCreateDate:entry.orderCreateDate,
             totalAmount:entry.totalAmount.amount,
@@ -279,12 +307,18 @@ export class NotificationController {
     };
 
     async sendEmailOrderCreated(entry:ICreateOrder){
+
+        const accountResponse=await this.queryAccountRepository.findAccountByUserId(entry.orderUserId);
+
+        if (!accountResponse.isSuccess())
+            throw accountResponse.getError;
+
         let emailsender=new SendGridNewOrderEmailSender()
         emailsender.setVariablesToSend({
             price:entry.totalAmount.amount,
             currency:entry.totalAmount.currency
         })
-        await emailsender.sendEmail('anfung.21@est.ucab.edu.ve')     
+        await emailsender.sendEmail(accountResponse.getValue.email)     
     };
 
     async sendPushToCreatedProduct(entry:ICreateProduct):Promise<void> {
