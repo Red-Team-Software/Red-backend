@@ -1,6 +1,7 @@
 import { ValueObject } from "src/common/domain"
 import { InvalidUserDirectionNameException } from "../domain-exceptions/invalid-user-direction-name-exception"
-import { InvalidUserDirectionException } from "../domain-exceptions/invalid-user-direction-exception"
+import { InvalidUserLatitudeDirectionException } from "../domain-exceptions/invalid-user-latitude-direction-exception"
+import { InvalidUserLongitudeDirectionException } from "../domain-exceptions/invalid-user-longitude-direction-exception"
 
 export class UserDirection implements ValueObject<UserDirection> {
 
@@ -32,12 +33,12 @@ export class UserDirection implements ValueObject<UserDirection> {
         lng: number
     ): UserDirection {
         
-        const regexName=new RegExp(/^[A-Za-zÁÉÍÓÚáéíóúÑñ]{1,50}$/)
-        if (!regexName.test(name)) 
-            throw new InvalidUserDirectionNameException()
+        const regex = new RegExp(/^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s]{1,50}$/)      
+        if (!regex.test(name)) 
+            throw new InvalidUserDirectionNameException(name)
 
-        if (Math.abs(lat) > 90) { throw new InvalidUserDirectionException(); }
-        if (Math.abs(lng) > 180) { throw new InvalidUserDirectionException(); }
+        if (Math.abs(lat) > 90) { throw new InvalidUserLatitudeDirectionException(lat.toString()) }
+        if (Math.abs(lng) > 180) { throw new InvalidUserLongitudeDirectionException(lng.toString()) }
 
         return new UserDirection( name,favorite,lat,lng)
     }
