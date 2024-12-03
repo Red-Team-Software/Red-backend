@@ -8,10 +8,8 @@ import { ICalculateTaxesFee } from 'src/order/domain/domain-services/calculate-t
 import { OrderTotalAmount } from 'src/order/domain/value_objects/order-totalAmount';
 import { IPaymentMethodService } from 'src/order/domain/domain-services/payment-method-interface';
 import { OrderDirection } from 'src/order/domain/value_objects/order-direction';
-import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
 import { ErrorCreatingPaymentApplicationException } from '../application-exception/error-creating-payment-application.exception';
 import { ErrorObtainingTaxesApplicationException } from '../application-exception/error-obtaining-taxes.application.exception';
-import { OrderStripePaymentMethod } from 'src/order/domain/value_objects/order-stripe-payment-method';
 import { ICommandOrderRepository } from 'src/order/domain/command-repository/order-command-repository-interface';
 import { Order } from 'src/order/domain/aggregate/order';
 import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
@@ -40,14 +38,12 @@ import { Bundle } from 'src/bundle/domain/aggregate/bundle.aggregate';
 import { OrderReport } from 'src/order/domain/entities/report/report-entity';
 import { OrderPayment } from 'src/order/domain/entities/payment/order-payment-entity';
 import { CalculateAmount } from 'src/order/domain/domain-services/calculate-amount';
-import { ICourierRepository } from 'src/courier/domain/repositories/courier-repository-interface';
 import { ICourierQueryRepository } from 'src/courier/application/query-repository/courier-query-repository-interface';
 import { OrderCourier } from 'src/order/domain/entities/order-courier/order-courier-entity';
 import { OrderCourierId } from 'src/order/domain/entities/order-courier/value-object/order-courier-id';
 import { OrderCourierDirection } from 'src/order/domain/entities/order-courier/value-object/order-courier-direction';
 import { OrderUserId } from 'src/order/domain/value_objects/order-user-id';
 import { IDateHandler } from 'src/common/application/date-handler/date-handler.interface';
-import { date } from 'joi';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{

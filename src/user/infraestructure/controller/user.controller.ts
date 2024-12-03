@@ -1,7 +1,7 @@
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 import { UpdateProfileInfraestructureRequestDTO } from "../dto/request/update-profile-infraestructure-request-dto"
-import { Controller, Inject, Patch, Body, Get, Query, Post, UseGuards, BadRequestException, Logger } from "@nestjs/common"
+import { Controller, Inject, Patch, Body, Get, Query, Post, UseGuards, BadRequestException, Logger, Delete, Put } from "@nestjs/common"
 import { ApiBearerAuth, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { UpdateProfileInfraestructureResponseDTO } from "../dto/response/update-profile-infraestructure-response-dto"
 import { OrmUserQueryRepository } from "../repositories/orm-repository/orm-user-query-repository"
@@ -37,6 +37,12 @@ import { IQueryAccountRepository } from "src/auth/application/repository/query-a
 import { OrmAccountQueryRepository } from "src/auth/infraestructure/repositories/orm-repository/orm-account-query-repository"
 import { IEncryptor } from "src/common/application/encryptor/encryptor.interface"
 import { BcryptEncryptor } from "src/common/infraestructure/encryptor/bcrypt-encryptor"
+import { DeleteUserDirectionsInfraestructureRequestDTO } from "../dto/request/delete-user-direction-infreaestructure-request-dto"
+import { DeleteUserDirectionInfraestructureResponseDTO } from "../dto/response/delete-user-direction-infreaestructure-response-dto"
+import { DeleteUserDirectionApplicationService } from "src/user/application/services/command/delete-user-direction-application.service"
+import { UpdateUserDirectionInfraestructureResponseDTO } from "../dto/response/update-user-direction-infreaestructure-response-dto"
+import { UpdateUserDirectionsInfraestructureRequestDTO } from "../dto/request/update-user-direction-infreaestructure-request-dto"
+import { UpdateUserDirectionApplicationService } from "src/user/application/services/command/update-user-direction-application.service"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -69,7 +75,6 @@ export class UserController {
 
   }
 
-  @UseGuards(JwtAuthGuard)
   @Patch('update/profile')
   @ApiResponse({
     status: 200,
@@ -112,22 +117,18 @@ export class UserController {
     return response.getValue       
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('')
   async findUserById(@Query() entry:{id:string}){
     let response=await this.ormUserQueryRepo.findUserById(UserId.create(entry.id))
     return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('directions')
-  async findUserDirectionById(@GetCredential() credential:ICredential,
-    @Query() entry:{id:string}){
-    let response=await this.ormUserQueryRepo.findUserDirectionsByUserId(UserId.create(entry.id))
-    return response
+  async findUserDirectionById(@GetCredential() credential:ICredential){
+    let response=await this.ormUserQueryRepo.findUserDirectionsByUserId(UserId.create(credential.account.idUser))
+    return response.getValue
   }
 
-  @UseGuards(JwtAuthGuard)  
   @Post('add-directions')
   @ApiResponse({
     status: 200,
@@ -137,13 +138,57 @@ export class UserController {
   async addDirectionToUser(
     @GetCredential() credential:ICredential ,
     @Body() entry:AddUserDirectionsInfraestructureRequestDTO){
-      console.log('user:',credential.account.idUser)
+
     let service= new ExceptionDecorator(
       new AddUserDirectionApplicationService (
         this.ormUserCommandRepo,
-        this.ormUserQueryRepo
+        this.ormUserQueryRepo,
+        new RabbitMQPublisher(this.channel)
       )
   )
   let response = await service.execute({userId:credential.account.idUser,...entry})
+  return response.getValue
+  }
+
+  @Delete('delete-directions')
+  @ApiResponse({
+    status: 200,
+    description: 'Delete direction information',
+    type: DeleteUserDirectionInfraestructureResponseDTO,
+  })
+  async deleteDirectionToUser(
+    @GetCredential() credential:ICredential ,
+    @Body() entry:DeleteUserDirectionsInfraestructureRequestDTO){
+
+    let service= new ExceptionDecorator(
+      new DeleteUserDirectionApplicationService (
+        this.ormUserCommandRepo,
+        this.ormUserQueryRepo,
+        new RabbitMQPublisher(this.channel)
+      )
+  )
+  let response = await service.execute({userId:credential.account.idUser,...entry})
+  return response.getValue
+  }
+
+  @Put('update-directions')
+  @ApiResponse({
+    status: 200,
+    description: 'Delete direction information',
+    type: UpdateUserDirectionInfraestructureResponseDTO,
+  })
+  async updateDirectionToUser(
+    @GetCredential() credential:ICredential ,
+    @Body() entry:UpdateUserDirectionsInfraestructureRequestDTO){
+
+    let service= new ExceptionDecorator(
+      new UpdateUserDirectionApplicationService (
+        this.ormUserCommandRepo,
+        this.ormUserQueryRepo,
+        new RabbitMQPublisher(this.channel)
+      )
+  )
+  let response = await service.execute({userId:credential.account.idUser,...entry})
+  return response.getValue
   }
 }
