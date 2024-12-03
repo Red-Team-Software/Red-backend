@@ -1,9 +1,10 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
 import { IUser } from "../../model-entity/orm-model-entity/user-interface";
 import { OrmAccountEntity } from "src/auth/infraestructure/orm/orm-entities/orm-account-entity";
 import { OrmDirectionUserEntity } from "./orm-direction-user-entity";
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
 import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-order-entity";
+import { OrmWalletEntity } from "./orm-wallet-entity";
 
 
 @Entity('user')
@@ -25,11 +26,16 @@ export class OrmUserEntity implements IUser{
     @OneToMany( () => OrmOrderEntity, order => order.user)
     orders?: OrmOrderEntity[]
 
+    @OneToOne(() => OrmWalletEntity, wallet => wallet, {eager:true}) 
+    @JoinColumn()
+    wallet: OrmWalletEntity;
+
     static create ( 
         id:string,
         name:string,
         phone:string,
         userRole:UserRoles,
+        wallet:OrmWalletEntity,
         image?:string,
     ): OrmUserEntity
     {
@@ -38,6 +44,7 @@ export class OrmUserEntity implements IUser{
         user.name=name
         user.phone=phone
         user.type=userRole
+        user.wallet=wallet
         image ? user.image=image : user.image=null
         return user
     }
