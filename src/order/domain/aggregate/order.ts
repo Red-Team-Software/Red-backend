@@ -1,17 +1,21 @@
 import { AggregateRoot, DomainEvent, Entity } from "src/common/domain";
-import { OrderId } from "../value_objects/orderId";
-import { OrderState } from "../value_objects/orderState";
+import { OrderId } from "../value_objects/order-id";
+import { OrderState } from "../value_objects/order-state";
 import { OrderTotalAmount } from "../value_objects/order-totalAmount";
-import { OrderReciviedDate } from "../value_objects/order-recivied-date";
+import { OrderReceivedDate } from "../value_objects/order-received-date";
 import { OrderCreatedDate } from "../value_objects/order-created-date";
-import { OrderReportId } from "../value_objects/order-reportId";
-import { OrderPayment } from "../value_objects/order-payment";
 import { OrderRegistered } from "../domain-events/order-registered";
 import { OrderDirection } from "../value_objects/order-direction";
-import { MissingOrderAtributes } from "../exception/missing-order-attributes.exception";
+import { MissingOrderAtributes } from "../exception/missing-order-atributes.exception";
 import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
 import { OrderProduct } from "../entities/order-product/order-product-entity";
 import { EmptyProductBundleAtributes } from "../exception/product-bundle-empty.exception";
+import { OrderReport } from "../entities/report/report-entity";
+import { OrderStatusCanceled } from "../domain-events/order-state-canceled";
+import { OrderPayment } from "../entities/payment/order-payment-entity";
+import { OrderStatusDelivered } from "../domain-events/order-state-delivered";
+import { OrderCourier } from "../entities/order-courier/order-courier-entity";
+import { OrderUserId } from '../value_objects/order-user-id';
 
 export class Order extends AggregateRoot<OrderId>{
     
@@ -21,11 +25,20 @@ export class Order extends AggregateRoot<OrderId>{
             this.orderCreatedDate = event.orderCreateDate;
             this.totalAmount = event.totalAmount;
             this.orderDirection = event.orderDirection;
+            this.orderCourier = event.orderCourier;
             this.products = event.products;
             this.bundles = event.bundles;
-            this.orderReciviedDate = event.orderReciviedDate;
+            this.orderReceivedDate = event.orderReceivedDate;
             this.orderReport = event.orderReport;
             this.orderPayment = event.orderPayment;
+        }
+
+        if (event instanceof OrderStatusCanceled) {
+            this.orderState = event.orderState;
+        }
+
+        if (event instanceof OrderStatusDelivered) {
+            this.orderState = event.orderState;
         }
     }
     
@@ -34,7 +47,9 @@ export class Order extends AggregateRoot<OrderId>{
             !this.orderState ||
             !this.orderCreatedDate ||
             !this.totalAmount ||
-            !this.orderDirection 
+            !this.orderDirection ||
+            !this.orderCourier ||
+            !this.orderUserId
         ) {
             throw new MissingOrderAtributes('The order is invalid, information is missing');
         }
@@ -50,10 +65,12 @@ export class Order extends AggregateRoot<OrderId>{
         private orderCreatedDate: OrderCreatedDate,
         private totalAmount: OrderTotalAmount,
         private orderDirection: OrderDirection,
+        private orderCourier: OrderCourier,
+        private orderUserId: OrderUserId,
         private products?: OrderProduct[],
         private bundles?: OrderBundle[],
-        private orderReciviedDate?: OrderReciviedDate,
-        private orderReport?: OrderReportId,
+        private orderReceivedDate?: OrderReceivedDate,
+        private orderReport?: OrderReport,
         private orderPayment?: OrderPayment
     ) {
         super(id);
@@ -65,10 +82,12 @@ export class Order extends AggregateRoot<OrderId>{
         orderCreatedDate: OrderCreatedDate,
         totalAmount: OrderTotalAmount,
         orderDirection: OrderDirection,
+        orderCourier: OrderCourier,
+        orderUserId: OrderUserId,
         products?: OrderProduct[],
         bundles?: OrderBundle[],
-        orderReciviedDate?: OrderReciviedDate,
-        orderReport?: OrderReportId,
+        orderReceivedDate?: OrderReceivedDate,
+        orderReport?: OrderReport,
         orderPayment?: OrderPayment
     ): Order {
         let order = new Order(
@@ -77,9 +96,11 @@ export class Order extends AggregateRoot<OrderId>{
             orderCreatedDate,
             totalAmount,
             orderDirection,
+            orderCourier,
+            orderUserId,
             products,
             bundles,
-            orderReciviedDate,
+            orderReceivedDate,
             orderReport,
             orderPayment
         );
@@ -90,9 +111,11 @@ export class Order extends AggregateRoot<OrderId>{
                 orderCreatedDate,
                 totalAmount,
                 orderDirection,
+                orderCourier,
+                orderUserId,
                 products,
                 bundles,
-                orderReciviedDate,
+                orderReceivedDate,
                 orderReport,
                 orderPayment
             )
@@ -100,17 +123,18 @@ export class Order extends AggregateRoot<OrderId>{
         return order;
     }
     
-    
     static initializeAggregate(
         id: OrderId,
         orderState: OrderState,
         orderCreateDate: OrderCreatedDate,
         totalAmount: OrderTotalAmount,
         orderDirection: OrderDirection,
+        orderCourier: OrderCourier,
+        orderUserId: OrderUserId,
         products?: OrderProduct[],
         bundles?: OrderBundle[],
-        orderReciviedDate?: OrderReciviedDate,
-        orderReport?: OrderReportId,
+        orderReceivedDate?: OrderReceivedDate,
+        orderReport?: OrderReport,
         orderPayment?: OrderPayment
 
     ): Order {
@@ -120,14 +144,40 @@ export class Order extends AggregateRoot<OrderId>{
             orderCreateDate,
             totalAmount,
             orderDirection,
+            orderCourier,
+            orderUserId,
             products,
             bundles,
-            orderReciviedDate,
+            orderReceivedDate,
             orderReport,
             orderPayment
         );
         order.validateState();
         return order;
+    }
+
+    cancelOrder(orderState: OrderState): void {
+        this.apply(
+            OrderStatusCanceled.create(
+                this.getId(),
+                orderState,
+                this.orderUserId
+            )
+        );
+    }
+
+    updateOrderStatus(orderState: OrderState): void {
+        this.apply(
+            OrderStatusDelivered.create(
+                this.getId(),
+                orderState,
+                this.orderUserId
+            )
+        );
+    }
+
+    addOrderReport(orderReport: OrderReport): void {
+        this.orderReport = orderReport;
     }
 
     get OrderState(): OrderState {
@@ -142,8 +192,8 @@ export class Order extends AggregateRoot<OrderId>{
         return this.totalAmount;
     }
 
-    get OrderReciviedDate(): OrderReciviedDate {
-        return this.orderReciviedDate;
+    get OrderReceivedDate(): OrderReceivedDate {
+        return this.orderReceivedDate;
     }
 
     get Products(): OrderProduct[] {
@@ -154,7 +204,7 @@ export class Order extends AggregateRoot<OrderId>{
         return this.bundles;
     }
 
-    get OrderReport(): OrderReportId {
+    get OrderReport(): OrderReport {
         return this.orderReport;
     }
 
@@ -164,6 +214,14 @@ export class Order extends AggregateRoot<OrderId>{
 
     get OrderDirection(): OrderDirection {
         return this.orderDirection;
+    }
+
+    get OrderCourier(): OrderCourier {
+        return this.orderCourier;
+    }
+
+    get OrderUserId(): OrderUserId {
+        return this.orderUserId;
     }
 
 }

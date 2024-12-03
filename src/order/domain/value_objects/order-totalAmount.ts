@@ -10,11 +10,11 @@ export class OrderTotalAmount extends ValueObject<OrderTotalAmount> {
     private constructor(amount: number, currency: string) {
         super();
  
-        if(amount<0) { throw new NegativeOrderTotalAmountException('The amount cannot be negative')}
+        if(amount<0) { throw new NegativeOrderTotalAmountException()}
         if(OrderCurrencyEnum.bsf != currency &&
             OrderCurrencyEnum.usd != currency &&
             OrderCurrencyEnum.eur != currency 
-        ) { throw new InvalidCurrencyOrderTotalAmountException('The currency is not in the list of valid currencies')}
+        ) { throw new InvalidCurrencyOrderTotalAmountException()}
 
 
         this.currency = currency;

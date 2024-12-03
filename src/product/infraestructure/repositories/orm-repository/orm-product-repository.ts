@@ -1,6 +1,6 @@
 import { DataSource, Repository } from "typeorm";
 import { OrmProductEntity } from "../../entities/orm-entities/orm-product-entity";
-import { IProductRepository } from "src/product/domain/repository/product.interface.repositry";
+import { IProductRepository } from "src/product/domain/repository/product.repositry.interface";
 import { Result } from "src/common/utils/result-handler/result";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { ProductID } from "src/product/domain/value-object/product-id";
