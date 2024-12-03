@@ -152,7 +152,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let orderCourier = OrderCourier.create(
                 OrderCourierId.create(selectedCourierId.courierId),
-                OrderCourierDirection.create(orderDirection.Latitude, orderDirection.Longitude)
+                OrderCourierDirection.create(10.4944, -66.8901)
             );
 
             let orderUserId: OrderUserId = OrderUserId.create(data.userId);
