@@ -12,6 +12,7 @@ import { AuthController } from './auth/infraestructure/controller/auth.controlle
 import { UserController } from './user/infraestructure/controller/user.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { PaymentMethodController } from './payment-methods/infraestructure/controller/payment-method.controller';
+import { CuponController } from './cupon/infraestructure/controller/cupon.controller';
 
 @Module({
   imports: [
@@ -33,7 +34,8 @@ import { PaymentMethodController } from './payment-methods/infraestructure/contr
     AuthController,
     UserController,
     CourierController,
-    PaymentMethodController
+    PaymentMethodController,
+    CuponController
   ],
   providers:[CloudinaryProvider]
 })
