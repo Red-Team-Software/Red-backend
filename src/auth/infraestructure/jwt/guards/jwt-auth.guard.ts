@@ -8,7 +8,7 @@ import { OrmTokenCommandRepository } from "../../repositories/orm-repository/orm
 import { JwtPayloadInfraestructureDTO } from "../decorator/dto/jwt-payload-infraestructure-dto"
 import { envs } from "src/config/envs/envs"
 import { OrmTokenQueryRepository } from "../../repositories/orm-repository/orm-token-query-session-repository"
-import { IQueryTokenSessionRepository } from "src/auth/application/repository/Query-token-session-repository.interface"
+import { IQueryTokenSessionRepository } from "src/auth/application/repository/query-token-session-repository.interface"
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface"
 import { UserId } from "src/user/domain/value-object/user-id"
 import { IQueryAccountRepository } from "src/auth/application/repository/query-account-repository.interface"

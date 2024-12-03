@@ -1,5 +1,5 @@
 import { ISession } from "src/auth/application/model/session.interface"
-import { IQueryTokenSessionRepository } from "src/auth/application/repository/Query-token-session-repository.interface"
+import { IQueryTokenSessionRepository } from "src/auth/application/repository/query-token-session-repository.interface"
 import { NotFoundException, PersistenceException } from "src/common/infraestructure/infraestructure-exception"
 import { Result } from "src/common/utils/result-handler/result"
 import { Repository, DataSource } from "typeorm"
