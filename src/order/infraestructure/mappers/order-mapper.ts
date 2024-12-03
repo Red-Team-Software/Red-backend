@@ -157,7 +157,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
                 OrmOrderProductEntity.create(
                     domainEntity.getId().orderId,
                     response.getValue.getId().Value,
-                    domainEntity.Products[0].Quantity.Quantity
+                    product.Quantity.Quantity
                 )
             )
         }
@@ -174,7 +174,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
                 OrmOrderBundleEntity.create(
                     domainEntity.getId().orderId,
                     response.getValue.getId().Value,
-                    domainEntity.Bundles[0].Quantity.OrderBundleQuantity
+                    bundle.Quantity.OrderBundleQuantity
                 )
             )
         }
