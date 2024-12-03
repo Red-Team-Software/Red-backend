@@ -22,6 +22,9 @@ import { UserRole } from "src/user/domain/value-object/user-role";
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { UserAlreadyExistPhoneNumberApplicationException } from "../../application-exeption/user-already-exist-phone-number-application-exception";
+import { Wallet } from "src/user/domain/entities/wallet/wallet.entity";
+import { WalletId } from "src/user/domain/entities/wallet/value-objects/wallet-id";
+import { Ballance } from "src/user/domain/entities/wallet/value-objects/balance";
 
 
 export class RegisterUserApplicationService extends IApplicationService 
@@ -71,7 +74,11 @@ export class RegisterUserApplicationService extends IApplicationService
             UserName.create(data.name),
             UserPhone.create(data.phone),
             UserRole.create(UserRoles.CLIENT),
-            []
+            [],
+            Wallet.create(
+                WalletId.create(await this.idGen.genId()),
+                Ballance.create(0,'usd')
+            )
         )
 
 
@@ -92,6 +99,7 @@ export class RegisterUserApplicationService extends IApplicationService
 
         let commandResult=await this.commandAccountRepository.createAccount(account)
 
+        console.log(commandResult)
         
         if (!commandResult.isSuccess())
             return Result.fail(new ErrorRegisteringAccountApplicationException())

@@ -27,8 +27,6 @@ export class DeleteUserDirectionApplicationService extends IApplicationService
     async execute(data: DeleteUserDirectionsApplicationRequestDTO): Promise<Result<AddUserDirectionApplicationResponseDTO>> {
         let userRepoResponse = await this.queryUserRepository.findUserById(UserId.create(data.userId))
 
-        console.log(userRepoResponse)
-
         if (!userRepoResponse.isSuccess())
             return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
 

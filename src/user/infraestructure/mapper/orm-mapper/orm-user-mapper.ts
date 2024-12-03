@@ -1,6 +1,5 @@
 import { OrmDirectionEntity } from './../../entities/orm-entities/orm-direction-entity';
 import { IMapper } from "src/common/application/mappers/mapper.interface"
-import { ProductID } from "src/product/domain/value-object/product-id"
 import { User } from "src/user/domain/aggregate/user.aggregate"
 import { UserId } from "src/user/domain/value-object/user-id"
 import { UserImage } from "src/user/domain/value-object/user-image"
@@ -13,6 +12,10 @@ import { UserDirection } from "src/user/domain/value-object/user-direction"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { OrmDirectionUserEntity } from "../../entities/orm-entities/orm-direction-user-entity"
 import { IQueryUserRepository } from 'src/user/application/repository/user.query.repository.interface';
+import { Wallet } from 'src/user/domain/entities/wallet/wallet.entity';
+import { WalletId } from 'src/user/domain/entities/wallet/value-objects/wallet-id';
+import { Ballance } from 'src/user/domain/entities/wallet/value-objects/balance';
+import { OrmWalletEntity } from '../../entities/orm-entities/orm-wallet-entity';
 
 
 export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
@@ -27,6 +30,12 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
         let ormDirectionEntities:OrmDirectionEntity[]=[]
         let ormDirectionUserEntities:OrmDirectionUserEntity[]=[]
 
+        let ormWallet=OrmWalletEntity.create(
+            domainEntity.Wallet.getId().Value,
+            domainEntity.Wallet.Ballance.Currency,
+            domainEntity.Wallet.Ballance.Amount
+        )
+
         let directionsResponse=await this.userQueryRepository.findDirectionsByLatAndLng(domainEntity.UserDirections)
 
         if (!directionsResponse.isSuccess())
@@ -39,6 +48,7 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
             domainEntity.UserName.Value,
             domainEntity.UserPhone.Value,
             domainEntity.UserRole.Value as UserRoles,
+            ormWallet,
             domainEntity.UserImage ? domainEntity.UserImage.Value : undefined,
         )
 
@@ -50,9 +60,6 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
 
             let id = directionFound ? directionFound.id : await this.IdGen.genId()
             
-            console.log('id:',id)
-            console.log('id:',directionFound)
-
             let ormDirection=OrmDirectionEntity.create(id,direction.Lat,direction.Lng)
             ormDirectionEntities.push(ormDirection)
 
@@ -85,6 +92,10 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
             ? direction.getValue.map(ormdirection=>
                 UserDirection.create(ormdirection.name, ormdirection.favorite,ormdirection.lat,ormdirection.lng))
             : [],
+            Wallet.create(
+                WalletId.create(infraEstructure.wallet.id),
+                Ballance.create(infraEstructure.wallet.price,infraEstructure.wallet.currency)
+            ),
             infraEstructure.image ? UserImage.create(infraEstructure.image) : undefined
         )
         return user

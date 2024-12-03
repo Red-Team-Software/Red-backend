@@ -26,7 +26,7 @@ export class StripePayOrderMethod implements IPaymentMethodService {
         try {
             const paymentIntent =
                 await this.stripe.stripeInstance.paymentIntents.create({
-                    amount: order.TotalAmount.OrderAmount*100,
+                    amount: Math.round(order.TotalAmount.OrderAmount*100),
                     currency: order.TotalAmount.OrderCurrency,
                     payment_method_types: ['card'],
                     confirmation_method: 'manual',

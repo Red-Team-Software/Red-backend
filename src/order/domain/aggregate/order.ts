@@ -6,7 +6,7 @@ import { OrderReceivedDate } from "../value_objects/order-received-date";
 import { OrderCreatedDate } from "../value_objects/order-created-date";
 import { OrderRegistered } from "../domain-events/order-registered";
 import { OrderDirection } from "../value_objects/order-direction";
-import { MissingOrderAtributes } from "../exception/missing-order-attributes.exception";
+import { MissingOrderAtributes } from "../exception/missing-order-atributes.exception";
 import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
 import { OrderProduct } from "../entities/order-product/order-product-entity";
 import { EmptyProductBundleAtributes } from "../exception/product-bundle-empty.exception";
@@ -160,7 +160,8 @@ export class Order extends AggregateRoot<OrderId>{
         this.apply(
             OrderStatusCanceled.create(
                 this.getId(),
-                orderState
+                orderState,
+                this.orderUserId
             )
         );
     }
@@ -169,7 +170,8 @@ export class Order extends AggregateRoot<OrderId>{
         this.apply(
             OrderStatusDelivered.create(
                 this.getId(),
-                orderState
+                orderState,
+                this.orderUserId
             )
         );
     }

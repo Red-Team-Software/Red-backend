@@ -8,6 +8,7 @@ export interface ICreateOrder {
     bundles:           Bundle[];
     orderReciviedDate: Date;
     orderPayment:      OrderPayment;
+    orderUserId:       string
 }
 
 export interface Bundle {

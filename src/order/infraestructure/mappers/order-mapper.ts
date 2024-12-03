@@ -42,6 +42,7 @@ import { IQueryUserRepository } from "src/user/application/repository/user.query
 import { UserId } from "src/user/domain/value-object/user-id";
 import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-user-entity";
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
+import { OrmWalletEntity } from "src/user/infraestructure/entities/orm-entities/orm-wallet-entity";
 
 
 export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
@@ -156,7 +157,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
                 OrmOrderProductEntity.create(
                     domainEntity.getId().orderId,
                     response.getValue.getId().Value,
-                    domainEntity.Products[0].Quantity.Quantity
+                    product.Quantity.Quantity
                 )
             )
         }
@@ -173,7 +174,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
                 OrmOrderBundleEntity.create(
                     domainEntity.getId().orderId,
                     response.getValue.getId().Value,
-                    domainEntity.Bundles[0].Quantity.OrderBundleQuantity
+                    bundle.Quantity.OrderBundleQuantity
                 )
             )
         }
@@ -203,6 +204,11 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             userDomain.getValue.UserName.Value,
             userDomain.getValue.UserPhone.Value,
             userDomain.getValue.UserRole.Value as UserRoles,
+            OrmWalletEntity.create(
+                userDomain.getValue.Wallet.getId().Value,
+                userDomain.getValue.Wallet.Ballance.Currency,
+                userDomain.getValue.Wallet.Ballance.Amount,   
+            ),
             userDomain.getValue.UserImage ? userDomain.getValue.UserImage.Value : null 
         )
 
