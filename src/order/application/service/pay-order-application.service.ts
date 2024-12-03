@@ -48,6 +48,7 @@ import { OrderCourierDirection } from 'src/order/domain/entities/order-courier/v
 import { OrderUserId } from 'src/order/domain/value_objects/order-user-id';
 import { IDateHandler } from 'src/common/application/date-handler/date-handler.interface';
 import { date } from 'joi';
+import { ErrorCreatingOrderCourierNotFoundApplicationException } from '../application-exception/error-creating-order-courier-not-found-application.exception';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -148,6 +149,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             let orderReport: OrderReport = null;
 
             let courier = await this.ormCourierQueryRepository.findAllCouriers();
+
+            if (courier.isFailure()) return Result.fail(new ErrorCreatingOrderCourierNotFoundApplicationException());
 
             let selectedCourierId = courier.getValue[Math.floor(Math.random() * courier.getValue.length)].getId();
 
