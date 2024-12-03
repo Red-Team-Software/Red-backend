@@ -41,8 +41,9 @@ import { OrmTokenCommandRepository } from "src/auth/infraestructure/repositories
 import { IDeliveredOrder } from "../interfaces/delivered-order.interface";
 import { OrderDeliveredPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/order-delivered-push-notification-application-request-dto";
 import { OrderDeliveredPushNotificationApplicationService } from "src/notification/application/services/command/order-delivered-push-notification-application.service";
-import { ApiBearerAuth } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+@ApiTags('Notification')
 @Controller('notification')
 export class NotificationController {
 

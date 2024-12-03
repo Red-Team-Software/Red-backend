@@ -32,8 +32,8 @@ import { CuponController } from './cupon/infraestructure/controller/cupon.contro
     OrderController,
     AuthController,
     UserController,
-    CourierController
-    CuponController
+    CourierController,
+    CuponController,
   ],
   providers:[CloudinaryProvider]
 })

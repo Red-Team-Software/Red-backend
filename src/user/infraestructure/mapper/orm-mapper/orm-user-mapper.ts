@@ -50,9 +50,6 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
 
             let id = directionFound ? directionFound.id : await this.IdGen.genId()
             
-            console.log('id:',id)
-            console.log('id:',directionFound)
-
             let ormDirection=OrmDirectionEntity.create(id,direction.Lat,direction.Lng)
             ormDirectionEntities.push(ormDirection)
 

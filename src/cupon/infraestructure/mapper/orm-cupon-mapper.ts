@@ -31,7 +31,7 @@ export class OrmCuponMapper implements IMapper<Cupon, OrmCuponEntity> {
             CuponId.create(infraEntity.id),
             CuponName.create(infraEntity.name),
             CuponCode.create(infraEntity.code),
-            CuponDiscount.create(infraEntity.discount),
+            CuponDiscount.create(Number(infraEntity.discount)),
             CuponState.create(infraEntity.state)
         );
 

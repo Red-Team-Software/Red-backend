@@ -54,11 +54,10 @@ export class CreateCuponApplicationService extends IApplicationService<
 
     // Guardar el cupón en el repositorio
     let result = await this.cuponRepository.createCupon(cupon);
-    console.log(result)
-    if (!result.isSuccess()) {
-      console.log("aqui")
+
+    if (!result.isSuccess()) 
       return Result.fail(new ErrorCreatingCuponApplicationException());
-    }
+    
     await this.eventPublisher.publish(cupon.pullDomainEvents())
     // Preparar la respuesta
     let response: CreateCuponApplicationResponseDTO = {
