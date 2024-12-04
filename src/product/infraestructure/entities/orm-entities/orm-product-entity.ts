@@ -1,7 +1,8 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, ManyToMany, OneToMany, PrimaryColumn } from "typeorm";
 import { IProduct } from "../../model-entity/orm-model-entity/product-interface";
 import { OrmProductImage } from "./orm-product-image";
 import { OrmOrderProductEntity } from "src/order/infraestructure/entities/orm-order-product-entity";
+import { OrmPromotionEntity } from "src/promotion/infraestructure/entities/orm-entities/orm-promotion-entity";
 
 @Entity('product')
 export class OrmProductEntity implements IProduct{
@@ -19,6 +20,9 @@ export class OrmProductEntity implements IProduct{
 
     @OneToMany(() => OrmOrderProductEntity, (orderProduct) => orderProduct.product)
     order_products?: OrmOrderProductEntity[]
+
+    @ManyToMany(()=>OrmPromotionEntity, promotion=>promotion.products)
+    promotions?: OrmPromotionEntity[]
 
     static create ( 
         id:string,

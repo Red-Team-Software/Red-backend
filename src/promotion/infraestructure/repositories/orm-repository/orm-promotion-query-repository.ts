@@ -48,8 +48,51 @@ export class OrmPromotionQueryRepository extends Repository<OrmPromotionEntity> 
             return Result.fail( new NotFoundException('error finding promotion please try again'))
         }
     }
-    findPromotionById(id: PromotionId): Promise<Result<IPromotion>> {
-        throw new Error("Method not implemented.");
+    async findPromotionById(id: PromotionId): Promise<Result<Promotion>> {
+        try{
+            const ormPromotion=await this.findOneBy({id:id.Value})
+            
+            if(!ormPromotion)
+                return Result.fail( new NotFoundException('Find promotion unsucssessfully'))
+
+            const activity=await this.mapper.fromPersistencetoDomain(ormPromotion)
+            
+            return Result.success(activity)
+        }catch(e){
+            return Result.fail( new NotFoundException('Find promotion unsucssessfully'))
+        }    
+    }
+
+    async findPromotionWithMoreDetailsById(id: PromotionId): Promise<Result<IPromotion>> {
+        try{
+            const ormPromotion=await this.findOneBy({id:id.Value})
+            
+            if(!ormPromotion)
+                return Result.fail( new NotFoundException('Find promotion unsucssessfully'))
+            
+            return Result.success({
+                id:ormPromotion.id,
+                description:ormPromotion.description,
+                name:ormPromotion.name,
+                avaleableState:ormPromotion.avaleableState,
+                discount:Number(ormPromotion.discount),
+                products:ormPromotion.products
+                ? ormPromotion.products.map(product=>({
+                    id:product.id,
+                    name:product.name
+                }))
+                : [],
+                bundles:ormPromotion.bundles
+                ? ormPromotion.bundles.map(bundle=>({
+                    id:bundle.id,
+                    name:bundle.name
+                }))
+                : [],
+                categories:[]
+            })
+        }catch(e){
+            return Result.fail( new NotFoundException('Find promotion unsucssessfully'))
+        }  
     }
     async verifyPromotionExistenceByName(promotionName: PromotionName): Promise<Result<boolean>> {
         try{
