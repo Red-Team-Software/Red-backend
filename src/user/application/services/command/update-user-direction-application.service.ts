@@ -26,7 +26,6 @@ export class UpdateUserDirectionApplicationService extends IApplicationService
     async execute(data: UpdateUserDirectionsApplicationRequestDTO): Promise<Result<UpdateUserDirectionsApplicationResponseDTO>> {
         let userRepoResponse = await this.queryUserRepository.findUserById(UserId.create(data.userId))
 
-
         if (!userRepoResponse.isSuccess())
             return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
 
@@ -39,12 +38,35 @@ export class UpdateUserDirectionApplicationService extends IApplicationService
 
         let user=userRepoResponse.getValue
 
+        let currentDirections=user.UserDirections
+
         user.updateDirection(userDirections)
 
+        let modifiedDirections=user.UserDirections
+
+        let directionsToDelete=currentDirections.filter(
+            (direction)=>!modifiedDirections.find(
+                (current)=>direction.equals(current)
+            )
+        )
+
         let userResponse= await this.commandUserRepository.updateUser(user)
-        
+
         if (!userResponse.isSuccess())
             return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
+
+        if (directionsToDelete.length!==0){
+            for (const directionToDelete of directionsToDelete){
+
+                let deleteResponse=await this.commandUserRepository.deleteUserDirection(
+                    user.getId().Value,
+                    directionToDelete.Lat,
+                    directionToDelete.Lng
+                )
+                if (!deleteResponse.isSuccess())
+                    return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
+            }
+        }
 
         this.eventPublisher.publish(user.pullDomainEvents())
 

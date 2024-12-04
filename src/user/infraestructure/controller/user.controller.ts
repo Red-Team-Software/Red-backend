@@ -43,6 +43,10 @@ import { DeleteUserDirectionApplicationService } from "src/user/application/serv
 import { UpdateUserDirectionInfraestructureResponseDTO } from "../dto/response/update-user-direction-infreaestructure-response-dto"
 import { UpdateUserDirectionsInfraestructureRequestDTO } from "../dto/request/update-user-direction-infreaestructure-request-dto"
 import { UpdateUserDirectionApplicationService } from "src/user/application/services/command/update-user-direction-application.service"
+import { AuditDecorator } from "src/common/application/aspects/audit-decorator/audit-decorator"
+import { DateHandler } from "src/common/infraestructure/date-handler/date-handler"
+import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator"
+import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -97,16 +101,21 @@ export class UserController {
       if(entry.image)
         image=(await this.imageTransformer.base64ToFile(entry.image)).buffer
 
-      let service= new ExceptionDecorator(
-          new UpdateProfileApplicationService(
-            this.ormUserCommandRepo,
-            this.ormUserQueryRepo,
-            this.ormAccountCommandRepo,
-            this.ormAccountQueryRepo,
-            new RabbitMQPublisher(this.channel),
-            new CloudinaryService(),
-            this.idGen,
-            this.encryptor
+      let service= 
+      new ExceptionDecorator(
+        new AuditDecorator(
+          new LoggerDecorator(
+              new UpdateProfileApplicationService(
+                this.ormUserCommandRepo,
+                this.ormUserQueryRepo,
+                this.ormAccountCommandRepo,
+                this.ormAccountQueryRepo,
+                new RabbitMQPublisher(this.channel),
+                new CloudinaryService(),
+                this.idGen,
+                this.encryptor
+            ), new NestLogger(new Logger())
+          ),this.auditRepository, new DateHandler()
         )
     )
     let response= await service.execute({
@@ -140,10 +149,16 @@ export class UserController {
     @Body() entry:AddUserDirectionsInfraestructureRequestDTO){
 
     let service= new ExceptionDecorator(
-      new AddUserDirectionApplicationService (
-        this.ormUserCommandRepo,
-        this.ormUserQueryRepo,
-        new RabbitMQPublisher(this.channel)
+      new AuditDecorator(
+        new LoggerDecorator(
+          new PerformanceDecorator(
+            new AddUserDirectionApplicationService (
+              this.ormUserCommandRepo,
+              this.ormUserQueryRepo,
+              new RabbitMQPublisher(this.channel)
+            ), new NestTimer(), new NestLogger(new Logger())
+          ), new NestLogger(new Logger())
+        ),this.auditRepository, new DateHandler()
       )
   )
   let response = await service.execute({userId:credential.account.idUser,...entry})
@@ -161,10 +176,16 @@ export class UserController {
     @Body() entry:DeleteUserDirectionsInfraestructureRequestDTO){
 
     let service= new ExceptionDecorator(
-      new DeleteUserDirectionApplicationService (
-        this.ormUserCommandRepo,
-        this.ormUserQueryRepo,
-        new RabbitMQPublisher(this.channel)
+      new AuditDecorator(  
+        new LoggerDecorator(
+          new PerformanceDecorator(
+            new DeleteUserDirectionApplicationService (
+              this.ormUserCommandRepo,
+              this.ormUserQueryRepo,
+              new RabbitMQPublisher(this.channel)
+            ), new NestTimer(), new NestLogger(new Logger())
+          ),new NestLogger(new Logger())
+        ),this.auditRepository, new DateHandler()
       )
   )
   let response = await service.execute({userId:credential.account.idUser,...entry})
@@ -182,10 +203,16 @@ export class UserController {
     @Body() entry:UpdateUserDirectionsInfraestructureRequestDTO){
 
     let service= new ExceptionDecorator(
-      new UpdateUserDirectionApplicationService (
-        this.ormUserCommandRepo,
-        this.ormUserQueryRepo,
-        new RabbitMQPublisher(this.channel)
+      new AuditDecorator(
+        new LoggerDecorator(
+          new PerformanceDecorator(
+              new UpdateUserDirectionApplicationService (
+                this.ormUserCommandRepo,
+                this.ormUserQueryRepo,
+                new RabbitMQPublisher(this.channel)
+              ), new NestTimer(), new NestLogger(new Logger())
+            ), new NestLogger(new Logger())
+        ),this.auditRepository, new DateHandler()
       )
   )
   let response = await service.execute({userId:credential.account.idUser,...entry})

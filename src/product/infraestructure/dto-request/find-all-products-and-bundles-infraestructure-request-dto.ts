@@ -1,20 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { Transform, Type } from "class-transformer"
-import { IsOptional, IsPositive, IsString } from "class-validator";
+import { IsString } from "class-validator";
+import { PaginationDto } from "src/common/infraestructure/dto/entry/pagination.dto";
 
-export class FindAllProductsAndBundlesInfraestructureRequestDTO{
-  @ApiProperty( { required: false, default: 1, minimum: 1 })
-  @IsOptional()
-  @IsPositive()
-  @Transform(({ value }) => { return Number(value); })  
-  page?: number
-
-  @ApiProperty( { required: false, default: 10, minimum: 1 })
-  @IsOptional()
-  @IsPositive()
-  @Transform(({ value }) => { return Number(value); })  
-  perPage?: number
-
+export class FindAllProductsAndBundlesInfraestructureRequestDTO extends PaginationDto{
   @ApiProperty( { required: true })
   @IsString()
   term:string

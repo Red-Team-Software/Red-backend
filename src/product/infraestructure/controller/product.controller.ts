@@ -1,5 +1,4 @@
 import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
-import { IProductRepository } from 'src/product/domain/repository/product.repositry.interface';
 import { OrmProductRepository } from '../repositories/orm-repository/orm-product-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateProductInfraestructureRequestDTO } from '../dto-request/create-product-infraestructure-request-dto';
@@ -29,6 +28,13 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/infraestructure/jwt/guards/jwt-auth.guard';
 import { ICredential } from 'src/auth/application/model/credential.interface';
 import { GetCredential } from 'src/auth/infraestructure/jwt/decorator/get-credential.decorator';
+import { PerformanceDecorator } from 'src/common/application/aspects/performance-decorator/performance-decorator';
+import { AuditDecorator } from 'src/common/application/aspects/audit-decorator/audit-decorator';
+import { IAuditRepository } from 'src/common/application/repositories/audit.repository';
+import { OrmAuditRepository } from 'src/common/infraestructure/repository/orm-repository/orm-audit.repository';
+import { DateHandler } from 'src/common/infraestructure/date-handler/date-handler';
+import { NestTimer } from 'src/common/infraestructure/timer/nets-timer';
+import { ICommandProductRepository } from 'src/product/domain/repository/product.command.repositry.interface';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -36,18 +42,20 @@ import { GetCredential } from 'src/auth/infraestructure/jwt/decorator/get-creden
 @Controller('product')
 export class ProductController {
 
-  private readonly ormProductRepo:IProductRepository
   private readonly idGen: IIdGen<string> 
-  private readonly ormProductQueryRepo:IQueryProductRepository
+  private readonly ormCommandProductRepo:ICommandProductRepository
+  private readonly ormQueryProductRepo:IQueryProductRepository
   private readonly ormBundleQueryRepo:IQueryBundleRepository
+  private readonly auditRepository: IAuditRepository
   
   constructor(
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
   ) {
     this.idGen= new UuidGen()
-    this.ormProductRepo= new OrmProductRepository(PgDatabaseSingleton.getInstance())
-    this.ormProductQueryRepo= new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
+    this.ormCommandProductRepo= new OrmProductRepository(PgDatabaseSingleton.getInstance())
+    this.ormQueryProductRepo= new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormBundleQueryRepo= new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
+    this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
   }
 
   @UseGuards(JwtAuthGuard)
@@ -66,13 +74,18 @@ export class ProductController {
   ) images: Express.Multer.File[]) {
 
     let service= new ExceptionDecorator(
+      new AuditDecorator(
+        new PerformanceDecorator(
           new CreateProductApplicationService(
             new RabbitMQPublisher(this.channel),
-            this.ormProductRepo,
+            this.ormCommandProductRepo,
+            this.ormQueryProductRepo,
             this.idGen,
             new CloudinaryService()
-          ),
+          ),new NestTimer(),new NestLogger(new Logger())
+        ),this.auditRepository,new DateHandler()
       )
+    )
       let buffers=images.map(image=>image.buffer)
     let response= await service.execute({userId:credential.account.idUser,...entry,images:buffers})
     return response.getValue
@@ -93,10 +106,11 @@ export class ProductController {
 
     let service= new ExceptionDecorator(
         new LoggerDecorator(
-          new FindAllProductsApplicationService(
-            this.ormProductQueryRepo
-          ),
-          new NestLogger(new Logger())
+          new PerformanceDecorator(
+            new FindAllProductsApplicationService(
+              this.ormQueryProductRepo
+            ),new NestTimer(),new NestLogger(new Logger())
+          ),new NestLogger(new Logger())
         )
       )
     let response= await service.execute({...pagination})
@@ -114,17 +128,23 @@ export class ProductController {
     if(!entry.perPage)
       entry.perPage=10
 
-    const pagination:FindAllProductsbyNameApplicationRequestDTO={userId:credential.account.idUser,page:entry.page, perPage:entry.perPage,name:entry.term}
+    const pagination:FindAllProductsbyNameApplicationRequestDTO={
+      userId:credential.account.idUser,
+      page:entry.page, 
+      perPage:entry.perPage,
+      name:entry.term
+    }
 
     let service= new ExceptionDecorator(
-        new LoggerDecorator(
+      new LoggerDecorator(
+        new PerformanceDecorator(
           new FindAllProductsAndComboApplicationService(
-            this.ormProductQueryRepo,
+            this.ormQueryProductRepo,
             this.ormBundleQueryRepo
-          ),
-          new NestLogger(new Logger())
-        )
+          ),new NestTimer(),new NestLogger(new Logger())
+        ),new NestLogger(new Logger())
       )
+    )
     let response= await service.execute({...pagination})
     return response.getValue
   }
@@ -135,14 +155,17 @@ export class ProductController {
     @GetCredential() credential:ICredential,
     @Query() entry:FindProductByIdInfraestructureRequestDTO
   ){
+
     let service= new ExceptionDecorator(
-        new LoggerDecorator(
+      new LoggerDecorator(
+        new PerformanceDecorator(
           new FindProductByIdApplicationService(
-            this.ormProductRepo
-          ),
-          new NestLogger(new Logger())
-        )
+            this.ormQueryProductRepo
+          ),new NestTimer(),new NestLogger(new Logger())
+        ),new NestLogger(new Logger())
       )
+    )
+    
     let response= await service.execute({userId:credential.account.idUser,...entry})
     return response.getValue
   }
