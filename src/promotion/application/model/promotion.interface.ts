@@ -1,0 +1,19 @@
+interface IPromotion {
+    promotionId:string,
+    promotionDescription:string,
+    promotionName:string,
+    promotionAvaleableState:boolean,
+    promotionDiscount:number,
+    products:{
+        id:string,
+        name:string
+    }[],
+    bundles:{
+        id:string,
+        name:string
+    }[],
+    categories:{
+        id:string,
+        name:string
+    }[],
+}

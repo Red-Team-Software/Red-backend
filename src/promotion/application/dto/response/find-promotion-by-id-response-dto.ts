@@ -1,0 +1,19 @@
+export interface FindPromotionbyIdApplicationResponseDTO {
+    id:string
+    description:string
+    name:string
+    avaleableState:boolean
+    discount:number
+    products:{
+        id:string,
+        name:string
+    }[]
+    bundles:{
+        id:string,
+        name:string
+    }[]
+    categories:{
+        id:string,
+        name:string
+    }[]
+}
