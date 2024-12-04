@@ -61,6 +61,12 @@ import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { OrmUserQueryRepository } from "src/user/infraestructure/repositories/orm-repository/orm-user-query-repository";
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler";
+import { ModifyCourierLocationApplicationService } from "src/order/application/service/modify-courier-location-application.service";
+import { ModifyCourierLocationEntryDto } from "../dto/modify-order-courier-location-entry.dto";
+import { ModifyCourierLocationRequestDto } from "src/order/application/dto/request/modify-courier-location-request.dto";
+import { FindOrderByIdEntryDto } from "../dto/find-order-by-id-entry.dto";
+import { FindOrderByIdRequestDto } from "src/order/application/dto/request/find-order-by-id-request-dto";
+import { FindOrderByIdApplicationService } from "src/order/application/service/find-order-by-id-application.service";
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
 import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository";
 import { OrmBundleQueryRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository";
@@ -313,6 +319,64 @@ export class OrderController {
         }
         
         let response = await this.createReport.execute(request);
+        
+        return response.getValue;
+    }
+
+    @Post('/courier/location')
+    async modifingCourierLocation(
+        @GetCredential() credential:ICredential,
+        @Body() data: ModifyCourierLocationEntryDto
+    ) {
+        let request: ModifyCourierLocationRequestDto = {
+            userId: credential.account.idUser,
+            orderId: data.orderId,
+            lat: data.lat,
+            long: data.long
+        }
+
+        let modifyCourierLocation = new ExceptionDecorator(
+            new LoggerDecorator(
+                new ModifyCourierLocationApplicationService(
+                    this.orderQueryRepository,
+                    this.orderRepository,
+                    this.rabbitMq,
+                    this.geocodificationAddress,
+                ),
+                new NestLogger(new Logger())
+            )
+        );
+        
+        let response = await modifyCourierLocation.execute(request);
+        
+        return response.getValue;
+    }
+
+    FindOrderByIdEntryDto
+
+    @Get('/one/:id')
+    async findOrderById(
+        @GetCredential() credential:ICredential,
+        @Query() data: FindOrderByIdEntryDto
+    ) {
+        let values: FindOrderByIdRequestDto = {
+            userId: credential.account.idUser,
+            ...data
+        }
+        
+        let findById = new ExceptionDecorator(
+            new LoggerDecorator(
+                new FindOrderByIdApplicationService(
+                    this.orderQueryRepository,
+                    this.ormProductRepository,
+                    this.ormBundleRepository,
+                    this.ormCourierQueryRepository
+                ),
+                new NestLogger(new Logger())
+            )
+        );
+
+        let response = await findById.execute(values);
         
         return response.getValue;
     }

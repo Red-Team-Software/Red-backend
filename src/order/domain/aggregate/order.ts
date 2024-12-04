@@ -16,6 +16,7 @@ import { OrderPayment } from "../entities/payment/order-payment-entity";
 import { OrderStatusDelivered } from "../domain-events/order-state-delivered";
 import { OrderCourier } from "../entities/order-courier/order-courier-entity";
 import { OrderUserId } from '../value_objects/order-user-id';
+import { OrderCourierLocationModified } from "../domain-events/order-courier-location-modified";
 
 export class Order extends AggregateRoot<OrderId>{
     
@@ -39,6 +40,10 @@ export class Order extends AggregateRoot<OrderId>{
 
         if (event instanceof OrderStatusDelivered) {
             this.orderState = event.orderState;
+        }
+
+        if (event instanceof OrderCourierLocationModified) {
+            this.orderCourier = event.orderCourier;
         }
     }
     
@@ -172,6 +177,15 @@ export class Order extends AggregateRoot<OrderId>{
                 this.getId(),
                 orderState,
                 this.orderUserId
+            )
+        );
+    }
+
+    modifyCourierLocation(orderCourier: OrderCourier): void {
+        this.apply(
+            OrderCourierLocationModified.create(
+                this.getId(),
+                orderCourier
             )
         );
     }
