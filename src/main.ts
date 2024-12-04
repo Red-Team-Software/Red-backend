@@ -30,10 +30,7 @@ async function bootstrap() {
 
   app.use(morgan('dev')); // log every request to the console
 
-  app.enableCors({
-    origin: true,
-    credentials: true,
-  });
+  app.enableCors()
 
   app.use(json({ limit: '20mb' }));
   await app.listen(envs.port);
