@@ -3,10 +3,6 @@ import { IsUUID, IsNotEmpty, IsString, MinLength, IsBoolean, IsNumber } from "cl
 
 export class UserDirectionsInfraestructureRequestDTO {
 
-    @ApiProperty({ required:true ,example: '65302e02-69e4-4c6a-9096-2ce00427d498' })
-    @IsUUID()
-    id: string
-
     @ApiProperty( { required: true, default: 'casa' })
     @IsNotEmpty()
     @IsString()

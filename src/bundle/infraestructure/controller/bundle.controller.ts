@@ -27,6 +27,12 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
 import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard"
 import { ICredential } from "src/auth/application/model/credential.interface"
 import { GetCredential } from "src/auth/infraestructure/jwt/decorator/get-credential.decorator"
+import { IAuditRepository } from "src/common/application/repositories/audit.repository"
+import { OrmAuditRepository } from "src/common/infraestructure/repository/orm-repository/orm-audit.repository"
+import { AuditDecorator } from "src/common/application/aspects/audit-decorator/audit-decorator"
+import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator"
+import { DateHandler } from "src/common/infraestructure/date-handler/date-handler"
+import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -37,6 +43,7 @@ export class BundleController {
   private readonly ormBundletRepo:IBundleRepository
   private readonly ormQueryBundletRepo:IQueryBundleRepository
   private readonly idGen: IIdGen<string> 
+  private readonly auditRepository: IAuditRepository
   
   constructor(
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -44,6 +51,7 @@ export class BundleController {
     this.ormBundletRepo=new OrmBundleRepository(PgDatabaseSingleton.getInstance())
     this.idGen= new UuidGen()
     this.ormQueryBundletRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
+    this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
   }
 
   @Post('create')
@@ -61,12 +69,16 @@ export class BundleController {
   ) images: Express.Multer.File[]) {
 
     let service= new ExceptionDecorator(
-          new CreateBundleApplicationService(
-            new RabbitMQPublisher(this.channel),
-            this.ormBundletRepo,
-            this.idGen,
-            new CloudinaryService()
-          ),
+      new AuditDecorator(
+          new PerformanceDecorator(
+            new CreateBundleApplicationService(
+              new RabbitMQPublisher(this.channel),
+              this.ormBundletRepo,
+              this.idGen,
+              new CloudinaryService()
+            ),new NestTimer(),new NestLogger(new Logger())
+          ),this.auditRepository,new DateHandler()
+        )
       )
       let buffers=images.map(image=>image.buffer)
     let response= await service.execute({userId:credential.account.idUser,...entry,images:buffers})
@@ -92,10 +104,11 @@ export class BundleController {
 
     let service= new ExceptionDecorator(
       new LoggerDecorator(
-        new FindAllBundlesByNameApplicationService(
-          this.ormQueryBundletRepo
-        ),
-        new NestLogger(new Logger())
+          new PerformanceDecorator(
+            new FindAllBundlesByNameApplicationService(
+              this.ormQueryBundletRepo
+            ),new NestTimer(), new NestLogger(new Logger())
+          ),new NestLogger(new Logger())
       )
     )
   let response= await service.execute({...pagination})
@@ -115,13 +128,15 @@ export class BundleController {
     const pagination:PaginationRequestDTO={userId:credential.account.idUser,page:entry.page, perPage:entry.perPage}
 
     let service= new ExceptionDecorator(
-        new LoggerDecorator(
-          new FindAllBundlesApplicationService(
-            this.ormQueryBundletRepo
-          ),
-          new NestLogger(new Logger())
-        )
+      new LoggerDecorator(
+          new PerformanceDecorator(
+            new FindAllBundlesApplicationService(
+              this.ormQueryBundletRepo
+            ),new NestTimer(), new NestLogger(new Logger())
+          ),new NestLogger(new Logger())
       )
+    )
+
     let response= await service.execute({...pagination})
     return response.getValue
   }
@@ -131,14 +146,16 @@ export class BundleController {
     @GetCredential() credential:ICredential,
     @Query() entry:FindBundleByIdInfraestructureRequestDTO
   ){
+
     let service= new ExceptionDecorator(
-        new LoggerDecorator(
-          new FindBundleByIdApplicationService(
-            this.ormBundletRepo
-          ),
-          new NestLogger(new Logger())
-        )
+      new LoggerDecorator(
+          new PerformanceDecorator(
+            new FindBundleByIdApplicationService(
+              this.ormBundletRepo
+            ),new NestTimer(), new NestLogger(new Logger())
+          ),new NestLogger(new Logger())
       )
+    )
     let response= await service.execute({userId:credential.account.idUser,...entry})
     return response.getValue
   }
