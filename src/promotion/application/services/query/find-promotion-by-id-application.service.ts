@@ -18,7 +18,7 @@ IApplicationService<FindPromotionByIdApplicationRequestDTO,FindPromotionbyIdAppl
     }
     async execute(data: FindPromotionByIdApplicationRequestDTO): Promise<Result<FindPromotionbyIdApplicationResponseDTO>> {
 
-        let response=await this.queryPromotionRepository.findPromotionById(
+        let response=await this.queryPromotionRepository.findPromotionWithMoreDetailsById(
             PromotionId.create(data.id)
         )
 
@@ -27,27 +27,7 @@ IApplicationService<FindPromotionByIdApplicationRequestDTO,FindPromotionbyIdAppl
         
         const promotion=response.getValue
         
-        return Result.success(
-            {
-                id:promotion.promotionId,
-                description:promotion.promotionDescription,
-                name:promotion.promotionName,
-                avaleableState:promotion.promotionAvaleableState,
-                discount:promotion.promotionDiscount,
-                products:promotion.products.map(product=>({
-                    id:product.id,
-                    name:product.name
-                })),
-                bundles:promotion.bundles.map(bundle=>({
-                    id:bundle.id,
-                    name:bundle.name
-                })),
-                categories:promotion.categories.map(category=>({
-                    id:category.id,
-                    name:category.name
-                }))
-            }
-        )
+        return Result.success({...promotion})
     }
     
 }

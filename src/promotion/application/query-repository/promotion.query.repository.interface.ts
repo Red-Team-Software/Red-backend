@@ -7,6 +7,7 @@ import { Promotion } from "src/promotion/domain/aggregate/promotion.aggregate"
 
 export interface IQueryPromotionRepository{
     findAllPromotion(criteria:FindAllPromotionApplicationRequestDTO):Promise<Result<Promotion[]>> 
-    findPromotionById(id:PromotionId):Promise<Result<IPromotion>>
+    findPromotionById(id:PromotionId):Promise<Result<Promotion>>
+    findPromotionWithMoreDetailsById(id:PromotionId):Promise<Result<IPromotion>>
     verifyPromotionExistenceByName(promotionName:PromotionName):Promise<Result<boolean>>
 }
