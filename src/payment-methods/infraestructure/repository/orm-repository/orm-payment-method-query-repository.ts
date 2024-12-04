@@ -7,6 +7,7 @@ import { Result } from "src/common/utils/result-handler/result";
 import { PaymentMethodId } from "src/payment-methods/domain/value-objects/payment-method-id";
 import { PaymentMethodName } from "src/payment-methods/domain/value-objects/payment-method-name";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
+import { FindAllPaymentMethodRequestDto } from "src/payment-methods/application/dto/request/find-all-payment-method-request.dto";
 
 
 export class OrmPaymentMethodQueryRepository extends Repository<PaymentMethodEntity> implements IPaymentMethodQueryRepository {
@@ -57,7 +58,7 @@ export class OrmPaymentMethodQueryRepository extends Repository<PaymentMethodEnt
     }
 
     
-    async findAllMethods(): Promise<Result<PaymentMethodAgregate[]>> {
+    async findAllMethods(pagination: FindAllPaymentMethodRequestDto): Promise<Result<PaymentMethodAgregate[]>> {
         try{
 
             let methodEntity = await this.find();
@@ -70,6 +71,8 @@ export class OrmPaymentMethodQueryRepository extends Repository<PaymentMethodEnt
                 let response = await this.paymentMethodMapper.fromPersistencetoDomain(method);
                 methodDomain.push(response);
             };
+
+            console.log(methodDomain);
             
             return Result.success(methodDomain);
         
