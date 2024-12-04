@@ -38,9 +38,7 @@ import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/
 import { IGeocodification } from "src/order/domain/domain-services/geocodification-interface";
 import { GeocodificationHereMapsDomainService } from "../domain-service/geocodification-here-maps-domain-service";
 import { OrmProductQueryRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-query-repository";
-import { IProductRepository } from "src/product/domain/repository/product.repositry.interface";
 import { OrmProductRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-repository";
-import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface";
 import { OrmBundleRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-repository";
 import { CancelOrderApplicationServiceRequestDto } from "src/order/application/dto/request/cancel-order-request-dto";
 import { CancelOrderApplicationServiceResponseDto } from "src/order/application/dto/response/cancel-order-response-dto";
@@ -63,6 +61,9 @@ import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { OrmUserQueryRepository } from "src/user/infraestructure/repositories/orm-repository/orm-user-query-repository";
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler";
+import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
+import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository";
+import { OrmBundleQueryRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository";
 
 
 @ApiBearerAuth()
@@ -92,8 +93,8 @@ export class OrderController {
     //*Repositories
     private readonly orderRepository: ICommandOrderRepository;
     private readonly orderQueryRepository: IQueryOrderRepository;
-    private readonly ormProductRepository: IProductRepository;
-    private readonly ormBundleRepository: IBundleRepository;
+    private readonly ormProductRepository: IQueryProductRepository;
+    private readonly ormBundleRepository: IQueryBundleRepository;
     private readonly ormCourierRepository: ICourierRepository;
     private readonly ormCourierQueryRepository: ICourierQueryRepository;
     private readonly ormUserQueryRepository: IQueryUserRepository;
@@ -124,8 +125,8 @@ export class OrderController {
         this.geocodificationAddress = new GeocodificationHereMapsDomainService(this.hereMapsSingelton);
         
         //*Repositories
-        this.ormProductRepository = new OrmProductRepository(PgDatabaseSingleton.getInstance());
-        this.ormBundleRepository = new OrmBundleRepository(PgDatabaseSingleton.getInstance());
+        this.ormProductRepository = new OrmProductQueryRepository(PgDatabaseSingleton.getInstance());
+        this.ormBundleRepository = new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance());
         this.ormCourierRepository = new CourierRepository(
             PgDatabaseSingleton.getInstance(),
             new OrmCourierMapper(this.idGen)

@@ -1,6 +1,5 @@
 import { DataSource, Repository } from "typeorm";
 import { OrmProductEntity } from "../../entities/orm-entities/orm-product-entity";
-import { IProductRepository } from "src/product/domain/repository/product.repositry.interface";
 import { Result } from "src/common/utils/result-handler/result";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { ProductID } from "src/product/domain/value-object/product-id";
@@ -10,9 +9,10 @@ import { OrmProductMapper } from "../../mapper/orm-mapper/orm-product-mapper";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { OrmProductImage } from "../../entities/orm-entities/orm-product-image";
 import { NotFoundException, PersistenceException } from "src/common/infraestructure/infraestructure-exception";
+import { ICommandProductRepository } from "src/product/domain/repository/product.command.repositry.interface";
 
 
-export class OrmProductRepository extends Repository<OrmProductEntity> implements IProductRepository{
+export class OrmProductRepository extends Repository<OrmProductEntity> implements ICommandProductRepository{
 
     private mapper:IMapper <Product,OrmProductEntity>
     private readonly ormProductImageRepository: Repository<OrmProductImage>

@@ -104,7 +104,7 @@ export class AuthController {
 
       let service= new ExceptionDecorator(
       new AuditDecorator(
-          new LoggerDecorator(
+          // new LoggerDecorator(
             new PerformanceDecorator(
               new RegisterUserApplicationService(
                 this.commandAccountRepository,
@@ -116,7 +116,7 @@ export class AuthController {
                 this.dateHandler,
                 this.eventPublisher
               ),new NestTimer(),new NestLogger(new Logger())
-            ),new NestLogger(new Logger())
+            // ),new NestLogger(new Logger())
           ),this.auditRepository,this.dateHandler)
         )
       
@@ -135,7 +135,7 @@ export class AuthController {
       let service=
       new ExceptionDecorator(
         new AuditDecorator(
-            new LoggerDecorator(
+            // new LoggerDecorator(
               new PerformanceDecorator(
                 new LogInUserApplicationService(
                   this.queryUserRepository,
@@ -146,7 +146,7 @@ export class AuthController {
                   this.jwtGen,
                   this.dateHandler
                 ), new NestTimer(), new NestLogger(new Logger())
-              ),new NestLogger(new Logger())
+              // ),new NestLogger(new Logger())
           ),this.auditRepository,this.dateHandler
         )
       )
@@ -189,7 +189,7 @@ export class AuthController {
   async validateCodeForgetPassword( @Body() entry: CodeValidateInfraestructureRequestDTO ) {
     let service=
     new ExceptionDecorator(
-      new LoggerDecorator(
+      // new LoggerDecorator(
         new PerformanceDecorator(
           new CodeValidateApplicationService(
             this.queryAccountRepository,
@@ -197,7 +197,7 @@ export class AuthController {
             this.encryptor,
             this.dateHandler,
           ), new NestTimer(), new NestLogger(new Logger())
-        ),new NestLogger(new Logger())
+        // ),new NestLogger(new Logger())
       )
     )
   
@@ -210,7 +210,7 @@ export class AuthController {
   async changePassword( @Body() entry: ChangePasswordInfraestructureRequestDTO ) {
     let service=
     new ExceptionDecorator(
-      new LoggerDecorator(
+      // new LoggerDecorator(
         new PerformanceDecorator(
           new ChangePasswordApplicationService(
             this.queryAccountRepository,
@@ -218,7 +218,7 @@ export class AuthController {
             this.encryptor,
             this.dateHandler
           ), new NestTimer(), new NestLogger(new Logger())
-        ),new NestLogger(new Logger())
+        // ),new NestLogger(new Logger())
       )
     )
   
