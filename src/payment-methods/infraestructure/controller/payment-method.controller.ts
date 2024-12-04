@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Inject, Logger, ParseFilePipe, Post, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
@@ -25,6 +25,9 @@ import { NestLogger } from "src/common/infraestructure/logger/nest-logger";
 import { CreatePaymentMethodApplicationService } from "src/payment-methods/application/service/create-payment-method.application.service";
 import { CloudinaryService } from "src/common/infraestructure/file-uploader/cloudinary-uploader";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { FindAllPaymentMethodEntryDto } from "../dto/find-all-payment-method.dto";
+import { FindAllPaymentMethodRequestDto } from "src/payment-methods/application/dto/request/find-all-payment-method-request.dto";
+import { FindAllPaymentMethodApplicationService } from "src/payment-methods/application/service/find-all-payment-method.application.service";
 
 
 @ApiBearerAuth()
@@ -98,6 +101,30 @@ export class PaymentMethodController {
 
 
         let response = await payOrderService.execute(method);
+        
+        return response.getValue;
+    }
+
+    @Get('/all')
+    async findAllPaymentMethods(
+        @GetCredential() credential:ICredential,
+        @Query() data: FindAllPaymentMethodEntryDto
+    ) {
+        let values: FindAllPaymentMethodRequestDto = {
+            userId: credential.account.idUser,
+            ...data
+        }
+        
+        let getAllPaymentMethodService = new ExceptionDecorator(
+            new LoggerDecorator(
+                new FindAllPaymentMethodApplicationService(
+                    this.paymentMethodQueryRepository
+                ),
+                new NestLogger(new Logger())
+            )
+        );
+
+        let response = await getAllPaymentMethodService.execute(values);
         
         return response.getValue;
     }
