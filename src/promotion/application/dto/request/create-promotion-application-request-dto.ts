@@ -7,5 +7,5 @@ export interface CreatePromotionApplicationRequestDTO extends IServiceRequestDto
     discount:number
     products:string[]
     bundles:string[]
-    categories:string[]
+    // categories:string[]
 }

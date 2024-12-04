@@ -7,5 +7,4 @@ export interface ModifyCourierLocationRequestDto extends IServiceRequestDto {
     orderId: string;
     lat: number;
     long: number;
-    adress: string;
 }

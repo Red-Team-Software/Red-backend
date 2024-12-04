@@ -1,9 +1,9 @@
 interface IPromotion {
-    promotionId:string,
-    promotionDescription:string,
-    promotionName:string,
-    promotionAvaleableState:boolean,
-    promotionDiscount:number,
+    id:string,
+    description:string,
+    name:string,
+    avaleableState:boolean,
+    discount:number,
     products:{
         id:string,
         name:string

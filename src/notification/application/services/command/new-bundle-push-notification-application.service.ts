@@ -32,10 +32,8 @@ export class NewBundlePushNotificationApplicationService extends IApplicationSer
         })
 
         for (const sendData of sendDTO){
-            let result= await this.pushNotifier.sendNotificationByToken(sendData)
-            if (!result.isSuccess())
-                return Result.fail(new ErrorSendingPushProductApplicationException())
-
+            if(sendData.token)
+                await this.pushNotifier.sendNotificationByToken(sendData)
         }
 
         return Result.success({succses:true})
