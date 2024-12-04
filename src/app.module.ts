@@ -20,11 +20,7 @@ import { CuponController } from './cupon/infraestructure/controller/cupon.contro
       isGlobal: true,
     }),
     RabbitMQModule,
-    NotificationModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET_KEY,
-      signOptions: { expiresIn: '24h' }
-    })
+    NotificationModule
   ],
   controllers: [
     ProductController,
