@@ -25,7 +25,7 @@ export class OrmPromotionEntity implements IOrmModelPromotion{
             referencedColumnName: "id"
         }
     })
-    products: OrmProductEntity[]
+    products?: OrmProductEntity[]
 
 
     @ManyToMany(()=>OrmBundleEntity, {eager:true})
@@ -40,7 +40,7 @@ export class OrmPromotionEntity implements IOrmModelPromotion{
             referencedColumnName: "id"
         }
     })
-    bundles: OrmBundleEntity[]
+    bundles?: OrmBundleEntity[]
 
     // TODO Categories 
     // @ManyToMany(()=>, {eager:true})

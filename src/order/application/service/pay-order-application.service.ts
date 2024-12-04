@@ -146,7 +146,13 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let courier = await this.ormCourierQueryRepository.findAllCouriers();
 
-            if (courier.isFailure()) return Result.fail(new ErrorCreatingOrderCourierNotFoundApplicationException());
+            if (!courier.isSuccess()) return Result.fail(
+                new ErrorCreatingOrderCourierNotFoundApplicationException()
+            )
+
+            if (courier.getValue.length==0) return Result.fail(
+                new ErrorCreatingOrderCourierNotFoundApplicationException()
+            )
 
             let selectedCourierId = courier.getValue[Math.floor(Math.random() * courier.getValue.length)].getId();
 

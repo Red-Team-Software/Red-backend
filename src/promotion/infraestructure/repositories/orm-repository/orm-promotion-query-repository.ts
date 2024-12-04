@@ -1,8 +1,6 @@
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { Result } from "src/common/utils/result-handler/result";
-import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
-import { OrmProductMapper } from "src/product/infraestructure/mapper/orm-mapper/orm-product-mapper";
 import { IQueryPromotionRepository } from "src/promotion/application/query-repository/promotion.query.repository.interface";
 import { Repository, DataSource, MoreThan } from "typeorm";
 import { OrmPromotionEntity } from "../../entities/orm-entities/orm-promotion-entity";
@@ -20,12 +18,35 @@ export class OrmPromotionQueryRepository extends Repository<OrmPromotionEntity> 
     private mapper:IMapper <Promotion,OrmPromotionEntity>
 
     constructor(dataSource:DataSource){
-        super( OrmProductEntity, dataSource.createEntityManager() )
-        this.mapper=new OrmPromotionMapper(new UuidGen())
+        super( OrmPromotionEntity, dataSource.createEntityManager() )
+        this.mapper=new OrmPromotionMapper(new UuidGen(),dataSource)
     }
 
-    findAllPromotion(criteria: FindAllPromotionApplicationRequestDTO): Promise<Result<Promotion[]>> {
-        throw new Error("Method not implemented.");
+    async findAllPromotion(criteria: FindAllPromotionApplicationRequestDTO): Promise<Result<Promotion[]>> {
+        try{
+
+            const ormPromotions = await this.createQueryBuilder('promotion')
+                .leftJoinAndSelect('promotion.products', 'promotion_product')
+                .leftJoinAndSelect('promotion.bundles', 'promotion_bundle')
+                .where('LOWER(promotion.name) LIKE :name', 
+                   { name: `%${criteria.name.toLowerCase().trim()}%` })
+                .take(criteria.perPage)
+                .skip(criteria.page)
+                .getMany();
+
+
+            // if(ormProducts.length==0)
+            //     return Result.fail( new NotFoundException('products empty please try again'))
+
+            const promotions:Promotion[]=[]
+
+            for (const promotion of ormPromotions){
+                promotions.push(await this.mapper.fromPersistencetoDomain(promotion))
+            }
+            return Result.success(promotions)
+        }catch(e){
+            return Result.fail( new NotFoundException('error finding promotion please try again'))
+        }
     }
     findPromotionById(id: PromotionId): Promise<Result<IPromotion>> {
         throw new Error("Method not implemented.");

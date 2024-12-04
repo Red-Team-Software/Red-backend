@@ -40,6 +40,8 @@ import { ICommandPromotionRepository } from 'src/promotion/domain/repository/pro
 import { OrmPromotionQueryRepository } from '../repositories/orm-repository/orm-promotion-query-repository';
 import { OrmPromotionCommandRepository } from '../repositories/orm-repository/orm-promotion-command-repository';
 import { OrmUserQueryRepository } from 'src/user/infraestructure/repositories/orm-repository/orm-user-query-repository';
+import { OrmProductQueryRepository } from 'src/product/infraestructure/repositories/orm-repository/orm-product-query-repository';
+import { FindAllPromotionApplicationService } from 'src/promotion/application/services/query/find-all-promotion-application.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -63,6 +65,7 @@ export class PromotionController {
     this.ormPromotionQueryRepo=new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormPromotionCommandRepo=new OrmPromotionCommandRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryBundleRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
+    this.ormQueryProductRepo=new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
   }
 
   @ApiResponse({
@@ -75,6 +78,8 @@ export class PromotionController {
     @GetCredential() credential:ICredential,
     @Body() entry: CreatePromotionInfraestructureRequestDTO
   ){
+    if(!entry.bundles) entry.bundles=[]
+    if(!entry.products) entry.products=[]
 
     let service= new ExceptionDecorator(
       new AuditDecorator(
@@ -108,20 +113,22 @@ export class PromotionController {
       entry.page=1
     if(!entry.perPage)
       entry.perPage=10
+    if(!entry.term)
+      entry.term=''
 
     const pagination:PaginationRequestDTO={userId:credential.account.idUser,page:entry.page, perPage:entry.perPage}
 
-    // let service= new ExceptionDecorator(
-    //     new LoggerDecorator(
-    //       new PerformanceDecorator(
-    //         new FindAllProductsApplicationService(
-    //           this.ormProductQueryRepo
-    //         ),new NestTimer(),new NestLogger(new Logger())
-    //       ),new NestLogger(new Logger())
-    //     )
-    //   )
-    // let response= await service.execute({...pagination})
-    // return response.getValue
+    let service= new ExceptionDecorator(
+        new LoggerDecorator(
+          new PerformanceDecorator(
+            new FindAllPromotionApplicationService(
+              this.ormPromotionQueryRepo
+            ),new NestTimer(),new NestLogger(new Logger())
+          ),new NestLogger(new Logger())
+        )
+      )
+    let response= await service.execute({...pagination,name:entry.term})
+    return response.getValue
   }
 
   @ApiResponse({

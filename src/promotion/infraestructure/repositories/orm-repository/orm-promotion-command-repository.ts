@@ -10,28 +10,26 @@ import { OrmPromotionEntity } from "../../entities/orm-entities/orm-promotion-en
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 
 
-export class OrmPromotionCommandRepository extends Repository<OrmProductEntity> implements ICommandPromotionRepository{
+export class OrmPromotionCommandRepository extends Repository<OrmPromotionEntity> implements ICommandPromotionRepository{
 
     private mapper:IMapper <Promotion,OrmPromotionEntity>
 
     constructor(dataSource:DataSource){
-        super( OrmProductEntity, dataSource.createEntityManager() )
-        this.mapper=new OrmPromotionMapper(new UuidGen())
+        super( OrmPromotionEntity, dataSource.createEntityManager() )
+        this.mapper=new OrmPromotionMapper(new UuidGen(),dataSource)
     }
     
     async createPromotion(promotion: Promotion): Promise<Result<Promotion>> {
         try{
             const entry=await this.mapper.fromDomaintoPersistence(promotion)
-            console.log(entry)
-
+                        
             const response= await this.save(entry)
-            console.log(response)
+            
             if (!response)
                 return Result.fail( new PersistenceException('Create promotion unsucssessfully') )
 
             return Result.success(promotion)
         }catch(e){
-            console.log(e)
             return Result.fail( new PersistenceException('Create promotion unsucssessfully') )
         }
     }
