@@ -2,9 +2,10 @@ import { IApplicationService } from "src/common/application/services"
 import { Result } from "src/common/utils/result-handler/result"
 import { IQueryPromotionRepository } from "../../query-repository/promotion.query.repository.interface"
 import { NotFoundPromotionApplicationException } from "../../application-exepction/not-found-promotion-application-exception"
-import { FindPromotionByIdApplicationRequestDTO } from "../../dto/request/find-product-by-id-request-dto"
 import { PromotionId } from "src/promotion/domain/value-object/promotion-id"
-import { FindPromotionbyIdApplicationResponseDTO } from "../../dto/response/find-promotion-by-id-response-dto"
+import { FindPromotionByIdApplicationRequestDTO } from "../../dto/request/find-promotion-by-id-application-request-dto"
+import { FindPromotionbyIdApplicationResponseDTO } from "../../dto/response/find-promotion-by-id-application-response-dto"
+
 
 
 

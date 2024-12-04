@@ -17,6 +17,11 @@ import { ProductID } from "src/product/domain/value-object/product-id"
 import { BundleId } from "src/bundle/domain/value-object/bundle-id"
 import { CategoryID } from "src/category/domain/value-object/category-id"
 import { ErrorCreatingPromotionApplicationException } from "../../application-exepction/error-creating-promotion-application-exception"
+import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository"
+import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository"
+import { ErrorCreatingPromotionProductNotFoudApplicationException } from "../../application-exepction/error-creating-promotion-product-not-found-application-exception"
+import { Product } from "src/product/domain/aggregate/product.aggregate"
+import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate"
 
 
 export class CreatePromotionApplicationService extends IApplicationService 
@@ -25,20 +30,45 @@ export class CreatePromotionApplicationService extends IApplicationService
     constructor(
         private readonly commandPromotionRepository:ICommandPromotionRepository,
         private readonly queryPromotionRepository:IQueryPromotionRepository,
+        private readonly queryProductRepository:IQueryProductRepository,
+        private readonly queryBundleRepository:IQueryBundleRepository,
         private readonly idGen:IIdGen<string>,
         private readonly eventPublisher: IEventPublisher,
     ){
         super()
     }
     async execute(command: CreatePromotionApplicationRequestDTO): Promise<Result<CreatePromotionApplicationResponseDTO>> {
-        
-        let search=await this.queryPromotionRepository.verifyPromotionExistenceByName(PromotionName.create(command.name))
+
+        let products:Product[]=[]
+        let bundles:Bundle[]=[]
+
+        let search=await this.queryPromotionRepository.verifyPromotionExistenceByName(
+            PromotionName.create(command.name)
+        )
 
         if (!search.isSuccess())
             return Result.fail(new ErrorCreatingPromotionApplicationException())
 
         if (search.getValue) 
             return Result.fail(new ErrorPromotionNameAlreadyApplicationException(command.name))
+
+        for( const product of command.products){
+            let productResponse=await this.queryProductRepository.findProductById(ProductID.create(product))
+            if (!productResponse.isSuccess())
+                return Result.fail(
+                    new ErrorCreatingPromotionProductNotFoudApplicationException(product)
+                )
+            products.push(productResponse.getValue)
+        }
+
+        for( const bundle of command.bundles){
+            let bundleResponse=await this.queryBundleRepository.findBundleById(BundleId.create(bundle))
+            if (!bundleResponse.isSuccess())
+                return Result.fail(
+                    new ErrorCreatingPromotionProductNotFoudApplicationException(bundle)
+                )
+            bundles.push(bundleResponse.getValue)
+        }
 
         let promotion=Promotion.Registerpromotion(
             PromotionId.create(await this.idGen.genId()),
@@ -48,7 +78,7 @@ export class CreatePromotionApplicationService extends IApplicationService
             PromotionDiscount.create(command.discount),
             command.products.map(product=>ProductID.create(product)),
             command.bundles.map(bundle=>BundleId.create(bundle)),
-            command.categories.map(category=>CategoryID.create(category))
+            []
         )
 
         let result=await this.commandPromotionRepository.createPromotion(promotion)

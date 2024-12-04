@@ -31,9 +31,8 @@ export class CanceledOrderPushNotificationApplicationService extends IApplicatio
         })
 
         for (const sendData of sendDTO){
-            let result= await this.pushNotifier.sendNotificationByToken(sendData)
-            if (result.isFailure())
-                return Result.fail(new ErrorSendingPushOrderCanceledApplicationException())
+            if(sendData.token)
+                await this.pushNotifier.sendNotificationByToken(sendData)
 
         }
 

@@ -2,7 +2,6 @@ import { IApplicationService } from "src/common/application/services/application
 import { Result } from "src/common/utils/result-handler/result";
 import { CreateProductApplicationRequestDTO } from "../../dto/request/create-product-application-request-dto";
 import { CreateProductApplicationResponseDTO } from "../../dto/response/create-product-application-response-dto";
-import { IProductRepository } from "src/product/domain/repository/product.repositry.interface";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { ProductID } from "src/product/domain/value-object/product-id";
@@ -20,20 +19,26 @@ import { ErrorCreatingProductApplicationException } from "../../application-exep
 import { ErrorNameAlreadyApplicationException } from "../../application-exepction/error-name-already-exist-application-exception";
 import { ErrorUploadingImagesApplicationException } from "../../application-exepction/error-uploading-images-application-exception";
 import { ProductWeigth } from "src/product/domain/value-object/product-weigth";
+import { IQueryProductRepository } from "../../query-repository/query-product-repository";
+import { ICommandProductRepository } from "src/product/domain/repository/product.command.repositry.interface";
 
 export class CreateProductApplicationService extends IApplicationService 
 <CreateProductApplicationRequestDTO,CreateProductApplicationResponseDTO> {
 
     constructor(
         private readonly eventPublisher: IEventPublisher,
-        private readonly productRepository:IProductRepository,
+        private readonly commandProductRepository:ICommandProductRepository,
+        private readonly queryProductRepository:IQueryProductRepository,
         private readonly idGen:IIdGen<string>,
         private readonly fileUploader:IFileUploader
     ){
         super()
     }
     async execute(command: CreateProductApplicationRequestDTO): Promise<Result<CreateProductApplicationResponseDTO>> {
-        let search=await this.productRepository.verifyProductExistenceByName(ProductName.create(command.name))
+
+        let search=await this.queryProductRepository.verifyProductExistenceByName(
+            ProductName.create(command.name)
+        )
 
         if (!search.isSuccess())
             return Result.fail(new ErrorCreatingProductApplicationException())
@@ -63,7 +68,7 @@ export class CreateProductApplicationService extends IApplicationService
             ProductPrice.create(command.price,command.currency),
             ProductWeigth.create(command.weigth,command.measurement)
         )
-        let result=await this.productRepository.createProduct(product)
+        let result=await this.commandProductRepository.createProduct(product)
         if (!result.isSuccess()) 
             return Result.fail(new ErrorCreatingProductApplicationException())
         await this.eventPublisher.publish(product.pullDomainEvents())

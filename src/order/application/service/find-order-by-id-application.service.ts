@@ -6,23 +6,22 @@ import { ProductID } from 'src/product/domain/value-object/product-id';
 import { ErrorCreatingOrderProductNotFoundApplicationException } from '../application-exception/error-creating-order-product-not-found-application.exception';
 import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
 import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../application-exception/error-creating-order-bundle-not-found-application.exception';
-import { bundlesOrderResponse, courierOrderResponse, FindAllOrdersApplicationServiceResponseDto,  orderResponse, productsOrderResponse } from '../dto/response/find-all-orders-response.dto';
 import { bundlesOrderType, productsOrderType } from '../types/get-all-orders-types';
 import { ICourierQueryRepository } from 'src/courier/application/query-repository/courier-query-repository-interface';
-import { IProductRepository } from 'src/product/domain/repository/product.repositry.interface';
-import { IBundleRepository } from 'src/bundle/domain/repository/product.repositry.interface';
 import { FindOrderByIdRequestDto } from '../dto/request/find-order-by-id-request-dto';
 import { bundlesOrderByIdResponse, courierOrderByIdResponse, FindOrderByIdResponseDto, orderByIdResponse, productsOrderByIdResponse } from '../dto/response/find-order-by-id-response-dto';
 import { OrderId } from 'src/order/domain/value_objects/order-id';
 import { CourierId } from 'src/courier/domain/value-objects/courier-id';
+import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
+import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
 
 
 export class FindOrderByIdApplicationService extends IApplicationService<FindOrderByIdRequestDto,FindOrderByIdResponseDto>{
     
     constructor(
         private readonly orderRepository: IQueryOrderRepository,
-        private readonly productRepository:IProductRepository,
-        private readonly bundleRepository:IBundleRepository,
+        private readonly productRepository:IQueryProductRepository,
+        private readonly bundleRepository:IQueryBundleRepository,
         private readonly ormCourierQueryRepository: ICourierQueryRepository
     ){
         super()

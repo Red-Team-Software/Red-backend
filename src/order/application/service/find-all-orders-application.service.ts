@@ -10,16 +10,16 @@ import { FindAllOrdersApplicationServiceRequestDto } from '../dto/request/find-a
 import { bundlesOrderResponse, courierOrderResponse, FindAllOrdersApplicationServiceResponseDto,  orderResponse, productsOrderResponse } from '../dto/response/find-all-orders-response.dto';
 import { bundlesOrderType, productsOrderType } from '../types/get-all-orders-types';
 import { ICourierQueryRepository } from 'src/courier/application/query-repository/courier-query-repository-interface';
-import { IProductRepository } from 'src/product/domain/repository/product.repositry.interface';
-import { IBundleRepository } from 'src/bundle/domain/repository/product.repositry.interface';
+import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
+import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
 
 
 export class FindAllOdersApplicationService extends IApplicationService<FindAllOrdersApplicationServiceRequestDto,FindAllOrdersApplicationServiceResponseDto>{
     
     constructor(
         private readonly orderRepository: IQueryOrderRepository,
-        private readonly productRepository:IProductRepository,
-        private readonly bundleRepository:IBundleRepository,
+        private readonly productRepository:IQueryProductRepository,
+        private readonly bundleRepository:IQueryBundleRepository,
         private readonly ormCourierQueryRepository: ICourierQueryRepository
     ){
         super()

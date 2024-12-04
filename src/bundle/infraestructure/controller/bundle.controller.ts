@@ -1,6 +1,5 @@
 import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
 import { FilesInterceptor } from "@nestjs/platform-express/multer"
-import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 import { CreateBundleInfraestructureRequestDTO } from "../dto-request/create-bundle-infraestructure-request-dto"
@@ -33,6 +32,7 @@ import { AuditDecorator } from "src/common/application/aspects/audit-decorator/a
 import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator"
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler"
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
+import { ICommandBundleRepository } from "src/bundle/domain/repository/bundle.command.repository.interface"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -40,7 +40,7 @@ import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
 @Controller('bundle')
 export class BundleController {
 
-  private readonly ormBundletRepo:IBundleRepository
+  private readonly ormBundleCommandRepo:ICommandBundleRepository
   private readonly ormQueryBundletRepo:IQueryBundleRepository
   private readonly idGen: IIdGen<string> 
   private readonly auditRepository: IAuditRepository
@@ -48,7 +48,7 @@ export class BundleController {
   constructor(
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
   ) {
-    this.ormBundletRepo=new OrmBundleRepository(PgDatabaseSingleton.getInstance())
+    this.ormBundleCommandRepo=new OrmBundleRepository(PgDatabaseSingleton.getInstance())
     this.idGen= new UuidGen()
     this.ormQueryBundletRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
@@ -73,7 +73,8 @@ export class BundleController {
           new PerformanceDecorator(
             new CreateBundleApplicationService(
               new RabbitMQPublisher(this.channel),
-              this.ormBundletRepo,
+              this.ormQueryBundletRepo,
+              this.ormBundleCommandRepo,
               this.idGen,
               new CloudinaryService()
             ),new NestTimer(),new NestLogger(new Logger())
@@ -151,7 +152,7 @@ export class BundleController {
       new LoggerDecorator(
           new PerformanceDecorator(
             new FindBundleByIdApplicationService(
-              this.ormBundletRepo
+              this.ormQueryBundletRepo
             ),new NestTimer(), new NestLogger(new Logger())
           ),new NestLogger(new Logger())
       )
