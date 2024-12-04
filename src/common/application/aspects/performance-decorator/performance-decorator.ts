@@ -23,15 +23,15 @@ extends IServiceDecorator <I,O>{
         let endingTime=performance.now()
         let time=endingTime-beginingTime
 		if (!result.isSuccess()) 
-			this.logger.errorLog(
+			this.logger.logPerformance(
 				this.decoratee.name,
-				`Error execute: Error: ${result.getError} -- +`,
+				`Error execute: Error: ${result.getError} -- in time:`,
 				time.toString()
 			)
 		 else 
-			this.logger.successLog(
+			this.logger.logPerformance(
 				this.decoratee.name,
-				`Successful execute: -- +`,
+				`Successful execute in time:`,
 				time.toString()
 			);
         return result

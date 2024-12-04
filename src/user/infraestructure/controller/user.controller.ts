@@ -45,6 +45,8 @@ import { UpdateUserDirectionsInfraestructureRequestDTO } from "../dto/request/up
 import { UpdateUserDirectionApplicationService } from "src/user/application/services/command/update-user-direction-application.service"
 import { AuditDecorator } from "src/common/application/aspects/audit-decorator/audit-decorator"
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler"
+import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator"
+import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -149,10 +151,12 @@ export class UserController {
     let service= new ExceptionDecorator(
       new AuditDecorator(
         new LoggerDecorator(
-          new AddUserDirectionApplicationService (
-            this.ormUserCommandRepo,
-            this.ormUserQueryRepo,
-            new RabbitMQPublisher(this.channel)
+          new PerformanceDecorator(
+            new AddUserDirectionApplicationService (
+              this.ormUserCommandRepo,
+              this.ormUserQueryRepo,
+              new RabbitMQPublisher(this.channel)
+            ), new NestTimer(), new NestLogger(new Logger())
           ), new NestLogger(new Logger())
         ),this.auditRepository, new DateHandler()
       )
@@ -174,10 +178,12 @@ export class UserController {
     let service= new ExceptionDecorator(
       new AuditDecorator(  
         new LoggerDecorator(
-          new DeleteUserDirectionApplicationService (
-            this.ormUserCommandRepo,
-            this.ormUserQueryRepo,
-            new RabbitMQPublisher(this.channel)
+          new PerformanceDecorator(
+            new DeleteUserDirectionApplicationService (
+              this.ormUserCommandRepo,
+              this.ormUserQueryRepo,
+              new RabbitMQPublisher(this.channel)
+            ), new NestTimer(), new NestLogger(new Logger())
           ),new NestLogger(new Logger())
         ),this.auditRepository, new DateHandler()
       )
@@ -199,11 +205,13 @@ export class UserController {
     let service= new ExceptionDecorator(
       new AuditDecorator(
         new LoggerDecorator(
-          new UpdateUserDirectionApplicationService (
-            this.ormUserCommandRepo,
-            this.ormUserQueryRepo,
-            new RabbitMQPublisher(this.channel)
-          ), new NestLogger(new Logger())
+          new PerformanceDecorator(
+              new UpdateUserDirectionApplicationService (
+                this.ormUserCommandRepo,
+                this.ormUserQueryRepo,
+                new RabbitMQPublisher(this.channel)
+              ), new NestTimer(), new NestLogger(new Logger())
+            ), new NestLogger(new Logger())
         ),this.auditRepository, new DateHandler()
       )
   )

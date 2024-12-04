@@ -1,11 +1,9 @@
+import { Logger } from "@nestjs/common";
 import { ITimer } from "src/common/application/timer/timer.interface";
 
 export class NestTimer implements ITimer {
-    private readonly performer:Performance
-    constructor(){
-        this.performer=new Performance()
-    }
+    constructor(){}
     getTime(): number {
-        return this.performer.now()
+        return performance.now()
     }
 }
