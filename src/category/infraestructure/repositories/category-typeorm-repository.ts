@@ -1,7 +1,7 @@
 import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
 import { DataSource, Repository } from "typeorm";
 import { OrmCategoryEntity } from "../entities/orm-entities/orm-category-entity";
-import { Category } from "src/category/domain/aggregate/category";
+import { Category } from "src/category/domain/aggregate/category.aggregate";
 import { CategoryId } from "src/category/domain/value-object/category-id";
 import { CategoryName } from "src/category/domain/value-object/category-name";
 import { InjectRepository } from "@nestjs/typeorm";

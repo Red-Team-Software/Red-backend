@@ -4,7 +4,7 @@ import { Injectable } from "@nestjs/common";
 import { CreateCategoryApplicationRequestDTO } from "../dto/request/create-category-application-request.dto";
 import { CreateCategoryApplicationResponseDTO } from "../dto/response/create-category-application-response.dto";
 import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
-import { Category } from "src/category/domain/aggregate/category";
+import { Category } from "src/category/domain/aggregate/category.aggregate";
 import { CategoryId } from "src/category/domain/value-object/category-id";
 import { CategoryName } from "src/category/domain/value-object/category-name";
 import { CategoryImage } from "src/category/domain/value-object/category-image";

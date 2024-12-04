@@ -1,7 +1,7 @@
 // src/category/domain/repository/category-repository.interface.ts
 
 import { Result } from "src/common/utils/result-handler/result";
-import { Category } from "../aggregate/category";
+import { Category } from "../aggregate/category.aggregate";
 import { CategoryId } from "../value-object/category-id";
 import { CategoryName } from "../value-object/category-name";
 export interface ICategoryRepository {
