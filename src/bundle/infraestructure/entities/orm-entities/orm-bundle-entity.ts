@@ -3,6 +3,7 @@ import { IBundle } from "../../model-entity/orm-model-entity/bundle-interface";
 import { OrmBundleImage } from "./orm-bundle-image";
 import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
 import { OrmOrderBundleEntity } from "src/order/infraestructure/entities/orm-order-bundle-entity";
+import { OrmPromotionEntity } from '../../../../promotion/infraestructure/entities/orm-entities/orm-promotion-entity';
 
 @Entity('bundle')
 export class OrmBundleEntity implements IBundle{
@@ -17,6 +18,11 @@ export class OrmBundleEntity implements IBundle{
     @Column( 'varchar' ) currency: string;
     @Column( 'integer' ) weigth: number;
     @Column( 'varchar' ) measurament: string;
+
+    @ManyToMany(() => OrmPromotionEntity, promotion => promotion.bundles)   
+    promotions?: OrmPromotionEntity[]
+
+
     @ManyToMany(()=>OrmProductEntity, {eager:true})
     @JoinTable({
         name: "bundle_product",

@@ -27,8 +27,7 @@ export class OrmPromotionEntity implements IOrmModelPromotion{
     })
     products?: OrmProductEntity[]
 
-
-    @ManyToMany(()=>OrmBundleEntity, {eager:true})
+    @ManyToMany(() => OrmBundleEntity, bundle => bundle.promotions,{eager:true})   
     @JoinTable({
         name: "promotion_bundle",
         joinColumn: {

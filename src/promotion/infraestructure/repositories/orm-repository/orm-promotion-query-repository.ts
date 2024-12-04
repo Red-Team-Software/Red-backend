@@ -69,8 +69,6 @@ export class OrmPromotionQueryRepository extends Repository<OrmPromotionEntity> 
             
             if(!ormPromotion)
                 return Result.fail( new NotFoundException('Find promotion unsucssessfully'))
-
-            console.log(ormPromotion)
             
             return Result.success({
                 id:ormPromotion.id,
