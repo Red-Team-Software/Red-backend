@@ -33,7 +33,7 @@ import { ISession } from "src/auth/application/model/session.interface";
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 import { IQueryAccountRepository } from "src/auth/application/repository/query-account-repository.interface";
 import { IAccount } from "src/auth/application/model/account.interface";
-import { IQueryTokenSessionRepository } from "src/auth/application/repository/Query-token-session-repository.interface";
+import { IQueryTokenSessionRepository } from "src/auth/application/repository/query-token-session-repository.interface";
 import { OrmAccountQueryRepository } from "src/auth/infraestructure/repositories/orm-repository/orm-account-query-repository";
 import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton";
 import { OrmTokenQueryRepository } from "src/auth/infraestructure/repositories/orm-repository/orm-token-query-session-repository";
