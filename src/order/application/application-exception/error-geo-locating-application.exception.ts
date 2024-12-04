@@ -1,7 +1,7 @@
 import { ApplicationException } from "src/common/application/application-exeption/application-exception";
 
-export class ErrorCreatingPaymentApplicationException extends ApplicationException{
+export class ErrorGeolocationApplicationException extends ApplicationException{
     constructor() {
-        super('Error during creation of payment');
+        super('Error during geolocation');
     }
 }
