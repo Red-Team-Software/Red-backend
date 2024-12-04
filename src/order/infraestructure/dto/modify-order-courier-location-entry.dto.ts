@@ -17,10 +17,5 @@ export class ModifyCourierLocationEntryDto {
     @IsNumber()
     long: number;
 
-    @ApiProperty({
-        example: 'Avenida Principal Alto Prado, Edificio Alto Prado Plaza',
-        description: 'The address of the location',
-    })
-    @IsString()
-    address: string;
+
 }

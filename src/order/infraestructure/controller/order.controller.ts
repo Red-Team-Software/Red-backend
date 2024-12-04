@@ -64,7 +64,7 @@ import { IQueryUserRepository } from "src/user/application/repository/user.query
 import { OrmUserQueryRepository } from "src/user/infraestructure/repositories/orm-repository/orm-user-query-repository";
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler";
 import { ModifyCourierLocationApplicationService } from "src/order/application/service/modify-courier-location-application.service";
-import { ModifyCourierLocationEntryDto } from "../dto/modify-order-location-entry.dto";
+import { ModifyCourierLocationEntryDto } from "../dto/modify-order-courier-location-entry.dto";
 import { ModifyCourierLocationRequestDto } from "src/order/application/dto/request/modify-courier-location-request.dto";
 import { FindOrderByIdEntryDto } from "../dto/find-order-by-id-entry.dto";
 import { FindOrderByIdRequestDto } from "src/order/application/dto/request/find-order-by-id-request-dto";
@@ -331,8 +331,7 @@ export class OrderController {
             userId: credential.account.idUser,
             orderId: data.orderId,
             lat: data.lat,
-            long: data.long,
-            adress: data.address
+            long: data.long
         }
 
         let modifyCourierLocation = new ExceptionDecorator(
