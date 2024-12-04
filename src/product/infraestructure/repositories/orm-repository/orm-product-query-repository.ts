@@ -11,6 +11,7 @@ import { NotFoundException } from "src/common/infraestructure/infraestructure-ex
 import { FindAllProductsbyNameApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-and-combos-request-dto";
 import { ProductID } from "src/product/domain/value-object/product-id";
 import { ProductName } from "src/product/domain/value-object/product-name";
+import { IProductModel } from "src/product/application/model/product.model.interface";
 
 
 export class OrmProductQueryRepository extends Repository<OrmProductEntity> implements IQueryProductRepository{
@@ -21,6 +22,49 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
         super( OrmProductEntity, dataSource.createEntityManager() )
         this.mapper=new OrmProductMapper(new UuidGen())
     }
+
+    async findProductWithMoreDetailById(id: ProductID): Promise<Result<IProductModel>> {
+        try{
+
+            const ormProduct = await this.createQueryBuilder('product')
+                .where('product.id = :id', { id: `${id.Value}` }) 
+                .leftJoinAndSelect('product.images', 'product_image')
+                .leftJoinAndSelect('product.promotions','promotion')
+                .getOne();
+
+            if(!ormProduct)
+                return Result.fail( new NotFoundException('Find product unsucssessfully'))
+
+            return Result.success(
+                {
+                    id:ormProduct.id,
+                    description:ormProduct.desciption,
+                    caducityDate:ormProduct.caducityDate,
+                    name:ormProduct.name,
+                    stock:ormProduct.stock,
+                    image:ormProduct.images.map(image=>image.image),
+                    price:Number(ormProduct.price),
+                    currency:ormProduct.currency,
+                    weigth:ormProduct.weigth,
+                    measurement:ormProduct.measurament,
+                    categories: [],
+                    promotion:
+                    ormProduct.promotions
+                    ? ormProduct.promotions.map(promotion=>({
+                        id:promotion.id,
+                        name:promotion.name,
+                        discount:promotion.discount
+                    }))
+                    : []
+                }
+            )
+
+        }catch(e){
+            console.log(e)
+            return Result.fail( new NotFoundException('Find product unsucssessfully'))
+        }  
+    }
+
     async findAllProductsByName(criteria: FindAllProductsbyNameApplicationRequestDTO): Promise<Result<Product[]>> {
         try{
             const ormProducts = await this.createQueryBuilder('product')
@@ -71,12 +115,12 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
     }
     async findProductById(id: ProductID): Promise<Result<Product>> {
         try{
-            const ormActivity=await this.findOneBy({id:id.Value})
+            const ormProduct=await this.findOneBy({id:id.Value})
             
-            if(!ormActivity)
+            if(!ormProduct)
                 return Result.fail( new NotFoundException('Find product unsucssessfully'))
 
-            const activity=await this.mapper.fromPersistencetoDomain(ormActivity)
+            const activity=await this.mapper.fromPersistencetoDomain(ormProduct)
             
             return Result.success(activity)
         }catch(e){
