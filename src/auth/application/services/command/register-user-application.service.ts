@@ -98,8 +98,6 @@ export class RegisterUserApplicationService extends IApplicationService
             return Result.fail(new ErrorRegisteringUserApplicationException())
 
         let commandResult=await this.commandAccountRepository.createAccount(account)
-
-        console.log(commandResult)
         
         if (!commandResult.isSuccess())
             return Result.fail(new ErrorRegisteringAccountApplicationException())

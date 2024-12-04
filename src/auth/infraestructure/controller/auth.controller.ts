@@ -56,6 +56,8 @@ import { JwtAuthGuard } from "../jwt/guards/jwt-auth.guard"
 import { UserId } from "src/user/domain/value-object/user-id"
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception"
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles"
+import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator"
+import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -100,24 +102,23 @@ export class AuthController {
   })
   async register( @Body() entry: RegisterUserInfraestructureRequestDTO ) {        
 
-      let service= new AuditDecorator(
-        new ExceptionDecorator(
-          new LoggerDecorator(
-            new RegisterUserApplicationService(
-              this.commandAccountRepository,
-              this.queryAccountRepository,
-              this.commandUserRepository,
-              this.queryUserRepository,
-              this.idGen,
-              this.encryptor,
-              this.dateHandler,
-              this.eventPublisher
-            )
-            ,new NestLogger(new Logger())
-          )
-        ),this.auditRepository,
-        this.dateHandler
-      )
+      let service= new ExceptionDecorator(
+      new AuditDecorator(
+          // new LoggerDecorator(
+            new PerformanceDecorator(
+              new RegisterUserApplicationService(
+                this.commandAccountRepository,
+                this.queryAccountRepository,
+                this.commandUserRepository,
+                this.queryUserRepository,
+                this.idGen,
+                this.encryptor,
+                this.dateHandler,
+                this.eventPublisher
+              ),new NestTimer(),new NestLogger(new Logger())
+            // ),new NestLogger(new Logger())
+          ),this.auditRepository,this.dateHandler)
+        )
       
       let response=await service.execute({userId:'none',...entry})
       return response.getValue
@@ -131,24 +132,25 @@ export class AuthController {
   })
   async login( @Body() entry: LogInUserInfraestructureRequestDTO ) {        
 
-      let service= new AuditDecorator(
-        new ExceptionDecorator(
-          new LoggerDecorator(
-            new LogInUserApplicationService(
-              this.queryUserRepository,
-              this.queryAccountRepository,
-              this.commandTokenSessionRespository,
-              this.encryptor,
-              this.idGen,
-              this.jwtGen,
-              this.dateHandler
-            )
-            ,new NestLogger(new Logger())
-          )
-        ),this.auditRepository,
-        this.dateHandler
+      let service=
+      new ExceptionDecorator(
+        new AuditDecorator(
+            // new LoggerDecorator(
+              new PerformanceDecorator(
+                new LogInUserApplicationService(
+                  this.queryUserRepository,
+                  this.queryAccountRepository,
+                  this.commandTokenSessionRespository,
+                  this.encryptor,
+                  this.idGen,
+                  this.jwtGen,
+                  this.dateHandler
+                ), new NestTimer(), new NestLogger(new Logger())
+              // ),new NestLogger(new Logger())
+          ),this.auditRepository,this.dateHandler
+        )
       )
-      
+    
       let response=await service.execute({userId:'none',...entry})
       return response.getValue
   }
@@ -164,16 +166,17 @@ export class AuthController {
       let service=
         new ExceptionDecorator(
           new LoggerDecorator(
-            new ForgetPasswordApplicationService(
-              this.queryAccountRepository,
-              this.commandAccountRepository,
-              this.queryUserRepository,
-              this.encryptor,
-              this.codeGenerator,
-              this.dateHandler,
-              new SendGridSendCodeEmailSender()
-            )
-            ,new NestLogger(new Logger())
+            new PerformanceDecorator(
+              new ForgetPasswordApplicationService(
+                this.queryAccountRepository,
+                this.commandAccountRepository,
+                this.queryUserRepository,
+                this.encryptor,
+                this.codeGenerator,
+                this.dateHandler,
+                new SendGridSendCodeEmailSender()
+              ), new NestTimer(), new NestLogger(new Logger())
+            ),new NestLogger(new Logger())
           )
         )
       
@@ -186,14 +189,15 @@ export class AuthController {
   async validateCodeForgetPassword( @Body() entry: CodeValidateInfraestructureRequestDTO ) {
     let service=
     new ExceptionDecorator(
-      new LoggerDecorator(
-        new CodeValidateApplicationService(
-          this.queryAccountRepository,
-          this.queryUserRepository,
-          this.encryptor,
-          this.dateHandler,
-        )
-        ,new NestLogger(new Logger())
+      // new LoggerDecorator(
+        new PerformanceDecorator(
+          new CodeValidateApplicationService(
+            this.queryAccountRepository,
+            this.queryUserRepository,
+            this.encryptor,
+            this.dateHandler,
+          ), new NestTimer(), new NestLogger(new Logger())
+        // ),new NestLogger(new Logger())
       )
     )
   
@@ -206,14 +210,15 @@ export class AuthController {
   async changePassword( @Body() entry: ChangePasswordInfraestructureRequestDTO ) {
     let service=
     new ExceptionDecorator(
-      new LoggerDecorator(
-        new ChangePasswordApplicationService(
-          this.queryAccountRepository,
-          this.commandAccountRepository,
-          this.encryptor,
-          this.dateHandler
-        )
-        ,new NestLogger(new Logger())
+      // new LoggerDecorator(
+        new PerformanceDecorator(
+          new ChangePasswordApplicationService(
+            this.queryAccountRepository,
+            this.commandAccountRepository,
+            this.encryptor,
+            this.dateHandler
+          ), new NestTimer(), new NestLogger(new Logger())
+        // ),new NestLogger(new Logger())
       )
     )
   

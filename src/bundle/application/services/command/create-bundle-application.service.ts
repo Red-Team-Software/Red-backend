@@ -13,7 +13,6 @@ import { ErrorNameAlreadyApplicationException } from "../../application-exeption
 import { ErrorUploadingImagesApplicationException } from "../../application-exeption/error-uploading-images-application-exception"
 import { FileUploaderResponseDTO } from "src/common/application/file-uploader/dto/response/file-uploader-response-dto"
 import { IApplicationService } from "src/common/application/services"
-import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface"
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract"
 import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
@@ -21,13 +20,16 @@ import { ProductID } from "src/product/domain/value-object/product-id"
 import { Result } from "src/common/utils/result-handler/result"
 import { TypeFile } from "src/common/application/file-uploader/enums/type-file.enum"
 import { CreateBundleApplicationResponseDTO } from "../../dto/response/create-bundles-application-response-dto"
+import { IQueryBundleRepository } from "../../query-repository/query-bundle-repository"
+import { ICommandBundleRepository } from "src/bundle/domain/repository/bundle.command.repository.interface"
 
 export class CreateBundleApplicationService extends IApplicationService 
 <CreateBundleApplicationRequestDTO,CreateBundleApplicationResponseDTO> {
 
     constructor(
         private readonly eventPublisher: IEventPublisher,
-        private readonly bunldeRepository:IBundleRepository,
+        private readonly bundleQueryRepository:IQueryBundleRepository,
+        private readonly bundleCommadRepository:ICommandBundleRepository,
         private readonly idGen:IIdGen<string>,
         private readonly fileUploader:IFileUploader
     ){
@@ -35,7 +37,7 @@ export class CreateBundleApplicationService extends IApplicationService
     }
     async execute(command: CreateBundleApplicationRequestDTO): Promise<Result<CreateBundleApplicationResponseDTO>> {
         
-        let search=await this.bunldeRepository.verifyBundleExistenceByName(BundleName.create(command.name))
+        let search=await this.bundleQueryRepository.verifyBundleExistenceByName(BundleName.create(command.name))
 
         if (!search.isSuccess())
             return Result.fail(new ErrorCreatingBundleApplicationException())
@@ -67,7 +69,7 @@ export class CreateBundleApplicationService extends IApplicationService
             BundleWeigth.create(command.weigth,command.measurement),
             command.productId.map(id=>ProductID.create(id))
         )
-        let result=await this.bunldeRepository.createBundle(bundle)
+        let result=await this.bundleCommadRepository.createBundle(bundle)
 
         if (!result.isSuccess()) 
             return Result.fail(new ErrorCreatingBundleApplicationException())

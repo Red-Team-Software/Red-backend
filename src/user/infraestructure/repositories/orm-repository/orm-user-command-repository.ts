@@ -28,11 +28,15 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
         this.ormDirectionUserRepository=dataSource.getRepository(OrmDirectionUserEntity)
         this.ormWalletRepository=dataSource.getRepository(OrmWalletEntity)
     }
-    async deleteUserDirection(idUser:string,idDirection:string): Promise<Result<string>> {
+    async deleteUserDirection(idUser:string,lat:number, lng:number): Promise<Result<string>> {
         try {
-    
+            let ormDirection=await this.ormDirectionRepository.findOneBy({lat,lng})
+
+            if (!ormDirection)
+                return Result.fail(new PersistenceException('Update user unsucssessfully'))
+
             let resultDelete = await this.ormDirectionUserRepository.delete({
-                direction_id:idDirection,
+                direction_id:ormDirection.id,
                 user_id:idUser
             })
                     

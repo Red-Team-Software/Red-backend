@@ -29,8 +29,6 @@ import { OrderProductQuantity } from 'src/order/domain/entities/order-product/va
 import { OrderBundleId } from 'src/order/domain/entities/order-bundle/value_object/order-bundlesId';
 import { OrderBundleQuantity } from 'src/order/domain/entities/order-bundle/value_object/order-bundle-quantity';
 import { BundleId } from '../../../bundle/domain/value-object/bundle-id';
-import { IProductRepository } from 'src/product/domain/repository/product.repositry.interface';
-import { IBundleRepository } from 'src/bundle/domain/repository/product.repositry.interface';
 import { Product } from 'src/product/domain/aggregate/product.aggregate';
 import { ErrorCreatingOrderProductNotFoundApplicationException } from '../application-exception/error-creating-order-product-not-found-application.exception';
 import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../application-exception/error-creating-order-bundle-not-found-application.exception';
@@ -45,6 +43,8 @@ import { OrderCourierDirection } from 'src/order/domain/entities/order-courier/v
 import { OrderUserId } from 'src/order/domain/value_objects/order-user-id';
 import { IDateHandler } from 'src/common/application/date-handler/date-handler.interface';
 import { ErrorCreatingOrderCourierNotFoundApplicationException } from '../application-exception/error-creating-order-courier-not-found-application.exception';
+import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
+import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -59,8 +59,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly orderRepository: ICommandOrderRepository,
         private readonly idGen: IIdGen<string>,
         private readonly geocodificationAddress: IGeocodification,
-        private readonly productRepository:IProductRepository,
-        private readonly bundleRepository:IBundleRepository,
+        private readonly productRepository:IQueryProductRepository,
+        private readonly bundleRepository:IQueryBundleRepository,
         private readonly ormCourierQueryRepository: ICourierQueryRepository,
         private readonly dateHandler: IDateHandler
         
@@ -146,7 +146,13 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let courier = await this.ormCourierQueryRepository.findAllCouriers();
 
-            if (courier.isFailure()) return Result.fail(new ErrorCreatingOrderCourierNotFoundApplicationException());
+            if (!courier.isSuccess()) return Result.fail(
+                new ErrorCreatingOrderCourierNotFoundApplicationException()
+            )
+
+            if (courier.getValue.length==0) return Result.fail(
+                new ErrorCreatingOrderCourierNotFoundApplicationException()
+            )
 
             let selectedCourierId = courier.getValue[Math.floor(Math.random() * courier.getValue.length)].getId();
 

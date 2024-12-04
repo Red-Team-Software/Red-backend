@@ -33,7 +33,7 @@ import { ISession } from "src/auth/application/model/session.interface";
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 import { IQueryAccountRepository } from "src/auth/application/repository/query-account-repository.interface";
 import { IAccount } from "src/auth/application/model/account.interface";
-import { IQueryTokenSessionRepository } from "src/auth/application/repository/Query-token-session-repository.interface";
+import { IQueryTokenSessionRepository } from "src/auth/application/repository/query-token-session-repository.interface";
 import { OrmAccountQueryRepository } from "src/auth/infraestructure/repositories/orm-repository/orm-account-query-repository";
 import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton";
 import { OrmTokenQueryRepository } from "src/auth/infraestructure/repositories/orm-repository/orm-token-query-session-repository";
@@ -42,6 +42,13 @@ import { IDeliveredOrder } from "../interfaces/delivered-order.interface";
 import { OrderDeliveredPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/order-delivered-push-notification-application-request-dto";
 import { OrderDeliveredPushNotificationApplicationService } from "src/notification/application/services/command/order-delivered-push-notification-application.service";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { UpdateTokenPushNotificationApplicationService } from "src/notification/application/services/command/update-token-push-notification-application.service";
+import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator";
+import { AuditDecorator } from "src/common/application/aspects/audit-decorator/audit-decorator";
+import { IAuditRepository } from "src/common/application/repositories/audit.repository";
+import { OrmAuditRepository } from "src/common/infraestructure/repository/orm-repository/orm-audit.repository";
+import { DateHandler } from "src/common/infraestructure/date-handler/date-handler";
+import { NestTimer } from "src/common/infraestructure/timer/nets-timer";
 
 @ApiTags('Notification')
 @Controller('notification')
@@ -52,6 +59,8 @@ export class NotificationController {
     private readonly commandTokenSessionRepository:ICommandTokenSessionRepository<ISession>;
     private readonly queryAccountRepository:IQueryAccountRepository<IAccount>;
     private readonly querySessionRepository:IQueryTokenSessionRepository<ISession>;
+    private readonly auditRepository: IAuditRepository
+
 
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -61,6 +70,7 @@ export class NotificationController {
         this.commandTokenSessionRepository= new OrmTokenCommandRepository(PgDatabaseSingleton.getInstance());
         this.queryAccountRepository= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance());
         this.querySessionRepository= new OrmTokenQueryRepository(PgDatabaseSingleton.getInstance());
+        this.auditRepository=new OrmAuditRepository(PgDatabaseSingleton.getInstance())
 
         this.subscriber.buildQueue({
             name:'ProductEvents',
@@ -419,9 +429,20 @@ export class NotificationController {
         @GetCredential() credential:ICredential,
         @Body() entry:SaveTokenInfraestructureEntryDTO
     ){
-        credential.session.push_token=entry.token;
-        let response=await this.commandTokenSessionRepository.updateSession(credential.session);
-        if (!response.isSuccess())
-            throw new PersistenceException('error registering token');
+        let service=
+        new ExceptionDecorator(
+            new AuditDecorator(
+                new LoggerDecorator(
+                    new PerformanceDecorator(
+                        new UpdateTokenPushNotificationApplicationService(
+                            this.commandTokenSessionRepository
+                        ),new NestTimer(),new NestLogger(new Logger())
+                    ),new NestLogger(new Logger()
+                    )
+                ),this.auditRepository,new DateHandler()
+            )
+        )
+        let response=await service.execute({userId:'none',...entry,session:credential.session})
+        return response.getValue
     };
 }

@@ -20,6 +20,7 @@ export class NewProductsPushNotificationApplicationService extends IApplicationS
         let currencySymbol = data.currency === 'usd' ? '$' : data.currency === 'eur' ? '€' : data.currency;
 
         data.tokens.forEach(token=>{
+            if(token)
             sendDTO.push({
                 token: token,
                 notification: { 
@@ -30,10 +31,9 @@ export class NewProductsPushNotificationApplicationService extends IApplicationS
         })
 
         for (const sendData of sendDTO){
-            let result= await this.pushNotifier.sendNotificationByToken(sendData)
-            if (!result.isSuccess())
-                return Result.fail(new ErrorSendingPushProductApplicationException())
-
+            if(sendData.token){
+                await this.pushNotifier.sendNotificationByToken(sendData)
+            }
         }
 
         return Result.success({succses:true})

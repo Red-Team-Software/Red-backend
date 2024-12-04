@@ -1,4 +1,4 @@
-import { Order } from "src/Order/domain/aggregate/order";
+import { Order } from "src/order/domain/aggregate/order";
 import { OrmOrderEntity } from "../entities/orm-order-entity";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
@@ -8,10 +8,8 @@ import { OrderTotalAmount } from "src/order/domain/value_objects/order-totalAmou
 import { OrderDirection } from "src/order/domain/value_objects/order-direction";
 import { OrderCreatedDate } from "src/order/domain/value_objects/order-created-date";
 import { OrmOrderPayEntity } from '../entities/orm-order-payment';
-import { IProductRepository } from "src/product/domain/repository/product.repositry.interface";
 import { OrmOrderProductEntity } from "../entities/orm-order-product-entity";
 import { OrmOrderBundleEntity } from "../entities/orm-order-bundle-entity";
-import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface";
 import { NotFoundException } from "@nestjs/common";
 import { ProductID } from '../../../product/domain/value-object/product-id';
 import { BundleId } from "src/bundle/domain/value-object/bundle-id";
@@ -37,12 +35,13 @@ import { OrderCourierDirection } from '../../domain/entities/order-courier/value
 import { ICourierRepository } from "src/courier/domain/repositories/courier-repository-interface";
 import { OrmOrderCourierEntity } from "../entities/orm-order-courier-entity";
 import { OrderUserId } from "src/order/domain/value_objects/order-user-id";
-import { OrmUserQueryRepository } from '../../../user/infraestructure/repositories/orm-repository/orm-user-query-repository';
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-user-entity";
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
 import { OrmWalletEntity } from "src/user/infraestructure/entities/orm-entities/orm-wallet-entity";
+import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
+import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository";
 
 
 export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
@@ -50,8 +49,8 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
 
     constructor(
         private readonly idGen:IIdGen<string>,
-        private readonly ormProductRepository: IProductRepository,
-        private readonly ormBundleRepository: IBundleRepository,
+        private readonly ormProductRepository: IQueryProductRepository,
+        private readonly ormBundleRepository: IQueryBundleRepository,
         private readonly ormCourierRepository: ICourierRepository,
         private readonly ormUserQueryRepository: IQueryUserRepository
     ){

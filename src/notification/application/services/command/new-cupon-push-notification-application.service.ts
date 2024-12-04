@@ -33,9 +33,8 @@ export class NewCuponPushNotificationApplicationService extends IApplicationServ
         })
 
         for (const sendData of sendDTO){
-            let result= await this.pushNotifier.sendNotificationByToken(sendData)
-            if (!result.isSuccess())
-                return Result.fail(new ErrorSendingPushCuponApplicationException())
+            if(sendData.token)
+                await this.pushNotifier.sendNotificationByToken(sendData)
 
         }
 
