@@ -1,11 +1,4 @@
+import { IBundleModel } from "../../model/bundle.model.interface";
 
-export interface FindBundleByIdApplicationResponseDTO {
-    id:string,
-    description:string,
-    name:string,
-    images:string[],
-    price:number,
-    currency:string,
-    weigth:number
-    measurement:string
+export interface FindBundleByIdApplicationResponseDTO extends IBundleModel{
 }

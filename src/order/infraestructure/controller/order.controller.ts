@@ -352,8 +352,6 @@ export class OrderController {
         return response.getValue;
     }
 
-    FindOrderByIdEntryDto
-
     @Get('/one/:id')
     async findOrderById(
         @GetCredential() credential:ICredential,

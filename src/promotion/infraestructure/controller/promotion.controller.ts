@@ -42,6 +42,7 @@ import { OrmPromotionCommandRepository } from '../repositories/orm-repository/or
 import { OrmUserQueryRepository } from 'src/user/infraestructure/repositories/orm-repository/orm-user-query-repository';
 import { OrmProductQueryRepository } from 'src/product/infraestructure/repositories/orm-repository/orm-product-query-repository';
 import { FindAllPromotionApplicationService } from 'src/promotion/application/services/query/find-all-promotion-application.service';
+import { FindPromotionByIdApplicationService } from 'src/promotion/application/services/query/find-promotion-by-id-application.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -133,7 +134,7 @@ export class PromotionController {
 
   @ApiResponse({
     status: 200,
-    description: 'find all promotions',
+    description: 'find promotion by id',
     type: FindPromotionByIdInfraestructureResponseDTO,
   })
   @UseGuards(JwtAuthGuard)
@@ -143,17 +144,17 @@ export class PromotionController {
     @Query() entry:FindPromotionByIdInfraestructureRequestDTO
   ){
 
-    // let service= new ExceptionDecorator(
-    //   new LoggerDecorator(
-    //     new PerformanceDecorator(
-    //       new FindProductByIdApplicationService(
-    //         this.ormProductRepo
-    //       ),new NestTimer(),new NestLogger(new Logger())
-    //     ),new NestLogger(new Logger())
-    //   )
-    // )
+    let service= new ExceptionDecorator(
+      new LoggerDecorator(
+        new PerformanceDecorator(
+          new FindPromotionByIdApplicationService(
+            this.ormPromotionQueryRepo
+          ),new NestTimer(),new NestLogger(new Logger())
+        ),new NestLogger(new Logger())
+      )
+    )
     
-    // let response= await service.execute({userId:credential.account.idUser,...entry})
-    // return response.getValue
+    let response= await service.execute({userId:credential.account.idUser,...entry})
+    return response.getValue
   }
 }

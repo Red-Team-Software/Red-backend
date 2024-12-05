@@ -13,7 +13,7 @@ export class OrmPromotionEntity implements IOrmModelPromotion{
     @Column( 'boolean') avaleableState: boolean
     @Column( 'numeric' ) discount: number
 
-    @ManyToMany(()=>OrmProductEntity, {eager:true})
+    @ManyToMany(() => OrmProductEntity, product => product.promotions,{eager:true})   
     @JoinTable({
         name: "promotion_product",
         joinColumn: {
@@ -27,8 +27,7 @@ export class OrmPromotionEntity implements IOrmModelPromotion{
     })
     products?: OrmProductEntity[]
 
-
-    @ManyToMany(()=>OrmBundleEntity, {eager:true})
+    @ManyToMany(() => OrmBundleEntity, bundle => bundle.promotions,{eager:true})   
     @JoinTable({
         name: "promotion_bundle",
         joinColumn: {
