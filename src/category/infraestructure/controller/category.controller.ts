@@ -22,6 +22,14 @@ import { ApiTags } from '@nestjs/swagger';
 import { DeleteCategoryApplication } from 'src/category/application/services/delete-category-application';
 import { ICredential } from 'src/auth/application/model/credential.interface';
 import { GetCredential } from 'src/auth/infraestructure/jwt/decorator/get-credential.decorator';
+import { credential } from 'firebase-admin';
+import { FindCategoryByProductIdApplicationRequestDTO } from 'src/category/application/dto/request/find-category-by-productid-application-request.dto';
+import { FindCategoryByProductIdInfraestructureRequestDTO } from '../dto-request/find-category-by-productid-infrastructure-request.dto';
+import { FindCategoryByIdApplicationService } from 'src/category/application/services/find-category-by-id-application';
+import { FindCategoryByProductIdApplicationService } from 'src/category/application/services/find-category-by-product-id-application';
+import { PerformanceDecorator } from 'src/common/application/aspects/performance-decorator/performance-decorator';
+import { NestTimer } from 'src/common/infraestructure/timer/nets-timer';
+import { FindCategoryByIdInfraestructureRequestDTO } from '../dto-request/find-category-by-id-infraestructure-request.dto';
 
 @Controller('category')
 @ApiTags("category")
@@ -88,7 +96,47 @@ export class CategoryController {
     const response = await service.execute({ ...pagination });
     return response.getValue
   }
+  
+// @Get('Category')
+//  async getCategoryById()
 
+  @Get('CategoryByProductId')
+  async getCategoryByProductId(
+    @GetCredential() credential:ICredential,
+    @Query() entry: FindCategoryByProductIdInfraestructureRequestDTO
+  ){
+    let service= new ExceptionDecorator(
+      new LoggerDecorator(
+          new FindCategoryByProductIdApplicationService(
+            this.ormCategoryQueryRepo
+          )
+        ,new NestLogger(new Logger())
+      )
+    )
+    
+    let response= await service.execute({userId:credential.account.idUser,...entry})
+    return response.getValue
+  }
+
+  @Get('')
+  async getProductById(
+    @GetCredential() credential:ICredential,
+    @Query() entry:FindCategoryByIdInfraestructureRequestDTO
+  ){
+
+    let service= new ExceptionDecorator(
+      new LoggerDecorator(
+        new PerformanceDecorator(
+          new FindCategoryByIdApplicationService(
+            this.ormCategoryQueryRepo
+          ),new NestTimer(),new NestLogger(new Logger())
+        ),new NestLogger(new Logger())
+      )
+    )
+    
+    let response= await service.execute({userId:credential.account.idUser,...entry})
+    return response.getValue
+  }
 
   @Delete('delete/:id')
   async deleteCategory(

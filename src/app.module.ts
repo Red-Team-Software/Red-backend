@@ -21,7 +21,11 @@ import { PromotionController } from './promotion/infraestructure/controller/prom
       isGlobal: true,
     }),
     RabbitMQModule,
-    NotificationModule
+    NotificationModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET_KEY,
+      signOptions: { expiresIn: '24h' }
+    })
   ],
   controllers: [
     ProductController,

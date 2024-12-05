@@ -15,7 +15,7 @@ export class OrderPayment extends ValueObject<OrderPayment> {
         if(OrderCurrencyEnum.bsf != currency &&
             OrderCurrencyEnum.usd != currency &&
             OrderCurrencyEnum.eur != currency 
-        ) { throw new InvalidPaymentCurrencyException('La moneda no puede ser nula')}
+        ) { throw new InvalidPaymentCurrencyException()}
 
 
         this.amount = amount;
