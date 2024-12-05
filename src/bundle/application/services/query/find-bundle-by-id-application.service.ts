@@ -16,25 +16,14 @@ IApplicationService<FindBundleByIdApplicationRequestDTO,FindBundleByIdApplicatio
     }
     async execute(data: FindBundleByIdApplicationRequestDTO): Promise<Result<FindBundleByIdApplicationResponseDTO>> {
 
-
-        let response=await this.bundleRepository.findBundleById(BundleId.create(data.id))
+        let response=await this.bundleRepository.findBundleWithMoreDetailById(BundleId.create(data.id))
 
         if(!response.isSuccess())
             return Result.fail(new NotFoundBundleApplicationException())
+
         let bundle=response.getValue
 
-        let responseDto:FindBundleByIdApplicationResponseDTO={
-                id:bundle.getId().Value,
-                description:bundle.BundleDescription.Value,
-                name:bundle.BundleName.Value,
-                images:bundle.BundleImages.map(image=>image.Value),
-                price:bundle.BundlePrice.Price,
-                currency:bundle.BundlePrice.Currency,
-                weigth:bundle.BundleWeigth.Weigth,
-                measurement:bundle.BundleWeigth.Measure
-            }
-
-        return Result.success(responseDto)
+        return Result.success(bundle)
     }
     
 }
