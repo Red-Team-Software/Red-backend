@@ -120,7 +120,7 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
                 ? ormBundle.promotions.map(promotion=>({
                     id:promotion.id,
                     name:promotion.name,
-                    discount:promotion.discount
+                    discount:Number(promotion.discount)
                 }))
                 : [],
                 products:ormBundle.products
