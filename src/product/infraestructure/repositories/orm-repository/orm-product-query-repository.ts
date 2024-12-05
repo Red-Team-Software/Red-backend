@@ -42,7 +42,7 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
                     caducityDate:ormProduct.caducityDate,
                     name:ormProduct.name,
                     stock:ormProduct.stock,
-                    image:ormProduct.images.map(image=>image.image),
+                    images:ormProduct.images.map(image=>image.image),
                     price:Number(ormProduct.price),
                     currency:ormProduct.currency,
                     weigth:ormProduct.weigth,
