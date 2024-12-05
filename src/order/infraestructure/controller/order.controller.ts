@@ -70,6 +70,7 @@ import { FindOrderByIdApplicationService } from "src/order/application/service/f
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
 import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository";
 import { OrmBundleQueryRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository";
+import { OrmPromotionQueryRepository } from "src/promotion/infraestructure/repositories/orm-repository/orm-promotion-query-repository";
 
 
 @ApiBearerAuth()
@@ -245,7 +246,8 @@ export class OrderController {
                     this.ormProductRepository,
                     this.ormBundleRepository,
                     this.ormCourierQueryRepository,
-                    new DateHandler()
+                    new DateHandler(),
+                    new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance())
                 ),
                 new NestLogger(new Logger())
             )

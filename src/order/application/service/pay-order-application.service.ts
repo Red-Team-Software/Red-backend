@@ -45,6 +45,9 @@ import { IDateHandler } from 'src/common/application/date-handler/date-handler.i
 import { ErrorCreatingOrderCourierNotFoundApplicationException } from '../application-exception/error-creating-order-courier-not-found-application.exception';
 import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
 import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
+import { IQueryPromotionRepository } from 'src/promotion/application/query-repository/promotion.query.repository.interface';
+import { Promotion } from 'src/promotion/domain/aggregate/promotion.aggregate';
+import { FindAllPromotionApplicationRequestDTO } from 'src/promotion/application/dto/request/find-all-promotion-application-request-dto';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -62,7 +65,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly productRepository:IQueryProductRepository,
         private readonly bundleRepository:IQueryBundleRepository,
         private readonly ormCourierQueryRepository: ICourierQueryRepository,
-        private readonly dateHandler: IDateHandler
+        private readonly dateHandler: IDateHandler,
+        private readonly queryPromotionRepositoy: IQueryPromotionRepository
         
     ){
         super()
@@ -70,10 +74,11 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
     
     async execute(data: OrderPayApplicationServiceRequestDto): Promise<Result<OrderPayResponseDto>> {
 
-        let products:Product[]=[]
-        let bundles:Bundle[]=[]
-        let orderproducts: OrderProduct[] = []
+        let products:Product[]=[];
+        let bundles:Bundle[]=[];
+        let orderproducts: OrderProduct[] = [];
         let orderBundles: OrderBundle[] = [];
+        let promotions: Promotion[] = [];
 
         if(data.products){
             for (const product of data.products){
@@ -90,7 +95,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 OrderProductId.create(product.id),
                 OrderProductQuantity.create(product.quantity))
             )
-
         }
 
         if(data.bundles){
@@ -111,7 +115,25 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             )
         }
 
-        let amount = this.calculateAmount.calculateAmount(products,bundles,orderproducts,orderBundles,data.currency)
+        let findPromotion: FindAllPromotionApplicationRequestDTO = {
+            userId: data.userId,
+            name: '',
+            perPage: 1000,
+            page: 0
+        }
+
+        let promoResponse = await this.queryPromotionRepositoy.findAllPromotion(findPromotion);
+
+        if (promoResponse.isSuccess()) promotions = promoResponse.getValue;
+
+        let amount = this.calculateAmount.calculateAmount(
+            products,
+            bundles,
+            orderproducts,
+            orderBundles,
+            promotions,
+            data.currency
+        );
 
             let orderAddress = OrderAddressStreet.create(data.address);
         
