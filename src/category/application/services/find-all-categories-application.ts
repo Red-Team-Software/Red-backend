@@ -31,6 +31,7 @@ export class FindAllCategoriesApplicationService extends IApplicationService<
         categoryId: category.getId().Value,
         categoryName: category.getName().Value,
         categoryImage: category.getImage().Value,
+        products: category.getProducts().map((productId) => productId.Value),
       })
     });
 

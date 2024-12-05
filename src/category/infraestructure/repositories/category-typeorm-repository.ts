@@ -2,7 +2,7 @@ import { ICategoryRepository } from "src/category/domain/repository/category-rep
 import { DataSource, Repository } from "typeorm";
 import { OrmCategoryEntity } from "../entities/orm-entities/orm-category-entity";
 import { Category } from "src/category/domain/aggregate/category.aggregate";
-import { CategoryId } from "src/category/domain/value-object/category-id";
+import { CategoryID } from "src/category/domain/value-object/category-id";
 import { CategoryName } from "src/category/domain/value-object/category-name";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Injectable } from "@nestjs/common";
@@ -14,6 +14,7 @@ import { OrmCategoryImage } from "../entities/orm-entities/orm-category-image.en
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
+import { Product } from "src/product/domain/aggregate/product.aggregate";
 
 export class OrmCategoryRepository extends Repository<OrmCategoryEntity> implements ICategoryRepository {
     private mapper: IMapper<Category, OrmCategoryEntity>;
@@ -21,8 +22,14 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
 
     constructor(dataSource: DataSource) {
         super(OrmCategoryEntity, dataSource.createEntityManager());
-        this.mapper = new OrmCategoryMapper(new UuidGen());
+        this.mapper = new OrmCategoryMapper(new UuidGen(),dataSource);
         this.ormCategoryImageRepository = dataSource.getRepository(OrmCategoryImage);
+    }
+    agregateProductToCategory(category: Category, product: Product): Promise<Result<boolean>> {
+        throw new Error("Method not implemented.");
+    }
+    findCategoryByProductId(product: Product): Promise<Result<Category>> {
+        throw new Error("Method not implemented.");
     }
 
 
@@ -43,7 +50,7 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
         }
     }
     
-    async findById(id: CategoryId): Promise<Result<Category>> {
+    async findById(id: CategoryID): Promise<Result<Category>> {
         try {
             const categoryEntity = await this.findOne({
                 where: { id: id.Value },
@@ -73,7 +80,7 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
         }
     }
 
-    async deleteCategoryById(id: CategoryId): Promise<Result<CategoryId>> {
+    async deleteCategoryById(id: CategoryID): Promise<Result<CategoryID>> {
         try {
             // Utilizamos `id.Value` para extraer el identificador primitivo
             await this.delete({ id: id.Value });

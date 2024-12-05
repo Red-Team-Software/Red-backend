@@ -1,17 +1,17 @@
 import { ValueObject } from "src/common/domain"
 
-export class CategoryId implements ValueObject<CategoryId> {
+export class CategoryID implements ValueObject<CategoryID> {
 
     private readonly id: string
 
-    equals(valueObject: CategoryId): boolean {
+    equals(valueObject: CategoryID): boolean {
         return this.Value===valueObject.Value
     }
     
     get Value(){ return this.id }
 
-    static create ( id: string ): CategoryId {
-        return new CategoryId( id )
+    static create ( id: string ): CategoryID {
+        return new CategoryID( id )
     }
 
     private constructor(id:string){

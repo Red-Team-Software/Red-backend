@@ -25,7 +25,8 @@ export class FindCategoryByIdApplicationService extends IApplicationService<
     const responseDto: FindCategoryByIdApplicationResponseDTO = {
       id: category.getId().Value,
       name: category.getName().Value,
-      image: category.getImage().Value
+      image: category.getImage().Value,
+      products: category.getProducts().map((productId) => productId.Value),
     };
 
     return Result.success(responseDto);

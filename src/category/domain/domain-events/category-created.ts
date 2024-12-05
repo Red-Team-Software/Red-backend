@@ -1,17 +1,17 @@
 // src/Category/domain/domain-events/category-created.ts
 
 import { DomainEvent } from "src/common/domain/domain-event/domain-event";
-import { CategoryId } from "src/category/domain/value-object/category-id";
+import { CategoryID } from "src/category/domain/value-object/category-id";
 import { CategoryName } from "src/category/domain/value-object/category-name";
 import { CategoryImage } from "../value-object/category-image";
 import { ProductID } from "src/product/domain/value-object/product-id";
 
 export class CategoryCreated extends DomainEvent {
-    categoryId: CategoryId;
+    categoryId: CategoryID;
     categoryName: CategoryName;
     categoryImage: CategoryImage;
     products: ProductID []=[];
-    private constructor(categoryId: CategoryId, categoryName: CategoryName, categoryImage:CategoryImage |null, products:ProductID[]) {
+    private constructor(categoryId: CategoryID, categoryName: CategoryName, categoryImage:CategoryImage |null, products:ProductID[]) {
         super();
         this.categoryId = categoryId;
         this.categoryName = categoryName;
@@ -19,7 +19,7 @@ export class CategoryCreated extends DomainEvent {
         this.products = products;
     }
 
-    static create(categoryId: CategoryId, categoryName: CategoryName, categoryImage:CategoryImage | null, products: ProductID[]): CategoryCreated {
+    static create(categoryId: CategoryID, categoryName: CategoryName, categoryImage:CategoryImage | null, products: ProductID[]): CategoryCreated {
         return new CategoryCreated(categoryId, categoryName, categoryImage, products);
     }
 

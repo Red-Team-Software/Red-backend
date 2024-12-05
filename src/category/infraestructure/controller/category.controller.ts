@@ -20,6 +20,8 @@ import { OrmCategoryQueryRepository } from '../repositories/orm-category-query-r
 import { FindAllCategoriesInfraestructureRequestDTO } from '../dto-request/find-all-categories-infraestructure-request-dto';
 import { ApiTags } from '@nestjs/swagger';
 import { DeleteCategoryApplication } from 'src/category/application/services/delete-category-application';
+import { ICredential } from 'src/auth/application/model/credential.interface';
+import { GetCredential } from 'src/auth/infraestructure/jwt/decorator/get-credential.decorator';
 
 @Controller('category')
 @ApiTags("category")
@@ -40,6 +42,7 @@ export class CategoryController {
   @Post('create')
   @UseInterceptors(FileInterceptor('image'))
   async createCategory(
+    @GetCredential() credential:ICredential,
     @Body() entry: CreateCategoryInfrastructureRequestDTO,
     @UploadedFile(
       new ParseFilePipe({
@@ -51,6 +54,7 @@ export class CategoryController {
       })
     ) image: Express.Multer.File
   ) {
+    if(!entry.products) entry.products=[]
     let service = new ExceptionDecorator(
       new CreateCategoryApplication(
         new RabbitMQPublisher(this.channel),
@@ -61,16 +65,18 @@ export class CategoryController {
     );
 
     const buffer = image.buffer;
-    const response = await service.execute({ userId: 'none', ...entry, image: buffer });
+    const response = await service.execute({ userId: credential.account.idUser, ...entry, image: buffer });
     return response.getValue
   }
 
   @Get('all')
-  async getAllCategories(@Query() entry: FindAllCategoriesInfraestructureRequestDTO) {
+  async getAllCategories(
+    @GetCredential() credential:ICredential,
+    @Query() entry: FindAllCategoriesInfraestructureRequestDTO) {
     if (!entry.page) entry.page = 1;
     if (!entry.perPage) entry.perPage = 10;
 
-    const pagination: PaginationRequestDTO = { userId: 'none', page: entry.page, perPage: entry.perPage };
+    const pagination: PaginationRequestDTO = { userId: credential.account.idUser, page: entry.page, perPage: entry.perPage };
 
     let service = new ExceptionDecorator(
       new LoggerDecorator(
@@ -84,15 +90,16 @@ export class CategoryController {
   }
 
 
-  // asjdnasjd.com/api/category/delete/1
   @Delete('delete/:id')
-  async deleteCategory(@Param('id') id: string) {
+  async deleteCategory(
+    @GetCredential() credential:ICredential,
+    @Param('id') id: string) {
     
     let service = new ExceptionDecorator(
       new DeleteCategoryApplication(this.ormCategoryRepo)
     )
 
-    const response = await service.execute({ userId: 'none', id });
+    const response = await service.execute({ userId:credential.account.idUser, id });
     return response.getValue
   }
 }

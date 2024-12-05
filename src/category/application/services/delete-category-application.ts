@@ -3,7 +3,7 @@ import { Injectable } from "@nestjs/common";
 import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
 import { DeleteCategoryApplicationRequestDTO } from "../dto/request/delete-category-application-request.dto";
 import { DeleteCategoryApplicationResponseDTO } from "../dto/response/delete-category-application-response.dto";
-import { CategoryId } from "src/category/domain/value-object/category-id";
+import { CategoryID } from "src/category/domain/value-object/category-id";
 import { Result } from "src/common/utils/result-handler/result";
 import { NotFoundCategoryApplicationException } from "../application-exception/not-found-category-application-exception";
 import { IApplicationService } from "src/common/application/services";
@@ -18,7 +18,7 @@ DeleteCategoryApplicationResponseDTO
     }
 
     async execute(request: DeleteCategoryApplicationRequestDTO): Promise<Result<DeleteCategoryApplicationResponseDTO>> {
-        const categoryId = CategoryId.create(request.id);
+        const categoryId = CategoryID.create(request.id);
 
         // Verificar si la categoría existe antes de eliminarla
         const existingCategory = await this.categoryRepository.findById(categoryId);

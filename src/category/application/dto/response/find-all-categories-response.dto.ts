@@ -4,4 +4,5 @@ export interface FindAllCategoriesApplicationResponseDTO extends IServiceRespons
     categoryId: string;
     categoryName: string;
     categoryImage: string;
+    products:string[]
 }

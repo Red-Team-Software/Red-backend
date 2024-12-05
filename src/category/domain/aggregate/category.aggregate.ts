@@ -1,19 +1,19 @@
 // src/category/domain/aggregate/category.ts
 
 import { AggregateRoot } from 'src/common/domain/aggregate-root/aggregate-root';
-import { CategoryId } from '../value-object/category-id';
+import { CategoryID } from '../value-object/category-id';
 import { CategoryName } from '../value-object/category-name';
 import { CategoryImage } from '../value-object/category-image';
 import { DomainEvent } from 'src/common/domain/domain-event/domain-event';
 import { CategoryCreated } from '../domain-events/category-created';
 import { ProductID } from 'src/product/domain/value-object/product-id';
 
-export class Category extends AggregateRoot<CategoryId> {
+export class Category extends AggregateRoot<CategoryID> {
     private categoryName: CategoryName;
     private categoryImage: CategoryImage | null; // Opcional para manejar categorías sin imagen
     private products: ProductID[] = []; // Lista de productos de la categoría
 
-    private constructor(id: CategoryId, name: CategoryName, categoryImage: CategoryImage|null, products?: ProductID[]) {
+    private constructor(id: CategoryID, name: CategoryName, categoryImage: CategoryImage|null, products?: ProductID[]) {
         super(id);
         this.categoryName = name;
         this.categoryImage = categoryImage || null;
@@ -21,7 +21,7 @@ export class Category extends AggregateRoot<CategoryId> {
     }
     // Método de fábrica para crear una nueva categoría y registrar el evento de creación
     static create(
-        id: CategoryId,
+        id: CategoryID,
         name: CategoryName,
         image: CategoryImage | null,
         productIds: ProductID[],
@@ -32,7 +32,7 @@ export class Category extends AggregateRoot<CategoryId> {
     }
 
     // Método para inicializar una categoría existente (sin registrar evento)
-    static initializeAggregate(id: CategoryId, name: CategoryName, image: CategoryImage | null): Category {
+    static initializeAggregate(id: CategoryID, name: CategoryName, image: CategoryImage | null): Category {
         const category = new Category(id, name, image);
         category.validateState();
         return category;
@@ -45,7 +45,7 @@ export class Category extends AggregateRoot<CategoryId> {
                 const categoryCreatedEvent = event as CategoryCreated;
                 this.categoryName = categoryCreatedEvent.categoryName;
                 this.categoryImage = categoryCreatedEvent.categoryImage;
-                this.products = categoryCreatedEvent.products.map(id => ProductID.create(id)); // Mapeamos los IDs de productos
+                this.products = categoryCreatedEvent.products.map(id => ProductID.create(id.Value)); // Mapeamos los IDs de productos
         }
     }
 
@@ -63,5 +63,8 @@ export class Category extends AggregateRoot<CategoryId> {
 
     getImage(): CategoryImage | null {
         return this.categoryImage;
+    }
+    getProducts():ProductID[]{
+        return this.products;
     }
 }

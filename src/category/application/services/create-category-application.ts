@@ -5,7 +5,7 @@ import { CreateCategoryApplicationRequestDTO } from "../dto/request/create-categ
 import { CreateCategoryApplicationResponseDTO } from "../dto/response/create-category-application-response.dto";
 import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
 import { Category } from "src/category/domain/aggregate/category.aggregate";
-import { CategoryId } from "src/category/domain/value-object/category-id";
+import { CategoryID } from "src/category/domain/value-object/category-id";
 import { CategoryName } from "src/category/domain/value-object/category-name";
 import { CategoryImage } from "src/category/domain/value-object/category-image";
 import { Result } from "src/common/utils/result-handler/result";
@@ -17,6 +17,7 @@ import { ErrorUploadingImagesApplicationException } from "../application-excepti
 import { ErrorCreatingCategoryApplicationException } from "../application-exception/error-creating-category-application-exception";
 import { TypeFile } from "src/common/application/file-uploader/enums/type-file.enum";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
+import { ProductID } from "src/product/domain/value-object/product-id";
 
 export class CreateCategoryApplication extends IApplicationService<
     CreateCategoryApplicationRequestDTO,
@@ -58,10 +59,11 @@ export class CreateCategoryApplication extends IApplicationService<
 
 
         // Create the Category aggregate
-        const categoryId = CategoryId.create(await this.idGen.genId());
+        const categoryId = CategoryID.create(await this.idGen.genId());
         const categoryName = CategoryName.create(command.name);
         const categoryImage = uploadedImageUrl ? CategoryImage.create(uploadedImageUrl) : null;
-        const category = Category.create(categoryId, categoryName,categoryImage);
+        const products= command.products.map((productId) => ProductID.create(productId))
+        const category = Category.create(categoryId, categoryName,categoryImage,products);
 
         // Save category to repository
         const saveResult = await this.categoryRepository.createCategory(category);
@@ -71,9 +73,9 @@ export class CreateCategoryApplication extends IApplicationService<
 
         // Prepare response
         const response: CreateCategoryApplicationResponseDTO = {
-            id: categoryId.Value,
-            name: categoryName.Value,
-            image:categoryImage.Value,
+            ...command,
+            image:category.getImage().Value,
+            id: category.getId().Value
         };
 
         return Result.success(response);
