@@ -35,13 +35,12 @@ export class CalculateAmount {
 
         products.forEach(product => {
             let promotion = promotions.find(promo => {
-                promo.Products.includes(product.getId())
+                return promo.Products.some(productId => productId.Value === product.getId().Value);
             });
 
             let productTotal = product.ProductPrice.Price;
 
-            if (promotion) productTotal -= (product.ProductPrice.Price * (promotion.PromotionDiscounts.Value / 100));
-            
+            if (promotion) productTotal -= (product.ProductPrice.Price * (promotion.PromotionDiscounts.Value));
 
             productPriceTotals.push({
             productId: product.getId().Value,
@@ -51,13 +50,12 @@ export class CalculateAmount {
 
         bundles.forEach(bundle => {
             let promotion = promotions.find(promo => {
-                promo.Bundles.includes(bundle.getId())
+                return promo.Bundles.some(bundleId => bundleId.Value === bundle.getId().Value);
             });
 
             let bundleTotal = bundle.BundlePrice.Price;
 
-            if (promotion) bundleTotal -= (bundle.BundlePrice.Price * (promotion.PromotionDiscounts.Value / 100));
-            
+            if (promotion) bundleTotal -= (bundle.BundlePrice.Price * (promotion.PromotionDiscounts.Value ));
 
             bundlePriceTotals.push({
             bundleId: bundle.getId().Value,

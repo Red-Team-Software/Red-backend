@@ -48,6 +48,7 @@ import { IQueryBundleRepository } from 'src/bundle/application/query-repository/
 import { IQueryPromotionRepository } from 'src/promotion/application/query-repository/promotion.query.repository.interface';
 import { Promotion } from 'src/promotion/domain/aggregate/promotion.aggregate';
 import { FindAllPromotionApplicationRequestDTO } from 'src/promotion/application/dto/request/find-all-promotion-application-request-dto';
+import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -137,27 +138,27 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let orderAddress = OrderAddressStreet.create(data.address);
         
-            // let address = await this.geocodificationAddress.DirecctiontoLatitudeLongitude(orderAddress);
+            let address = await this.geocodificationAddress.DirecctiontoLatitudeLongitude(orderAddress);
             
-            // let orderDirection = OrderDirection.create(address.getValue.Latitude, address.getValue.Longitude);
+            let orderDirection = OrderDirection.create(address.getValue.Latitude, address.getValue.Longitude);
 
-            let orderDirection = OrderDirection.create(10.4399, -66.89275);
+            //let orderDirection = OrderDirection.create(10.4399, -66.89275);
 
-            // let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
+            let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
 
-            let shippingFee = OrderShippingFee.create(10);
+            //let shippingFee = OrderShippingFee.create(10);
 
-            // if (!shippingFee.isSuccess())
-            //  return Result.fail(new ErrorObtainingShippingFeeApplicationException());
+            if (!shippingFee.isSuccess())
+                return Result.fail(new ErrorObtainingShippingFeeApplicationException());
 
             let taxes = await this.calculateTaxesFee.calculateTaxesFee(amount);
 
             if (!taxes.isSuccess()) 
                 return Result.fail(new ErrorObtainingTaxesApplicationException());
             
-            //let amountTotal = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.getValue.OrderTaxes;
+            let amountTotal = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.getValue.OrderTaxes;
             
-            let amountTotal = amount.OrderAmount + shippingFee.OrderShippingFee + taxes.getValue.OrderTaxes;
+            //let amountTotal = amount.OrderAmount + shippingFee.OrderShippingFee + taxes.getValue.OrderTaxes;
 
             let total = OrderTotalAmount.create(amountTotal, data.currency);
             
