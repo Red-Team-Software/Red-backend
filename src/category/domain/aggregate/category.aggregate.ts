@@ -13,16 +13,21 @@ export class Category extends AggregateRoot<CategoryId> {
     private categoryImage: CategoryImage | null; // Opcional para manejar categorías sin imagen
     private products: ProductID[] = []; // Lista de productos de la categoría
 
-    private constructor(id: CategoryId, name: CategoryName, image: CategoryImage | null) {
+    private constructor(id: CategoryId, name: CategoryName, categoryImage: CategoryImage|null, products?: ProductID[]) {
         super(id);
         this.categoryName = name;
-        this.categoryImage = image;
+        this.categoryImage = categoryImage || null;
+        this.products = products || []; // Si no se pasa un array de productos, lo inicializa como vacío
     }
-
     // Método de fábrica para crear una nueva categoría y registrar el evento de creación
-    static create(id: CategoryId, name: CategoryName, image: CategoryImage | null): Category {
-        const category = new Category(id, name, image);
-        category.apply(CategoryCreated.create(id, name, image));
+    static create(
+        id: CategoryId,
+        name: CategoryName,
+        image: CategoryImage | null,
+        productIds: ProductID[],
+    ): Category {
+        const category = new Category(id, name, image,productIds);
+        category.apply(CategoryCreated.create(id, name, image, productIds)); // Aplicamos el evento con productos
         return category;
     }
 
@@ -37,11 +42,10 @@ export class Category extends AggregateRoot<CategoryId> {
     protected when(event: DomainEvent): void {
         switch (event.getEventName) {
             case 'CategoryCreated':
-                const categoryCreated = event as CategoryCreated;
-                this.categoryName = categoryCreated.categoryName;
-                this.categoryImage = categoryCreated.categoryImage;
-                break;
-            // Agregar otros casos de eventos de dominio si es necesario
+                const categoryCreatedEvent = event as CategoryCreated;
+                this.categoryName = categoryCreatedEvent.categoryName;
+                this.categoryImage = categoryCreatedEvent.categoryImage;
+                this.products = categoryCreatedEvent.products.map(id => ProductID.create(id)); // Mapeamos los IDs de productos
         }
     }
 
