@@ -53,7 +53,7 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
                     ? ormProduct.promotions.map(promotion=>({
                         id:promotion.id,
                         name:promotion.name,
-                        discount:promotion.discount
+                        discount:Number(promotion.discount)
                     }))
                     : []
                 }
