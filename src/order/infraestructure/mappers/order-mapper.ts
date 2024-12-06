@@ -106,6 +106,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             PaymentCurrency.create(infraEstructure.pay.currency)
         )}
 
+        if(infraEstructure.order_courier)
         orderCourier = OrderCourier.create(
             OrderCourierId.create(infraEstructure.order_courier.courier_id),
             OrderCourierDirection.create(

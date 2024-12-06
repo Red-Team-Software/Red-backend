@@ -322,7 +322,10 @@ export class OrderController {
             new LoggerDecorator(
               new PerformanceDecorator(
                 new FindAllOdersByUserApplicationService(
-                    this.orderQueryRepository
+                    this.orderQueryRepository,
+                    this.ormProductRepository,
+                    this.ormBundleRepository,
+                    this.ormCourierQueryRepository
                 ), new NestTimer(), new NestLogger(new Logger())
               ),new NestLogger(new Logger())
             )
