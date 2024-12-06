@@ -8,6 +8,7 @@ import { OrmOrderPayEntity } from "../../entities/orm-order-payment";
 import { FindAllOrdersApplicationServiceRequestDto } from "src/order/application/dto/request/find-all-orders-request.dto";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { OrderId } from "src/order/domain/value_objects/order-id";
+import { OrderUserId } from "src/order/domain/value_objects/order-user-id";
 
 
 export class OrderQueryRepository extends Repository<OrmOrderEntity> implements IQueryOrderRepository {
@@ -22,6 +23,37 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
         super( OrmOrderEntity, dataSource.createEntityManager());
         this.orderMapper = orderMapper;
         this.ormOrderPayRepository = dataSource.getRepository(OrmOrderPayEntity);
+    }
+
+    async findOrdersByUserId(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>> {
+        try {
+            
+            
+            const ormOrders = await this.find({
+                where: { user: { id: data.userId } },
+                relations: ["pay", "order_products", "order_bundles","order_report","order_courier", "user"]
+            });
+            
+                if(!ormOrders) return Result.fail( new NotFoundException('Orders empty, please try again'))
+            
+                let domainOrders: Order[] = [];
+
+                for(let ormOrder of ormOrders){
+                    let or = await this.orderMapper.fromPersistencetoDomain(ormOrder)
+                    domainOrders.push(or);
+                };
+
+                if (data.perPage) {
+                    let page = data.page;
+                    if (!page) {page = 0}
+        
+                    domainOrders = domainOrders.slice((page*data.perPage), (data.perPage) + (page*data.perPage));
+                }
+
+            return Result.success(domainOrders);
+        } catch (error) {
+            return Result.fail(new NotFoundException('Orders empty, please try again'));
+        }
     }
     
     async findAllOrders(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>> {

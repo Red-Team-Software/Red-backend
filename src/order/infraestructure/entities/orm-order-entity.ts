@@ -31,7 +31,7 @@ export class OrmOrderEntity implements IOrderInterface {
     @Column('float')
     longitude: number;
 
-    @ManyToOne( () => OrmUserEntity, (user) => user.orders)
+    @ManyToOne( () => OrmUserEntity, (user) => user.orders, {eager: true} )
     @JoinColumn()
     user: OrmUserEntity;
     
