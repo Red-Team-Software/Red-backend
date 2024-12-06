@@ -102,7 +102,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         orderPayment = OrderPayment.create(
             PaymentId.create(infraEstructure.pay.id),
             PaymentMethod.create(infraEstructure.pay.paymentMethod),
-            PaymentAmount.create(infraEstructure.pay.amount),
+            PaymentAmount.create(Number(infraEstructure.pay.amount)),
             PaymentCurrency.create(infraEstructure.pay.currency)
         )}
 
@@ -119,7 +119,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             OrderId. create(infraEstructure.id),
             OrderState.create(infraEstructure.state),
             OrderCreatedDate.create(infraEstructure.orderCreatedDate),
-            OrderTotalAmount.create(infraEstructure.totalAmount,infraEstructure.currency),
+            OrderTotalAmount.create(Number(infraEstructure.totalAmount),infraEstructure.currency),
             OrderDirection.create(infraEstructure.latitude,infraEstructure.longitude),
             orderCourier,
             OrderUserId.create(infraEstructure.user.id),

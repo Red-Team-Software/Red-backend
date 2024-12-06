@@ -2,7 +2,7 @@ import { IServiceResponseDto } from "src/common/application/services/dto/respons
 
 export type productsOrderResponse = {
     id: string
-    name: string 
+    nombre: string 
     descripcion: string
     quantity: number
     price:number 
@@ -13,7 +13,7 @@ export type productsOrderResponse = {
 
 export type bundlesOrderResponse = {
     id: string
-    name: string 
+    nombre: string 
     descripcion: string
     quantity: number
     price:number 
