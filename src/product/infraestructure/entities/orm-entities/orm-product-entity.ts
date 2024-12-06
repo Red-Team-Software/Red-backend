@@ -3,6 +3,7 @@ import { IProduct } from "../../model-entity/orm-model-entity/product-interface"
 import { OrmProductImage } from "./orm-product-image";
 import { OrmOrderProductEntity } from "src/order/infraestructure/entities/orm-order-product-entity";
 import { OrmPromotionEntity } from "src/promotion/infraestructure/entities/orm-entities/orm-promotion-entity";
+import { OrmCategoryEntity } from "src/category/infraestructure/entities/orm-entities/orm-category-entity";
 
 @Entity('product')
 export class OrmProductEntity implements IProduct{
@@ -23,6 +24,9 @@ export class OrmProductEntity implements IProduct{
 
     @ManyToMany(()=>OrmPromotionEntity, promotion=>promotion.products)
     promotions?: OrmPromotionEntity[]
+
+    @ManyToMany(()=>OrmCategoryEntity, category=>category.products)
+    categories?: OrmCategoryEntity[]
 
     static create ( 
         id:string,

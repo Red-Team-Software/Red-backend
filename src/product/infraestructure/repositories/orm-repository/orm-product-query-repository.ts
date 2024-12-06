@@ -30,6 +30,7 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
                 .where('product.id = :id', { id: `${id.Value}` }) 
                 .leftJoinAndSelect('product.images', 'product_image')
                 .leftJoinAndSelect('product.promotions','promotion')
+                .leftJoinAndSelect('product.categories','category')
                 .getOne();
 
             if(!ormProduct)
