@@ -17,7 +17,7 @@ export class GeocodificationHereMapsDomainService implements IGeocodification {
     
     
     async LatitudeLongitudetoDirecction(location: OrderDirection): Promise<Result<OrderAddressStreet>> {
-        const url = `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${location.Latitude},${location.Longitude}&apiKey=${this.hereMap.getapiKey()}`;
+        const url = `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${encodeURIComponent(location.Latitude)},${encodeURIComponent(location.Longitude)}&apiKey=${this.hereMap.getapiKey()}`;
 
         const response = await fetch(url);
         const data = await response.json();
