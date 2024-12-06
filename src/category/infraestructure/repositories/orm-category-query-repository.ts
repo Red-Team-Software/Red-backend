@@ -12,6 +12,8 @@ import { FindAllCategoriesApplicationRequestDTO } from 'src/category/application
 import { FindCategoryByIdApplicationRequestDTO } from 'src/category/application/dto/request/find-category-by-id-application-request.dto';
 import { FindCategoryByProductIdApplicationRequestDTO } from 'src/category/application/dto/request/find-category-by-productid-application-request.dto';
 import { CategoryName } from 'src/category/domain/value-object/category-name';
+import { ICategory } from 'src/category/application/model/category.model';
+
 export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> implements IQueryCategoryRepository {
 
     private mapper: IMapper<Category, OrmCategoryEntity>;
@@ -21,6 +23,32 @@ export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> im
         super(OrmCategoryEntity, dataSource.createEntityManager());
         this.mapper = new OrmCategoryMapper(new UuidGen(),dataSource);
         this.ormCategoryImageRepository = dataSource.getRepository(OrmCategoryImage);
+    }
+    async findCategoryByIdMoreDetail(criteria: FindCategoryByIdApplicationRequestDTO): Promise<Result<ICategory>> {
+        try{
+            const ormCategory=await this.findOneBy({id:criteria.id})
+            
+            if(!ormCategory)
+                return Result.fail( new NotFoundException('Find category unsucssessfully'))
+
+            ormCategory.image
+            
+            return Result.success({
+                id:ormCategory.id,
+                name: ormCategory.name,
+                image: ormCategory.image.image,
+                products: ormCategory.products
+                ? ormCategory.products.map(product=>({
+                    id:product.id,
+                    name:product.name,
+                    images:product.images.map(image=>image.image)
+                }))
+                : []
+            })
+        }catch(e){
+            console.log(e)
+            return Result.fail( new NotFoundException('Find category unsucssessfully'))
+        }    
     }
     async findCategoryByProductId(criteria: FindCategoryByProductIdApplicationRequestDTO): Promise<Result<Category[]>> {
         try {

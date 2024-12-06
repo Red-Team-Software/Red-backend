@@ -24,7 +24,7 @@ export class OrmCategoryEntity {
     })
     products?: OrmProductEntity[];
 
-    @OneToOne(() => OrmCategoryImage, (categoryImage) => categoryImage.category, { cascade: true })
+    @OneToOne(() => OrmCategoryImage, (categoryImage) => categoryImage.category, {eager:true ,cascade: true })
     @JoinColumn()
     image: OrmCategoryImage;
 

@@ -71,6 +71,8 @@ export class CreateCategoryApplication extends IApplicationService<
             return Result.fail(new ErrorCreatingCategoryApplicationException());
         }
 
+        this.eventPublisher.publish(category.pullDomainEvents())
+
         // Prepare response
         const response: CreateCategoryApplicationResponseDTO = {
             ...command,
