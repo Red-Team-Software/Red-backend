@@ -71,6 +71,13 @@ import { IQueryProductRepository } from "src/product/application/query-repositor
 import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository";
 import { OrmBundleQueryRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository";
 import { OrmPromotionQueryRepository } from "src/promotion/infraestructure/repositories/orm-repository/orm-promotion-query-repository";
+import { FindAllOrdersByUserInfraestructureEntryDto } from "../dto/find-all-orders-by-user-ifraestructure-request-dto";
+import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator";
+import { NestTimer } from "src/common/infraestructure/timer/nets-timer";
+import { FindAllOdersByUserApplicationService } from "src/order/application/service/find-all-orders-by-user-application.service";
+import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
+import { OrmPaymentMethodMapper } from "src/payment-methods/infraestructure/mapper/orm-mapper/orm-payment-method-mapper";
+import { OrmPaymentMethodQueryRepository } from "src/payment-methods/infraestructure/repository/orm-repository/orm-payment-method-query-repository";
 
 
 @ApiBearerAuth()
@@ -105,6 +112,7 @@ export class OrderController {
     private readonly ormCourierRepository: ICourierRepository;
     private readonly ormCourierQueryRepository: ICourierQueryRepository;
     private readonly ormUserQueryRepository: IQueryUserRepository;
+    private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
 
     //*IdGen
     private readonly idGen: IIdGen<string>;
@@ -145,6 +153,10 @@ export class OrderController {
         this.ormUserQueryRepository = new OrmUserQueryRepository(
             PgDatabaseSingleton.getInstance()
         );
+        this.paymentMethodQueryRepository=new OrmPaymentMethodQueryRepository(
+            PgDatabaseSingleton.getInstance(),
+            new OrmPaymentMethodMapper()
+        )
 
         //*Mappers
         this.orderMapper = new OrmOrderMapper(
@@ -247,7 +259,8 @@ export class OrderController {
                     this.ormBundleRepository,
                     this.ormCourierQueryRepository,
                     new DateHandler(),
-                    new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance())
+                    new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
+                    this.paymentMethodQueryRepository
                 ),
                 new NestLogger(new Logger())
             )
@@ -291,6 +304,32 @@ export class OrderController {
         let response = await this.getAllOrders.execute(values);
         
         return response.getValue;
+    }
+
+    //@UseGuards(JwtAuthGuard)
+    @Get('/user/all')
+    async findAllByUserOrders(
+        @GetCredential() credential:ICredential,
+        @Query() data: FindAllOrdersByUserInfraestructureEntryDto
+    ) {
+        let values: FindAllOrdersApplicationServiceRequestDto = {
+            userId: credential.account.idUser,
+            ...data
+        }
+        
+        let service=
+        new ExceptionDecorator(
+            new LoggerDecorator(
+              new PerformanceDecorator(
+                new FindAllOdersByUserApplicationService(
+                    this.orderQueryRepository
+                ), new NestTimer(), new NestLogger(new Logger())
+              ),new NestLogger(new Logger())
+            )
+          )
+        
+        let response=await service.execute({...data,userId:credential.account.idUser})
+        return response.getValue
     }
 
     //@UseGuards(JwtAuthGuard)

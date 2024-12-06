@@ -46,7 +46,8 @@ export class UpdateUserDirectionApplicationService extends IApplicationService
 
         let directionsToDelete=currentDirections.filter(
             (direction)=>!modifiedDirections.find(
-                (current)=>direction.equals(current)
+                (current)=>direction.Lat==current.Lat&&
+                direction.Lng==current.Lng
             )
         )
 

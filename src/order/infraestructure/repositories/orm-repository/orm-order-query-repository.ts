@@ -8,7 +8,7 @@ import { OrmOrderPayEntity } from "../../entities/orm-order-payment";
 import { FindAllOrdersApplicationServiceRequestDto } from "src/order/application/dto/request/find-all-orders-request.dto";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { OrderId } from "src/order/domain/value_objects/order-id";
-import { OrderUserId } from "src/order/domain/value_objects/order-user-id";
+import { IOrderModel } from "src/order/application/model/order.model.interface";
 
 
 export class OrderQueryRepository extends Repository<OrmOrderEntity> implements IQueryOrderRepository {
@@ -24,35 +24,57 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
         this.orderMapper = orderMapper;
         this.ormOrderPayRepository = dataSource.getRepository(OrmOrderPayEntity);
     }
-
-    async findOrdersByUserId(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>> {
+    async findAllOrdersByUser(data: FindAllOrdersApplicationServiceRequestDto): 
+    Promise<Result<IOrderModel[]>> {
         try {
-            
-            
-            const ormOrders = await this.find({
-                where: { user: { id: data.userId } },
-                relations: ["pay", "order_products", "order_bundles","order_report","order_courier", "user"]
-            });
-            
-                if(!ormOrders) return Result.fail( new NotFoundException('Orders empty, please try again'))
-            
-                let domainOrders: Order[] = [];
 
-                for(let ormOrder of ormOrders){
-                    let or = await this.orderMapper.fromPersistencetoDomain(ormOrder)
-                    domainOrders.push(or);
-                };
+            let ormOrders = await this.createQueryBuilder('order')
+            .innerJoinAndSelect('order.user', 'user')
+            .leftJoinAndSelect('order.order_products', 'order_product')
+            .leftJoinAndSelect('order.order_bundles', 'order_bundle')
+            .leftJoinAndSelect('order.order_report', 'order_report')
+            .leftJoinAndSelect('order.order_courier', 'order_courier')
+            .leftJoinAndSelect('order_courier.courier', 'courier')
+            .skip(data.page)
+            .take(data.perPage)
+            .getMany();
 
-                if (data.perPage) {
-                    let page = data.page;
-                    if (!page) {page = 0}
-        
-                    domainOrders = domainOrders.slice((page*data.perPage), (data.perPage) + (page*data.perPage));
-                }
-
-            return Result.success(domainOrders);
+            // return Result.success(ormOrders.map(ormOrder=>({
+            //     orderId: ormOrder.id,
+            //     orderState: ormOrder.state,
+            //     orderCreatedDate: ormOrder.orderCreatedDate,
+            //     orderTimeCreated: ormOrder.orderCreatedDate,
+            //     totalAmount: ormOrder.totalAmount,
+            //     orderReceivedDate: ormOrder.orderReceivedDate
+            //     ? ormOrder.orderReceivedDate
+            //     : null,
+            //     orderPayment: ormOrder.pay
+            //     ? {
+            //         paymetAmount: ormOrder.pay.amount,
+            //         paymentCurrency: ormOrder.pay.currency,
+            //         payementMethod: ormOrder.pay.paymentMethod
+            //     }
+            //     : null,
+            //     orderDirection: {
+            //         lat: ormOrder.latitude,
+            //         long: ormOrder.longitude
+            //     },
+            //     products:ormOrder.order_products
+            //     ? ormOrder.order_products.map(product=>({
+            //         id: product.product.id,
+            //         name: product.product.name, 
+            //         descripcion: product.product.desciption,
+            //         quantity: product.quantity,
+            //         price:product.product.price, 
+            //         images:product.product.images.map(image=>image.image),
+            //         currency:product.product.currency,
+            //         orderid: ormOrder.id
+            //     }))
+            //     : []
+            // })))
         } catch (error) {
-            return Result.fail(new NotFoundException('Orders empty, please try again'));
+            console.log(error)                
+            return Result.fail(new NotFoundException('Orders search error, please try again'));
         }
     }
     

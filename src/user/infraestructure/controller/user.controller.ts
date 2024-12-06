@@ -52,6 +52,7 @@ import { GeocodificationHereMapsDomainService } from "src/order/infraestructure/
 import { HereMapsSingelton } from "src/payments/infraestructure/here-maps-singleton"
 import { FindUserDirectionsByIdApplicationRequestDTO } from "src/user/application/dto/response/find-directions-by-user-id-response-dto"
 import { OrderDirection } from "src/order/domain/value_objects/order-direction"
+import { GeocodificationOpenStreeMapsDomainService } from "src/order/infraestructure/domain-service/geocodification-naminatim-maps-domain-service"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -83,9 +84,7 @@ export class UserController {
     this.imageTransformer= new ImageTransformer()
     this.encryptor= new BcryptEncryptor()
     this.hereMapsSingelton= HereMapsSingelton.getInstance()
-    this.geocodification= new GeocodificationHereMapsDomainService(
-      this.hereMapsSingelton
-    )
+    this.geocodification= new GeocodificationOpenStreeMapsDomainService()
 
   }
 
@@ -150,22 +149,17 @@ export class UserController {
 
     let dir: FindUserDirectionsByIdApplicationRequestDTO[] = [];
 
-    //!Importante: Alfredo, esto es lo que debes hacer
-
-    //*Hay que tner cuidado porque tuve problemas, hay que estar pendientes de 
-    //*que la latitud y longitud que nos manden este bien, porque sino la app no nos devuelve nada
-    //* ya que no existe
-    
-    //!Desde mi recomendacion, es mejor que nos manden es string y nosotros lo convertimos, para que no haya error humano
-
     for (let direction of directions){
       let geo = OrderDirection.create(direction.lat,direction.lng);
       let geoReponse= await this.geocodification.LatitudeLongitudetoDirecction(geo);
 
+      console.log('response:',geoReponse.getValue)
+
       dir.push({
-        lat: direction.lat,
-        lng: direction.lng,
-        adress: geoReponse.getValue.Address
+        ...direction,
+        address:geoReponse.isSuccess()
+        ? geoReponse.getValue.Address
+        : 'no direction get it'
       })
     }
 
