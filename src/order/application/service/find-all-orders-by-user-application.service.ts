@@ -59,7 +59,7 @@ export class FindAllOdersByUserApplicationService extends IApplicationService<Fi
 
                     domainProducts.push({
                         id: domain.getValue.getId().Value,
-                        name: domain.getValue.ProductName.Value,
+                        nombre: domain.getValue.ProductName.Value,
                         descripcion: domain.getValue.ProductDescription.Value,
                         quantity: prod.Quantity.Quantity,
                         price: domain.getValue.ProductPrice.Price,
@@ -81,7 +81,7 @@ export class FindAllOdersByUserApplicationService extends IApplicationService<Fi
 
                     domainBundles.push({
                         id: domain.getValue.getId().Value,
-                        name: domain.getValue.BundleName.Value,
+                        nombre: domain.getValue.BundleName.Value,
                         descripcion: domain.getValue.BundleDescription.Value,
                         quantity: bund.Quantity.OrderBundleQuantity,
                         price: domain.getValue.BundlePrice.Price,
