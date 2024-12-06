@@ -165,7 +165,7 @@ export class UserController {
       dir.push({
         lat: direction.lat,
         lng: direction.lng,
-        adress: geoReponse.getValue.Address
+        address: geoReponse.getValue.Address
       })
     }
 
