@@ -28,9 +28,52 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
     Promise<Result<IOrderModel[]>> {
         try {
 
-            
+            let ormOrders = await this.createQueryBuilder('order')
+            .innerJoinAndSelect('order.user', 'user')
+            .leftJoinAndSelect('order.order_products', 'order_product')
+            .leftJoinAndSelect('order.order_bundles', 'order_bundle')
+            .leftJoinAndSelect('order.order_report', 'order_report')
+            .leftJoinAndSelect('order.order_courier', 'order_courier')
+            .leftJoinAndSelect('order_courier.courier', 'courier')
+            .skip(data.page)
+            .take(data.perPage)
+            .getMany();
 
+            // return Result.success(ormOrders.map(ormOrder=>({
+            //     orderId: ormOrder.id,
+            //     orderState: ormOrder.state,
+            //     orderCreatedDate: ormOrder.orderCreatedDate,
+            //     orderTimeCreated: ormOrder.orderCreatedDate,
+            //     totalAmount: ormOrder.totalAmount,
+            //     orderReceivedDate: ormOrder.orderReceivedDate
+            //     ? ormOrder.orderReceivedDate
+            //     : null,
+            //     orderPayment: ormOrder.pay
+            //     ? {
+            //         paymetAmount: ormOrder.pay.amount,
+            //         paymentCurrency: ormOrder.pay.currency,
+            //         payementMethod: ormOrder.pay.paymentMethod
+            //     }
+            //     : null,
+            //     orderDirection: {
+            //         lat: ormOrder.latitude,
+            //         long: ormOrder.longitude
+            //     },
+            //     products:ormOrder.order_products
+            //     ? ormOrder.order_products.map(product=>({
+            //         id: product.product.id,
+            //         name: product.product.name, 
+            //         descripcion: product.product.desciption,
+            //         quantity: product.quantity,
+            //         price:product.product.price, 
+            //         images:product.product.images.map(image=>image.image),
+            //         currency:product.product.currency,
+            //         orderid: ormOrder.id
+            //     }))
+            //     : []
+            // })))
         } catch (error) {
+            console.log(error)                
             return Result.fail(new NotFoundException('Orders search error, please try again'));
         }
     }
