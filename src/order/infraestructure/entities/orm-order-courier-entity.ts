@@ -10,6 +10,7 @@ export class OrmOrderCourierEntity {
     @JoinColumn({ name: 'courier_id' })
     courier: OrmCourierEntity;
     
+    @OneToOne(() => OrmOrderEntity, (order) => order)
     @PrimaryColumn('uuid')
     order_id: string;
 

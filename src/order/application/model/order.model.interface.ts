@@ -14,14 +14,13 @@ export interface IOrderModel{
         lat: number;
         long: number;
     };
-    //orderDirection: string;
     products?: productsOrderResponse[];
     bundles?: bundlesOrderResponse[];
     orderReport?: reportOrderResponse;
     orderCourier: courierOrderResponse;
 }
 
-export type productsOrderResponse = {
+export interface productsOrderResponse {
     id: string
     name: string 
     descripcion: string
@@ -32,7 +31,7 @@ export type productsOrderResponse = {
     orderid: string
 }
 
-export type bundlesOrderResponse = {
+export interface bundlesOrderResponse {
     id: string
     name: string 
     descripcion: string
@@ -43,13 +42,13 @@ export type bundlesOrderResponse = {
     orderid: string
 }
 
-export type reportOrderResponse = {
+export interface reportOrderResponse {
     id: string
     description: string
     orderid: string
 }
 
-export type courierOrderResponse = {
+export interface courierOrderResponse {
     courierName: string
     courierImage: string
 }

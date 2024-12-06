@@ -113,7 +113,8 @@ export class UserController {
       let service= 
       new ExceptionDecorator(
         new AuditDecorator(
-          new LoggerDecorator(
+          // new LoggerDecorator(
+            new PerformanceDecorator(
               new UpdateProfileApplicationService(
                 this.ormUserCommandRepo,
                 this.ormUserQueryRepo,
@@ -123,7 +124,8 @@ export class UserController {
                 new CloudinaryService(),
                 this.idGen,
                 this.encryptor
-            ), new NestLogger(new Logger())
+            // ), new NestLogger(new Logger())
+            ), new NestTimer(), new NestLogger(new Logger())
           ),this.auditRepository, new DateHandler()
         )
     )
