@@ -52,6 +52,7 @@ import { GeocodificationHereMapsDomainService } from "src/order/infraestructure/
 import { HereMapsSingelton } from "src/payments/infraestructure/here-maps-singleton"
 import { FindUserDirectionsByIdApplicationRequestDTO } from "src/user/application/dto/response/find-directions-by-user-id-response-dto"
 import { OrderDirection } from "src/order/domain/value_objects/order-direction"
+import { GeocodificationOpenStreeMapsDomainService } from "src/order/infraestructure/domain-service/geocodification-naminatim-maps-domain-service"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -83,9 +84,7 @@ export class UserController {
     this.imageTransformer= new ImageTransformer()
     this.encryptor= new BcryptEncryptor()
     this.hereMapsSingelton= HereMapsSingelton.getInstance()
-    this.geocodification= new GeocodificationHereMapsDomainService(
-      this.hereMapsSingelton
-    )
+    this.geocodification= new GeocodificationOpenStreeMapsDomainService()
 
   }
 
@@ -153,6 +152,8 @@ export class UserController {
     for (let direction of directions){
       let geo = OrderDirection.create(direction.lat,direction.lng);
       let geoReponse= await this.geocodification.LatitudeLongitudetoDirecction(geo);
+
+      console.log('response:',geoReponse.getValue)
 
       dir.push({
         ...direction,

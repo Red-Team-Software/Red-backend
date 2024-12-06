@@ -49,6 +49,8 @@ import { IQueryPromotionRepository } from 'src/promotion/application/query-repos
 import { Promotion } from 'src/promotion/domain/aggregate/promotion.aggregate';
 import { FindAllPromotionApplicationRequestDTO } from 'src/promotion/application/dto/request/find-all-promotion-application-request-dto';
 import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
+import { IPaymentMethodQueryRepository } from 'src/payment-methods/application/query-repository/orm-query-repository.interface';
+import { PaymentMethodId } from 'src/payment-methods/domain/value-objects/payment-method-id';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -67,7 +69,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly bundleRepository:IQueryBundleRepository,
         private readonly ormCourierQueryRepository: ICourierQueryRepository,
         private readonly dateHandler: IDateHandler,
-        private readonly queryPromotionRepositoy: IQueryPromotionRepository
+        private readonly queryPromotionRepositoy: IQueryPromotionRepository,
+        private readonly paymentQueryRepository:IPaymentMethodQueryRepository
         
     ){
         super()
@@ -80,6 +83,14 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         let orderproducts: OrderProduct[] = [];
         let orderBundles: OrderBundle[] = [];
         let promotions: Promotion[] = [];
+
+        let paymentResponse=await this.paymentQueryRepository.findMethodById(PaymentMethodId.create(data.paymentId))
+
+        console.log(paymentResponse)
+
+        if (!paymentResponse.isSuccess())
+            return Result.fail(paymentResponse.getError)
+
 
         if(data.products){
             for (const product of data.products){
