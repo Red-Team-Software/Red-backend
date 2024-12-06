@@ -9,9 +9,9 @@ import { BundleId } from "src/bundle/domain/value-object/bundle-id"
 import { BundleName } from "src/bundle/domain/value-object/bundle-name"
 import { Result } from "src/common/utils/result-handler/result"
 import { NotFoundException, PersistenceException } from "src/common/infraestructure/infraestructure-exception"
-import { IBundleRepository } from "src/bundle/domain/repository/product.repositry.interface"
+import { ICommandBundleRepository } from "src/bundle/domain/repository/bundle.command.repository.interface"
 
-export class OrmBundleRepository extends Repository<OrmBundleEntity> implements IBundleRepository{
+export class OrmBundleRepository extends Repository<OrmBundleEntity> implements ICommandBundleRepository{
 
     private mapper:IMapper <Bundle,OrmBundleEntity>
     private readonly ormBundleImageRepository: Repository<OrmBundleImage>
@@ -50,41 +50,5 @@ export class OrmBundleRepository extends Repository<OrmBundleEntity> implements 
         } catch (e) {
             return Result.fail(new PersistenceException('Update bundle unsucssessfully'))
         }
-    }
-    async findBundleById(id: BundleId): Promise<Result<Bundle>> {
-        try{
-            const ormActivity=await this.findOneBy({id:id.Value})
-            
-            if(!ormActivity)
-                return Result.fail( new NotFoundException('Find bundle unsucssessfully'))
-
-            const activity=await this.mapper.fromPersistencetoDomain(ormActivity)
-            
-            return Result.success(activity)
-        }catch(e){
-            return Result.fail( new NotFoundException('Find bundle unsucssessfully'))
-        }    
-    }
-    async findBundleByName(bundleName: BundleName): Promise<Result<Bundle[]>> {
-        try{
-            const bundle = await this.findBy({name:bundleName.Value})
-            if(bundle.length==0) 
-                return Result.fail( new NotFoundException('Find product by name unsucssessfully they are 0 registered'))
-            let domain=bundle.map(async infraestrcuture=>await this.mapper.fromPersistencetoDomain(infraestrcuture))
-            return Result.success(await Promise.all(domain))
-        }
-        catch(e){
-            return Result.fail( new NotFoundException('Find product by name unsucssessfully'))
-        }                 
-    }
-    async verifyBundleExistenceByName(bundleName: BundleName): Promise<Result<boolean>> {
-        try{
-            const account = await this.findOneBy({name:bundleName.Value})
-            if(account) return Result.success(true)
-                return Result.success(false)
-        }
-        catch(e){
-            return Result.fail( new NotFoundException('Find bundle by name unsucssessfully'))
-        }           
     }
 }

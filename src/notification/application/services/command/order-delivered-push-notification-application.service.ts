@@ -29,9 +29,8 @@ export class OrderDeliveredPushNotificationApplicationService extends IApplicati
         });
 
         for (const sendData of sendDTO){
-            let result= await this.pushNotifier.sendNotificationByToken(sendData);
-            if (result.isFailure())
-                return Result.fail(new ErrorSendingPushOrderCanceledApplicationException())
+            if(sendData.token)
+                await this.pushNotifier.sendNotificationByToken(sendData)
         };
 
         return Result.success({succses:true});

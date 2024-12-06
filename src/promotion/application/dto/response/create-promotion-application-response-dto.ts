@@ -8,5 +8,5 @@ export interface CreatePromotionApplicationResponseDTO extends IServiceResponseD
     discount:number
     products:string[]
     bundles:string[]
-    categories:string[]
+    // categories:string[]
 }
