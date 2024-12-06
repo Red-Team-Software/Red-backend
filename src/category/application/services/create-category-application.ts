@@ -55,8 +55,6 @@ export class CreateCategoryApplication extends IApplicationService<
             uploadedImageUrl = imageUploadResult.getValue.url;
         }
 
-        console.log("Llego aqui:", uploadedImageUrl)
-
 
         // Create the Category aggregate
         const categoryId = CategoryID.create(await this.idGen.genId());

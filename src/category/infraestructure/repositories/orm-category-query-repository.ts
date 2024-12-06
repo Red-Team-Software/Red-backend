@@ -46,7 +46,6 @@ export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> im
                 : []
             })
         }catch(e){
-            console.log(e)
             return Result.fail( new NotFoundException('Find category unsucssessfully'))
         }    
     }
@@ -56,11 +55,7 @@ export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> im
             const ormCategories = await this.createQueryBuilder('category')
                 .leftJoinAndSelect('category.image', 'image') // Cargar la imagen de la categoría
                 .where(':productId = ANY(category.products)', { productId: criteria.id }) // Verifica si el productId está en el array de productos
-                .getMany(); // Devuelve todas las categorías asociadas al producto
-    
-            if (ormCategories.length === 0) {
-                return Result.fail(new NotFoundException('No categories found for the given product.'));
-            }
+                .getMany(); // Devuelve todas las categorías asociadas al producto            
     
             // Mapeamos todas las categorías encontradas desde ORM a dominio
             const categories: Category[] = [];
@@ -70,6 +65,7 @@ export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> im
             }
     
             return Result.success(categories);
+        
         } catch (error) {
             return Result.fail(new NotFoundException('Error fetching categories by product ID.'));
         }
@@ -110,10 +106,6 @@ export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> im
                 skip: criteria.page,
                 relations: ['image'],
             });
-
-            if (ormCategories.length === 0) {
-                return Result.fail(new NotFoundException('No categories found, please try again.'));
-            }
 
             const categories: Category[] = [];
             for (const categoryEntity of ormCategories) {

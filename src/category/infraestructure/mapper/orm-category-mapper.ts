@@ -44,7 +44,6 @@ export class OrmCategoryMapper implements IMapper<Category, OrmCategoryEntity> {
 
         return data;
         } catch (error) {
-            console.log("Error en el mapper de category",error);
             
         }
         
