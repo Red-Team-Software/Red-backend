@@ -47,6 +47,11 @@ import { AuditDecorator } from "src/common/application/aspects/audit-decorator/a
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler"
 import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator"
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
+import { IGeocodification } from "src/order/domain/domain-services/geocodification-interface"
+import { GeocodificationHereMapsDomainService } from "src/order/infraestructure/domain-service/geocodification-here-maps-domain-service"
+import { HereMapsSingelton } from "src/payments/infraestructure/here-maps-singleton"
+import { FindUserDirectionsByIdApplicationRequestDTO } from "src/user/application/dto/response/find-directions-by-user-id-response-dto"
+import { OrderDirection } from "src/order/domain/value_objects/order-direction"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -62,7 +67,8 @@ export class UserController {
   private readonly auditRepository: IAuditRepository
   private readonly imageTransformer:ImageTransformer
   private readonly encryptor: IEncryptor
-
+  private readonly geocodification: IGeocodification
+  private readonly hereMapsSingelton: HereMapsSingelton;
 
   
   constructor(
@@ -76,6 +82,10 @@ export class UserController {
     this.ormAccountQueryRepo= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance())
     this.imageTransformer= new ImageTransformer()
     this.encryptor= new BcryptEncryptor()
+    this.hereMapsSingelton= HereMapsSingelton.getInstance()
+    this.geocodification= new GeocodificationHereMapsDomainService(
+      this.hereMapsSingelton
+    )
 
   }
 
@@ -134,8 +144,32 @@ export class UserController {
 
   @Get('directions')
   async findUserDirectionById(@GetCredential() credential:ICredential){
-    let response=await this.ormUserQueryRepo.findUserDirectionsByUserId(UserId.create(credential.account.idUser))
-    return response.getValue
+    let response=await this.ormUserQueryRepo.findUserDirectionsByUserId(UserId.create(credential.account.idUser));
+
+    let directions = response.getValue
+
+    let dir: FindUserDirectionsByIdApplicationRequestDTO[] = [];
+
+    //!Importante: Alfredo, esto es lo que debes hacer
+
+    //*Hay que tner cuidado porque tuve problemas, hay que estar pendientes de 
+    //*que la latitud y longitud que nos manden este bien, porque sino la app no nos devuelve nada
+    //* ya que no existe
+    
+    //!Desde mi recomendacion, es mejor que nos manden es string y nosotros lo convertimos, para que no haya error humano
+
+    for (let direction of directions){
+      let geo = OrderDirection.create(direction.lat,direction.lng);
+      let geoReponse= await this.geocodification.LatitudeLongitudetoDirecction(geo);
+
+      dir.push({
+        lat: direction.lat,
+        lng: direction.lng,
+        address: geoReponse.getValue.Address
+      })
+    }
+
+    return dir
   }
 
   @Post('add-directions')

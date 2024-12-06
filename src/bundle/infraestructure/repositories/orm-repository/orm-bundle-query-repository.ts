@@ -131,7 +131,6 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
                 : []
             })
         }catch(e){
-            console.log(e)
             return Result.fail( new NotFoundException('Find promotion unsucssessfully'))
         }  
 
