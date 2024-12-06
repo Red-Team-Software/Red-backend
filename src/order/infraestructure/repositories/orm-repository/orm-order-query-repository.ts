@@ -8,6 +8,7 @@ import { OrmOrderPayEntity } from "../../entities/orm-order-payment";
 import { FindAllOrdersApplicationServiceRequestDto } from "src/order/application/dto/request/find-all-orders-request.dto";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { OrderId } from "src/order/domain/value_objects/order-id";
+import { IOrderModel } from "src/order/application/model/order.model.interface";
 
 
 export class OrderQueryRepository extends Repository<OrmOrderEntity> implements IQueryOrderRepository {
@@ -22,6 +23,16 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
         super( OrmOrderEntity, dataSource.createEntityManager());
         this.orderMapper = orderMapper;
         this.ormOrderPayRepository = dataSource.getRepository(OrmOrderPayEntity);
+    }
+    async findAllOrdersByUser(data: FindAllOrdersApplicationServiceRequestDto): 
+    Promise<Result<IOrderModel[]>> {
+        try {
+
+            
+
+        } catch (error) {
+            return Result.fail(new NotFoundException('Orders search error, please try again'));
+        }
     }
     
     async findAllOrders(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>> {

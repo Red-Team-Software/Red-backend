@@ -150,22 +150,15 @@ export class UserController {
 
     let dir: FindUserDirectionsByIdApplicationRequestDTO[] = [];
 
-    //!Importante: Alfredo, esto es lo que debes hacer
-
-    //*Hay que tner cuidado porque tuve problemas, hay que estar pendientes de 
-    //*que la latitud y longitud que nos manden este bien, porque sino la app no nos devuelve nada
-    //* ya que no existe
-    
-    //!Desde mi recomendacion, es mejor que nos manden es string y nosotros lo convertimos, para que no haya error humano
-
     for (let direction of directions){
       let geo = OrderDirection.create(direction.lat,direction.lng);
       let geoReponse= await this.geocodification.LatitudeLongitudetoDirecction(geo);
 
       dir.push({
-        lat: direction.lat,
-        lng: direction.lng,
-        address: geoReponse.getValue.Address
+        ...direction,
+        address:geoReponse.isSuccess()
+        ? geoReponse.getValue.Address
+        : 'no direction get it'
       })
     }
 

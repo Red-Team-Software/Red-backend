@@ -1,7 +1,7 @@
 import { IServiceRequestDto } from 'src/common/application/services';
 
 
-export interface FindAllOrdersApplicationServiceRequestDto extends IServiceRequestDto {    
+export interface FindAllOrdersByUserApplicationServiceRequestDto extends IServiceRequestDto {    
     page?: number;
     perPage?: number;
 }
