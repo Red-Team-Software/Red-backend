@@ -8,6 +8,6 @@ import { IOrderModel } from "../model/order.model.interface";
 
 export interface IQueryOrderRepository {
     findAllOrders(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>>;
-    findAllOrdersByUser(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<IOrderModel[]>>;
+    findAllOrdersByUser(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>>;
     findOrderById(orderId: OrderId): Promise<Result<Order>>;
 }
