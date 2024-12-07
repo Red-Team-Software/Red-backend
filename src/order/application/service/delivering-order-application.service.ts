@@ -1,7 +1,5 @@
 import { IApplicationService } from "src/common/application/services";
-import { CancelOrderApplicationServiceRequestDto } from "../dto/request/cancel-order-request-dto";
 import { Result } from "src/common/utils/result-handler/result";
-import { CancelOrderApplicationServiceResponseDto } from "../dto/response/cancel-order-response-dto";
 import { IQueryOrderRepository } from "../query-repository/order-query-repository-interface";
 import { ICommandOrderRepository } from "src/order/domain/command-repository/order-command-repository-interface";
 import { OrderId } from "src/order/domain/value_objects/order-id";
@@ -9,23 +7,24 @@ import { NotFoundOrderApplicationException } from "../application-exception/not-
 import { OrderState } from "src/order/domain/value_objects/order-state";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { ErrorModifiyingOrderStateApplicationException } from "../application-exception/error-modifying-order-status-application.exception";
-import { IRefundPaymentService } from "src/order/domain/domain-services/refund-amount.interface";
+import { DeliveringOrderApplicationServiceRequestDto } from "../dto/request/delivering-order-request-dto";
+import { DeliveringOrderApplicationServiceResponseDto } from "../dto/response/delivering-order-response-dto";
+import { ErrorOrderAlreadyDeliveringApplicationException } from "../application-exception/error-orden-already-delivering-application.exception";
 import { ErrorOrderAlreadyCanceledApplicationException } from "../application-exception/error-orden-already-canceled-application.exception";
 
 
 
-export class CancelOderApplicationService extends IApplicationService<CancelOrderApplicationServiceRequestDto,CancelOrderApplicationServiceResponseDto>{
+export class DeliveringOderApplicationService extends IApplicationService<DeliveringOrderApplicationServiceRequestDto,DeliveringOrderApplicationServiceResponseDto>{
 
     constructor(
         private readonly orderQueryRepository: IQueryOrderRepository,
         private readonly orderRepository: ICommandOrderRepository,
         private readonly eventPublisher: IEventPublisher,
-        private readonly refundPayment: IRefundPaymentService
     ){
         super()
     }
 
-    async execute(data: CancelOrderApplicationServiceRequestDto): Promise<Result<CancelOrderApplicationServiceResponseDto>> {
+    async execute(data: DeliveringOrderApplicationServiceRequestDto): Promise<Result<DeliveringOrderApplicationServiceResponseDto>> {
         
         let response = await this.orderQueryRepository.findOrderById(OrderId.create(data.orderId));
 
@@ -33,13 +32,15 @@ export class CancelOderApplicationService extends IApplicationService<CancelOrde
 
         let newOrder = response.getValue;
 
+        if (newOrder.OrderState.orderState === 'delivering') return Result.fail(
+            new ErrorOrderAlreadyDeliveringApplicationException()
+        );
+        
         if (newOrder.OrderState.orderState === 'canceled') return Result.fail(
-            new ErrorOrderAlreadyCanceledApplicationException('The order is already canceled')
+            new ErrorOrderAlreadyCanceledApplicationException('The order cant be delivered because is already canceled')
         );
 
-        newOrder.cancelOrder(OrderState.create('canceled'));
-
-        this.refundPayment.refundPayment(newOrder);
+        newOrder.orderDelivering(OrderState.create('delivering'));
 
         let responseCommand = await this.orderRepository.saveOrder(newOrder);
 
@@ -47,7 +48,7 @@ export class CancelOderApplicationService extends IApplicationService<CancelOrde
 
         await this.eventPublisher.publish(newOrder.pullDomainEvents())
 
-        let responseDto: CancelOrderApplicationServiceResponseDto = {
+        let responseDto: DeliveringOrderApplicationServiceResponseDto = {
             orderId: newOrder.getId().orderId,
             state: newOrder.OrderState.orderState
         };
