@@ -27,6 +27,8 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
     
     async execute(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<FindAllOrdersApplicationServiceResponseDto>> {
 
+        data.page = data.page * data.perPage - data.perPage
+
         let response = await this.orderRepository.findAllOrders(data);
 
         if (response.isFailure()) return Result.fail(new NotFoundOrderApplicationException());
@@ -59,7 +61,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
 
                     domainProducts.push({
                         id: domain.getValue.getId().Value,
-                        name: domain.getValue.ProductName.Value,
+                        nombre: domain.getValue.ProductName.Value,
                         descripcion: domain.getValue.ProductDescription.Value,
                         quantity: prod.Quantity.Quantity,
                         price: domain.getValue.ProductPrice.Price,
@@ -81,7 +83,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
 
                     domainBundles.push({
                         id: domain.getValue.getId().Value,
-                        name: domain.getValue.BundleName.Value,
+                        nombre: domain.getValue.BundleName.Value,
                         descripcion: domain.getValue.BundleDescription.Value,
                         quantity: bund.Quantity.OrderBundleQuantity,
                         price: domain.getValue.BundlePrice.Price,

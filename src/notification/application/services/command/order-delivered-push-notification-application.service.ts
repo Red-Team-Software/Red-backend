@@ -2,7 +2,7 @@ import { IPushNotifier } from "src/common/application/notification-handler/notif
 import { Result } from "src/common/utils/result-handler/result";
 import { IApplicationService } from "src/common/application/services";
 import { PushNotifierRequestDto } from "src/common/application/notification-handler/dto/request/push-notifier-request-dto";
-import { ErrorSendingPushOrderCanceledApplicationException } from "../../application-exception/error-sending-push-order-canceled-application-exception";
+import { ErrorSendingPushOrderCancelledApplicationException } from "../../application-exception/error-sending-push-order-cancelled-application-exception";
 import { OrderDeliveredPushNotificationApplicationRequestDTO } from "../../dto/request/order-delivered-push-notification-application-request-dto";
 import { OrderDeliveredPushNotificationApplicationResponseDTO } from "../../dto/response/order-delivered-push-notification-application-response-dto";
 
@@ -22,9 +22,12 @@ export class OrderDeliveredPushNotificationApplicationService extends IApplicati
             sendDTO.push({
                 token: token,
                 notification: { 
-                    title: `Orden en camino`, 
-                    body: `Tu orden con el numero #[${data.orderId}] ha sido recibida por el repartidor y va en camino.`
-                } 
+                    title: `Orden ha sido entregada`, 
+                    body: `Tu orden con el numero #[${data.orderId}] ha sido entregada con exito.`
+                },
+                data:{
+                    route: `/order/:${data.orderId}`
+                }
             })
         });
 

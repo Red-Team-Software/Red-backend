@@ -4,9 +4,12 @@ import { FindAllCategoriesApplicationRequestDTO } from "../dto/request/find-all-
 import { FindCategoryByIdApplicationRequestDTO } from "../dto/request/find-category-by-id-application-request.dto";
 import { FindCategoryByProductIdApplicationRequestDTO } from "../dto/request/find-category-by-productid-application-request.dto";
 import { CategoryName } from "src/category/domain/value-object/category-name";
+import { ICategory } from "../model/category.model";
+
 export interface IQueryCategoryRepository{
     findAllCategories(criteria:FindAllCategoriesApplicationRequestDTO):Promise<Result<Category[]>>;
     findCategoryById(criteria:FindCategoryByIdApplicationRequestDTO):Promise<Result<Category>>;
+    findCategoryByIdMoreDetail(criteria:FindCategoryByIdApplicationRequestDTO):Promise<Result<ICategory>>;
     findCategoryByProductId(criteria:FindCategoryByProductIdApplicationRequestDTO):Promise<Result<Category[]>>;
     verifyCategoryExistenceByName(categoryName:CategoryName):Promise<Result<boolean>>
 }

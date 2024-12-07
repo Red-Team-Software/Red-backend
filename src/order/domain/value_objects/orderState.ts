@@ -10,7 +10,7 @@ export class OrderState extends ValueObject<OrderState> {
 
         if( OrderStateEnum.delivered != state 
             && OrderStateEnum.ongoing != state 
-            && OrderStateEnum.canceled != state 
+            && OrderStateEnum.cancelled != state 
             && OrderStateEnum.waiting != state
         ) { throw new InvalidOrderStateException()}  
 

@@ -10,6 +10,7 @@ import { OrderState } from "src/order/domain/value_objects/order-state";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { ErrorModifiyingOrderStateApplicationException } from "../application-exception/error-modifying-order-status-application.exception";
 import { IRefundPaymentService } from "src/order/domain/domain-services/refund-amount.interface";
+import { ErrorOrderAlreadyCancelledApplicationException } from "../application-exception/error-orden-already-cancelled-application.exception";
 
 
 
@@ -32,7 +33,11 @@ export class CancelOderApplicationService extends IApplicationService<CancelOrde
 
         let newOrder = response.getValue;
 
-        newOrder.cancelOrder(OrderState.create('canceled'));
+        if (newOrder.OrderState.orderState === 'cancelled') return Result.fail(
+            new ErrorOrderAlreadyCancelledApplicationException('The order is already cancelled')
+        );
+
+        newOrder.cancelOrder(OrderState.create('cancelled'));
 
         this.refundPayment.refundPayment(newOrder);
 

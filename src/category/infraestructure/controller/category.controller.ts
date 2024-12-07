@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ICategoryRepository } from 'src/category/domain/repository/category-repository.interface';
 import { OrmCategoryRepository } from '../repositories/category-typeorm-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
@@ -18,7 +18,7 @@ import { Channel } from 'amqplib';
 import { IQueryCategoryRepository } from 'src/category/application/query-repository/query-category-repository';
 import { OrmCategoryQueryRepository } from '../repositories/orm-category-query-repository';
 import { FindAllCategoriesInfraestructureRequestDTO } from '../dto-request/find-all-categories-infraestructure-request-dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { DeleteCategoryApplication } from 'src/category/application/services/delete-category-application';
 import { ICredential } from 'src/auth/application/model/credential.interface';
 import { GetCredential } from 'src/auth/infraestructure/jwt/decorator/get-credential.decorator';
@@ -30,9 +30,12 @@ import { FindCategoryByProductIdApplicationService } from 'src/category/applicat
 import { PerformanceDecorator } from 'src/common/application/aspects/performance-decorator/performance-decorator';
 import { NestTimer } from 'src/common/infraestructure/timer/nets-timer';
 import { FindCategoryByIdInfraestructureRequestDTO } from '../dto-request/find-category-by-id-infraestructure-request.dto';
+import { JwtAuthGuard } from 'src/auth/infraestructure/jwt/guards/jwt-auth.guard';
 
 @Controller('category')
-@ApiTags("category")
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@ApiTags("Category")
 export class CategoryController {
 
   private readonly ormCategoryRepo: ICategoryRepository;

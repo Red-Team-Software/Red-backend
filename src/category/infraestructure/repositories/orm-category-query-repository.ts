@@ -12,6 +12,8 @@ import { FindAllCategoriesApplicationRequestDTO } from 'src/category/application
 import { FindCategoryByIdApplicationRequestDTO } from 'src/category/application/dto/request/find-category-by-id-application-request.dto';
 import { FindCategoryByProductIdApplicationRequestDTO } from 'src/category/application/dto/request/find-category-by-productid-application-request.dto';
 import { CategoryName } from 'src/category/domain/value-object/category-name';
+import { ICategory } from 'src/category/application/model/category.model';
+
 export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> implements IQueryCategoryRepository {
 
     private mapper: IMapper<Category, OrmCategoryEntity>;
@@ -22,17 +24,38 @@ export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> im
         this.mapper = new OrmCategoryMapper(new UuidGen(),dataSource);
         this.ormCategoryImageRepository = dataSource.getRepository(OrmCategoryImage);
     }
+    async findCategoryByIdMoreDetail(criteria: FindCategoryByIdApplicationRequestDTO): Promise<Result<ICategory>> {
+        try{
+            const ormCategory=await this.findOneBy({id:criteria.id})
+            
+            if(!ormCategory)
+                return Result.fail( new NotFoundException('Find category unsucssessfully'))
+
+            ormCategory.image
+            
+            return Result.success({
+                id:ormCategory.id,
+                name: ormCategory.name,
+                image: ormCategory.image.image,
+                products: ormCategory.products
+                ? ormCategory.products.map(product=>({
+                    id:product.id,
+                    name:product.name,
+                    images:product.images.map(image=>image.image)
+                }))
+                : []
+            })
+        }catch(e){
+            return Result.fail( new NotFoundException('Find category unsucssessfully'))
+        }    
+    }
     async findCategoryByProductId(criteria: FindCategoryByProductIdApplicationRequestDTO): Promise<Result<Category[]>> {
         try {
             // Usamos el ProductID proporcionado en `criteria` para buscar todas las categorías que contienen este producto
             const ormCategories = await this.createQueryBuilder('category')
                 .leftJoinAndSelect('category.image', 'image') // Cargar la imagen de la categoría
                 .where(':productId = ANY(category.products)', { productId: criteria.id }) // Verifica si el productId está en el array de productos
-                .getMany(); // Devuelve todas las categorías asociadas al producto
-    
-            if (ormCategories.length === 0) {
-                return Result.fail(new NotFoundException('No categories found for the given product.'));
-            }
+                .getMany(); // Devuelve todas las categorías asociadas al producto            
     
             // Mapeamos todas las categorías encontradas desde ORM a dominio
             const categories: Category[] = [];
@@ -42,6 +65,7 @@ export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> im
             }
     
             return Result.success(categories);
+        
         } catch (error) {
             return Result.fail(new NotFoundException('Error fetching categories by product ID.'));
         }
@@ -82,10 +106,6 @@ export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> im
                 skip: criteria.page,
                 relations: ['image'],
             });
-
-            if (ormCategories.length === 0) {
-                return Result.fail(new NotFoundException('No categories found, please try again.'));
-            }
 
             const categories: Category[] = [];
             for (const categoryEntity of ormCategories) {

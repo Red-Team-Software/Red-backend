@@ -8,7 +8,6 @@ import { Result } from "src/common/utils/result-handler/result";
 import { NotFoundCategoryApplicationException } from "../application-exception/not-found-category-application-exception";
 import { IApplicationService } from "src/common/application/services";
 
-@Injectable()
 export class DeleteCategoryApplication extends IApplicationService<
 DeleteCategoryApplicationRequestDTO,
 DeleteCategoryApplicationResponseDTO
