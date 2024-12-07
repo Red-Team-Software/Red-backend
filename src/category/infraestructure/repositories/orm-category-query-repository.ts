@@ -41,7 +41,9 @@ export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> im
                 ? ormCategory.products.map(product=>({
                     id:product.id,
                     name:product.name,
-                    images:product.images.map(image=>image.image)
+                    images:product.images.map(image=>image.image),
+                    description:product.desciption,
+                    price:Number(product.price)
                 }))
                 : []
             })
