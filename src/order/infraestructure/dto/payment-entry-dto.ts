@@ -1,13 +1,14 @@
-import { Transform } from 'class-transformer';
 import { IsArray, IsNumber, IsPositive, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PaymentEntryDto {
-  @ApiProperty({ example: 100, description: 'The amount to be paid' })
-  @IsNumber()
-  @IsPositive()
-  @Transform(({ value }) => Number(value))
-  amount: number;
+  
+  @ApiProperty({
+    example: 'To be decided',
+    description: 'The payment Method Id to know if it is active or inactive',
+  })
+  @IsString()
+  paymentId: string;
 
   @ApiProperty({
     example: 'USD',
@@ -19,10 +20,6 @@ export class PaymentEntryDto {
   @ApiProperty({ example: 'card', description: 'The method of payment used' })
   @IsString()
   paymentMethod: string;
-
-  @ApiProperty({ example: 'pm_card_threeDSecureOptional', description: 'The token that stripe gives' })
-  @IsString()
-  stripePaymentMethod: string;
 
   @ApiProperty({
     example: 'Avenida Principal Alto Prado, Edificio Alto Prado Plaza',
@@ -52,5 +49,4 @@ export class PaymentEntryDto {
     id: string,
     quantity: number
   }[];
-
 }
