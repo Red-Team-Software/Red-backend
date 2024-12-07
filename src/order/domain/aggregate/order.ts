@@ -32,6 +32,7 @@ export class Order extends AggregateRoot<OrderId>{
             this.orderReceivedDate = event.orderReceivedDate;
             this.orderReport = event.orderReport;
             this.orderPayment = event.orderPayment;
+            this.orderUserId = event.orderUserId;
         }
 
         if (event instanceof OrderStatusCanceled) {

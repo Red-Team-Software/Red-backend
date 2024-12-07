@@ -9,8 +9,7 @@ export class OrmOrderCourierEntity {
     @ManyToOne(() => OrmCourierEntity, (courier) => courier.order_couriers)
     @JoinColumn({ name: 'courier_id' })
     courier: OrmCourierEntity;
-    
-    @OneToOne(() => OrmOrderEntity, (order) => order)
+
     @PrimaryColumn('uuid')
     order_id: string;
 
