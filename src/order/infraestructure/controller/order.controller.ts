@@ -406,10 +406,10 @@ export class OrderController {
         return response.getValue
     }
 
-    @Post('/cancel/order')
+    @Get('/cancel/:orderId')
     async cancelOrder(
         @GetCredential() credential:ICredential,
-        @Body() data: CancelOrderDto) {
+        @Param() data: CancelOrderDto) {
         let request: CancelOrderApplicationServiceRequestDto = {
             userId: credential.account.idUser,
             orderId: data.orderId
@@ -517,7 +517,6 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Get('/one/:id')
     @Get('/one/:id')
     async findOrderById(
         @GetCredential() credential:ICredential,
