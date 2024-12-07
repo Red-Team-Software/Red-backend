@@ -32,8 +32,11 @@ export class OrmOrderEntity implements IOrderInterface {
     longitude: number;
 
     @ManyToOne( () => OrmUserEntity, (user) => user.orders, {eager: true} )
-    @JoinColumn()
+    @JoinColumn({ name: 'userId' })
     user: OrmUserEntity;
+
+    @Column('varchar')
+    userId: string;
     
     @OneToOne( () => OrmOrderPayEntity, (pay) => pay.order, { cascade: true, eager: true } )
     @JoinColumn()
