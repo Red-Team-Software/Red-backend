@@ -214,12 +214,12 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             if (response.isFailure()) return Result.fail(new ErrorCreatingPaymentApplicationException());
             
-            // let responseDB = await this.orderRepository.saveOrder(response.getValue); 
+            let responseDB = await this.orderRepository.saveOrder(response.getValue); 
 
-            // if (responseDB.isFailure()) 
-            //     return Result.fail(new ErrorCreatingOrderApplicationException());
+            if (responseDB.isFailure()) 
+                return Result.fail(new ErrorCreatingOrderApplicationException());
 
-            //await this.eventPublisher.publish(order.pullDomainEvents());
+            await this.eventPublisher.publish(order.pullDomainEvents());
 
             let productsresponse:{
                 id: string,
