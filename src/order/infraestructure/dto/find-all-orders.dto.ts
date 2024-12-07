@@ -1,9 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsOptional, IsPositive } from "class-validator";
 import { Transform } from "class-transformer";
+import { UserId } from '../../../user/domain/value-object/user-id';
 
 
 export class FindAllOrdersEntryDto {
+
     @ApiProperty( { required: false })
     @IsOptional()
     @IsPositive()
