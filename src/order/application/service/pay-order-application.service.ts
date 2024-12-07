@@ -51,6 +51,9 @@ import { FindAllPromotionApplicationRequestDTO } from 'src/promotion/application
 import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
 import { IPaymentMethodQueryRepository } from 'src/payment-methods/application/query-repository/orm-query-repository.interface';
 import { PaymentMethodId } from 'src/payment-methods/domain/value-objects/payment-method-id';
+import { Cupon } from 'src/cupon/domain/aggregate/cupon.aggregate';
+import { IQueryCuponRepository } from 'src/cupon/domain/query-repository/query-cupon-repository';
+import { CuponId } from 'src/cupon/domain/value-object/cupon-id';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -70,7 +73,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly ormCourierQueryRepository: ICourierQueryRepository,
         private readonly dateHandler: IDateHandler,
         private readonly queryPromotionRepositoy: IQueryPromotionRepository,
-        private readonly paymentQueryRepository:IPaymentMethodQueryRepository
+        private readonly paymentQueryRepository:IPaymentMethodQueryRepository,
+        private readonly cuponRepository: IQueryCuponRepository
         
     ){
         super()
@@ -83,6 +87,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         let orderproducts: OrderProduct[] = [];
         let orderBundles: OrderBundle[] = [];
         let promotions: Promotion[] = [];
+        let cupons: Cupon[]=[];
 
         let paymentResponse=await this.paymentQueryRepository.findMethodById(PaymentMethodId.create(data.paymentId))
 
@@ -126,7 +131,17 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                     )
             )
         }
+/*
+        if(data.cupons){
+            for(const cupon of data.cupons){
+                let domain=await this.cuponRepository.findCuponById(CuponId.create(cupon.id))
 
+                if(!domain.isSuccess())
+                    return Result.fail(new ErrorCreatingOrderCuponNotFoundApplicationException())
+                bundles.push(domain.getValue)
+            }
+        }
+*/
         let findPromotion: FindAllPromotionApplicationRequestDTO = {
             userId: data.userId,
             name: '',
@@ -144,7 +159,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             orderproducts,
             orderBundles,
             promotions,
-            data.currency
+            data.currency,
+            cupons
         );
 
             let orderAddress = OrderAddressStreet.create(data.address);

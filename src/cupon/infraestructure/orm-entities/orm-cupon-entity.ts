@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn, OneToOne, JoinColumn } from "typeorm";
+import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-user-entity";
+import { Column, Entity, PrimaryColumn, OneToOne, JoinColumn, ManyToOne } from "typeorm";
 
 @Entity('cupon')
 export class OrmCuponEntity {
@@ -16,7 +17,11 @@ export class OrmCuponEntity {
 
     @Column({ type: "boolean", default: true })
     state: boolean;
-
+    
+    @ManyToOne( () => OrmUserEntity, (user) => user.orders, {eager: true} )
+    @JoinColumn({ name: 'userId' })
+    user: OrmUserEntity;
+    
     static create(id: string, code: string, name: string, discount: number, state: boolean): OrmCuponEntity {
         const cupon = new OrmCuponEntity();
         cupon.id = id;
