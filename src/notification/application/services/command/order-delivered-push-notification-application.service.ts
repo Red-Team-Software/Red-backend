@@ -24,6 +24,9 @@ export class OrderDeliveredPushNotificationApplicationService extends IApplicati
                 notification: { 
                     title: `Orden ha sido entregada`, 
                     body: `Tu orden con el numero #[${data.orderId}] ha sido entregada con exito.`
+                },
+                data:{
+                    route: `/order/:${data.orderId}`
                 }
             })
         });

@@ -26,7 +26,10 @@ export class CancelledOrderPushNotificationApplicationService extends IApplicati
                     body: `La orden ${data.orderId} ha sido cancelada. 
                     Si tuviste algún inconveniente durante el proceso o necesitas más ayuda, 
                     te invitamos a generar un reporte para que podamos ayudarte mejor.`,
-                } 
+                },
+                data:{
+                    route: `/order/:${data.orderId}`
+                }
             })
         })
 

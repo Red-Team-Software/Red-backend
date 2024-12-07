@@ -23,6 +23,9 @@ export class OrderDeliveringPushNotificationApplicationService extends IApplicat
                 notification: { 
                     title: `Orden en camino`, 
                     body: `Tu orden con el numero #[${data.orderId}] ha sido recibida por el repartidor y va en camino.`
+                },
+                data:{
+                    route: `/order/:${data.orderId}`
                 }
             })
         });
