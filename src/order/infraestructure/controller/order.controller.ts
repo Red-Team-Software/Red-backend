@@ -319,6 +319,11 @@ export class OrderController {
             userId: credential.account.idUser,
             ...data
         }
+
+        if(!data.page)
+            values.page=1
+          if(!data.perPage)
+            values.perPage=10
         
         let service=
         new ExceptionDecorator(
@@ -449,14 +454,14 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Get('/one/:id')
+    @Get('/one')
     async findOrderById(
         @GetCredential() credential:ICredential,
-        @Param() data: FindOrderByIdEntryDto
+        @Param('id') id: string
     ) {
         let values: FindOrderByIdRequestDto = {
             userId: credential.account.idUser,
-            ...data
+            orderId:id
         }
         
         let findById = new ExceptionDecorator(
