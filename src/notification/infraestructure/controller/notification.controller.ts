@@ -21,8 +21,8 @@ import { ICreateCupon } from "../interfaces/create-cupon.interface";
 import { NewCuponPushNotificationApplicationService } from "src/notification/application/services/command/new-cupon-push-notification-application.service";
 import { NewCuponPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-cupon-push-notification-application-request-dto";
 import { CancelOrderPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/cancel-order-push-notification-application-request-dto";
-import { CanceledOrderPushNotificationApplicationService } from "src/notification/application/services/command/cancel-order-push-notification-application.service";
-import { SendGridCanceledOrderEmailSender } from "src/common/infraestructure/email-sender/send-grid-canceled-order-email-sender.service";
+import { CancelledOrderPushNotificationApplicationService } from "src/notification/application/services/command/cancel-order-push-notification-application.service";
+import { SendGridCancelledOrderEmailSender } from "src/common/infraestructure/email-sender/send-grid-cancelled-order-email-sender.service";
 import { ICreateOrder } from "../interfaces/create-order.interface";
 import { ICancelOrder } from "../interfaces/cancel-order.interface";
 import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard";
@@ -113,7 +113,7 @@ export class NotificationController {
 
         this.subscriber.buildQueue({
             name:'OrderEvents/CancelOrder',
-            pattern: 'OrderStatusCanceled',
+            pattern: 'OrderStatusCancelled',
             exchange:{
                 name:'DomainEvent',
                 type:'direct',
@@ -224,8 +224,8 @@ export class NotificationController {
         this.subscriber.consume<ICancelOrder>(
             { name: 'OrderEvents/CancelOrder'}, 
             (data):Promise<void>=>{
-                this.sendPushOrderCanceled(data)
-                this.sendEmailOrderCanceled(data)
+                this.sendPushOrderCancelled(data)
+                this.sendEmailOrderCancelled(data)
                 return
             }
         );
@@ -297,10 +297,10 @@ export class NotificationController {
         service.execute(data);
     };
 
-    async sendPushOrderCanceled(entry:ICancelOrder){
+    async sendPushOrderCancelled(entry:ICancelOrder){
         let service= new ExceptionDecorator(
             new LoggerDecorator(
-                new CanceledOrderPushNotificationApplicationService(
+                new CancelledOrderPushNotificationApplicationService(
                     this.pushsender
                 ),
             new NestLogger(new Logger())
@@ -322,7 +322,7 @@ export class NotificationController {
     };
 
 
-    async sendEmailOrderCanceled(entry:ICancelOrder){
+    async sendEmailOrderCancelled(entry:ICancelOrder){
 
         const accountResponse=await this.queryAccountRepository.findAccountByUserId(entry.orderUserId);
 
@@ -330,7 +330,7 @@ export class NotificationController {
             throw accountResponse.getError;
 
 
-        let emailsender=new SendGridCanceledOrderEmailSender();
+        let emailsender=new SendGridCancelledOrderEmailSender();
         emailsender.setVariablesToSend({
             username:'customer',
             orderid: entry.orderId

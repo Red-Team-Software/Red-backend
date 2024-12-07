@@ -3,5 +3,5 @@ export enum OrderStateEnum{
     delivered = "delivered",
     delivering = "delivering",
     waiting    = "waiting",
-    canceled = "canceled"
+    cancelled = "cancelled"
 }

@@ -107,7 +107,7 @@ export class OrderController {
     //*Aplication services
     private readonly calculateTaxesShippingFee: IApplicationService<TaxesShippingFeeApplicationServiceEntryDto,CalculateTaxesShippingResponseDto>;
     private readonly getAllOrders: IApplicationService<FindAllOrdersApplicationServiceRequestDto,FindAllOrdersApplicationServiceResponseDto>;
-    private readonly orderCanceled: IApplicationService<CancelOrderApplicationServiceRequestDto,CancelOrderApplicationServiceResponseDto>;
+    private readonly orderCancelled: IApplicationService<CancelOrderApplicationServiceRequestDto,CancelOrderApplicationServiceResponseDto>;
     private readonly createReport: IApplicationService<CreateOrderReportApplicationServiceRequestDto,CreateOrderReportApplicationServiceResponseDto>;
 
     //*Repositories
@@ -205,9 +205,9 @@ export class OrderController {
             )
         );
 
-        //*order canceled
+        //*order cancelled
 
-        this.orderCanceled = new ExceptionDecorator(
+        this.orderCancelled = new ExceptionDecorator(
             new LoggerDecorator(
                 new CancelOderApplicationService(
                     this.orderQueryRepository,
@@ -357,7 +357,7 @@ export class OrderController {
             orderId: data.orderId
         }
         
-        let response = await this.orderCanceled.execute(request);
+        let response = await this.orderCancelled.execute(request);
         
         return response.getValue;
     }

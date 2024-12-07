@@ -11,7 +11,7 @@ import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
 import { OrderProduct } from "../entities/order-product/order-product-entity";
 import { EmptyProductBundleAtributes } from "../exception/product-bundle-empty.exception";
 import { OrderReport } from "../entities/report/report-entity";
-import { OrderStatusCanceled } from "../domain-events/order-state-canceled";
+import { OrderStatusCancelled } from "../domain-events/order-state-cancelled";
 import { OrderPayment } from "../entities/payment/order-payment-entity";
 import { OrderStatusDelivered } from "../domain-events/order-state-delivered";
 import { OrderCourier } from "../entities/order-courier/order-courier-entity";
@@ -36,7 +36,7 @@ export class Order extends AggregateRoot<OrderId>{
             this.orderUserId = event.orderUserId;
         }
 
-        if (event instanceof OrderStatusCanceled) {
+        if (event instanceof OrderStatusCancelled) {
             this.orderState = event.orderState;
         }
 
@@ -169,7 +169,7 @@ export class Order extends AggregateRoot<OrderId>{
 
     cancelOrder(orderState: OrderState): void {
         this.apply(
-            OrderStatusCanceled.create(
+            OrderStatusCancelled.create(
                 this.getId(),
                 orderState,
                 this.orderUserId

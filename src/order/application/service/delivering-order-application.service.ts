@@ -10,7 +10,7 @@ import { ErrorModifiyingOrderStateApplicationException } from "../application-ex
 import { DeliveringOrderApplicationServiceRequestDto } from "../dto/request/delivering-order-request-dto";
 import { DeliveringOrderApplicationServiceResponseDto } from "../dto/response/delivering-order-response-dto";
 import { ErrorOrderAlreadyDeliveringApplicationException } from "../application-exception/error-orden-already-delivering-application.exception";
-import { ErrorOrderAlreadyCanceledApplicationException } from "../application-exception/error-orden-already-canceled-application.exception";
+import { ErrorOrderAlreadyCancelledApplicationException } from "../application-exception/error-orden-already-cancelled-application.exception";
 
 
 
@@ -36,8 +36,8 @@ export class DeliveringOderApplicationService extends IApplicationService<Delive
             new ErrorOrderAlreadyDeliveringApplicationException()
         );
         
-        if (newOrder.OrderState.orderState === 'canceled') return Result.fail(
-            new ErrorOrderAlreadyCanceledApplicationException('The order cant be delivered because is already canceled')
+        if (newOrder.OrderState.orderState === 'cancelled') return Result.fail(
+            new ErrorOrderAlreadyCancelledApplicationException('The order cant be delivered because is already cancelled')
         );
 
         newOrder.orderDelivering(OrderState.create('delivering'));

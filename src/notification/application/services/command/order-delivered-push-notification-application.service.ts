@@ -2,7 +2,7 @@ import { IPushNotifier } from "src/common/application/notification-handler/notif
 import { Result } from "src/common/utils/result-handler/result";
 import { IApplicationService } from "src/common/application/services";
 import { PushNotifierRequestDto } from "src/common/application/notification-handler/dto/request/push-notifier-request-dto";
-import { ErrorSendingPushOrderCanceledApplicationException } from "../../application-exception/error-sending-push-order-canceled-application-exception";
+import { ErrorSendingPushOrderCancelledApplicationException } from "../../application-exception/error-sending-push-order-cancelled-application-exception";
 import { OrderDeliveredPushNotificationApplicationRequestDTO } from "../../dto/request/order-delivered-push-notification-application-request-dto";
 import { OrderDeliveredPushNotificationApplicationResponseDTO } from "../../dto/response/order-delivered-push-notification-application-response-dto";
 

@@ -9,7 +9,7 @@ import { NotFoundOrderApplicationException } from "../application-exception/not-
 import { OrderState } from "src/order/domain/value_objects/order-state";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { ErrorModifiyingOrderStateApplicationException } from "../application-exception/error-modifying-order-status-application.exception";
-import { ErrorOrderAlreadyCanceledApplicationException } from "../application-exception/error-orden-already-canceled-application.exception";
+import { ErrorOrderAlreadyCancelledApplicationException } from "../application-exception/error-orden-already-cancelled-application.exception";
 import { DeliveredOrderApplicationServiceRequestDto } from "../dto/request/delivered-order-request-dto";
 import { DeliveredOrderApplicationServiceResponseDto } from "../dto/response/delivered-order-response-dto";
 
@@ -33,8 +33,8 @@ export class DeliveredOderApplicationService extends IApplicationService<Deliver
 
         let newOrder = response.getValue;
 
-        if (newOrder.OrderState.orderState === 'canceled') return Result.fail(
-            new ErrorOrderAlreadyCanceledApplicationException('The order is already canceled')
+        if (newOrder.OrderState.orderState === 'cancelled') return Result.fail(
+            new ErrorOrderAlreadyCancelledApplicationException('The order is already cancelled')
         );
 
         newOrder.orderDelivered(OrderState.create('delivered'));

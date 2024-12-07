@@ -6,7 +6,7 @@ import { NotFoundException } from "../infraestructure-exception/not-found/not-fo
 import { envs } from "src/config/envs/envs";
 
 
-export class SendGridCanceledOrderEmailSender implements IEmailSender<EmailSenderCancelOrderEntryDTO,boolean>{
+export class SendGridCancelledOrderEmailSender implements IEmailSender<EmailSenderCancelOrderEntryDTO,boolean>{
     public templateId='d-f5233b353e0d40eba083b0750ae5b10b'
     public variables:EmailSenderCancelOrderEntryDTO
 
