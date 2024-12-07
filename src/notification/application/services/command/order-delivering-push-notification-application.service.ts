@@ -2,18 +2,17 @@ import { IPushNotifier } from "src/common/application/notification-handler/notif
 import { Result } from "src/common/utils/result-handler/result";
 import { IApplicationService } from "src/common/application/services";
 import { PushNotifierRequestDto } from "src/common/application/notification-handler/dto/request/push-notifier-request-dto";
-import { ErrorSendingPushOrderCancelledApplicationException } from "../../application-exception/error-sending-push-order-cancelled-application-exception";
-import { OrderDeliveredPushNotificationApplicationRequestDTO } from "../../dto/request/order-delivered-push-notification-application-request-dto";
-import { OrderDeliveredPushNotificationApplicationResponseDTO } from "../../dto/response/order-delivered-push-notification-application-response-dto";
+import { OrderDeliveringPushNotificationApplicationRequestDTO } from "../../dto/request/order-delivering-push-notification-application-request-dto";
+import { OrderDeliveringPushNotificationApplicationResponseDTO } from "../../dto/response/order-delivering-push-notification-application-response-dto";
 
 
-export class OrderDeliveredPushNotificationApplicationService extends IApplicationService<OrderDeliveredPushNotificationApplicationRequestDTO,OrderDeliveredPushNotificationApplicationResponseDTO>{
+export class OrderDeliveringPushNotificationApplicationService extends IApplicationService<OrderDeliveringPushNotificationApplicationRequestDTO,OrderDeliveringPushNotificationApplicationResponseDTO>{
     constructor(
         private readonly pushNotifier:IPushNotifier,
     ){
         super()
     }
-    async execute(data: OrderDeliveredPushNotificationApplicationRequestDTO): Promise<Result<OrderDeliveredPushNotificationApplicationResponseDTO>> {
+    async execute(data: OrderDeliveringPushNotificationApplicationRequestDTO): Promise<Result<OrderDeliveringPushNotificationApplicationResponseDTO>> {
 
 
         let sendDTO:PushNotifierRequestDto[]=[];
@@ -22,8 +21,8 @@ export class OrderDeliveredPushNotificationApplicationService extends IApplicati
             sendDTO.push({
                 token: token,
                 notification: { 
-                    title: `Orden ha sido entregada`, 
-                    body: `Tu orden con el numero #[${data.orderId}] ha sido entregada con exito.`
+                    title: `Orden en camino`, 
+                    body: `Tu orden con el numero #[${data.orderId}] ha sido recibida por el repartidor y va en camino.`
                 },
                 data:{
                     route: `/order/:${data.orderId}`
