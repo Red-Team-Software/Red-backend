@@ -304,6 +304,11 @@ export class OrderController {
             userId: credential.account.idUser,
             ...data
         }
+
+        if(!data.page)
+            values.page=1
+          if(!data.perPage)
+            values.perPage=10
         
         let response = await this.getAllOrders.execute(values);
         

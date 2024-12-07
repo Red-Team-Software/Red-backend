@@ -40,10 +40,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
                 take:data.perPage
             },
             )
-            
-            if(!ormOrders)
-                return Result.fail( new NotFoundException('Orders empty, please try again'))
-            
+                        
             let domainOrders: Order[] = [];
 
             for(let ormOrder of ormOrders){

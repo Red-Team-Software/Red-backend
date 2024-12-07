@@ -51,6 +51,7 @@ import { DateHandler } from "src/common/infraestructure/date-handler/date-handle
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer";
 import { IDeliveringOrder } from "../interfaces/delivering-order.interface";
 import { OrderDeliveringPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/order-delivering-push-notification-application-request-dto";
+import { NewBundlePushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-bundle-push-notification-application-request-dto";
 
 @ApiTags('Notification')
 @Controller('notification')
@@ -398,6 +399,7 @@ export class NotificationController {
         let data:NewProductPushNotificationApplicationRequestDTO={
             userId:'none',
             tokens:tokens.getValue,
+            productId:entry.productId,
             name:entry.productName,
             price:entry.productPrice.price,
             currency:entry.productPrice.currency
@@ -459,7 +461,7 @@ export class NotificationController {
             )
         );
 
-        let data:NewProductPushNotificationApplicationRequestDTO={
+        let data:NewBundlePushNotificationApplicationRequestDTO={
             userId:'none',
             tokens:tokensResponse.getValue,
             name:entry.bundleName,
