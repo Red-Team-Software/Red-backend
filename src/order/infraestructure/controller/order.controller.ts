@@ -84,6 +84,9 @@ import { DeliveredOrderDto } from "../dto/delivered-order-entry.dto";
 import { DeliveringOrderDto } from "../dto/delivering-order-entry.dto";
 import { DeliveringOderApplicationService } from "src/order/application/service/delivering-order-application.service";
 import { DeliveredOderApplicationService } from "src/order/application/service/delivered-order-application.service";
+import { IExchangeRateResponse } from "../interfaces/exchange-rate-response.interface";
+import { ExchangeRateSingelton } from "src/payments/infraestructure/exchange-rate-singleton";
+import { payOrder } from "../dto/pay-order-dto";
 
 
 @ApiBearerAuth()
@@ -98,6 +101,7 @@ export class OrderController {
     //*Singeltons
     private readonly stripeSingleton: StripeSingelton;
     private readonly hereMapsSingelton: HereMapsSingelton;
+    private readonly exchange: ExchangeRateSingelton;
     
     //*Domain services
     private readonly calculateShipping: ICalculateShippingFee;
@@ -136,6 +140,7 @@ export class OrderController {
         //*implementations of singeltons
         this.stripeSingleton = StripeSingelton.getInstance();
         this.hereMapsSingelton = HereMapsSingelton.getInstance(); 
+        this.exchange = ExchangeRateSingelton.getInstance();
 
         //*RabbitMQ
         this.rabbitMq = new RabbitMQPublisher(this.channel);
@@ -459,7 +464,7 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Get('/one')
+    @Get('/one/:id')
     async findOrderById(
         @GetCredential() credential:ICredential,
         @Param('id') id: string
@@ -484,6 +489,29 @@ export class OrderController {
         let response = await findById.execute(values);
         
         return response.getValue;
+    }
+
+    @Post('/prueba')
+    async exchangeCurrency(
+        @GetCredential() credential:ICredential,
+        @Body() am: payOrder) {
+        try{
+            const amountAsNumber = Number(am.am);
+            const url = `https://v6.exchangerate-api.com/v6/${this.exchange.getapiKey()}/pair/${am.currency}/${am.currency2}/${amountAsNumber}`;
+    
+            let response = await fetch(url);
+            if (!response.ok) {
+                console.log(response); 
+                return Error();}
+                
+            let data: IExchangeRateResponse = await response.json();
+            let amt = data.conversion_result;
+    
+            return amt;
+        }catch(error){
+            console.log(error);
+            return new Error();
+        }
     }
 
 }
