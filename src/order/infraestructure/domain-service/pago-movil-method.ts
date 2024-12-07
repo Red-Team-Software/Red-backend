@@ -9,6 +9,8 @@ import { PaymentId } from "src/order/domain/entities/payment/value-object/paymen
 import { PaymentMethod } from "src/order/domain/entities/payment/value-object/payment-method";
 import { OrderState } from "src/order/domain/value_objects/order-state";
 import { PagoMovilDTO } from "../dto/pago-movil-dto-entry.dto";
+import { IConversionService } from "src/order/domain/domain-services/conversion-currency-interface";
+import { ConvertAmount } from "src/order/domain/value_objects/vo-domain-services/convert-amount";
 
 
 
@@ -16,10 +18,18 @@ export class PagoMovilPaymentMethod implements IPaymentMethodService {
     
     constructor(
         private readonly idGen: IIdGen<string>,
-        private readonly pagoMovilDataDto:PagoMovilDTO
+        private readonly pagoMovilDataDto:PagoMovilDTO,
+        private readonly exchangeRate: IConversionService
     ) {}
 
     async createPayment(order: Order): Promise<Result<Order>> {
+        console.log("llegue aqui");
+        let change = ConvertAmount.create(order.TotalAmount.OrderAmount, order.TotalAmount.OrderCurrency)
+
+        let newChange = await this.exchangeRate.convertAmount(change)
+        
+        console.log(newChange);
+
         let newOrder = Order.registerOrder(
             order.getId(),
             OrderState.create('ongoing'),
@@ -35,8 +45,8 @@ export class PagoMovilPaymentMethod implements IPaymentMethodService {
             OrderPayment.create(
                 PaymentId.create(await this.idGen.genId()),
                 PaymentMethod.create('pago movil'),
-                PaymentAmount.create(order.TotalAmount.OrderAmount),
-                PaymentCurrency.create(order.TotalAmount.OrderCurrency)
+                PaymentAmount.create(newChange.getValue.Amount),
+                PaymentCurrency.create(newChange.getValue.Currency)
             )
         )
         return Result.success(newOrder)

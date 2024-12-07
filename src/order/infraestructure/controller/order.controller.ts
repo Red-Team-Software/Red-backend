@@ -88,7 +88,7 @@ import { PagoMovilPaymentEntryDto } from "../dto/pago-movil-payment-entry-dto";
 import { PagoMovilPaymentMethod } from "../domain-service/pago-movil-method";
 import { IExchangeRateResponse } from "../interfaces/exchange-rate-response.interface";
 import { ExchangeRateSingelton } from "src/payments/infraestructure/exchange-rate-singleton";
-import { payOrder } from "../dto/pay-order-dto";
+import { ConvertCurrencyExchangeRate } from "../domain-service/conversion-currency-exchange-rate";
 
 
 @ApiBearerAuth()
@@ -103,7 +103,7 @@ export class OrderController {
     //*Singeltons
     private readonly stripeSingleton: StripeSingelton;
     private readonly hereMapsSingelton: HereMapsSingelton;
-    private readonly exchange: ExchangeRateSingelton;
+    private readonly exchangeRateSingelton: ExchangeRateSingelton;
     
     //*Domain services
     private readonly calculateShipping: ICalculateShippingFee;
@@ -141,8 +141,8 @@ export class OrderController {
 
         //*implementations of singeltons
         this.stripeSingleton = StripeSingelton.getInstance();
-        this.hereMapsSingelton = HereMapsSingelton.getInstance(); 
-        this.exchange = ExchangeRateSingelton.getInstance();
+        this.hereMapsSingelton = HereMapsSingelton.getInstance();
+        this.exchangeRateSingelton = ExchangeRateSingelton.getInstance();
 
         //*RabbitMQ
         this.rabbitMq = new RabbitMQPublisher(this.channel);
@@ -310,7 +310,8 @@ export class OrderController {
                     this.calculateTax,
                     new PagoMovilPaymentMethod(
                         this.idGen,
-                        {...data}
+                        {...data},
+                        new ConvertCurrencyExchangeRate(this.exchangeRateSingelton)
                     ),
                     this.orderRepository,
                     this.idGen,
@@ -542,29 +543,6 @@ export class OrderController {
         let response = await findById.execute(values);
         
         return response.getValue;
-    }
-
-    @Post('/prueba')
-    async exchangeCurrency(
-        @GetCredential() credential:ICredential,
-        @Body() am: payOrder) {
-        try{
-            const amountAsNumber = Number(am.am);
-            const url = `https://v6.exchangerate-api.com/v6/${this.exchange.getapiKey()}/pair/${am.currency}/${am.currency2}/${amountAsNumber}`;
-    
-            let response = await fetch(url);
-            if (!response.ok) {
-                console.log(response); 
-                return Error();}
-                
-            let data: IExchangeRateResponse = await response.json();
-            let amt = data.conversion_result;
-    
-            return amt;
-        }catch(error){
-            console.log(error);
-            return new Error();
-        }
     }
 
 }

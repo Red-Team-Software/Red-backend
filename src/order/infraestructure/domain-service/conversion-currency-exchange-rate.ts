@@ -26,7 +26,9 @@ export class ConvertCurrencyExchangeRate implements IConversionService {
             let data: IExchangeRateResponse = await response.json();
             let amt = data.conversion_result;
             
-            let newAmount = ConvertAmount.create(amt,'bsf');
+            let roundedAmt = Math.round(amt * 100) / 100;
+            
+            let newAmount = ConvertAmount.create(roundedAmt,'bsf');
 
             return Result.success(newAmount);
         }catch(error){

@@ -86,8 +86,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
         let paymentResponse=await this.paymentQueryRepository.findMethodById(PaymentMethodId.create(data.paymentId))
 
-        console.log(paymentResponse)
-
         if (!paymentResponse.isSuccess())
             return Result.fail(paymentResponse.getError)
 
@@ -196,7 +194,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             );
 
             let orderUserId: OrderUserId = OrderUserId.create(data.userId);
-            
+
             let order = Order.initializeAggregate(
                 OrderId.create(await this.idGen.genId()),
                 OrderState.create('waiting'),
@@ -216,12 +214,12 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             if (response.isFailure()) return Result.fail(new ErrorCreatingPaymentApplicationException());
             
-            let responseDB = await this.orderRepository.saveOrder(response.getValue); 
+            // let responseDB = await this.orderRepository.saveOrder(response.getValue); 
 
-            if (responseDB.isFailure()) 
-                return Result.fail(new ErrorCreatingOrderApplicationException());
+            // if (responseDB.isFailure()) 
+            //     return Result.fail(new ErrorCreatingOrderApplicationException());
 
-            await this.eventPublisher.publish(order.pullDomainEvents());
+            //await this.eventPublisher.publish(order.pullDomainEvents());
 
             let productsresponse:{
                 id: string,
