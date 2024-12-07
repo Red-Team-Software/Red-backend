@@ -49,6 +49,7 @@ import { IAuditRepository } from "src/common/application/repositories/audit.repo
 import { OrmAuditRepository } from "src/common/infraestructure/repository/orm-repository/orm-audit.repository";
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler";
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer";
+import { NewBundlePushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-bundle-push-notification-application-request-dto";
 
 @ApiTags('Notification')
 @Controller('notification')
@@ -351,6 +352,7 @@ export class NotificationController {
         let data:NewProductPushNotificationApplicationRequestDTO={
             userId:'none',
             tokens:tokens.getValue,
+            productId:entry.productId,
             name:entry.productName,
             price:entry.productPrice.price,
             currency:entry.productPrice.currency
@@ -412,7 +414,7 @@ export class NotificationController {
             )
         );
 
-        let data:NewProductPushNotificationApplicationRequestDTO={
+        let data:NewBundlePushNotificationApplicationRequestDTO={
             userId:'none',
             tokens:tokensResponse.getValue,
             name:entry.bundleName,
