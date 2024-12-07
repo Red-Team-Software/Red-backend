@@ -21,9 +21,9 @@ export class OrderDeliveringPushNotificationApplicationService extends IApplicat
             sendDTO.push({
                 token: token,
                 notification: { 
-                    title: `Orden ha sido entregada`, 
-                    body: `Tu orden con el numero #[${data.orderId}] ha sido entregada con exito.`
-                } 
+                    title: `Orden en camino`, 
+                    body: `Tu orden con el numero #[${data.orderId}] ha sido recibida por el repartidor y va en camino.`
+                }
             })
         });
 
