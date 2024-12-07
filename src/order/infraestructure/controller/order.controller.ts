@@ -84,6 +84,8 @@ import { DeliveredOrderDto } from "../dto/delivered-order-entry.dto";
 import { DeliveringOrderDto } from "../dto/delivering-order-entry.dto";
 import { DeliveringOderApplicationService } from "src/order/application/service/delivering-order-application.service";
 import { DeliveredOderApplicationService } from "src/order/application/service/delivered-order-application.service";
+import { PagoMovilPaymentEntryDto } from "../dto/pago-movil-payment-entry-dto";
+import { PagoMovilPaymentMethod } from "../domain-service/pago-movil-method";
 
 
 @ApiBearerAuth()
@@ -272,11 +274,61 @@ export class OrderController {
             )
         );
 
+        
+
 
         let response = await payOrderService.execute(payment);
         
         return response.getValue;
     }
+
+    @Post('/pay/pagomovil')
+    async realizePaymentZelle(
+        @GetCredential() credential:ICredential,
+        @Body() data: PagoMovilPaymentEntryDto
+    ) {
+        let payment: OrderPayApplicationServiceRequestDto = {
+            userId: credential.account.idUser,
+            paymentId: data.paymentId,
+            currency: data.currency.toLowerCase(),
+            paymentMethod: data.paymentMethod,
+            address: data.address,
+            products: data.products,
+            bundles: data.bundles
+        }
+
+        let payOrderService = new ExceptionDecorator(
+            new LoggerDecorator(
+                new PayOrderAplicationService(
+                    this.rabbitMq,
+                    this.calculateShipping,
+                    this.calculateTax,
+                    new PagoMovilPaymentMethod(
+                        this.idGen,
+                        {...data}
+                    ),
+                    this.orderRepository,
+                    this.idGen,
+                    this.geocodificationAddress,
+                    this.ormProductRepository,
+                    this.ormBundleRepository,
+                    this.ormCourierQueryRepository,
+                    new DateHandler(),
+                    new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
+                    this.paymentMethodQueryRepository
+                ),
+                new NestLogger(new Logger())
+            )
+        );
+
+        
+
+
+        let response = await payOrderService.execute(payment);
+        
+        return response.getValue;
+    }
+
 
     @Post('/tax-shipping-fee')
     async calculateTaxesAndShipping(
@@ -459,7 +511,7 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Get('/one')
+    @Get('/one/:id')
     async findOrderById(
         @GetCredential() credential:ICredential,
         @Param('id') id: string
