@@ -49,6 +49,8 @@ import { IAuditRepository } from "src/common/application/repositories/audit.repo
 import { OrmAuditRepository } from "src/common/infraestructure/repository/orm-repository/orm-audit.repository";
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler";
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer";
+import { IDeliveringOrder } from "../interfaces/delivering-order.interface";
+import { OrderDeliveringPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/order-delivering-push-notification-application-request-dto";
 
 @ApiTags('Notification')
 @Controller('notification')
@@ -111,6 +113,18 @@ export class NotificationController {
         this.subscriber.buildQueue({
             name:'OrderEvents/CancelOrder',
             pattern: 'OrderStatusCanceled',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        });
+
+        this.subscriber.buildQueue({
+            name:'OrderEvents/OrderStatusDelivering',
+            pattern: 'OrderStatusDelivering',
             exchange:{
                 name:'DomainEvent',
                 type:'direct',
@@ -223,7 +237,40 @@ export class NotificationController {
             }
         );
 
+        this.subscriber.consume<IDeliveringOrder>(
+            { name: 'OrderEvents/OrderStatusDelivering'}, 
+            (data):Promise<void>=>{
+                this.sendPushOrderDelivering(data)
+                return
+            }
+        );
+
     }
+
+    async sendPushOrderDelivering(entry:IDeliveringOrder){
+        let service= new ExceptionDecorator(
+            new LoggerDecorator(
+                new OrderDeliveredPushNotificationApplicationService(
+                    this.pushsender
+                ),
+            new NestLogger(new Logger())
+            )
+        );
+        
+        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
+
+        let data: OrderDeliveringPushNotificationApplicationRequestDTO={
+            userId:'none',
+            tokens:[tokensResponse.getValue.push_token],
+            orderState:entry.orderState,
+            orderId:entry.orderId
+        };
+        service.execute(data);
+    };
+
 
     async sendPushOrderDelivered(entry:IDeliveredOrder){
         let service= new ExceptionDecorator(
