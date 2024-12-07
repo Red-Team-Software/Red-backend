@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Logger, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Logger, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { StripeSingelton } from "src/payments/infraestructure/stripe-singelton";
 import { StripePaymentEntryDto } from "../dto/stripe-payment-entry-dto";
@@ -78,6 +78,12 @@ import { FindAllOdersByUserApplicationService } from "src/order/application/serv
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
 import { OrmPaymentMethodMapper } from "src/payment-methods/infraestructure/mapper/orm-mapper/orm-payment-method-mapper";
 import { OrmPaymentMethodQueryRepository } from "src/payment-methods/infraestructure/repository/orm-repository/orm-payment-method-query-repository";
+import { DeliveredOrderApplicationServiceRequestDto } from "src/order/application/dto/request/delivered-order-request-dto";
+import { DeliveringOrderApplicationServiceRequestDto } from "src/order/application/dto/request/delivering-order-request-dto";
+import { DeliveredOrderDto } from "../dto/delivered-order-entry.dto";
+import { DeliveringOrderDto } from "../dto/delivering-order-entry.dto";
+import { DeliveringOderApplicationService } from "src/order/application/service/delivering-order-application.service";
+import { DeliveredOderApplicationService } from "src/order/application/service/delivered-order-application.service";
 
 
 @ApiBearerAuth()
@@ -101,7 +107,7 @@ export class OrderController {
     //*Aplication services
     private readonly calculateTaxesShippingFee: IApplicationService<TaxesShippingFeeApplicationServiceEntryDto,CalculateTaxesShippingResponseDto>;
     private readonly getAllOrders: IApplicationService<FindAllOrdersApplicationServiceRequestDto,FindAllOrdersApplicationServiceResponseDto>;
-    private readonly orderCanceled: IApplicationService<CancelOrderApplicationServiceRequestDto,CancelOrderApplicationServiceResponseDto>;
+    private readonly orderCancelled: IApplicationService<CancelOrderApplicationServiceRequestDto,CancelOrderApplicationServiceResponseDto>;
     private readonly createReport: IApplicationService<CreateOrderReportApplicationServiceRequestDto,CreateOrderReportApplicationServiceResponseDto>;
 
     //*Repositories
@@ -199,9 +205,9 @@ export class OrderController {
             )
         );
 
-        //*order canceled
+        //*order cancelled
 
-        this.orderCanceled = new ExceptionDecorator(
+        this.orderCancelled = new ExceptionDecorator(
             new LoggerDecorator(
                 new CancelOderApplicationService(
                     this.orderQueryRepository,
@@ -272,7 +278,6 @@ export class OrderController {
         return response.getValue;
     }
 
-    //@UseGuards(JwtAuthGuard)
     @Post('/tax-shipping-fee')
     async calculateTaxesAndShipping(
         @GetCredential() credential:ICredential,
@@ -290,7 +295,6 @@ export class OrderController {
         return response.getValue;
     }
 
-    //@UseGuards(JwtAuthGuard)
     @Get('/all')
     async findAllOrders(
         @GetCredential() credential:ICredential,
@@ -300,13 +304,17 @@ export class OrderController {
             userId: credential.account.idUser,
             ...data
         }
+
+        if(!data.page)
+            values.page=1
+          if(!data.perPage)
+            values.perPage=10
         
         let response = await this.getAllOrders.execute(values);
         
         return response.getValue;
     }
 
-    //@UseGuards(JwtAuthGuard)
     @Get('/user/all')
     async findAllByUserOrders(
         @GetCredential() credential:ICredential,
@@ -316,26 +324,30 @@ export class OrderController {
             userId: credential.account.idUser,
             ...data
         }
+
+        if(!data.page)
+            values.page=1
+          if(!data.perPage)
+            values.perPage=10
         
         let service=
         new ExceptionDecorator(
             new LoggerDecorator(
-              new PerformanceDecorator(
+            new PerformanceDecorator(
                 new FindAllOdersByUserApplicationService(
                     this.orderQueryRepository,
                     this.ormProductRepository,
                     this.ormBundleRepository,
                     this.ormCourierQueryRepository
                 ), new NestTimer(), new NestLogger(new Logger())
-              ),new NestLogger(new Logger())
+            ),new NestLogger(new Logger())
             )
-          )
+        )
         
         let response=await service.execute({...data,userId:credential.account.idUser})
         return response.getValue
     }
 
-    //@UseGuards(JwtAuthGuard)
     @Post('/cancel/order')
     async cancelOrder(
         @GetCredential() credential:ICredential,
@@ -345,12 +357,63 @@ export class OrderController {
             orderId: data.orderId
         }
         
-        let response = await this.orderCanceled.execute(request);
+        let response = await this.orderCancelled.execute(request);
         
         return response.getValue;
     }
 
-    //@UseGuards(JwtAuthGuard)
+    @Post('/delivering/order')
+    async deliveringOrder(
+        @GetCredential() credential:ICredential,
+        @Body() data: DeliveringOrderDto) {
+        
+            let request: DeliveringOrderApplicationServiceRequestDto = {
+            userId: credential.account.idUser,
+            orderId: data.orderId
+        }
+
+        let orderDelivering = new ExceptionDecorator(
+            new LoggerDecorator(
+                new DeliveringOderApplicationService(
+                    this.orderQueryRepository,
+                    this.orderRepository,
+                    this.rabbitMq
+                ),
+                new NestLogger(new Logger())
+            )
+        );
+        
+        let response = await orderDelivering.execute(request);
+        
+        return response.getValue;
+    }
+
+    @Post('/delivered/order')
+    async deliveredOrder(
+        @GetCredential() credential:ICredential,
+        @Body() data: DeliveredOrderDto) {
+        
+            let request: DeliveredOrderApplicationServiceRequestDto = {
+            userId: credential.account.idUser,
+            orderId: data.orderId
+        }
+
+        let orderDelivered = new ExceptionDecorator(
+            new LoggerDecorator(
+                new DeliveredOderApplicationService(
+                    this.orderQueryRepository,
+                    this.orderRepository,
+                    this.rabbitMq
+                ),
+                new NestLogger(new Logger())
+            )
+        );
+        
+        let response = await orderDelivered.execute(request);
+        
+        return response.getValue;
+    }
+
     @Post('/report/order')
     async reportOrder(
         @GetCredential() credential:ICredential,
@@ -396,14 +459,14 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Get('/one/:id')
+    @Get('/one')
     async findOrderById(
         @GetCredential() credential:ICredential,
-        @Query() data: FindOrderByIdEntryDto
+        @Param('id') id: string
     ) {
         let values: FindOrderByIdRequestDto = {
             userId: credential.account.idUser,
-            ...data
+            orderId:id
         }
         
         let findById = new ExceptionDecorator(
@@ -422,24 +485,5 @@ export class OrderController {
         
         return response.getValue;
     }
-
-    // @Post('/refund/stripe')
-    // async refundPayment(@Body() data: StripePaymentEntryDto) {
-    //     try {
-
-    //         const paymentIntents = await this.stripeSingleton.stripeInstance.paymentIntents.list({});
-
-    //         const stripePaymentIntent = paymentIntents.data.find(
-    //             (paymentIntent) => paymentIntent.metadata.orderId === data.paymentId,
-    //         );
-
-    //         const refund = await this.stripeSingleton.stripeInstance.refunds.create({
-    //             payment_intent: stripePaymentIntent.id,
-    //         });
-    //         return refund.status;
-    //     } catch (error) {
-    //         return error;
-    //     }
-    // }
 
 }

@@ -35,23 +35,18 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
             const ormOrders = await this.find({
                 relations: 
                 ["pay", "order_products", "order_bundles","order_report","order_courier", "user"],
-                where:{userId: data.userId}})
-            
-            if(!ormOrders)
-                return Result.fail( new NotFoundException('Orders empty, please try again'))
-            
+                where:{userId: data.userId},
+                skip:data.page,
+                take:data.perPage
+            },
+            )
+                        
             let domainOrders: Order[] = [];
 
             for(let ormOrder of ormOrders){
                 let or = await this.orderMapper.fromPersistencetoDomain(ormOrder)
                 domainOrders.push(or);
             };
-
-            if (data.perPage) {
-                let page = data.page;
-                if (!page) {page = 0}
-                domainOrders = domainOrders.slice((page*data.perPage), (data.perPage) + (page*data.perPage));
-            }
 
             return Result.success(domainOrders);
         } catch (error) {
@@ -64,7 +59,9 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
         try {
             const ormOrders = await this.find({
                 relations: ["pay", "order_products", "order_bundles","order_report","order_courier", "user"],
-                order: { orderCreatedDate: 'DESC' }
+                order: { orderCreatedDate: 'DESC' },
+                skip:data.page,
+                take:data.perPage
             });
             
                 if(!ormOrders) return Result.fail( new NotFoundException('Orders empty, please try again'))
@@ -75,13 +72,6 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
                     let or = await this.orderMapper.fromPersistencetoDomain(ormOrder)
                     domainOrders.push(or);
                 };
-
-                if (data.perPage) {
-                    let page = data.page;
-                    if (!page) {page = 0}
-        
-                    domainOrders = domainOrders.slice((page*data.perPage), (data.perPage) + (page*data.perPage));
-                }
 
             return Result.success(domainOrders);
         } catch (error) {

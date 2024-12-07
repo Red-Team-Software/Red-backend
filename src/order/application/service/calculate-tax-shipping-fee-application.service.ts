@@ -41,6 +41,9 @@ export class CalculateTaxShippingFeeAplicationService extends IApplicationServic
 
         if (!taxes.isSuccess) return Result.fail(new ErrorObtainingTaxesApplicationException());
 
-        return Result.success(new CalculateTaxesShippingResponseDto(taxes.getValue.OrderTaxes,shippingFee.getValue.OrderShippingFee));
+        return Result.success(new CalculateTaxesShippingResponseDto(
+            taxes.getValue.OrderTaxes,
+            shippingFee.getValue.OrderShippingFee
+        ));
     }
 }

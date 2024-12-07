@@ -4,5 +4,8 @@ export interface PushNotifierRequestDto {
         title: string 
         body: string
         icon?: string
-    } 
+    }
+    data?:{
+        route:string
+    }
 }

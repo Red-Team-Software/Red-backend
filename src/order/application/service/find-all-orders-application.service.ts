@@ -27,6 +27,8 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
     
     async execute(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<FindAllOrdersApplicationServiceResponseDto>> {
 
+        data.page = data.page * data.perPage - data.perPage
+
         let response = await this.orderRepository.findAllOrders(data);
 
         if (response.isFailure()) return Result.fail(new NotFoundOrderApplicationException());
