@@ -35,6 +35,8 @@ import { OrmAuditRepository } from 'src/common/infraestructure/repository/orm-re
 import { DateHandler } from 'src/common/infraestructure/date-handler/date-handler';
 import { NestTimer } from 'src/common/infraestructure/timer/nets-timer';
 import { ICommandProductRepository } from 'src/product/domain/repository/product.command.repositry.interface';
+import { SecurityDecorator } from 'src/common/application/aspects/security-decorator/security-decorator';
+import { UserRoles } from 'src/user/domain/value-object/enum/user.roles';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -73,19 +75,21 @@ export class ProductController {
     }),
   ) images: Express.Multer.File[]) {
 
-    let service= new ExceptionDecorator(
-      new AuditDecorator(
-        new PerformanceDecorator(
-          new CreateProductApplicationService(
-            new RabbitMQPublisher(this.channel),
-            this.ormCommandProductRepo,
-            this.ormQueryProductRepo,
-            this.idGen,
-            new CloudinaryService()
-          ),new NestTimer(),new NestLogger(new Logger())
-        ),this.auditRepository,new DateHandler()
+    let service=
+    new ExceptionDecorator(
+      new SecurityDecorator(
+        new AuditDecorator(
+          new PerformanceDecorator(
+            new CreateProductApplicationService(
+              new RabbitMQPublisher(this.channel),
+              this.ormCommandProductRepo,
+              this.ormQueryProductRepo,
+              this.idGen,
+              new CloudinaryService()
+            ),new NestTimer(),new NestLogger(new Logger())
+          ),this.auditRepository,new DateHandler()
+        ),credential,[UserRoles.ADMIN])
       )
-    )
       let buffers=images.map(image=>image.buffer)
     let response= await service.execute({userId:credential.account.idUser,...entry,images:buffers})
     return response.getValue
