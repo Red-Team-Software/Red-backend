@@ -1,0 +1,16 @@
+{
+    "default": {
+      "paths": [
+        "test/**/**/**/*.feature",
+        "test/**/**/**/**/*.feature"
+      ],
+      "requireModule": ["ts-node/register", "tsconfig-paths/register"],
+      "require": [
+        "test/**/**/**/*.steps.ts",
+        "test/**/**/**/**/*.steps.ts"
+      ],
+      "formatOptions": {
+        "snippetInterface": "synchronous"
+        }
+    }
+  }
