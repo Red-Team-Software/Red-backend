@@ -46,9 +46,12 @@ export class DeleteUserDirectionApplicationService extends IApplicationService
         for (const userDirection of data.directions){
 
             let userResponse= await this.commandUserRepository.deleteUserDirection(
-                user.getId().Value,
-                userDirection.lat,
-                userDirection.lng
+                user.getId(),
+                UserDirection.create(
+                    userDirection.name,
+                    userDirection.favorite,
+                    userDirection.lat,
+                    userDirection.lng)
             )
 
             if (!userResponse.isSuccess())

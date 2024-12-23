@@ -59,9 +59,8 @@ export class UpdateUserDirectionApplicationService extends IApplicationService
             for (const directionToDelete of directionsToDelete){
 
                 let deleteResponse=await this.commandUserRepository.deleteUserDirection(
-                    user.getId().Value,
-                    directionToDelete.Lat,
-                    directionToDelete.Lng
+                    user.getId(),
+                    directionToDelete
                 )
                 if (!deleteResponse.isSuccess())
                     return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
