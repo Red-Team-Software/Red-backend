@@ -61,12 +61,12 @@ export class CreateProductApplicationService extends IApplicationService
         let product=Product.RegisterProduct(
             ProductID.create(id),
             ProductDescription.create(command.description),
-            ProductCaducityDate.create(command.caducityDate),
             ProductName.create(command.name),
             ProductStock.create(command.stock),
             uploaded.map((image)=>ProductImage.create(image.url)),
             ProductPrice.create(command.price,command.currency),
-            ProductWeigth.create(command.weigth,command.measurement)
+            ProductWeigth.create(command.weigth,command.measurement),
+            ProductCaducityDate.create(command.caducityDate)
         )
         let result=await this.commandProductRepository.createProduct(product)
         if (!result.isSuccess()) 

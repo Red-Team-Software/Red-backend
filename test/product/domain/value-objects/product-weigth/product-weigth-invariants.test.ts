@@ -1,7 +1,5 @@
 import * as assert from 'assert';
-import { InvalidProductStockException } from 'src/product/domain/domain-exceptions/invalid-product-stock-exception';
 import { InvalidProductWeigthException } from 'src/product/domain/domain-exceptions/invalid-product-weigth-exception';
-import { ProductStock } from 'src/product/domain/value-object/product-stock';
 import { ProductWeigth } from 'src/product/domain/value-object/product-weigth';
 
 describe("Product Weigth Invariants", () => {

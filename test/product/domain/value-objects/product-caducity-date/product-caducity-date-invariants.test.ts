@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { ProductCaducityDate } from 'src/product/domain/value-object/product-caducity-date';
 
-describe("User Caducity Date Invariants", () => {
+describe("Product Caducity Date Invariants", () => {
   let caughtError: any
 
   beforeEach(() => {

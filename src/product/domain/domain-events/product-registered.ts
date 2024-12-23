@@ -12,12 +12,14 @@ export class ProductRegistered extends DomainEvent {
         let data= {  
             productId:this.productId.Value,
             productDescription:this.productDescription.Value,
-            productCaducityDate:this.productCaducityDate.Value,
             productName:this.productName.Value,
             productStock:this.productStock.Value,
             productImage:this.productImage.map(image=>image.Value),
             productPrice:this.productPrice,
-            productWeigth:this.productWeigth         
+            productWeigth:this.productWeigth,
+            productCaducityDate:this.productCaducityDate 
+            ? null
+            : this.productCaducityDate.Value
         }
         
         return JSON.stringify(data)

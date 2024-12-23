@@ -42,12 +42,12 @@ export class Product extends AggregateRoot <ProductID>{
     static RegisterProduct(
         productId:ProductID,
         productDescription:ProductDescription,
-        productCaducityDate:ProductCaducityDate,
         productName:ProductName,
         productStock:ProductStock,
         productImages:ProductImage[],
         productPrice:ProductPrice,
-        productWeigth:ProductWeigth
+        productWeigth:ProductWeigth,
+        productCaducityDate?:ProductCaducityDate
     ):Product{
         const product = new Product(
             productId,

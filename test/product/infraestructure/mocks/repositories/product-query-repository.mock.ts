@@ -12,18 +12,28 @@ export class ProductQueryRepositoryMock implements IQueryProductRepository{
 
     constructor(private products: Product[] = []){}
 
-    findAllProducts(criteria: FindAllProductsApplicationRequestDTO): Promise<Result<Product[]>> {
-        throw new Error("Method not implemented.");
+    async findAllProducts(criteria: FindAllProductsApplicationRequestDTO): Promise<Result<Product[]>> {
+        let products= this.products.slice(criteria.page,criteria.perPage)
+        return Result.success(products)
     }
-    findAllProductsByName(criteria: FindAllProductsbyNameApplicationRequestDTO): Promise<Result<Product[]>> {
-        throw new Error("Method not implemented.");
+
+    async findAllProductsByName(criteria: FindAllProductsbyNameApplicationRequestDTO): Promise<Result<Product[]>> {
+        let products= this.products.filter((p) => p.ProductName.Value.includes(criteria.name))
+        products= products.slice(criteria.page,criteria.perPage)
+        return Result.success(products)
     }
-    findProductById(id: ProductID): Promise<Result<Product>> {
-        throw new Error("Method not implemented.");
+
+    async findProductById(id: ProductID): Promise<Result<Product>> {
+        let product=this.products.find((p) => p.getId().equals(id))
+        if (!product)
+            return Result.fail(new PersistenceException('Find product by id unsucssessfully'))
+        return Result.success(product)
     }
+
     findProductWithMoreDetailById(id: ProductID): Promise<Result<IProductModel>> {
         throw new Error("Method not implemented.");
     }
+    
     async findProductByName(productName: ProductName): Promise<Result<Product[]>> {
         let product=this.products.find((p) => p.ProductName.equals(productName))
         if (!product)
