@@ -42,15 +42,19 @@ export class UserQueryRepositoryMock implements IQueryUserRepository{
         if (!user)
             return Result.fail(new PersistenceException('Find user by user direction unsucssessfully'))
 
-        return Result.success(
-            await Promise.all(user.UserDirections.map(async (direction) => ({
+        let directions:IUserDirection[]=[]
+
+        for (const direction of user.UserDirections) {
+            directions.push({
                 id: await this.idGen.genId(),
                 name: direction.Name,
                 favorite: direction.Favorite,
                 lat: direction.Lat,
                 lng: direction.Lng
-            })))
-        )
+            })
+        }
+
+        return Result.success(directions)
     }
     async findDirectionsByLatAndLng(userDirection: UserDirection[]): Promise<Result<IDirection[]>> {
 

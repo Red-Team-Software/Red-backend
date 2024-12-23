@@ -1,10 +1,9 @@
 import { Then, When } from '@cucumber/cucumber';
 import * as assert from 'assert';
-import { UserCommandRepositoryMock } from '../../infraestructure/mocks/repository/user-command-repository.mock';
+import { UserCommandRepositoryMock } from '../../infraestructure/mocks/repositories/user-command-repository.mock';
 import { User } from 'src/user/domain/aggregate/user.aggregate';
 import { UserId } from 'src/user/domain/value-object/user-id';
-import { UserQueryRepositoryMock } from 'test/user/infraestructure/mocks/repository/user-query-repository.mock';
-import { UuidGen } from 'src/common/infraestructure/id-gen/uuid-gen';
+import { UserQueryRepositoryMock } from 'test/user/infraestructure/mocks/repositories/user-query-repository.mock';
 import { UserName } from 'src/user/domain/value-object/user-name';
 import { UserPhone } from 'src/user/domain/value-object/user-phone';
 import { UserRole } from 'src/user/domain/value-object/user-role';
@@ -15,8 +14,9 @@ import { AddUserDirectionApplicationService } from 'src/user/application/service
 import { EventPublisherMock } from 'test/common/infraestructure/mocks/event-publisher.mock';
 import { UserDirection } from 'src/user/domain/value-object/user-direction';
 import { InvalidUserDirectionQuantityException } from 'src/user/domain/domain-exceptions/invalid-user-direction-quantity-exception';
+import { IdGeneratorMock } from 'test/common/infraestructure/mocks/id-generator.mock';
 
-let idGen = new UuidGen()
+let idGen = new IdGeneratorMock()
 
 const users: User[] = [
   User.initializeAggregate(
