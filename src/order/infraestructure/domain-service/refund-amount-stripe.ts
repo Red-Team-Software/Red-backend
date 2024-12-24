@@ -2,7 +2,7 @@ import { Result } from "src/common/utils/result-handler/result";
 import { Order } from "src/order/domain/aggregate/order";
 import { IRefundPaymentService } from "src/order/domain/domain-services/refund-amount.interface";
 import { OrderStripePaymentIntent } from "src/order/domain/value_objects/order-stripe-payment-intent";
-import { StripeSingelton } from "src/payments/infraestructure/stripe-singelton";
+import { StripeSingelton } from "src/common/infraestructure/stripe/stripe-singelton";
 
 export class RefundPaymentStripeConnection implements IRefundPaymentService {    
     private stripe: StripeSingelton;

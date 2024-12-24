@@ -1,4 +1,4 @@
-import { StripeSingelton } from "src/payments/infraestructure/stripe-singelton";
+import { StripeSingelton } from "src/common/infraestructure/stripe/stripe-singelton";
 import { IPaymentMethodService } from "../../domain/domain-services/payment-method-interface";
 import { Result } from "src/common/utils/result-handler/result";
 import { OrderPayment } from "src/order/domain/entities/payment/order-payment-entity";

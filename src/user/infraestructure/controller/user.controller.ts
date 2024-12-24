@@ -49,7 +49,7 @@ import { PerformanceDecorator } from "src/common/application/aspects/performance
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
 import { IGeocodification } from "src/order/domain/domain-services/geocodification-interface"
 import { GeocodificationHereMapsDomainService } from "src/order/infraestructure/domain-service/geocodification-here-maps-domain-service"
-import { HereMapsSingelton } from "src/payments/infraestructure/here-maps-singleton"
+import { HereMapsSingelton } from "src/common/infraestructure/here-maps/here-maps-singleton"
 import { FindUserDirectionsByIdApplicationRequestDTO } from "src/user/application/dto/response/find-directions-by-user-id-response-dto"
 import { OrderDirection } from "src/order/domain/value_objects/order-direction"
 import { GeocodificationOpenStreeMapsDomainService } from "src/order/infraestructure/domain-service/geocodification-naminatim-maps-domain-service"

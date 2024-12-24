@@ -2,7 +2,7 @@ import { BadRequestException } from "src/common/infraestructure/infraestructure-
 import { Result } from "src/common/utils/result-handler/result";
 import { IConversionService } from "src/order/domain/domain-services/conversion-currency-interface";
 import { ConvertAmount } from "src/order/domain/value_objects/vo-domain-services/convert-amount";
-import { ExchangeRateSingelton } from "src/payments/infraestructure/exchange-rate-singleton";
+import { ExchangeRateSingelton } from "src/common/infraestructure/exchange-rate/exchange-rate-singleton";
 import { IExchangeRateResponse } from "../interfaces/exchange-rate-response.interface";
 
 

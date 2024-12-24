@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Inject, Logger, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { StripeSingelton } from "src/payments/infraestructure/stripe-singelton";
+import { StripeSingelton } from "src/common/infraestructure/stripe/stripe-singelton";
 import { StripePaymentEntryDto } from "../dto/stripe-payment-entry-dto";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
@@ -15,7 +15,7 @@ import { ICalculateTaxesFee } from "src/order/domain/domain-services/calculate-t
 import { CalculateTaxesFeeImplementation } from "../domain-service/calculate-tax-fee-implementation";
 import { NestLogger } from "src/common/infraestructure/logger/nest-logger";
 import { CalculateShippingFeeHereMaps } from "../domain-service/calculate-shipping-here-maps";
-import { HereMapsSingelton } from '../../../payments/infraestructure/here-maps-singleton';
+import { HereMapsSingelton } from '../../../common/infraestructure/here-maps/here-maps-singleton';
 import { TaxesShippingFeeEntryDto } from "../dto/taxes-shipping-dto";
 import { TaxesShippingFeeApplicationServiceEntryDto } from "src/order/application/dto/request/tax-shipping-fee-request-dto";
 import { CalculateTaxesShippingResponseDto } from "src/order/application/dto/response/calculate-taxes-shipping-fee-response.dto";
@@ -87,7 +87,7 @@ import { DeliveredOderApplicationService } from "src/order/application/service/d
 import { PagoMovilPaymentEntryDto } from "../dto/pago-movil-payment-entry-dto";
 import { PagoMovilPaymentMethod } from "../domain-service/pago-movil-method";
 import { IExchangeRateResponse } from "../interfaces/exchange-rate-response.interface";
-import { ExchangeRateSingelton } from "src/payments/infraestructure/exchange-rate-singleton";
+import { ExchangeRateSingelton } from "src/common/infraestructure/exchange-rate/exchange-rate-singleton";
 import { ConvertCurrencyExchangeRate } from "../domain-service/conversion-currency-exchange-rate";
 
 
