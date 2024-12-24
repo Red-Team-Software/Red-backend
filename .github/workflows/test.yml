@@ -16,9 +16,11 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Test API
+    - name: Install dependencies and run tests
       run: |
-        echo "Starting to run the app test ..."
+        echo "Starting the API test process..."
+        echo "Installing dependencies using pnpm..."
         pnpm install
+        echo "Running tests..."
         pnpm test
-        echo "End of the test"
+        echo "API test process completed."
