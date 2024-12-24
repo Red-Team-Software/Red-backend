@@ -24,7 +24,6 @@ describe("Bundle Aggregate Invariants", () => {
         Bundle.initializeAggregate(
             BundleId.create('bundle-123'),
             BundleDescription.create('Bundle Description'),
-            BundleCaducityDate.create(new Date()),
             BundleName.create('Bundle Name'),
             BundleStock.create(10),
             [
@@ -36,7 +35,8 @@ describe("Bundle Aggregate Invariants", () => {
             [
                 ProductID.create('e09771db-2657-45fb-ad39-ae6604422919'),
                 ProductID.create('e09771db-2657-45fb-ad39-ae6604422848')
-            ]
+            ],
+            BundleCaducityDate.create(new Date())
         )
     } 
     catch (error) {

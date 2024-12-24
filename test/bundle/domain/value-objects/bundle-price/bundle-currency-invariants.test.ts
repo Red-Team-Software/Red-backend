@@ -15,7 +15,6 @@ describe("Bundle Currency Invariants", () => {
     } catch (error) {
       caughtError = error
     }
-    console.log(caughtError)
     assert.ok(
       caughtError instanceof InvalidBundleCurrencyException,
       `Expected InvalidBundlePriceException but got ${caughtError}`
