@@ -102,12 +102,15 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
             .getOne();
             
             if(!ormBundle)
-                return Result.fail( new NotFoundException('Find promotion unsucssessfully'))
+                return Result.fail( new NotFoundException('Find bundle unsucssessfully'))
 
             return Result.success({
                 id:ormBundle.id,
                 description:ormBundle.desciption,
-                caducityDate:ormBundle.caducityDate,
+                caducityDate:
+                ormBundle.caducityDate
+                ? ormBundle.caducityDate
+                : null,
                 name:ormBundle.name,
                 stock:ormBundle.stock,
                 image:ormBundle.images.map(image=>image.image),

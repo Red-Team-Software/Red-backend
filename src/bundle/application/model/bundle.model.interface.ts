@@ -1,7 +1,7 @@
 export interface IBundleModel{
     id:string,
     description:string,
-    caducityDate:Date,
+    caducityDate?:Date,
     name:string,
     stock:number,
     image:string[],

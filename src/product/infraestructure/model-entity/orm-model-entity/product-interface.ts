@@ -2,7 +2,7 @@ export interface IProduct{
     id:string,
     name: string,
     desciption: string,
-    caducityDate: Date,
+    caducityDate?: Date,
     stock: number
     price:number
     currency:string

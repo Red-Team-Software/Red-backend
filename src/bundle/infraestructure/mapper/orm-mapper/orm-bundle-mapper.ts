@@ -48,14 +48,16 @@ export class OrmBundleMapper implements IMapper <Bundle,OrmBundleEntity>{
             id:domainEntity.getId().Value,
             name: domainEntity.BundleName.Value,
             desciption: domainEntity.BundleDescription.Value,
-            caducityDate: domainEntity.BundleCaducityDate.Value,
             stock: domainEntity.BundleStock.Value,
             images: ormImages,
             price:domainEntity.BundlePrice.Price,
             currency:domainEntity.BundlePrice.Currency,
             weigth:domainEntity.BundleWeigth.Weigth,
             measurament:domainEntity.BundleWeigth.Measure,
-            products
+            products,
+            caducityDate: domainEntity.BundleCaducityDate
+            ? domainEntity.BundleCaducityDate.Value
+            : null
         }
         return data
     }
@@ -64,13 +66,13 @@ export class OrmBundleMapper implements IMapper <Bundle,OrmBundleEntity>{
         let bundle=Bundle.initializeAggregate(
             BundleId.create(infraEstructure.id),
             BundleDescription.create(infraEstructure.desciption),
-            BundleCaducityDate.create(infraEstructure.caducityDate),
             BundleName.create(infraEstructure.name),
             BundleStock.create(infraEstructure.stock),
             infraEstructure.images.map((ormimage)=>BundleImage.create(ormimage.image)),
             BundlePrice.create(Number(infraEstructure.price),infraEstructure.currency),
             BundleWeigth.create(infraEstructure.weigth,infraEstructure.measurament),
-            infraEstructure.products.map(product=>ProductID.create(product.id))
+            infraEstructure.products.map(product=>ProductID.create(product.id)),
+            BundleCaducityDate.create(infraEstructure.caducityDate),
         )
         return bundle
     }

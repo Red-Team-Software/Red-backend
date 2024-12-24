@@ -29,12 +29,12 @@ export class Product extends AggregateRoot <ProductID>{
     private constructor(
         productId:ProductID,
         private productDescription:ProductDescription,
-        private productCaducityDate:ProductCaducityDate,
         private productName:ProductName,
         private productStock:ProductStock,
         private productImages:ProductImage[],
         private productPrice:ProductPrice,
-        private productWeigth:ProductWeigth
+        private productWeigth:ProductWeigth,
+        private productCaducityDate?:ProductCaducityDate,
     ){
         super(productId)
     }
@@ -42,33 +42,35 @@ export class Product extends AggregateRoot <ProductID>{
     static RegisterProduct(
         productId:ProductID,
         productDescription:ProductDescription,
-        productCaducityDate:ProductCaducityDate,
         productName:ProductName,
         productStock:ProductStock,
         productImages:ProductImage[],
         productPrice:ProductPrice,
-        productWeigth:ProductWeigth
+        productWeigth:ProductWeigth,
+        productCaducityDate?:ProductCaducityDate
     ):Product{
         const product = new Product(
             productId,
             productDescription,
-            productCaducityDate,
             productName,
             productStock,
             productImages,
             productPrice,
-            productWeigth
+            productWeigth,
+            productCaducityDate
+            ? productCaducityDate
+            : null
         )
         product.apply(
             ProductRegistered.create(
                 productId,
                 productDescription,
-                productCaducityDate,
                 productName,
                 productStock,
                 productImages,
                 productPrice,
-                productWeigth
+                productWeigth,
+                productCaducityDate
             )
         )
         return product
@@ -76,22 +78,22 @@ export class Product extends AggregateRoot <ProductID>{
     static initializeAggregate(
         productId:ProductID,
         productDescription:ProductDescription,
-        productCaducityDate:ProductCaducityDate,
         productName:ProductName,
         productStock:ProductStock,
         productImages:ProductImage[],
         productPrice:ProductPrice,
-        productWeigth:ProductWeigth
+        productWeigth:ProductWeigth,
+        productCaducityDate?:ProductCaducityDate
     ):Product{
         const product = new Product(
             productId,
             productDescription,
-            productCaducityDate,
             productName,
             productStock,
             productImages,
             productPrice,
-            productWeigth
+            productWeigth,
+            productCaducityDate
         )
         product.validateState()
         return product

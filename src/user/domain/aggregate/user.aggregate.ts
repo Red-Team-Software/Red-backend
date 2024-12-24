@@ -15,6 +15,7 @@ import { UserNameUpdated } from "../domain-events/user-name-updated";
 import { UserPhoneUpdated } from "../domain-events/user-phone-updated";
 import { UserDirectionUpdated } from "../domain-events/user-direction-updated";
 import { Wallet } from "../entities/wallet/wallet.entity";
+import { InvalidUserDirectionQuantityException } from "../domain-exceptions/invalid-user-direction-quantity-exception";
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -28,6 +29,8 @@ export class User extends AggregateRoot <UserId>{
             case 'UserDirectionAdded':{
                 const userDirectionAdded: UserDirectionAdded = event as UserDirectionAdded
                 this.UserDirections.push(userDirectionAdded.userDirection)
+                if(this.UserDirections.length>6)
+                    throw new InvalidUserDirectionQuantityException(this.userDirections.length)
                 break;
             }
             case 'UserDirectionDeleted':{

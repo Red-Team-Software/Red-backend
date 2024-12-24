@@ -1,4 +1,4 @@
-import { DomainException } from "../domain-exeption/domain-exception";
+import { DomainException } from "../domain-exception/domain-exception";
 
 export class DomainExceptionNotHandled extends DomainException{
     constructor(error:string){

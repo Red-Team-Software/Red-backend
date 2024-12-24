@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
+import { Body, Controller, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
 import { FilesInterceptor } from "@nestjs/platform-express/multer"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
@@ -142,10 +142,10 @@ export class BundleController {
     return response.getValue
   }
 
-  @Get('')
+  @Get('/:id')
   async getBundleById(
     @GetCredential() credential:ICredential,
-    @Query() entry:FindBundleByIdInfraestructureRequestDTO
+    @Param() entry:FindBundleByIdInfraestructureRequestDTO
   ){
 
     let service= new ExceptionDecorator(

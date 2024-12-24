@@ -61,13 +61,15 @@ export class CreateBundleApplicationService extends IApplicationService
         let bundle=Bundle.Registerbundle(
             BundleId.create(id),
             BundleDescription.create(command.description),
-            BundleCaducityDate.create(command.caducityDate),
             BundleName.create(command.name),
             BundleStock.create(command.stock),
             uploaded.map(image=>BundleImage.create(image.url)),
             BundlePrice.create(command.price,command.currency),
             BundleWeigth.create(command.weigth,command.measurement),
-            command.productId.map(id=>ProductID.create(id))
+            command.productId.map(id=>ProductID.create(id)),
+            command.caducityDate
+            ? BundleCaducityDate.create(command.caducityDate)
+            : null
         )
         let result=await this.bundleCommadRepository.createBundle(bundle)
 
@@ -78,6 +80,7 @@ export class CreateBundleApplicationService extends IApplicationService
     
         let response:CreateBundleApplicationResponseDTO={
             ...command,
+            bundleId:bundle.getId().Value,
             images:bundle.BundleImages.map(image=>image.Value)
         }
         return Result.success(response)
