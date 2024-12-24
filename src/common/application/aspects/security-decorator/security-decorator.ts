@@ -21,7 +21,8 @@ extends IServiceDecorator <I,O>{
 
     async execute ( input: I ): Promise<Result<O>> {
 
-        if(!this.permitedRoles[this.userContetx.userRole])
+        let role=this.permitedRoles.find((role) => role===this.userContetx.userRole)
+        if(!role)
             return Result.fail(new SecurityException(this.userContetx.userRole,this.permitedRoles))        
 
         return await this.decoratee.execute(input)

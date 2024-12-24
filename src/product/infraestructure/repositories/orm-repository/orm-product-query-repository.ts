@@ -40,7 +40,10 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
                 {
                     id:ormProduct.id,
                     description:ormProduct.desciption,
-                    caducityDate:ormProduct.caducityDate,
+                    caducityDate:
+                    ormProduct.caducityDate
+                    ? ormProduct.caducityDate
+                    : null,	
                     name:ormProduct.name,
                     stock:ormProduct.stock,
                     image:ormProduct.images.map(image=>image.image),

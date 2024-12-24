@@ -58,17 +58,19 @@ export class Product extends AggregateRoot <ProductID>{
             productPrice,
             productWeigth,
             productCaducityDate
+            ? productCaducityDate
+            : null
         )
         product.apply(
             ProductRegistered.create(
                 productId,
                 productDescription,
-                productCaducityDate,
                 productName,
                 productStock,
                 productImages,
                 productPrice,
-                productWeigth
+                productWeigth,
+                productCaducityDate
             )
         )
         return product

@@ -155,8 +155,6 @@ export class UserController {
       let geo = OrderDirection.create(direction.lat,direction.lng);
       let geoReponse= await this.geocodification.LatitudeLongitudetoDirecction(geo);
 
-      console.log('response:',geoReponse.getValue)
-
       dir.push({
         ...direction,
         address:geoReponse.isSuccess()

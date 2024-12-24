@@ -18,8 +18,8 @@ export class ProductRegistered extends DomainEvent {
             productPrice:this.productPrice,
             productWeigth:this.productWeigth,
             productCaducityDate:this.productCaducityDate 
-            ? null
-            : this.productCaducityDate.Value
+            ? this.productCaducityDate.Value
+            : null
         }
         
         return JSON.stringify(data)
@@ -27,33 +27,35 @@ export class ProductRegistered extends DomainEvent {
     static create(
         productId:ProductID,
         productDescription:ProductDescription,
-        productCaducityDate:ProductCaducityDate,
         productName:ProductName,
         productStock:ProductStock,
         productImage:ProductImage[],
         productPrice:ProductPrice,
-        productWeigth:ProductWeigth
+        productWeigth:ProductWeigth,
+        productCaducityDate?:ProductCaducityDate,
     ){
         return new ProductRegistered(
             productId,
             productDescription,
-            productCaducityDate,
             productName,
             productStock,
             productImage,
             productPrice,
-            productWeigth
+            productWeigth,
+            productCaducityDate
+            ? productCaducityDate
+            : null
         )
     }
     constructor(
         public productId:ProductID,
         public productDescription:ProductDescription,
-        public productCaducityDate:ProductCaducityDate,
         public productName:ProductName,
         public productStock:ProductStock,
         public productImage:ProductImage[],
         public productPrice:ProductPrice,
-        public productWeigth:ProductWeigth
+        public productWeigth:ProductWeigth,
+        public productCaducityDate?:ProductCaducityDate,
     ){
         super()
     }

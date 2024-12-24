@@ -29,7 +29,6 @@ export class Bundle extends AggregateRoot <BundleId>{
     protected validateState(): void {
         if (! this.bundleDescription ||
         ! this.bundleDescription ||
-        ! this.bundleCaducityDate ||
         ! this.bundleName ||
         ! this.bundleStock ||
         ! this.bundleImages ||
@@ -41,13 +40,13 @@ export class Bundle extends AggregateRoot <BundleId>{
     private constructor(
         bundleId:BundleId,
         private bundleDescription:BundleDescription,
-        private bundleCaducityDate:BundleCaducityDate,
         private bundleName:BundleName,
         private bundleStock:BundleStock,
         private bundleImages:BundleImage[],
         private bundlePrice:BundlePrice,
         private bundleWeigth:BundleWeigth,
-        private productId:ProductID[]
+        private productId:ProductID[],
+        private bundleCaducityDate?:BundleCaducityDate,
     ){
         super(bundleId)
     }
@@ -55,37 +54,38 @@ export class Bundle extends AggregateRoot <BundleId>{
     static Registerbundle(
         bundleId:BundleId,
         bundleDescription:BundleDescription,
-        bundleCaducityDate:BundleCaducityDate,
         bundleName:BundleName,
         bundleStock:BundleStock,
         bundleImages:BundleImage[],
         bundlePrice:BundlePrice,
         bundleWeigth:BundleWeigth,
-        productId:ProductID[]
-
+        productId:ProductID[],
+        bundleCaducityDate?:BundleCaducityDate,
     ):Bundle{
         const bundle = new Bundle(
             bundleId,
             bundleDescription,
-            bundleCaducityDate,
             bundleName,
             bundleStock,
             bundleImages,
             bundlePrice,
             bundleWeigth,
-            productId
+            productId,
+            bundleCaducityDate
+            ? bundleCaducityDate
+            : null
         )
         bundle.apply(
             BundleRegistered.create(
                 bundleId,
                 bundleDescription,
-                bundleCaducityDate,
                 bundleName,
                 bundleStock,
                 bundleImages,
                 bundlePrice,
                 bundleWeigth,
-                productId
+                productId,
+                bundleCaducityDate
             )
         )
         return bundle
@@ -93,24 +93,26 @@ export class Bundle extends AggregateRoot <BundleId>{
     static initializeAggregate(
         bundleId:BundleId,
         bundleDescription:BundleDescription,
-        bundleCaducityDate:BundleCaducityDate,
         bundleName:BundleName,
         bundleStock:BundleStock,
         bundleImages:BundleImage[],
         bundlePrice:BundlePrice,
         bundleWeigth:BundleWeigth,
-        productId:ProductID[]
+        productId:ProductID[],
+        bundleCaducityDate?:BundleCaducityDate
     ):Bundle{
         const bundle = new Bundle(
             bundleId,
             bundleDescription,
-            bundleCaducityDate,
             bundleName,
             bundleStock,
             bundleImages,
             bundlePrice,
             bundleWeigth,
-            productId
+            productId,
+            bundleCaducityDate
+            ? bundleCaducityDate
+            : null
         )
         bundle.validateState()
         return bundle

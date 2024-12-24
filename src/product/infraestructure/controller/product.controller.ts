@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { OrmProductRepository } from '../repositories/orm-repository/orm-product-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateProductInfraestructureRequestDTO } from '../dto-request/create-product-infraestructure-request-dto';
@@ -96,7 +96,7 @@ export class ProductController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('all')
+  @Get('many')
   async getAllProducts(
     @GetCredential() credential:ICredential,
     @Query() entry:FindAllProductsInfraestructureRequestDTO
@@ -122,7 +122,7 @@ export class ProductController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('all-product-bundle')
+  @Get('/all-product-bundle')
   async getAllProductsAndBundles(
     @GetCredential() credential:ICredential,
     @Query() entry:FindAllProductsAndBundlesInfraestructureRequestDTO
@@ -154,12 +154,11 @@ export class ProductController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('')
+  @Get('/:id')
   async getProductById(
     @GetCredential() credential:ICredential,
-    @Query() entry:FindProductByIdInfraestructureRequestDTO
+    @Param() entry:FindProductByIdInfraestructureRequestDTO
   ){
-
     let service= new ExceptionDecorator(
       new LoggerDecorator(
         new PerformanceDecorator(
