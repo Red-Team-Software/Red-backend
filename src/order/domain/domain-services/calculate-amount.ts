@@ -4,6 +4,7 @@ import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate";
 import { OrderProduct } from "../entities/order-product/order-product-entity";
 import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
 import { Promotion } from "src/promotion/domain/aggregate/promotion.aggregate";
+import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
 
 
 type productPriceTotal = {
@@ -26,7 +27,8 @@ export class CalculateAmount {
         orderProducts: OrderProduct[],
         orderBundles: OrderBundle[],
         promotions: Promotion[],
-        currency: string
+        currency: string,
+        cupons:Cupon[]
     ): OrderTotalAmount {
         let amount = 0;
 
@@ -79,6 +81,10 @@ export class CalculateAmount {
             let orderBundle = orderBundles.find(ob => ob.OrderBundleId.OrderBundleId === bundle.bundleId);
             amount += bundle.total * orderBundle.Quantity.OrderBundleQuantity;
         });
+
+        cupons.forEach(cupon=>{
+            amount-=(amount*(cupon.CuponDiscount.Value))
+        })
 
         return OrderTotalAmount.create(amount, currency);
     }

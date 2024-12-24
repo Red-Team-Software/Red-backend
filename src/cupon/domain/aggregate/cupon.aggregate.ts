@@ -7,8 +7,10 @@ import { CuponState } from "../value-object/cupon-state";
 import { CuponRegistered } from "../domain-events/cupon-created";
 import { CuponDeleted } from "../domain-events/cupon-delete";
 import { CuponStateChanged } from "../domain-events/cupon-state-change";
+import { CuponUser } from "../entities/cuponUser/cuponUser";
 
 export class Cupon extends AggregateRoot<CuponId> {
+
     protected when(event: DomainEvent): void {
         switch (event.getEventName) {
             case "CuponCreated":
@@ -17,6 +19,7 @@ export class Cupon extends AggregateRoot<CuponId> {
                 this.cuponCode = cuponCreated.cuponCode;
                 this.cuponDiscount = cuponCreated.cuponDiscount;
                 this.cuponState = cuponCreated.cuponState;
+                this.users=cuponCreated.users;
                 break;
 
             case "CuponStateChange":
@@ -41,7 +44,8 @@ export class Cupon extends AggregateRoot<CuponId> {
         private cuponName: CuponName,
         private cuponCode: CuponCode,
         private cuponDiscount: CuponDiscount,
-        private cuponState: CuponState
+        private cuponState: CuponState,
+        private users?: CuponUser[]
     ) {
         super(cuponId);
     }
@@ -51,11 +55,12 @@ export class Cupon extends AggregateRoot<CuponId> {
         cuponName: CuponName,
         cuponCode: CuponCode,
         cuponDiscount: CuponDiscount,
-        cuponState: CuponState
+        cuponState: CuponState,
+        users?:CuponUser[]
     ): Cupon {
-        const cupon = new Cupon(cuponId, cuponName, cuponCode, cuponDiscount, cuponState);
+        const cupon = new Cupon(cuponId, cuponName, cuponCode, cuponDiscount, cuponState, users);
         cupon.apply(
-            CuponRegistered.create(cuponId, cuponName, cuponCode, cuponDiscount, cuponState)
+            CuponRegistered.create(cuponId, cuponName, cuponCode, cuponDiscount, cuponState, users)
         );
         return cupon;
     }
@@ -65,9 +70,10 @@ export class Cupon extends AggregateRoot<CuponId> {
         cuponName: CuponName,
         cuponCode: CuponCode,
         cuponDiscount: CuponDiscount,
-        cuponState: CuponState
+        cuponState: CuponState,
+        users:CuponUser[]
     ): Cupon {
-        const cupon = new Cupon(cuponId, cuponName, cuponCode, cuponDiscount, cuponState);
+        const cupon = new Cupon(cuponId, cuponName, cuponCode, cuponDiscount, cuponState, users);
         cupon.validateState();
         return cupon;
     }
@@ -98,5 +104,9 @@ export class Cupon extends AggregateRoot<CuponId> {
 
     get CuponState(): CuponState {
         return this.cuponState;
+    }
+    
+    get CuponUsers(): CuponUser[] {
+        return this.users
     }
 }

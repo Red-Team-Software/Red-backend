@@ -50,6 +50,7 @@ export class CreateCuponApplicationService extends IApplicationService<
       CuponCode.create(command.code),
       CuponDiscount.create(command.discount),
       CuponState.create(command.state)
+
     );
 
     // Guardar el cupón en el repositorio

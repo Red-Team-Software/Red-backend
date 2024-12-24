@@ -1,5 +1,4 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
-import { OrmOrderEntity } from "./orm-order-entity";
 import { OrmCourierEntity } from "src/courier/infraestructure/entities/orm-courier-entity";
 
 

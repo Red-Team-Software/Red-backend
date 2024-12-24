@@ -84,6 +84,11 @@ import { DeliveredOrderDto } from "../dto/delivered-order-entry.dto";
 import { DeliveringOrderDto } from "../dto/delivering-order-entry.dto";
 import { DeliveringOderApplicationService } from "src/order/application/service/delivering-order-application.service";
 import { DeliveredOderApplicationService } from "src/order/application/service/delivered-order-application.service";
+import { UseCuponApplicationRequestDTO } from "src/cupon/application/dto/request/use-cupon-application-requestdto";
+import { UseCuponApplicationResponseDTO } from "src/cupon/application/dto/response/use-cupon-application-responsedto";
+import { UseCuponApplicationService } from "src/cupon/application/services/command/use-cupon-application-service";
+import { IQueryCuponRepository } from "src/cupon/domain/query-repository/query-cupon-repository";
+import { ICuponRepository } from "src/cupon/domain/repository/cupon.interface.repository";
 
 
 @ApiBearerAuth()
@@ -109,6 +114,7 @@ export class OrderController {
     private readonly getAllOrders: IApplicationService<FindAllOrdersApplicationServiceRequestDto,FindAllOrdersApplicationServiceResponseDto>;
     private readonly orderCancelled: IApplicationService<CancelOrderApplicationServiceRequestDto,CancelOrderApplicationServiceResponseDto>;
     private readonly createReport: IApplicationService<CreateOrderReportApplicationServiceRequestDto,CreateOrderReportApplicationServiceResponseDto>;
+    private readonly applyCupons: IApplicationService<UseCuponApplicationRequestDTO,UseCuponApplicationResponseDTO>;
 
     //*Repositories
     private readonly orderRepository: ICommandOrderRepository;
@@ -120,6 +126,8 @@ export class OrderController {
     private readonly ormUserQueryRepository: IQueryUserRepository;
     private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
 
+    private readonly ormCuponQueryRepository: IQueryCuponRepository;
+    private readonly ormCuponCommandRepository: ICuponRepository
     //*IdGen
     private readonly idGen: IIdGen<string>;
 
@@ -204,7 +212,13 @@ export class OrderController {
                 new NestLogger(new Logger())
             )
         );
-
+        
+        this.applyCupons=new ExceptionDecorator(
+            new LoggerDecorator(
+                new UseCuponApplicationService(this.ormCuponQueryRepository,this.ormCuponCommandRepository),
+                new NestLogger(new Logger())
+            )
+        );
         //*order cancelled
 
         this.orderCancelled = new ExceptionDecorator(
@@ -266,7 +280,9 @@ export class OrderController {
                     this.ormCourierQueryRepository,
                     new DateHandler(),
                     new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                    this.paymentMethodQueryRepository
+                    this.paymentMethodQueryRepository,
+                    this.ormCuponQueryRepository,
+                    this.applyCupons
                 ),
                 new NestLogger(new Logger())
             )

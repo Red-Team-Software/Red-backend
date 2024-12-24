@@ -6,6 +6,7 @@ import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
 import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-order-entity";
 import { OrmWalletEntity } from "./orm-wallet-entity";
 import { OrmCuponEntity } from "src/cupon/infraestructure/orm-entities/orm-cupon-entity";
+import { OrmCuponUserEntity } from "src/cupon/infraestructure/orm-entities/orm-cupon-user-entity";
 
 
 @Entity('user')
@@ -31,8 +32,8 @@ export class OrmUserEntity implements IUser{
     @JoinColumn()
     wallet: OrmWalletEntity;
 
-    @OneToMany(()=> OrmCuponEntity, cupon=> cupon.user)
-    cupons?:OrmCuponEntity[]
+    @OneToMany(() => OrmCuponUserEntity, (cuponUser) => cuponUser.user, { cascade: true } )
+    user_cupons?: OrmCuponUserEntity[]
 
     static create ( 
         id:string,
@@ -41,6 +42,7 @@ export class OrmUserEntity implements IUser{
         userRole:UserRoles,
         wallet:OrmWalletEntity,
         image?:string,
+        cupons?:OrmCuponUserEntity[]
     ): OrmUserEntity
     {
         const user = new OrmUserEntity()
@@ -50,6 +52,7 @@ export class OrmUserEntity implements IUser{
         user.type=userRole
         user.wallet=wallet
         image ? user.image=image : user.image=null
+        cupons? user.user_cupons=cupons : user.user_cupons=null
         return user
     }
 }

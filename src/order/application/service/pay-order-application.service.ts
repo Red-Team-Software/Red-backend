@@ -54,7 +54,12 @@ import { PaymentMethodId } from 'src/payment-methods/domain/value-objects/paymen
 import { Cupon } from 'src/cupon/domain/aggregate/cupon.aggregate';
 import { IQueryCuponRepository } from 'src/cupon/domain/query-repository/query-cupon-repository';
 import { CuponId } from 'src/cupon/domain/value-object/cupon-id';
-
+import { ErrorCreatingOrderCuponNotFoundApplicationException } from '../application-exception/error-creating-order-cupon-application.exception';
+import { CuponUser } from 'src/cupon/domain/entities/cuponUser/cuponUser';
+import { CuponUserId } from 'src/cupon/domain/entities/cuponUser/value-objects/cuponUserId';
+import { UseCuponApplicationService } from 'src/cupon/application/services/command/use-cupon-application-service';
+import { UseCuponApplicationRequestDTO } from 'src/cupon/application/dto/request/use-cupon-application-requestdto';
+import { UseCuponApplicationResponseDTO } from 'src/cupon/application/dto/response/use-cupon-application-responsedto';
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
     
@@ -131,17 +136,19 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                     )
             )
         }
-/*
-        if(data.cupons){
-            for(const cupon of data.cupons){
+
+        if (data.cupons) {
+            for (const cupon of data.cupons) {
+
                 let domain=await this.cuponRepository.findCuponById(CuponId.create(cupon.id))
 
                 if(!domain.isSuccess())
                     return Result.fail(new ErrorCreatingOrderCuponNotFoundApplicationException())
-                bundles.push(domain.getValue)
+
+                cupons.push(domain.getValue);
             }
         }
-*/
+
         let findPromotion: FindAllPromotionApplicationRequestDTO = {
             userId: data.userId,
             name: '',
