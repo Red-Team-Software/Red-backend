@@ -26,7 +26,10 @@ export class NewProductsPushNotificationApplicationService extends IApplicationS
                 notification: { 
                     title: `Salio un nuevo producto!!!`, 
                     body: `El producto es ${data.name} con un valor de ${data.price}${currencySymbol}`,
-                } 
+                },
+                data:{
+                    route: `/product/${data.productId}`
+                }
             })
         })
 

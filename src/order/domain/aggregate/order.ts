@@ -11,12 +11,13 @@ import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
 import { OrderProduct } from "../entities/order-product/order-product-entity";
 import { EmptyProductBundleAtributes } from "../exception/product-bundle-empty.exception";
 import { OrderReport } from "../entities/report/report-entity";
-import { OrderStatusCanceled } from "../domain-events/order-state-canceled";
+import { OrderStatusCancelled } from "../domain-events/order-state-cancelled";
 import { OrderPayment } from "../entities/payment/order-payment-entity";
 import { OrderStatusDelivered } from "../domain-events/order-state-delivered";
 import { OrderCourier } from "../entities/order-courier/order-courier-entity";
 import { OrderUserId } from '../value_objects/order-user-id';
 import { OrderCourierLocationModified } from "../domain-events/order-courier-location-modified";
+import { OrderStatusDelivering } from "../domain-events/order-state-delivering";
 
 export class Order extends AggregateRoot<OrderId>{
     
@@ -32,9 +33,10 @@ export class Order extends AggregateRoot<OrderId>{
             this.orderReceivedDate = event.orderReceivedDate;
             this.orderReport = event.orderReport;
             this.orderPayment = event.orderPayment;
+            this.orderUserId = event.orderUserId;
         }
 
-        if (event instanceof OrderStatusCanceled) {
+        if (event instanceof OrderStatusCancelled) {
             this.orderState = event.orderState;
         }
 
@@ -44,6 +46,10 @@ export class Order extends AggregateRoot<OrderId>{
 
         if (event instanceof OrderCourierLocationModified) {
             this.orderCourier = event.orderCourier;
+        }
+    
+        if (event instanceof OrderStatusDelivering) {
+            this.orderState = event.orderState;
         }
     }
     
@@ -163,7 +169,7 @@ export class Order extends AggregateRoot<OrderId>{
 
     cancelOrder(orderState: OrderState): void {
         this.apply(
-            OrderStatusCanceled.create(
+            OrderStatusCancelled.create(
                 this.getId(),
                 orderState,
                 this.orderUserId
@@ -171,9 +177,19 @@ export class Order extends AggregateRoot<OrderId>{
         );
     }
 
-    updateOrderStatus(orderState: OrderState): void {
+    orderDelivered(orderState: OrderState): void {
         this.apply(
             OrderStatusDelivered.create(
+                this.getId(),
+                orderState,
+                this.orderUserId
+            )
+        );
+    }
+
+    orderDelivering(orderState: OrderState): void {
+        this.apply(
+            OrderStatusDelivering.create(
                 this.getId(),
                 orderState,
                 this.orderUserId
