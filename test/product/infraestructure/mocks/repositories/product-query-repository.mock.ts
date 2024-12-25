@@ -35,10 +35,10 @@ export class ProductQueryRepositoryMock implements IQueryProductRepository{
     }
     
     async findProductByName(productName: ProductName): Promise<Result<Product[]>> {
-        let product=this.products.find((p) => p.ProductName.equals(productName))
+        let product=this.products.filter((p) => p.ProductName.equals(productName))
         if (!product)
             return Result.fail(new PersistenceException('Find product by name unsucssessfully'))
-        return Result.success([product])
+        return Result.success(product)
     }
     async verifyProductExistenceByName(productName: ProductName): Promise<Result<boolean>> {
         let product=this.products.find((p) => p.ProductName.equals(productName))

@@ -1,4 +1,4 @@
-interface IPromotion {
+export interface IPromotion {
     id:string,
     description:string,
     name:string,

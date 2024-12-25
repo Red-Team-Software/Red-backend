@@ -4,15 +4,19 @@ import { ICommandPromotionRepository } from "src/promotion/domain/repository/pro
 
 export class PromotionCommandRepositoryMock  implements ICommandPromotionRepository{
     
-    constructor(private readonly promotions: Promotion[]){}
+    constructor(private promotions: Promotion[]){}
 
-    createPromotion(promotion: Promotion): Promise<Result<Promotion>> {
-        throw new Error("Method not implemented.");
+    async createPromotion(promotion: Promotion): Promise<Result<Promotion>> {
+        this.promotions.push(promotion)
+        return Result.success(promotion) 
     }
-    updatePromotion(promotion: Promotion): Promise<Result<Promotion>> {
-        throw new Error("Method not implemented.");
+    async updatePromotion(promotion: Promotion): Promise<Result<Promotion>> {
+        this.promotions = this.promotions.filter((p) => p.getId().equals(promotion.getId()))
+        this.promotions.push(promotion)
+        return Result.success(promotion)
     }
-    deletePromotion(promotion: Promotion): Promise<Result<Promotion>> {
-        throw new Error("Method not implemented.");
+    async deletePromotion(promotion: Promotion): Promise<Result<Promotion>> {
+        this.promotions = this.promotions.filter((p) => p.getId().equals(promotion.getId()))
+        return Result.success(promotion)
     }
 }
