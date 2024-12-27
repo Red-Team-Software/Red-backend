@@ -5,7 +5,7 @@ import { IQueryBundleRepository } from "src/bundle/application/query-repository/
 import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate"
 import { BundleId } from "src/bundle/domain/value-object/bundle-id"
 import { BundleName } from "src/bundle/domain/value-object/bundle-name"
-import { PersistenceException } from "src/common/infraestructure/infraestructure-exception"
+import { NotFoundException } from "src/common/infraestructure/infraestructure-exception"
 import { Result } from "src/common/utils/result-handler/result"
 
 export class BundleQueryRepositoryMock implements IQueryBundleRepository{
@@ -25,7 +25,7 @@ export class BundleQueryRepositoryMock implements IQueryBundleRepository{
     async findBundleById(id: BundleId): Promise<Result<Bundle>> {
         let bundle=this.bundles.find((b) => b.getId().equals(id))
         if (!bundle)
-            return Result.fail(new PersistenceException('Find bundle by id unsucssessfully'))
+            return Result.fail(new NotFoundException('Find bundle by id unsucssessfully'))
         return Result.success(bundle)
     }
     async findBundleWithMoreDetailById(id: BundleId): Promise<Result<IBundleModel>> {
@@ -34,7 +34,7 @@ export class BundleQueryRepositoryMock implements IQueryBundleRepository{
     async findBundleByName(bundleName: BundleName): Promise<Result<Bundle[]>> {
         let bundle=this.bundles.filter((b) => b.BundleName.equals(bundleName))
         if (!bundle)
-            return Result.fail(new PersistenceException('Find bundle by name unsucssessfully'))
+            return Result.fail(new NotFoundException('Find bundle by name unsucssessfully'))
         return Result.success(bundle)
     }
     async verifyBundleExistenceByName(bundleName: BundleName): Promise<Result<boolean>> {

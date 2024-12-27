@@ -22,6 +22,7 @@ import { CreateBundleApplicationResponseDTO } from "../../dto/response/create-bu
 import { IQueryBundleRepository } from "../../query-repository/query-bundle-repository"
 import { ICommandBundleRepository } from "src/bundle/domain/repository/bundle.command.repository.interface"
 import { ErrorBundleNameAlreadyApplicationException } from "../../application-exeption/error-bundle-name-already-exist-application-exception"
+import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository"
 
 export class CreateBundleApplicationService extends IApplicationService 
 <CreateBundleApplicationRequestDTO,CreateBundleApplicationResponseDTO> {
@@ -30,6 +31,7 @@ export class CreateBundleApplicationService extends IApplicationService
         private readonly eventPublisher: IEventPublisher,
         private readonly bundleQueryRepository:IQueryBundleRepository,
         private readonly bundleCommadRepository:ICommandBundleRepository,
+        private readonly productQueryRepository:IQueryProductRepository,
         private readonly idGen:IIdGen<string>,
         private readonly fileUploader:IFileUploader
     ){
@@ -44,6 +46,12 @@ export class CreateBundleApplicationService extends IApplicationService
 
         if (search.getValue) 
             return Result.fail(new ErrorBundleNameAlreadyApplicationException(command.name))
+
+        for (const product of command.productId){
+            let productResponse=await this.productQueryRepository.findProductById(ProductID.create(product))
+            if (!productResponse.isSuccess())
+                return Result.fail(productResponse.getError)
+        }
 
         let uploaded:FileUploaderResponseDTO[]=[]
         for (const image of command.images){

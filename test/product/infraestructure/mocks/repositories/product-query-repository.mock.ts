@@ -1,4 +1,4 @@
-import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
+import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { Result } from "src/common/utils/result-handler/result";
 import { FindAllProductsbyNameApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-and-combos-request-dto";
 import { FindAllProductsApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-application-request-dto";
@@ -26,7 +26,7 @@ export class ProductQueryRepositoryMock implements IQueryProductRepository{
     async findProductById(id: ProductID): Promise<Result<Product>> {
         let product=this.products.find((p) => p.getId().equals(id))
         if (!product)
-            return Result.fail(new PersistenceException('Find product by id unsucssessfully'))
+            return Result.fail(new NotFoundException('Find product by id unsucssessfully'))
         return Result.success(product)
     }
 
@@ -37,7 +37,7 @@ export class ProductQueryRepositoryMock implements IQueryProductRepository{
     async findProductByName(productName: ProductName): Promise<Result<Product[]>> {
         let product=this.products.filter((p) => p.ProductName.equals(productName))
         if (!product)
-            return Result.fail(new PersistenceException('Find product by name unsucssessfully'))
+            return Result.fail(new NotFoundException('Find product by name unsucssessfully'))
         return Result.success(product)
     }
     async verifyProductExistenceByName(productName: ProductName): Promise<Result<boolean>> {

@@ -1,4 +1,4 @@
-import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
+import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { Result } from "src/common/utils/result-handler/result";
 import { FindAllPromotionApplicationRequestDTO } from "src/promotion/application/dto/request/find-all-promotion-application-request-dto";
 import { IPromotion } from "src/promotion/application/model/promotion.interface";
@@ -18,7 +18,7 @@ export class PromotionQueryRepositoryMock implements IQueryPromotionRepository{
     async findPromotionById(id: PromotionId): Promise<Result<Promotion>> {
         let promotion=this.promotions.find((p) => p.getId().equals(id))
         if (!promotion)
-            return Result.fail(new PersistenceException('Find promotion by id unsucssessfully'))
+            return Result.fail(new NotFoundException('Find promotion by id unsucssessfully'))
         return Result.success(promotion)
     }
     async findPromotionWithMoreDetailsById(id: PromotionId): Promise<Result<IPromotion>> {
