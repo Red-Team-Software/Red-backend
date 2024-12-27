@@ -55,6 +55,9 @@ import { OrderDirection } from "src/order/domain/value_objects/order-direction"
 import { GeocodificationOpenStreeMapsDomainService } from "src/order/infraestructure/domain-service/geocodification-naminatim-maps-domain-service"
 import { UseCuponApplicationService } from "src/cupon/application/services/command/use-cupon-application-service"
 import { UseCuponInfraestructureResponseDTO } from "src/cupon/infraestructure/dto-request/response/use-cupon-infraestructure-request"
+import { UseCuponInfraestructureRequestDTO } from "src/cupon/infraestructure/dto-request/use-cupon-infraestructure-request"
+import { IQueryCuponRepository } from "src/cupon/domain/query-repository/query-cupon-repository"
+import { ICuponRepository } from "src/cupon/domain/repository/cupon.interface.repository"
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('User')
@@ -71,6 +74,8 @@ export class UserController {
   private readonly encryptor: IEncryptor
   private readonly geocodification: IGeocodification
   private readonly hereMapsSingelton: HereMapsSingelton;
+  private readonly ormCuponQueryRepository: IQueryCuponRepository
+  private readonly ormCuponCommandRepository: ICuponRepository
 
   
   constructor(
@@ -171,11 +176,28 @@ export class UserController {
 
   @Post('use-cupon')
   @ApiResponse({
-    status:200,
-    description: 'cupon information',
-    type: UseCuponInfraestructureResponseDTO
+      status: 200,
+      description: 'Cupon information',
+      type: UseCuponInfraestructureResponseDTO,
   })
-
+  async useCupon(@Body() entry: UseCuponInfraestructureRequestDTO) {
+      const service = new ExceptionDecorator(
+          new LoggerDecorator(
+              new PerformanceDecorator(
+                  new UseCuponApplicationService(
+                      this.ormCuponQueryRepository,
+                      this.ormCuponCommandRepository
+                  ),
+                  new NestTimer(),
+                  new NestLogger(new Logger())
+              ),
+              new NestLogger(new Logger())
+          )
+      );
+  
+      const response = await service.execute({ ...entry });
+      return response.getValue;
+  }
 
   @Post('add-directions')
   @ApiResponse({

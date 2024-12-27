@@ -78,8 +78,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly ormCourierQueryRepository: ICourierQueryRepository,
         private readonly dateHandler: IDateHandler,
         private readonly queryPromotionRepositoy: IQueryPromotionRepository,
-        private readonly paymentQueryRepository:IPaymentMethodQueryRepository,
-        private readonly cuponRepository: IQueryCuponRepository
+        private readonly paymentQueryRepository:IPaymentMethodQueryRepository
         
     ){
         super()
@@ -92,7 +91,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         let orderproducts: OrderProduct[] = [];
         let orderBundles: OrderBundle[] = [];
         let promotions: Promotion[] = [];
-        let cupons: Cupon[]=[];
 
         let paymentResponse=await this.paymentQueryRepository.findMethodById(PaymentMethodId.create(data.paymentId))
 
@@ -137,17 +135,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             )
         }
 
-        if (data.cupons) {
-            for (const cupon of data.cupons) {
-
-                let domain=await this.cuponRepository.findCuponById(CuponId.create(cupon.id))
-
-                if(!domain.isSuccess())
-                    return Result.fail(new ErrorCreatingOrderCuponNotFoundApplicationException())
-
-                cupons.push(domain.getValue);
-            }
-        }
 
         let findPromotion: FindAllPromotionApplicationRequestDTO = {
             userId: data.userId,
@@ -166,8 +153,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             orderproducts,
             orderBundles,
             promotions,
-            data.currency,
-            cupons
+            data.currency
         );
 
             let orderAddress = OrderAddressStreet.create(data.address);

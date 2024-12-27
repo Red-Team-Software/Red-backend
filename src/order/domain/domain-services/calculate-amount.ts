@@ -27,8 +27,7 @@ export class CalculateAmount {
         orderProducts: OrderProduct[],
         orderBundles: OrderBundle[],
         promotions: Promotion[],
-        currency: string,
-        cupons:Cupon[]
+        currency: string
     ): OrderTotalAmount {
         let amount = 0;
 
@@ -82,9 +81,6 @@ export class CalculateAmount {
             amount += bundle.total * orderBundle.Quantity.OrderBundleQuantity;
         });
 
-        cupons.forEach(cupon=>{
-            amount-=(amount*(cupon.CuponDiscount.Value))
-        })
 
         return OrderTotalAmount.create(amount, currency);
     }
