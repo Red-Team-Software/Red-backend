@@ -1,6 +1,7 @@
 import { IServiceResponseDto } from "src/common/application/services"
 
 export interface CreateProductApplicationResponseDTO extends IServiceResponseDto {
+    productId:string
     name: string,
     description: string,
     caducityDate: Date,

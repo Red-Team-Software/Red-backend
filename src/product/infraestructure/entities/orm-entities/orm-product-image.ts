@@ -8,7 +8,7 @@ export class OrmProductImage implements IProductImage
     @PrimaryColumn("uuid", { primaryKeyConstraintName: "pk_product_image_id" })
     id: string
     @Column( 'varchar' ) image: string
-    @ManyToOne( () => OrmProductEntity ) @JoinColumn( { name: 'product_id' } ) product: OrmProductEntity
+    @ManyToOne( () => OrmProductEntity , { onDelete: 'CASCADE',   onUpdate: 'CASCADE'}) @JoinColumn( { name: 'product_id' } ) product: OrmProductEntity
     @Column( 'varchar' ) product_id: string
     static create ( 
         id: string,

@@ -12,7 +12,7 @@ export class OrmProductEntity implements IProduct{
     @Column( 'varchar', { unique: true }   ) name: string
     @Column( 'varchar' ) desciption: string
     @Column( 'timestamp', { nullable:true} ) caducityDate?: Date
-    @OneToMany( () => OrmProductImage,   image => image.product,{ eager: true }) images: OrmProductImage[]   
+    @OneToMany( () => OrmProductImage,   image => image.product,{ eager: true , onDelete:'CASCADE', onUpdate:'CASCADE'}) images: OrmProductImage[]   
     @Column( 'integer' ) stock: number
     @Column( 'numeric' ) price: number
     @Column( 'varchar' ) currency: string;

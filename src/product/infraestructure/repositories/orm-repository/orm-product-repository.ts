@@ -53,41 +53,4 @@ export class OrmProductRepository extends Repository<OrmProductEntity> implement
             return Result.fail(new PersistenceException('Update product unsucssessfully'))
         }
     }
-    async findProductById(id: ProductID): Promise<Result<Product>> {
-        try{
-            const ormActivity=await this.findOneBy({id:id.Value})
-            
-            if(!ormActivity)
-                return Result.fail( new NotFoundException('Find product unsucssessfully'))
-
-            const activity=await this.mapper.fromPersistencetoDomain(ormActivity)
-            
-            return Result.success(activity)
-        }catch(e){
-            return Result.fail( new NotFoundException('Find product unsucssessfully'))
-        }    
-    }
-    async findProductByName(ProductName: ProductName): Promise<Result<Product[]>> {
-        try{
-            const product = await this.findBy({name:ProductName.Value})
-            if(product.length==0) 
-                return Result.fail( new NotFoundException('Find product by name unsucssessfully they are 0 registered'))
-            let domain=product.map(async infraestrcuture=>await this.mapper.fromPersistencetoDomain(infraestrcuture))
-            return Result.success(await Promise.all(domain))
-        }
-        catch(e){
-            return Result.fail( new NotFoundException('Find product by name unsucssessfully'))
-        }         
-    }
-
-    async verifyProductExistenceByName(ProductName: ProductName): Promise<Result<boolean>> {
-        try{
-            const account = await this.findOneBy({name:ProductName.Value})
-            if(account) return Result.success(true)
-                return Result.success(false)
-        }
-        catch(e){
-            return Result.fail( new NotFoundException('Find product by name unsucssessfully'))
-        }    
-    }
 }

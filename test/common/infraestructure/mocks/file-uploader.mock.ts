@@ -5,6 +5,10 @@ import { Result } from "src/common/utils/result-handler/result";
 
 export class FileUploaderMock implements IFileUploader {
 
+    async deleteFile(id: string): Promise<Result<boolean>> {
+        return Result.success(true)
+    }
+
     async uploadFile(buffer: Buffer, fileType: TypeFile, id:string): Promise<Result<FileUploaderResponseDTO>> {
 
         let response:FileUploaderResponseDTO={

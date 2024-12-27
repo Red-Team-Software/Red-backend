@@ -8,6 +8,7 @@ import { ProductRegistered } from "../domain-events/product-registered";
 import { ProductImage } from "../value-object/product-image";
 import { ProductPrice } from "../value-object/product-price";
 import { ProductWeigth } from "../value-object/product-weigth";
+import { ProductDeleted } from "../domain-events/product-deleted";
 
 export class Product extends AggregateRoot <ProductID>{
     protected when(event: DomainEvent): void {
@@ -37,6 +38,12 @@ export class Product extends AggregateRoot <ProductID>{
         private productCaducityDate?:ProductCaducityDate,
     ){
         super(productId)
+    }
+
+    delete(id:ProductID){
+        this.apply(
+            ProductDeleted.create(this.getId())
+        )
     }
 
     static RegisterProduct(

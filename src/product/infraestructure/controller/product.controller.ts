@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { OrmProductRepository } from '../repositories/orm-repository/orm-product-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateProductInfraestructureRequestDTO } from '../dto-request/create-product-infraestructure-request-dto';
@@ -37,6 +37,8 @@ import { NestTimer } from 'src/common/infraestructure/timer/nets-timer';
 import { ICommandProductRepository } from 'src/product/domain/repository/product.command.repositry.interface';
 import { SecurityDecorator } from 'src/common/application/aspects/security-decorator/security-decorator';
 import { UserRoles } from 'src/user/domain/value-object/enum/user.roles';
+import { DeleteProductByIdInfraestructureRequestDTO } from '../dto-request/delete-product-by-id-infraestructure-request-dto';
+import { DeleteProductApplicationService } from 'src/product/application/services/command/delete-product-application.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -168,6 +170,30 @@ export class ProductController {
         ),new NestLogger(new Logger())
       )
     )
+    
+    let response= await service.execute({userId:credential.account.idUser,...entry})
+    return response.getValue
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('delete/:id')
+  async deletetProductById(
+    @GetCredential() credential:ICredential,
+    @Param() entry:DeleteProductByIdInfraestructureRequestDTO
+  ){
+    let service= new ExceptionDecorator(
+      new SecurityDecorator(
+        new LoggerDecorator(
+          new PerformanceDecorator(
+            new DeleteProductApplicationService(
+              new RabbitMQPublisher(this.channel),
+              this.ormCommandProductRepo,
+              this.ormQueryProductRepo,
+              new CloudinaryService()              
+            ),new NestTimer(),new NestLogger(new Logger())
+          ),new NestLogger(new Logger())
+        ),credential,[UserRoles.ADMIN])
+      )
     
     let response= await service.execute({userId:credential.account.idUser,...entry})
     return response.getValue

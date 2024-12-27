@@ -26,8 +26,6 @@ IApplicationService<FindPromotionByIdApplicationRequestDTO,FindPromotionbyIdAppl
             return Result.fail(new NotFoundPromotionApplicationException(data.id))
         
         const promotion=response.getValue
-
-        console.log(promotion)
         
         return Result.success({...promotion})
     }

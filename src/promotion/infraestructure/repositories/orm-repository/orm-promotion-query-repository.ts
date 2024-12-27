@@ -10,6 +10,7 @@ import { PromotionId } from "src/promotion/domain/value-object/promotion-id";
 import { PromotionName } from "src/promotion/domain/value-object/promotion-name";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { OrmPromotionMapper } from "../../mapper/orm-mapper/orm-promotion-mapper";
+import { IPromotion } from "src/promotion/application/model/promotion.interface";
 
 
 
