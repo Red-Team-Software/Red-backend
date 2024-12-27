@@ -21,13 +21,7 @@ import { OrderReceivedDate } from 'src/order/domain/value_objects/order-received
 import { ErrorCreatingOrderApplicationException } from '../application-exception/error-creating-order-application.exception';
 import { IGeocodification } from 'src/order/domain/domain-services/geocodification-interface';
 import { OrderAddressStreet } from 'src/order/domain/value_objects/order-direction-street';
-import { OrderProduct } from 'src/order/domain/entities/order-product/order-product-entity';
-import { OrderBundle } from 'src/order/domain/entities/order-bundle/order-bundle-entity';
-import { OrderProductId } from 'src/order/domain/entities/order-product/value_object/order-productId';
 import { ProductID } from '../../../product/domain/value-object/product-id';
-import { OrderProductQuantity } from 'src/order/domain/entities/order-product/value_object/order-product-quantity';
-import { OrderBundleId } from 'src/order/domain/entities/order-bundle/value_object/order-bundlesId';
-import { OrderBundleQuantity } from 'src/order/domain/entities/order-bundle/value_object/order-bundle-quantity';
 import { BundleId } from '../../../bundle/domain/value-object/bundle-id';
 import { Product } from 'src/product/domain/aggregate/product.aggregate';
 import { ErrorCreatingOrderProductNotFoundApplicationException } from '../application-exception/error-creating-order-product-not-found-application.exception';
@@ -51,6 +45,12 @@ import { FindAllPromotionApplicationRequestDTO } from 'src/promotion/application
 import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
 import { IPaymentMethodQueryRepository } from 'src/payment-methods/application/query-repository/orm-query-repository.interface';
 import { PaymentMethodId } from 'src/payment-methods/domain/value-objects/payment-method-id';
+import { BundleDetail } from 'src/order/domain/entities/bundle-detail/bundle-detail-entity';
+import { ProductDetail } from 'src/order/domain/entities/product-detail/product-detail-entity';
+import { BundleDetailId } from 'src/order/domain/entities/bundle-detail/value_object/bundle-detail-id';
+import { BundleDetailQuantity } from 'src/order/domain/entities/bundle-detail/value_object/bundle-detail-quantity';
+import { ProductDetailId } from 'src/order/domain/entities/product-detail/value_object/product-detail-id';
+import { ProductDetailQuantity } from 'src/order/domain/entities/product-detail/value_object/product-detail-quantity';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -80,8 +80,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
         let products:Product[]=[];
         let bundles:Bundle[]=[];
-        let orderproducts: OrderProduct[] = [];
-        let orderBundles: OrderBundle[] = [];
+        let orderproducts: ProductDetail[] = [];
+        let orderBundles: BundleDetail[] = [];
         let promotions: Promotion[] = [];
 
         let paymentResponse=await this.paymentQueryRepository.findMethodById(PaymentMethodId.create(data.paymentId))
@@ -101,9 +101,9 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             }
             
             if (data.products)
-                orderproducts=data.products.map(product=>OrderProduct.create(
-                OrderProductId.create(product.id),
-                OrderProductQuantity.create(product.quantity))
+                orderproducts=data.products.map(product=>ProductDetail.create(
+                ProductDetailId.create(product.id),
+                ProductDetailQuantity.create(product.quantity))
             )
         }
 
@@ -118,9 +118,9 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             if (data.bundles)
                 orderBundles=data.bundles.map(bundle=>
-                    OrderBundle.create(
-                        OrderBundleId.create(bundle.id),
-                        OrderBundleQuantity.create(bundle.quantity)
+                    BundleDetail.create(
+                        BundleDetailId.create(bundle.id),
+                        BundleDetailQuantity.create(bundle.quantity)
                     )
             )
         }
@@ -246,7 +246,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 productsresponse.push({
                     id: product.getId().Value,
                     quantity: order.Products.find(
-                        orderproduct=>product.getId().equals(ProductID.create(orderproduct.OrderProductId.OrderProductId))
+                        orderproduct=>product.getId().equals(ProductID.create(orderproduct.ProductDetailId.productDetailId))
                     ).Quantity.Quantity,
                     nombre:product.ProductName.Value,
                     descripcion:product.ProductDescription.Value,
@@ -260,8 +260,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 bundlesresponse.push({
                     id: bundle.getId().Value,
                     quantity: order.Bundles.find(
-                        orderBundle=>bundle.getId().equals(BundleId.create(orderBundle.OrderBundleId.OrderBundleId))
-                    ).Quantity.OrderBundleQuantity,
+                        orderBundle=>bundle.getId().equals(BundleId.create(orderBundle.BundleDetailId.BundleDetailId))
+                    ).Quantity.Quantity,
                     nombre:bundle.BundleName.Value ,
                     descripcion:bundle.BundleDescription.Value,
                     price:bundle.BundlePrice.Price,

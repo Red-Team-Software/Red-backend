@@ -56,7 +56,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
         if(products){
             for (const product of products){
                 for (const prod of product.products){
-                    let domain=await this.productRepository.findProductById(ProductID.create(prod.OrderProductId.OrderProductId))
+                    let domain=await this.productRepository.findProductById(ProductID.create(prod.ProductDetailId.productDetailId))
 
                     if(!domain.isSuccess())
                         return Result.fail(new ErrorCreatingOrderProductNotFoundApplicationException())
@@ -78,7 +78,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
         if(bundles){
             for (const bundle of bundles){
                 for (const bund of bundle.bundles){
-                    let domain=await this.bundleRepository.findBundleById(BundleId.create(bund.OrderBundleId.OrderBundleId))
+                    let domain=await this.bundleRepository.findBundleById(BundleId.create(bund.BundleDetailId.BundleDetailId))
 
                     if(!domain.isSuccess()) return Result.fail(new ErrorCreatingOrderBundleNotFoundApplicationException())
                 
@@ -87,7 +87,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
                         id: domain.getValue.getId().Value,
                         name: domain.getValue.BundleName.Value,
                         descripcion: domain.getValue.BundleDescription.Value,
-                        quantity: bund.Quantity.OrderBundleQuantity,
+                        quantity: bund.Quantity.Quantity,
                         price: domain.getValue.BundlePrice.Price,
                         images: domain.getValue.BundleImages.map((image)=>image.Value),
                         currency: domain.getValue.BundlePrice.Currency,

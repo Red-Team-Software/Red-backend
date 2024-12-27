@@ -13,12 +13,6 @@ import { OrmOrderBundleEntity } from "../entities/orm-order-bundle-entity";
 import { NotFoundException } from "@nestjs/common";
 import { ProductID } from '../../../product/domain/value-object/product-id';
 import { BundleId } from "src/bundle/domain/value-object/bundle-id";
-import { OrderProduct } from "src/order/domain/entities/order-product/order-product-entity";
-import { OrderBundle } from "src/order/domain/entities/order-bundle/order-bundle-entity";
-import { OrderProductId } from "src/order/domain/entities/order-product/value_object/order-productId";
-import { OrderProductQuantity } from "src/order/domain/entities/order-product/value_object/order-product-quantity";
-import { OrderBundleQuantity } from "src/order/domain/entities/order-bundle/value_object/order-bundle-quantity";
-import { OrderBundleId } from "src/order/domain/entities/order-bundle/value_object/order-bundlesId";
 import { OrderReceivedDate } from "src/order/domain/value_objects/order-received-date";
 import { OrderReport } from "src/order/domain/entities/report/report-entity";
 import { OrderReportId } from '../../domain/entities/report/value-object/order-report-id';
@@ -42,6 +36,12 @@ import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
 import { OrmWalletEntity } from "src/user/infraestructure/entities/orm-entities/orm-wallet-entity";
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
 import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository";
+import { ProductDetail } from "src/order/domain/entities/product-detail/product-detail-entity";
+import { BundleDetail } from "src/order/domain/entities/bundle-detail/bundle-detail-entity";
+import { ProductDetailId } from "src/order/domain/entities/product-detail/value_object/product-detail-id";
+import { ProductDetailQuantity } from "src/order/domain/entities/product-detail/value_object/product-detail-quantity";
+import { BundleDetailId } from "src/order/domain/entities/bundle-detail/value_object/bundle-detail-id";
+import { BundleDetailQuantity } from "src/order/domain/entities/bundle-detail/value_object/bundle-detail-quantity";
 
 
 export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
@@ -58,8 +58,8 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
     
     async fromPersistencetoDomain(infraEstructure: OrmOrderEntity): Promise<Order> {
 
-        let products: OrderProduct[] = [];
-        let bundles: OrderBundle[] = [];
+        let products: ProductDetail[] = [];
+        let bundles: BundleDetail[] = [];
         let recievedDate: OrderReceivedDate;
         let orderReport: OrderReport;
         let orderPayment: OrderPayment;
@@ -71,9 +71,9 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         if(ormProducts){
             for (let product of ormProducts){
                 let response = await this.ormProductRepository.findProductById(ProductID.create(product.product_id));
-                products.push( OrderProduct.create(
-                    OrderProductId.create(response.getValue.getId().Value),
-                    OrderProductQuantity.create(product.quantity)
+                products.push( ProductDetail.create(
+                    ProductDetailId.create(response.getValue.getId().Value),
+                    ProductDetailQuantity.create(product.quantity)
                 ))
             }
         }
@@ -81,9 +81,9 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         if(ormBundles){
             for (let bundle of ormBundles){
                 let response = await this.ormBundleRepository.findBundleById(BundleId.create(bundle.bundle_id));
-                bundles.push( OrderBundle.create(
-                    OrderBundleId.create(response.getValue.getId().Value),
-                    OrderBundleQuantity.create(bundle.quantity)
+                bundles.push( BundleDetail.create(
+                    BundleDetailId.create(response.getValue.getId().Value),
+                    BundleDetailQuantity.create(bundle.quantity)
                 ))
             }
         }
@@ -149,7 +149,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         let ormProducts: OrmOrderProductEntity[] = [];
 
         for (let product of domainEntity.Products){
-            let response = await this.ormProductRepository.findProductById(ProductID.create(product.OrderProductId.OrderProductId));
+            let response = await this.ormProductRepository.findProductById(ProductID.create(product.ProductDetailId.productDetailId));
             if(!response.isSuccess())
                 throw new NotFoundException('Find product id not registered')
 
@@ -165,7 +165,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         let ormBundles: OrmOrderBundleEntity[] = [];
 
         for (let bundle of domainEntity.Bundles){
-            let response = await this.ormBundleRepository.findBundleById(BundleId.create(bundle.getId().OrderBundleId));
+            let response = await this.ormBundleRepository.findBundleById(BundleId.create(bundle.getId().BundleDetailId));
             
             if(!response.isSuccess())
                 throw new NotFoundException('Find bundle id not registered')
@@ -174,7 +174,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
                 OrmOrderBundleEntity.create(
                     domainEntity.getId().orderId,
                     response.getValue.getId().Value,
-                    bundle.Quantity.OrderBundleQuantity
+                    bundle.Quantity.Quantity
                 )
             )
         }
