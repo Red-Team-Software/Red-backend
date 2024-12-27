@@ -5,9 +5,11 @@ import { FindCuponByIdApplicationRequestDTO } from "src/cupon/application/dto/re
 import { CuponId } from "../value-object/cupon-id";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { CuponUser } from "../entities/cuponUser/cuponUser";
+import { CuponCode } from "../value-object/cupon-code";
 
 export interface IQueryCuponRepository {
     findAllCupons(criteria: FindAllCuponsApplicationRequestDTO): Promise<Result<Cupon[]>>;
     findCuponById(id:CuponId): Promise<Result<Cupon>>;
     findCuponUserByUserAndCupon(userId: UserId, cuponId: CuponId): Promise<Result<CuponUser>>;
+    findCuponByCode(code:CuponCode): Promise<Result<Cupon>>;
 }

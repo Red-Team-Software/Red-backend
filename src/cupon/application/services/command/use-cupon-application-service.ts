@@ -8,6 +8,7 @@ import { NotFoundCuponApplicationException } from '../../application-exception/n
 import { CuponAlreadyUsedException } from '../../application-exception/cupon-already-use-application-exception';
 import { UseCuponApplicationRequestDTO } from '../../dto/request/use-cupon-application-requestdto';
 import { UseCuponApplicationResponseDTO } from '../../dto/response/use-cupon-application-responsedto';
+import { CuponCode } from 'src/cupon/domain/value-object/cupon-code';
 
 export class UseCuponApplicationService extends IApplicationService<
     UseCuponApplicationRequestDTO,UseCuponApplicationResponseDTO
@@ -20,13 +21,18 @@ export class UseCuponApplicationService extends IApplicationService<
     }
 
     async execute(data: UseCuponApplicationRequestDTO): Promise<Result<UseCuponApplicationResponseDTO>> {
-        const { userId, cuponId } = data;
+        const { userId, cuponCode } = data;
 
+        const cupon = await this.queryCuponRepository.findCuponByCode(CuponCode.create(cuponCode));
+        
+        if(!cupon.isSuccess()){
+            return Result.fail(new NotFoundCuponApplicationException())
+        }
         // 1. Verificar si el cupon y usuario existen
         const cuponUserResult = await this.queryCuponRepository.findCuponUserByUserAndCupon(
             UserId.create(userId),
-            CuponId.create(cuponId)
-        );
+            cupon.getValue.getId()
+            );
 
         if (!cuponUserResult.isSuccess()) {
             return Result.fail(new NotFoundCuponApplicationException());
@@ -49,7 +55,8 @@ export class UseCuponApplicationService extends IApplicationService<
 
         const responseDto: UseCuponApplicationResponseDTO = {
             userId: data.userId,
-            cuponId: data.cuponId,
+            cuponId: cupon.getValue.getId().Value,
+            discount: cupon.getValue.CuponDiscount.Value,
             status: 'used',
         };
     

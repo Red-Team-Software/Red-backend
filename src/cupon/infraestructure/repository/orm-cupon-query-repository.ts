@@ -11,6 +11,8 @@ import { NotFoundCuponApplicationException
 
  } from "src/cupon/application/application-exception/not-found-cupon-application-exception";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
+import { CuponCode } from "src/cupon/domain/value-object/cupon-code";
+
 
 export class OrmCuponQueryRepository extends Repository<OrmCuponEntity> implements IQueryCuponRepository {
     
@@ -72,4 +74,19 @@ export class OrmCuponQueryRepository extends Repository<OrmCuponEntity> implemen
             return Result.fail(new NotFoundCuponApplicationException());
         }
     }
+    async findCuponByCode(code:CuponCode):Promise<Result<Cupon>>{
+        try {
+            const ormCupon = await this.findOneBy({ code: code.Value });
+
+            if (!ormCupon) {
+                return Result.fail(new NotFoundCuponApplicationException());
+            }
+
+            const cupon = await this.mapper.fromPersistencetoDomain(ormCupon);
+            return Result.success(cupon);
+        } catch (e) {
+            return Result.fail(new NotFoundCuponApplicationException());
+        }
+    }
+
 }

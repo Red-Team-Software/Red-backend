@@ -53,7 +53,8 @@ import { HereMapsSingelton } from "src/payments/infraestructure/here-maps-single
 import { FindUserDirectionsByIdApplicationRequestDTO } from "src/user/application/dto/response/find-directions-by-user-id-response-dto"
 import { OrderDirection } from "src/order/domain/value_objects/order-direction"
 import { GeocodificationOpenStreeMapsDomainService } from "src/order/infraestructure/domain-service/geocodification-naminatim-maps-domain-service"
-
+import { UseCuponApplicationService } from "src/cupon/application/services/command/use-cupon-application-service"
+import { UseCuponInfraestructureResponseDTO } from "src/cupon/infraestructure/dto-request/response/use-cupon-infraestructure-request"
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('User')
@@ -167,6 +168,14 @@ export class UserController {
 
     return dir
   }
+
+  @Post('use-cupon')
+  @ApiResponse({
+    status:200,
+    description: 'cupon information',
+    type: UseCuponInfraestructureResponseDTO
+  })
+
 
   @Post('add-directions')
   @ApiResponse({
