@@ -9,6 +9,9 @@ import { ProductImage } from "../value-object/product-image";
 import { ProductPrice } from "../value-object/product-price";
 import { ProductWeigth } from "../value-object/product-weigth";
 import { ProductDeleted } from "../domain-events/product-deleted";
+import { ProductUpdatedDescription } from "../domain-events/product-updated-description";
+import { ProductUpdatedName } from "../domain-events/product-updated-name";
+import { ProductUpdatedStock } from "../domain-events/product-updated-stock";
 
 export class Product extends AggregateRoot <ProductID>{
     protected when(event: DomainEvent): void {
@@ -40,10 +43,41 @@ export class Product extends AggregateRoot <ProductID>{
         super(productId)
     }
 
-    delete(id:ProductID){
+    delete(id:ProductID):void{
         this.apply(
-            ProductDeleted.create(this.getId())
+            ProductDeleted.create(id)
         )
+        this.validateState()
+    }
+
+    updateDescription(description:ProductDescription):void{
+        this.apply(
+            ProductUpdatedDescription.create(
+                this.getId(),
+                description
+            )
+        )
+        this.validateState()
+    }
+
+    updateName(name:ProductName):void{
+        this.apply(
+            ProductUpdatedName.create(
+                this.getId(),
+                name
+            )
+        )
+        this.validateState()
+    }
+
+    updateStock(stock:ProductStock):void{
+        this.apply(
+            ProductUpdatedStock.create(
+                this.getId(),
+                stock
+            )
+        )
+        this.validateState()
     }
 
     static RegisterProduct(

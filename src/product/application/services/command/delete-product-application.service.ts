@@ -2,8 +2,8 @@ import { IApplicationService } from "src/common/application/services/application
 import { Result } from "src/common/utils/result-handler/result";
 import { IQueryProductRepository } from "../../query-repository/query-product-repository";
 import { ICommandProductRepository } from "src/product/domain/repository/product.command.repositry.interface";
-import { DeleteProductsbyIdApplicationRequestDTO } from "../../dto/request/delete-product-by-id-request-dto";
-import { DeleteProductsbyIdApplicationResponseDTO } from "../../dto/response/delete-product-by-id-response-dto";
+import { DeleteProductsbyIdApplicationRequestDTO } from "../../dto/request/delete-product-by-id-application-request-dto";
+import { DeleteProductsbyIdApplicationResponseDTO } from "../../dto/response/delete-product-by-id-application-response-dto";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface";
 import { ProductID } from "src/product/domain/value-object/product-id";

@@ -20,7 +20,7 @@ import { FindAllProductsAndBundlesInfraestructureRequestDTO } from '../dto-reque
 import { FindAllProductsAndComboApplicationService } from 'src/product/application/services/query/find-all-product-and-combo-by-name-application.service';
 import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
 import { OrmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository';
-import { FindAllProductsbyNameApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-and-combos-request-dto';
+import { FindAllProductsbyNameApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-and-combos-application-request-dto';
 import { FindProductByIdInfraestructureRequestDTO } from '../dto-request/find-product-by-id-infraestructure-request-dto';
 import { FindProductByIdApplicationService } from 'src/product/application/services/query/find-product-by-id-application.service';
 import { RabbitMQPublisher } from 'src/common/infraestructure/events/publishers/rabbit-mq-publisher';
@@ -39,6 +39,9 @@ import { SecurityDecorator } from 'src/common/application/aspects/security-decor
 import { UserRoles } from 'src/user/domain/value-object/enum/user.roles';
 import { DeleteProductByIdInfraestructureRequestDTO } from '../dto-request/delete-product-by-id-infraestructure-request-dto';
 import { DeleteProductApplicationService } from 'src/product/application/services/command/delete-product-application.service';
+import { ByIdDTO } from 'src/common/infraestructure/dto/entry/by-id.dto';
+import { UpdateProductInfraestructureRequestDTO } from '../dto-request/update-product-infraestructure-request-dto';
+import { UpdateProductApplicationService } from 'src/product/application/services/command/update-product-application.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -196,6 +199,31 @@ export class ProductController {
       )
     
     let response= await service.execute({userId:credential.account.idUser,...entry})
+    return response.getValue
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('update/:id')
+  async updateProduct(
+    @GetCredential() credential:ICredential,
+    @Param() entryId:ByIdDTO,
+    @Body() entry:UpdateProductInfraestructureRequestDTO
+  ){
+    let service= new ExceptionDecorator(
+      new SecurityDecorator(
+        new LoggerDecorator(
+          new PerformanceDecorator(
+            new UpdateProductApplicationService(
+              new RabbitMQPublisher(this.channel),
+              this.ormCommandProductRepo,
+              this.ormQueryProductRepo,
+              new CloudinaryService()              
+            ),new NestTimer(),new NestLogger(new Logger())
+          ),new NestLogger(new Logger())
+        ),credential,[UserRoles.ADMIN])
+      )
+    
+    let response= await service.execute({...entry,userId:credential.account.idUser,productId:entryId.id})
     return response.getValue
   }
 }

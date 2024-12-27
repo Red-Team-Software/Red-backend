@@ -15,7 +15,7 @@ import { Channel } from 'amqplib';
 import { FindAllProductsAndComboApplicationService } from 'src/product/application/services/query/find-all-product-and-combo-by-name-application.service';
 import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
 import { OrmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository';
-import { FindAllProductsbyNameApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-and-combos-request-dto';
+import { FindAllProductsbyNameApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-and-combos-application-request-dto';
 import { FindProductByIdApplicationService } from 'src/product/application/services/query/find-product-by-id-application.service';
 import { RabbitMQPublisher } from 'src/common/infraestructure/events/publishers/rabbit-mq-publisher';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';

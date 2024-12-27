@@ -1,6 +1,6 @@
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { Result } from "src/common/utils/result-handler/result";
-import { FindAllProductsbyNameApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-and-combos-request-dto";
+import { FindAllProductsbyNameApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-and-combos-application-request-dto";
 import { FindAllProductsApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-application-request-dto";
 import { IProductModel } from "src/product/application/model/product.model.interface";
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
