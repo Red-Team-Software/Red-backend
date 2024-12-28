@@ -9,6 +9,7 @@ export class FindCategoryByBundleIdApplicationService extends IApplicationServic
   FindCategoryByBundleIdApplicationRequestDTO,
   FindCategoryByBundleIdApplicationResponseDTO[]
 > {
+  
   constructor(
     private readonly queryCategoryRepository: IQueryCategoryRepository
   ) {
