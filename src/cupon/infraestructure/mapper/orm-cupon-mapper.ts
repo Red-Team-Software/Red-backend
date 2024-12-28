@@ -27,6 +27,7 @@ export class OrmCuponMapper implements IMapper<Cupon, OrmCuponEntity> {
 
         for (let user of ormUsers) {
             const userId = UserId.create(user.user_id);
+            const cuponId = CuponId.create(user.cupon_id);
 
             // Validar si el usuario existe en el sistema
             const userResponse = await this.ormUserQueryRepository.findUserById(userId);
@@ -37,7 +38,11 @@ export class OrmCuponMapper implements IMapper<Cupon, OrmCuponEntity> {
             // Crear entidad CuponUser
             users.push(
                 CuponUser.create(
-                    user.cupon_id, user.user_id
+                    CuponUserId.create(userId.Value, cuponId.Value),
+                    userId,
+                    cuponId,
+                    CuponDiscount.create(user.discount),
+                    user.isUsed
                 )
             );
         }
@@ -56,11 +61,14 @@ export class OrmCuponMapper implements IMapper<Cupon, OrmCuponEntity> {
     async fromDomaintoPersistence(domainEntity: Cupon): Promise<OrmCuponEntity> {
         const ormUsers: OrmCuponUserEntity[] = [];
 
-        for (let cuponUser of domainEntity.CuponUsers) {
+        for (let cuponUser of domainEntity.CuponUsers || []) {
             ormUsers.push(
                 OrmCuponUserEntity.create(
-                    cuponUser.UserId,
-                    cuponUser.CuponId
+                    cuponUser.UserId.Value,
+                    cuponUser.CuponId.Value,
+                    cuponUser.CuponUserId.Value,
+                    cuponUser.Discount.Value,
+                    cuponUser.isCuponUsed()
                 )
             );
         }

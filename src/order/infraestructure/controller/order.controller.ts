@@ -280,9 +280,7 @@ export class OrderController {
                     this.ormCourierQueryRepository,
                     new DateHandler(),
                     new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                    this.paymentMethodQueryRepository,
-                    this.ormCuponQueryRepository,
-                    this.applyCupons
+                    this.paymentMethodQueryRepository
                 ),
                 new NestLogger(new Logger())
             )

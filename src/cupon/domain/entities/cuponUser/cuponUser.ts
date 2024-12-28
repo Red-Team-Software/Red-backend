@@ -2,28 +2,36 @@ import { Entity } from "src/common/domain";
 import { CuponUserId } from "./value-objects/cuponUserId";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { CuponId } from "../../value-object/cupon-id";
+import { CuponDiscount } from "../../value-object/cupon-discount";
 
 export class CuponUser extends Entity<CuponUserId> {
     private isUsed: boolean;
-    private userId: string;
-    private cuponId: string;
+    private userId: UserId;
+    private cuponId: CuponId;
+    private discount: CuponDiscount;
 
     constructor(
         private cuponUserId: CuponUserId,
-        userId: string,
-        cuponId: string,
+        userId: UserId,
+        cuponId: CuponId,
+        discount: CuponDiscount,
         isUsed: boolean = false
     ) {
         super(cuponUserId);
         this.isUsed = isUsed;
-        this.cuponId=cuponId;
-        this.userId=userId;
+        this.userId = userId;
+        this.cuponId = cuponId;
+        this.discount = discount;
     }
 
-    static create(userId: string, cuponId: string): CuponUser {
-        
-        const cuponUserId = CuponUserId.create(userId, cuponId);
-        return new CuponUser(cuponUserId, userId, cuponId);
+    static create(
+        cuponUserId: CuponUserId,
+        userId: UserId,
+        cuponId: CuponId,
+        discount: CuponDiscount,
+        isUsed: boolean = false
+    ): CuponUser {
+        return new CuponUser(cuponUserId, userId, cuponId, discount, isUsed);
     }
 
     public markAsUsed(): void {
@@ -38,11 +46,15 @@ export class CuponUser extends Entity<CuponUserId> {
         return this.cuponUserId;
     }
 
-    get UserId(): string{
-        return this.UserId;
+    get UserId(): UserId{
+        return this.userId
     }
 
-    get CuponId(): string{
+    get CuponId(): CuponId{
         return this.cuponId;
+    }
+
+    get Discount(): CuponDiscount{
+        return this.discount
     }
 }

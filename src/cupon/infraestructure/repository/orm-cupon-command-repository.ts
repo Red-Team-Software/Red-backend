@@ -10,16 +10,29 @@ import { OrmCuponMapper } from "../mapper/orm-cupon-mapper";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { NotFoundException, PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 import { CuponName } from "src/cupon/domain/value-object/cupon-name";
+import { CuponUser } from "src/cupon/domain/entities/cuponUser/cuponUser";
+import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
+import { OrmCuponUserMapper } from "../mapper/orm-cupon-user-mapper"; // Importar el nuevo mapper
+import { OrmCuponUserEntity } from "../orm-entities/orm-cupon-user-entity";
 
-export class OrmCuponRepository extends Repository<OrmCuponEntity> implements ICuponRepository {
-    private mapper: IMapper<Cupon, OrmCuponEntity>;
-
-    constructor(dataSource: DataSource) {
+export class OrmCuponCommandRepository extends Repository<OrmCuponEntity> implements ICuponRepository {
+    private readonly cuponUserMapper: IMapper<CuponUser, OrmCuponUserEntity>;
+    private readonly mapper: IMapper<Cupon,OrmCuponEntity>;
+    constructor(dataSource: DataSource, mapper: IMapper<Cupon, OrmCuponEntity>) {
         super(OrmCuponEntity, dataSource.createEntityManager());
-        this.mapper = new OrmCuponMapper(new UuidGen());
+        this.mapper = mapper;
+        this.cuponUserMapper = new OrmCuponUserMapper(); // Inicializar el mapper de CuponUser
     }
 
-
+    async saveCuponUser(cuponUser: CuponUser): Promise<Result<boolean>> {
+        try {
+            const ormCuponUser = await this.cuponUserMapper.fromDomaintoPersistence(cuponUser);
+            await this.manager.save(ormCuponUser);
+            return Result.success(true);
+        } catch (e) {
+            return Result.fail(new PersistenceException("Save cupon user unsuccessfully"));
+        }
+    }
 
     async createCupon(cupon: Cupon): Promise<Result<Cupon>> {
         try {

@@ -178,7 +178,7 @@ export class UserController {
   @ApiResponse({
       status: 200,
       description: 'Cupon information',
-      type: UseCuponInfraestructureResponseDTO,
+      type: UseCuponInfraestructureResponseDTO
   })
   async useCupon(@Body() entry: UseCuponInfraestructureRequestDTO) {
       const service = new ExceptionDecorator(

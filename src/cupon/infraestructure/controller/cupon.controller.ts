@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query, Logger, Inject, UseGuards } from '@nestjs/common';
 import { ICuponRepository } from 'src/cupon/domain/repository/cupon.interface.repository';
-import { OrmCuponRepository } from '../repository/orm-cupon-repository';
+import { OrmCuponCommandRepository } from '../repository/orm-cupon-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateCuponApplicationService } from 'src/cupon/application/services/command/create-cupon-application-service';
 import { ExceptionDecorator } from 'src/common/application/aspects/exeption-decorator/exception-decorator';
@@ -34,7 +34,7 @@ export class CuponController {
 
   constructor(@Inject("RABBITMQ_CONNECTION") private readonly channel: Channel) {
     this.idGen = new UuidGen();
-    this.ormCuponRepo = new OrmCuponRepository(PgDatabaseSingleton.getInstance());
+    this.ormCuponRepo = new OrmCuponCommandRepository(PgDatabaseSingleton.getInstance());
     this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
   }
 

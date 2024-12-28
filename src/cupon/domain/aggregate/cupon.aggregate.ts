@@ -11,6 +11,17 @@ import { CuponUser } from "../entities/cuponUser/cuponUser";
 
 export class Cupon extends AggregateRoot<CuponId> {
 
+    private constructor(
+        cuponId: CuponId,
+        private cuponName: CuponName,
+        private cuponCode: CuponCode,
+        private cuponDiscount: CuponDiscount,
+        private cuponState: CuponState,
+        private users?: CuponUser[]
+    ) {
+        super(cuponId);
+    }
+    
     protected when(event: DomainEvent): void {
         switch (event.getEventName) {
             case "CuponCreated":
@@ -39,16 +50,7 @@ export class Cupon extends AggregateRoot<CuponId> {
         }
     }
 
-    private constructor(
-        cuponId: CuponId,
-        private cuponName: CuponName,
-        private cuponCode: CuponCode,
-        private cuponDiscount: CuponDiscount,
-        private cuponState: CuponState,
-        private users?: CuponUser[]
-    ) {
-        super(cuponId);
-    }
+    
 
     static registerCupon(
         cuponId: CuponId,

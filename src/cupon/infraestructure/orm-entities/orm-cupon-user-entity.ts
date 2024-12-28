@@ -1,11 +1,11 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
-import { OrmBundleEntity } from "src/bundle/infraestructure/entities/orm-entities/orm-bundle-entity";
 import { OrmCuponEntity } from "./orm-cupon-entity";
 import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-user-entity";
 
-
-@Entity('order_bundle')
+@Entity('cupon_user')
 export class OrmCuponUserEntity {
+    @PrimaryColumn('uuid')
+    cupon_user_id: string; // Identificador único combinado de cupon_id y user_id
 
     @ManyToOne(() => OrmCuponEntity, (cupon) => cupon.cupon_users, { eager: true })
     @JoinColumn({ name: 'cupon_id' })
@@ -15,22 +15,31 @@ export class OrmCuponUserEntity {
     @JoinColumn({ name: 'user_id' })
     user: OrmUserEntity;
     
-    @PrimaryColumn('uuid')
+    @Column('uuid')
     cupon_id: string;
 
-    @PrimaryColumn('uuid')
+    @Column('uuid')
     user_id: string;
 
     @Column('integer')
-    quantity: number; // Cantidad de productos en la orden
+    discount: number;
+
+    @Column('boolean')
+    isUsed: boolean;
 
     static create(
+        cuponUserId: string,
         userId: string,
-        cuponId: string
+        cuponId: string,
+        discount: number,
+        isUsed: boolean
     ): OrmCuponUserEntity {
         const cuponUser = new OrmCuponUserEntity();
-        cuponUser.user_id=userId;
-        cuponUser.cupon_id=cuponId;
+        cuponUser.cupon_user_id = cuponUserId;
+        cuponUser.user_id = userId;
+        cuponUser.cupon_id = cuponId;
+        cuponUser.discount = discount;
+        cuponUser.isUsed = isUsed;
         return cuponUser;
     }
 }
