@@ -13,6 +13,7 @@ import { FindCategoryByIdApplicationRequestDTO } from 'src/category/application/
 import { FindCategoryByProductIdApplicationRequestDTO } from 'src/category/application/dto/request/find-category-by-productid-application-request.dto';
 import { CategoryName } from 'src/category/domain/value-object/category-name';
 import { ICategory } from 'src/category/application/model/category.model';
+import { FindCategoryByBundleIdApplicationRequestDTO } from 'src/category/application/dto/request/find-category-by-bundle-id-application-request.dto';
 
 export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> implements IQueryCategoryRepository {
 
@@ -24,6 +25,28 @@ export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> im
         this.mapper = new OrmCategoryMapper(new UuidGen(),dataSource);
         this.ormCategoryImageRepository = dataSource.getRepository(OrmCategoryImage);
     }
+    
+    async findCategoryByBundleId(criteria: FindCategoryByBundleIdApplicationRequestDTO): Promise<Result<Category[]>> {
+        try {
+            // Usamos el BundleID proporcionado en `criteria` para buscar todas las categorías que contienen este bundle
+            const ormCategories = await this.createQueryBuilder('category')
+                .leftJoinAndSelect('category.image', 'image') // Cargar la imagen de la categoría
+                .where(':bundleId = ANY(category.bundles)', { bundleId: criteria.id }) // Verifica si el bundleId está en el array de bundles
+                .getMany(); // Devuelve todas las categorías asociadas al bundle            
+    
+            // Mapeamos todas las categorías encontradas desde ORM a dominio
+            const categories: Category[] = [];
+            for (const ormCategory of ormCategories) {
+                const category = await this.mapper.fromPersistencetoDomain(ormCategory);
+                categories.push(category);
+            }
+    
+            return Result.success(categories);
+        } catch (error) {
+            return Result.fail(new NotFoundException('Error fetching categories by bundle ID.'));
+        }
+    }
+    
     async findCategoryByIdMoreDetail(criteria: FindCategoryByIdApplicationRequestDTO): Promise<Result<ICategory>> {
         try{
             const ormCategory=await this.findOneBy({id:criteria.id})

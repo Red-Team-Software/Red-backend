@@ -4,6 +4,7 @@ import { OrmBundleImage } from "./orm-bundle-image";
 import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
 import { OrmOrderBundleEntity } from "src/order/infraestructure/entities/orm-order-bundle-entity";
 import { OrmPromotionEntity } from '../../../../promotion/infraestructure/entities/orm-entities/orm-promotion-entity';
+import { OrmCategoryEntity } from "src/category/infraestructure/entities/orm-entities/orm-category-entity";
 
 @Entity('bundle')
 export class OrmBundleEntity implements IBundle{
@@ -22,7 +23,6 @@ export class OrmBundleEntity implements IBundle{
     @ManyToMany(() => OrmPromotionEntity, promotion => promotion.bundles)   
     promotions?: OrmPromotionEntity[]
 
-
     @ManyToMany(()=>OrmProductEntity, {eager:true})
     @JoinTable({
         name: "bundle_product",
@@ -36,6 +36,20 @@ export class OrmBundleEntity implements IBundle{
         }
     })
     products: OrmProductEntity[];
+
+    @ManyToMany(() => OrmCategoryEntity, category => category.bundles, { eager: true })
+    @JoinTable({
+        name: "category_bundle",
+        joinColumn: {
+            name: "bundle_id",
+            referencedColumnName: "id"
+        },
+        inverseJoinColumn: {
+            name: "category_id",
+            referencedColumnName: "id"
+        }
+    })
+    categories: OrmCategoryEntity[];
 
     @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.bundle)
     order_bundles?: OrmOrderBundleEntity[]
@@ -51,7 +65,8 @@ export class OrmBundleEntity implements IBundle{
         currency:string,
         weigth:number,
         measurament:string,
-        products: OrmProductEntity[]
+        products: OrmProductEntity[],
+        categories: OrmCategoryEntity[]
     ): OrmBundleEntity
     {
         const bundle = new OrmBundleEntity()
@@ -66,6 +81,7 @@ export class OrmBundleEntity implements IBundle{
         bundle.weigth=weigth
         bundle.measurament=measurament
         bundle.products=products
+        bundle.categories=categories
         return bundle
     }
 }

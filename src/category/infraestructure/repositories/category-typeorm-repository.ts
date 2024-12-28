@@ -15,6 +15,7 @@ import { PersistenceException } from "src/common/infraestructure/infraestructure
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
+import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate";
 
 export class OrmCategoryRepository extends Repository<OrmCategoryEntity> implements ICategoryRepository {
     private mapper: IMapper<Category, OrmCategoryEntity>;
@@ -22,16 +23,83 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
 
     constructor(dataSource: DataSource) {
         super(OrmCategoryEntity, dataSource.createEntityManager());
-        this.mapper = new OrmCategoryMapper(new UuidGen(),dataSource);
+        this.mapper = new OrmCategoryMapper(new UuidGen(), dataSource);
         this.ormCategoryImageRepository = dataSource.getRepository(OrmCategoryImage);
     }
-    agregateProductToCategory(category: Category, product: Product): Promise<Result<boolean>> {
-        throw new Error("Method not implemented.");
-    }
-    findCategoryByProductId(product: Product): Promise<Result<Category>> {
-        throw new Error("Method not implemented.");
+
+    async agregateBundleToCategory(category: Category, bundle: Bundle): Promise<Result<boolean>> {
+        try {
+            const categoryEntity = await this.findOne({ where: { id: category.getId().Value }, relations: ["bundles"] });
+
+            if (!categoryEntity) {
+                return Result.fail(new NotFoundCategoryApplicationException());
+            }
+
+            if (!categoryEntity.bundles.some(b => b.id === bundle.getId().Value)) {
+                categoryEntity.bundles.push({ id: bundle.getId().Value } as any);
+                await this.save(categoryEntity);
+            }
+
+            return Result.success(true);
+        } catch (error) {
+            return Result.fail(new PersistenceException("Failed to add bundle to category."));
+        }
     }
 
+    async findCategoryByBundleId(bundle: Bundle): Promise<Result<Category>> {
+        try {
+            const categoryEntity = await this.createQueryBuilder("category")
+                .leftJoin("category.bundles", "bundle")
+                .where("bundle.id = :bundleId", { bundleId: bundle.getId().Value })
+                .getOne();
+
+            if (!categoryEntity) {
+                return Result.fail(new NotFoundCategoryApplicationException());
+            }
+
+            const category = await this.mapper.fromPersistencetoDomain(categoryEntity);
+            return Result.success(category);
+        } catch (error) {
+            return Result.fail(new PersistenceException("Failed to find category by bundle ID."));
+        }
+    }
+
+    async agregateProductToCategory(category: Category, product: Product): Promise<Result<boolean>> {
+        try {
+            const categoryEntity = await this.findOne({ where: { id: category.getId().Value }, relations: ["products"] });
+
+            if (!categoryEntity) {
+                return Result.fail(new NotFoundCategoryApplicationException());
+            }
+
+            if (!categoryEntity.products.some(p => p.id === product.getId().Value)) {
+                categoryEntity.products.push({ id: product.getId().Value } as any);
+                await this.save(categoryEntity);
+            }
+
+            return Result.success(true);
+        } catch (error) {
+            return Result.fail(new PersistenceException("Failed to add product to category."));
+        }
+    }
+
+    async findCategoryByProductId(product: Product): Promise<Result<Category>> {
+        try {
+            const categoryEntity = await this.createQueryBuilder("category")
+                .leftJoin("category.products", "product")
+                .where("product.id = :productId", { productId: product.getId().Value })
+                .getOne();
+
+            if (!categoryEntity) {
+                return Result.fail(new NotFoundCategoryApplicationException());
+            }
+
+            const category = await this.mapper.fromPersistencetoDomain(categoryEntity);
+            return Result.success(category);
+        } catch (error) {
+            return Result.fail(new PersistenceException("Failed to find category by product ID."));
+        }
+    }
 
     async createCategory(category: Category): Promise<Result<Category>> {
         try {
@@ -44,7 +112,7 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
     
             return Result.success(category);
         } catch (error) {
-        console.log("error en el repo es",error);
+            console.log("error en el repo es", error);
 
             return Result.fail(new PersistenceException('Create category unsuccessfully'));
         }

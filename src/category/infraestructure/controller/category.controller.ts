@@ -31,6 +31,8 @@ import { PerformanceDecorator } from 'src/common/application/aspects/performance
 import { NestTimer } from 'src/common/infraestructure/timer/nets-timer';
 import { FindCategoryByIdInfraestructureRequestDTO } from '../dto-request/find-category-by-id-infraestructure-request.dto';
 import { JwtAuthGuard } from 'src/auth/infraestructure/jwt/guards/jwt-auth.guard';
+import { FindCategoryByBundleIdApplicationService } from 'src/category/application/services/find-category-by-bundle-id-application';
+import { FindCategoryByBundleIdInfraestructureRequestDTO } from '../dto-request/find-category-by-bundle-id-infrastructure-request.dto';
 
 @Controller('category')
 @ApiBearerAuth()
@@ -120,6 +122,24 @@ export class CategoryController {
     let response= await service.execute({userId:credential.account.idUser,...entry})
     return response.getValue
   }
+
+  @Get('CategoryByBundleId')
+  async getCategoryByBundleId(
+    @GetCredential() credential: ICredential,
+    @Query() entry: FindCategoryByBundleIdInfraestructureRequestDTO
+  ) {
+  let service = new ExceptionDecorator(
+    new LoggerDecorator(
+      new FindCategoryByBundleIdApplicationService(
+        this.ormCategoryQueryRepo
+      ),
+      new NestLogger(new Logger())
+    )
+  );
+
+  let response = await service.execute({ userId: credential.account.idUser, ...entry });
+  return response.getValue;
+}
 
   @Get('')
   async getProductById(
