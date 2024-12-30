@@ -46,7 +46,7 @@ export class DeleteProductApplicationService extends IApplicationService
         if (!productDeleteResponse.isSuccess())
             return Result.fail(productDeleteResponse.getError)
 
-        this.eventPublisher.publish(product.pullDomainEvents())
+        await this.eventPublisher.publish(product.pullDomainEvents())
 
         return Result.success({...command})
     }

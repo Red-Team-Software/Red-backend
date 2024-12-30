@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Patch, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { OrmProductRepository } from '../repositories/orm-repository/orm-product-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateProductInfraestructureRequestDTO } from '../dto-request/create-product-infraestructure-request-dto';
@@ -203,27 +203,42 @@ export class ProductController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete('update/:id')
+  @Patch('update/:id')
+  @UseInterceptors(FilesInterceptor('images'))  
   async updateProduct(
     @GetCredential() credential:ICredential,
     @Param() entryId:ByIdDTO,
-    @Body() entry:UpdateProductInfraestructureRequestDTO
+    @Body() entry:UpdateProductInfraestructureRequestDTO,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({
+            fileType:/(jpeg|.jpg|.png)$/
+          }),
+        ],
+        fileIsRequired:false
+      }),
+    ) images?: Express.Multer.File[]
   ){
     let service= new ExceptionDecorator(
       new SecurityDecorator(
-        new LoggerDecorator(
           new PerformanceDecorator(
             new UpdateProductApplicationService(
               new RabbitMQPublisher(this.channel),
               this.ormCommandProductRepo,
               this.ormQueryProductRepo,
-              new CloudinaryService()              
+              new CloudinaryService(),
+              new UuidGen()              
             ),new NestTimer(),new NestLogger(new Logger())
-          ),new NestLogger(new Logger())
         ),credential,[UserRoles.ADMIN])
       )
-    
-    let response= await service.execute({...entry,userId:credential.account.idUser,productId:entryId.id})
+    let buffers=images ? images.map(image=>image.buffer) : null
+
+    let response= await service.execute({
+      ...entry,
+      userId:credential.account.idUser,
+      productId:entryId.id,
+      images:buffers})
     return response.getValue
   }
 }

@@ -47,9 +47,15 @@ export class OrmProductRepository extends Repository<OrmProductEntity> implement
     async updateProduct(product: Product): Promise<Result<Product>> {
         const persis = await this.mapper.fromDomaintoPersistence(product)
         try {
-            const result = await this.save(persis)
+            const result = await this.upsert(persis,['id'])
+            await this.ormProductImageRepository.delete({product_id:product.getId().Value})
+
+            for (const image of persis.images) {
+                await this.ormProductImageRepository.save(image);
+              }
             return Result.success(product)
         } catch (e) {
+            console.log(e)
             return Result.fail(new PersistenceException('Update product unsucssessfully'))
         }
     }

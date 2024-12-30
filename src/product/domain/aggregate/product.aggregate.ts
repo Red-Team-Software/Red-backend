@@ -12,6 +12,10 @@ import { ProductDeleted } from "../domain-events/product-deleted";
 import { ProductUpdatedDescription } from "../domain-events/product-updated-description";
 import { ProductUpdatedName } from "../domain-events/product-updated-name";
 import { ProductUpdatedStock } from "../domain-events/product-updated-stock";
+import { ProductUpdatedImages } from "../domain-events/product-updated-images";
+import { ProductUpdatedPrice } from "../domain-events/product-updated-price";
+import { ProductUpdatedWeigth } from "../domain-events/product-updated-weigth";
+import { ProductUpdatedCaducityDate } from "../domain-events/product-updated-caducity-date";
 
 export class Product extends AggregateRoot <ProductID>{
     protected when(event: DomainEvent): void {
@@ -25,6 +29,31 @@ export class Product extends AggregateRoot <ProductID>{
                 this.productImages= productRegistered.productImage
                 this.productPrice= productRegistered.productPrice
                 this.productWeigth= productRegistered.productWeigth
+                break;
+            case 'ProductUpdatedName':
+                const productUpdatedName= event as ProductUpdatedName
+                this.productName=productUpdatedName.productName
+                break;
+            case 'ProductUpdatedDescription':
+                const productUpdatedDescription= event as ProductUpdatedDescription
+                this.productDescription=productUpdatedDescription.productDescription
+                break;
+            case 'ProductUpdatedStock':
+                const productUpdatedStock= event as ProductUpdatedStock
+                this.productStock=productUpdatedStock.productStock
+                break;
+            case 'ProductUpdatedImages':
+                const productUpdatedImages= event as ProductUpdatedImages
+                this.productImages=productUpdatedImages.productImage
+                break;
+            case 'ProductUpdatedPrice':
+                const productUpdatedPrice= event as ProductUpdatedPrice
+                this.productPrice=productUpdatedPrice.productPrice
+                break;
+            case 'ProductUpdatedWeigth':
+                const productUpdatedWeigth= event as ProductUpdatedWeigth
+                this.productWeigth=productUpdatedWeigth.productWeigth
+                break;
         }
     }
     protected validateState(): void {
@@ -47,7 +76,6 @@ export class Product extends AggregateRoot <ProductID>{
         this.apply(
             ProductDeleted.create(id)
         )
-        this.validateState()
     }
 
     updateDescription(description:ProductDescription):void{
@@ -57,7 +85,6 @@ export class Product extends AggregateRoot <ProductID>{
                 description
             )
         )
-        this.validateState()
     }
 
     updateName(name:ProductName):void{
@@ -67,7 +94,6 @@ export class Product extends AggregateRoot <ProductID>{
                 name
             )
         )
-        this.validateState()
     }
 
     updateStock(stock:ProductStock):void{
@@ -77,7 +103,42 @@ export class Product extends AggregateRoot <ProductID>{
                 stock
             )
         )
-        this.validateState()
+    }
+
+    updateImages(images:ProductImage[]){
+        this.apply(
+            ProductUpdatedImages.create(
+                this.getId(),
+                images
+            )
+        )
+    }
+
+    updateCurrency(price:ProductPrice){
+        this.apply(
+            ProductUpdatedPrice.create(
+                this.getId(),
+                price
+            )
+        )
+    }
+
+    updateWeigth(weigth:ProductWeigth){
+        this.apply(
+            ProductUpdatedWeigth.create(
+                this.getId(),
+                weigth
+            )
+        )
+    }
+
+    updateCaducityDate(caducityDate:ProductCaducityDate){
+        this.apply(
+            ProductUpdatedCaducityDate.create(
+                this.getId(),
+                caducityDate
+            )
+        )
     }
 
     static RegisterProduct(
