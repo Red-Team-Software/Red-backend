@@ -16,7 +16,6 @@ import { Promotion } from "src/promotion/domain/aggregate/promotion.aggregate"
 import { PromotionId } from "src/promotion/domain/value-object/promotion-id"
 import { PromotionDescription } from "src/promotion/domain/value-object/promotion-description"
 import { PromotionName } from "src/promotion/domain/value-object/promotion-name"
-import { PromotionAvaleableState } from "src/promotion/domain/value-object/promotion-state"
 import { PromotionDiscount } from "src/promotion/domain/value-object/promotion-discount"
 import { CreatePromotionApplicationService } from "src/promotion/application/services/command/create-promotion-application.service"
 import { PromotionCommandRepositoryMock } from '../infraestructure/mocks/repositories/promotion-command-repository.mock';
@@ -31,6 +30,7 @@ import { ProductStock } from "src/product/domain/value-object/product-stock"
 import { ProductWeigth } from "src/product/domain/value-object/product-weigth"
 import { BundleQueryRepositoryMock } from "test/bundle/infraestructure/mocks/repositories/bundle-query-repository.mock"
 import { ErrorPromotionNameAlreadyApplicationException } from "src/promotion/application/application-exepction/error-promotion-name-already-exist-application-exception";
+import { PromotionState } from "src/promotion/domain/value-object/promotion-state";
 
 
 const promotions: Promotion[] = [
@@ -38,7 +38,7 @@ const promotions: Promotion[] = [
     PromotionId.create('e09771db-2657-45fb-ad39-ae6604422414'),
     PromotionDescription.create('Descripcion de prueba'),
     PromotionName.create('promocion navidad 2024'),
-    PromotionAvaleableState.create(true),
+    PromotionState.create('avaleable'),
     PromotionDiscount.create(0.20),
     [
       ProductID.create('e09771db-2657-45fb-ad39-ae6604422919')
@@ -57,7 +57,7 @@ const bundles: Bundle[] = [
     BundleName.create('arroz chino con lumpias'),
     BundleStock.create(50),
     [
-      BundleImage.create('image-123')
+      BundleImage.create('http://image.jpg')
     ],
     BundlePrice.create(50,'usd'),
     BundleWeigth.create(50,'kg'),
@@ -74,7 +74,7 @@ const products: Product[] = [
     ProductDescription.create('descripcion de comida china'),
     ProductName.create('comida china'),
     ProductStock.create(10),
-    [ProductImage.create('prueba')],
+    [ProductImage.create('http://prueba.jpg')],
     ProductPrice.create(10,'usd'),
     ProductWeigth.create(10,'kg')
   )
@@ -97,7 +97,7 @@ When('Trying to create a promotion with a name that is already registered', asyn
       userId:"e09771db-2657-45fb-ad39-ae6604422919",
       description:"navidad 2024",
       name:"promocion navidad 2024",
-      avaleableState:true,
+      state:'avaleable',
       discount:0.50,
       products:[
         "e09771db-2657-45fb-ad39-ae6604422919"

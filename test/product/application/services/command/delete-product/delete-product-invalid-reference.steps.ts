@@ -25,7 +25,9 @@ When('Trying to delete a product with id {string} that is not registered', async
       ProductDescription.create('descripcion de comida china'),
       ProductName.create('cachito'),
       ProductStock.create(10),
-      [ProductImage.create('prueba')],
+      [
+        ProductImage.create('http://image-123.jpg')
+      ],
       ProductPrice.create(10,'usd'),
       ProductWeigth.create(10,'kg')
     )

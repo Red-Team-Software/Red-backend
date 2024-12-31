@@ -27,8 +27,8 @@ describe("Bundle Aggregate Invariants", () => {
             BundleName.create('Bundle Name'),
             BundleStock.create(10),
             [
-                BundleImage.create('image1'),
-                BundleImage.create('image2')
+                BundleImage.create('http://image1.jpg'),
+                BundleImage.create('http://image2.jpg')
             ],
             BundlePrice.create(100,'usd'),
             BundleWeigth.create(100,'kg'),

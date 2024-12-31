@@ -36,7 +36,7 @@ const bundles: Bundle[] = [
     BundleName.create(name),
     BundleStock.create(50),
     [
-      BundleImage.create('image-123')
+      BundleImage.create('http://image-123.jpg')
     ],
     BundlePrice.create(50,'usd'),
     BundleWeigth.create(50,'kg'),
@@ -53,7 +53,7 @@ const products: Product[] = [
     ProductDescription.create('descripcion de comida china'),
     ProductName.create('comida china'),
     ProductStock.create(10),
-    [ProductImage.create('prueba')],
+    [ProductImage.create('http://image-123.jpg')],
     ProductPrice.create(10,'usd'),
     ProductWeigth.create(10,'kg')
   ),
@@ -62,7 +62,7 @@ const products: Product[] = [
     ProductDescription.create('descripcion de comida japonesa'),
     ProductName.create('comida japonesa'),
     ProductStock.create(10),
-    [ProductImage.create('prueba')],
+    [ProductImage.create('http://image-123.jpg')],
     ProductPrice.create(10,'usd'),
     ProductWeigth.create(10,'kg')
   )

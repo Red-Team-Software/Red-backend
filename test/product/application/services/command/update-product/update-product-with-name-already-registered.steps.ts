@@ -31,7 +31,9 @@ When(
       ProductDescription.create('descripcion de comida cachito'),
       ProductName.create(name),
       ProductStock.create(10),
-      [ProductImage.create('prueba')],
+      [
+        ProductImage.create('http://image-123.jpg')
+      ],
       ProductPrice.create(10,'usd'),
       ProductWeigth.create(10,'kg')
     )
