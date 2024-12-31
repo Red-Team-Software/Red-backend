@@ -75,7 +75,7 @@ export class OrmPromotionQueryRepository extends Repository<OrmPromotionEntity> 
                 id:ormPromotion.id,
                 description:ormPromotion.description,
                 name:ormPromotion.name,
-                avaleableState:ormPromotion.avaleableState,
+                state:ormPromotion.state,
                 discount:Number(ormPromotion.discount),
                 products:ormPromotion.products
                 ? ormPromotion.products.map(product=>({

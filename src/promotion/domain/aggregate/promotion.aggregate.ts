@@ -7,7 +7,7 @@ import { BundleId } from "src/bundle/domain/value-object/bundle-id"
 import { PromotionDescription } from "../value-object/promotion-description"
 import { PromotionName } from "../value-object/promotion-name"
 import { PromotionRegistered } from "../domain-events/promotion-registered"
-import { PromotionAvaleableState } from '../value-object/promotion-avaleable-state';
+import { PromotionState } from "../value-object/promotion-state"
 
 
 export class Promotion extends AggregateRoot <PromotionId>{
@@ -27,7 +27,7 @@ export class Promotion extends AggregateRoot <PromotionId>{
         promotionId:PromotionId,
         private promotionDescription:PromotionDescription,
         private promotionName:PromotionName,
-        private promotionAvaleableState:PromotionAvaleableState,
+        private promotionState:PromotionState,
         private promotionDiscount:PromotionDiscount,
         private products:ProductID[],
         private bundles:BundleId[],
@@ -40,7 +40,7 @@ export class Promotion extends AggregateRoot <PromotionId>{
         promotionId:PromotionId,
         promotionDescription:PromotionDescription,
         promotionName:PromotionName,
-        promotionAvaleableState:PromotionAvaleableState,
+        promotionState:PromotionState,
         promotionDiscount:PromotionDiscount,
         products:ProductID[],
         bundles:BundleId[],
@@ -51,7 +51,7 @@ export class Promotion extends AggregateRoot <PromotionId>{
             promotionId,
             promotionDescription,
             promotionName,
-            promotionAvaleableState,
+            promotionState,
             promotionDiscount,
             products,
             bundles,
@@ -62,7 +62,7 @@ export class Promotion extends AggregateRoot <PromotionId>{
                 promotionId,
                 promotionDescription,
                 promotionName,
-                promotionAvaleableState,
+                promotionState,
                 promotionDiscount,
                 products,
                 bundles,
@@ -76,7 +76,7 @@ export class Promotion extends AggregateRoot <PromotionId>{
         promotionId:PromotionId,
         promotionDescription:PromotionDescription,
         promotionName:PromotionName,
-        promotionAvaleableState:PromotionAvaleableState,
+        promotionState:PromotionState,
         promotionDiscount:PromotionDiscount,
         products:ProductID[],
         bundles:BundleId[],
@@ -86,7 +86,7 @@ export class Promotion extends AggregateRoot <PromotionId>{
             promotionId,
             promotionDescription,
             promotionName,
-            promotionAvaleableState,
+            promotionState,
             promotionDiscount,
             products,
             bundles,
@@ -98,7 +98,7 @@ export class Promotion extends AggregateRoot <PromotionId>{
         
     get PromotionDescription():PromotionDescription{return this.promotionDescription}
     get PromotionName():PromotionName{return this.promotionName}
-    get PromotionAvaleableState():PromotionAvaleableState{return this.promotionAvaleableState}
+    get PromotionState():PromotionState{return this.promotionState}
     get PromotionDiscounts():PromotionDiscount{return this.promotionDiscount}
     get Products():ProductID[]{return this.products}
     get Bundles():BundleId[]{return this.bundles}

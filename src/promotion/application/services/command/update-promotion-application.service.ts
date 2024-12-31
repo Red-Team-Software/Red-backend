@@ -7,7 +7,6 @@ import { ErrorPromotionNameAlreadyApplicationException } from "../../application
 import { Promotion } from "src/promotion/domain/aggregate/promotion.aggregate"
 import { PromotionId } from "src/promotion/domain/value-object/promotion-id"
 import { PromotionDescription } from "src/promotion/domain/value-object/promotion-description"
-import { PromotionAvaleableState } from "src/promotion/domain/value-object/promotion-avaleable-state"
 import { PromotionDiscount } from "src/promotion/domain/value-object/promotion-discount"
 import { ProductID } from "src/product/domain/value-object/product-id"
 import { BundleId } from "src/bundle/domain/value-object/bundle-id"
@@ -86,7 +85,7 @@ export class UpdatePromotionApplicationService extends IApplicationService
             id:promotion.getId().Value,
             description:promotion.PromotionDescription.Value,
             name:promotion.PromotionName.Value,
-            avaleableState:promotion.PromotionAvaleableState.Value,
+            state:promotion.PromotionState.Value,
             discount:promotion.PromotionDiscounts.Value,
             products:promotion.Products.map(product=>({
                 id:product.Value,

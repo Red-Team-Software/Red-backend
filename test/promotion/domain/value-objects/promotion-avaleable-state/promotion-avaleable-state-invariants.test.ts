@@ -1,24 +1,23 @@
 import * as assert from 'assert';
-import { PromotionAvaleableState } from 'src/promotion/domain/value-object/promotion-avaleable-state';
+import { InvalidPromotionStateException } from 'src/promotion/domain/domain-exceptions/invalid-promotion-state-exception';
+import { PromotionState } from 'src/promotion/domain/value-object/promotion-state';
 
-describe("Promotion Avaleable State Invariants", () => {
+describe("Promotion State Invariants", () => {
   let caughtError: any
 
   beforeEach(() => {
     caughtError = null
   })
 
-  test("should not create a Promotion avaleable state with invalid state", () => {
+  test("should not create a Promotion state with invalid state", () => {
     try {
-        PromotionAvaleableState.create(false)
+        PromotionState.create('retirado')
     } catch (error) {
       caughtError = error
     }
     assert.ok(
-        true==true
-    //TODO
-    //   caughtError instanceof InvalidProductCaducityDateException,
-    //   `Expected InvalidProductCaducityDateException but got ${caughtError}`
+      caughtError instanceof InvalidPromotionStateException,
+      `Expected InvalidPromotionStateException but got ${caughtError}`
     )
   })
 })

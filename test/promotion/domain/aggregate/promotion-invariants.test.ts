@@ -1,15 +1,15 @@
 import * as assert from 'assert';
 import { ProductID } from 'src/product/domain/value-object/product-id';
-import { InvalidProductIdException } from 'src/product/domain/domain-exceptions/invalid-product-id-exception';
 import { Promotion } from 'src/promotion/domain/aggregate/promotion.aggregate';
 import { PromotionId } from 'src/promotion/domain/value-object/promotion-id';
 import { PromotionDescription } from 'src/promotion/domain/value-object/promotion-description';
 import { PromotionName } from 'src/promotion/domain/value-object/promotion-name';
-import { PromotionAvaleableState } from 'src/promotion/domain/value-object/promotion-avaleable-state';
+import { PromotionState } from 'src/promotion/domain/value-object/promotion-state';
 import { PromotionDiscount } from 'src/promotion/domain/value-object/promotion-discount';
 import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
 import { CategoryID } from 'src/category/domain/value-object/category-id';
 import { InvalidPromotionIdException } from 'src/promotion/domain/domain-exceptions/invalid-promotion-id-exception';
+import { PromotionStateEnum } from 'src/promotion/domain/value-object/enum/promotion-state.enum';
 
 
 describe("Promotion Aggregate Invariants", () => {
@@ -25,7 +25,7 @@ describe("Promotion Aggregate Invariants", () => {
             PromotionId.create('promotion-123'),
             PromotionDescription.create('Promotion Description'),
             PromotionName.create('Promotion Name'),
-            PromotionAvaleableState.create(true),
+            PromotionState.create(PromotionStateEnum.avaleable),
             PromotionDiscount.create(0.10),
             [
                 ProductID.create('e09771db-2657-45fb-ad39-ae6604422919')

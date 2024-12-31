@@ -16,7 +16,7 @@ import { Promotion } from "src/promotion/domain/aggregate/promotion.aggregate"
 import { PromotionId } from "src/promotion/domain/value-object/promotion-id"
 import { PromotionDescription } from "src/promotion/domain/value-object/promotion-description"
 import { PromotionName } from "src/promotion/domain/value-object/promotion-name"
-import { PromotionAvaleableState } from "src/promotion/domain/value-object/promotion-avaleable-state"
+import { PromotionAvaleableState } from "src/promotion/domain/value-object/promotion-state"
 import { PromotionDiscount } from "src/promotion/domain/value-object/promotion-discount"
 import { CreatePromotionApplicationService } from "src/promotion/application/services/command/create-promotion-application.service"
 import { PromotionCommandRepositoryMock } from '../infraestructure/mocks/repositories/promotion-command-repository.mock';
