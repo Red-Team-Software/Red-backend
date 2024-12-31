@@ -38,7 +38,9 @@ export class OrmProductRepository extends Repository<OrmProductEntity> implement
     }
     async deleteProductById(id: ProductID): Promise<Result<ProductID>> {
         try {
-            const result = this.delete({ id: id.Value })   
+            const result = await this.delete({ id: id.Value })
+            if(result.affected!==1)
+                return Result.fail(new PersistenceException('Delete product unsucssessfully'))
             return Result.success(id) 
         } catch (e) {
             return Result.fail(new PersistenceException('Delete product unsucssessfully'))
@@ -55,7 +57,6 @@ export class OrmProductRepository extends Repository<OrmProductEntity> implement
               }
             return Result.success(product)
         } catch (e) {
-            console.log(e)
             return Result.fail(new PersistenceException('Update product unsucssessfully'))
         }
     }

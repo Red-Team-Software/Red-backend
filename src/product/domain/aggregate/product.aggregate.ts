@@ -54,6 +54,10 @@ export class Product extends AggregateRoot <ProductID>{
                 const productUpdatedWeigth= event as ProductUpdatedWeigth
                 this.productWeigth=productUpdatedWeigth.productWeigth
                 break;
+            case 'ProductUpdatedCaducityDate':
+                const productUpdatedCaducityDate= event as ProductUpdatedCaducityDate
+                this.productCaducityDate=productUpdatedCaducityDate.productCaducityDate
+                break;
         }
     }
     protected validateState(): void {
