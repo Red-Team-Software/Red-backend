@@ -8,6 +8,10 @@ import { PromotionDescription } from "../value-object/promotion-description"
 import { PromotionName } from "../value-object/promotion-name"
 import { PromotionRegistered } from "../domain-events/promotion-registered"
 import { PromotionState } from "../value-object/promotion-state"
+import { PromotionUpdatedDescription } from "../domain-events/promotion-updated-description"
+import { PromotionUpdatedName } from "../domain-events/promotion-updated-name"
+import { PromotionUpdatedState } from "../domain-events/promotion-updated-state"
+import { PromotionUpdatedDiscount } from "../domain-events/promotion-updated-discount"
 
 
 export class Promotion extends AggregateRoot <PromotionId>{
@@ -17,7 +21,23 @@ export class Promotion extends AggregateRoot <PromotionId>{
                 const promotionRegistered: PromotionRegistered = event as PromotionRegistered
                 this.promotionDescription = promotionRegistered.promotionDescription
                 this.promotionName = promotionRegistered.promotionName
-
+                break;
+            case 'PromotionUpdatedDescription':
+                const promotionUpdatedDescription: PromotionUpdatedDescription = event as PromotionUpdatedDescription
+                this.promotionDescription=promotionUpdatedDescription.promotionDescription
+                break;
+            case 'PromotionUpdatedName':
+                const promotionUpdatedName: PromotionUpdatedName = event as PromotionUpdatedName
+                this.promotionName=promotionUpdatedName.promotionName
+                break;
+            case 'PromotionUpdatedState':
+                const promotionUpdatedState: PromotionUpdatedState = event as PromotionUpdatedState
+                this.promotionState=promotionUpdatedState.promotionState
+                break;
+            case 'PromotionUpdatedDiscount':
+                const promotionUpdatedDiscount: PromotionUpdatedDiscount = event as PromotionUpdatedDiscount
+                this.promotionDiscount=promotionUpdatedDiscount.promotionDiscount
+                break;
         }
     }
     protected validateState(): void {
@@ -34,6 +54,42 @@ export class Promotion extends AggregateRoot <PromotionId>{
         private categories:CategoryID[],
     ){
         super(promotionId)
+    }
+
+    updateDescription(description:PromotionDescription):void{
+            this.apply(
+                PromotionUpdatedDescription.create(
+                    this.getId(),
+                    description
+                )
+            )
+        }
+    
+    updateName(name:PromotionName):void{
+        this.apply(
+            PromotionUpdatedName.create(
+                this.getId(),
+                name
+            )
+        )
+    }
+
+    updateState(state:PromotionState):void{
+        this.apply(
+            PromotionUpdatedState.create(
+                this.getId(),
+                state
+            )
+        )
+    }
+
+    updateDiscount(discount:PromotionDiscount):void{
+        this.apply(
+            PromotionUpdatedDiscount.create(
+                this.getId(),
+                discount
+            )
+        )
     }
 
     static Registerpromotion(

@@ -78,6 +78,10 @@ export class UpdatePromotionApplicationService extends IApplicationService
         }
 
         const promotion=promotionResponse.getValue
+
+        if(command.description)
+            promotion.updateDescription(PromotionDescription.create(command.description))
+        
         
         await this.eventPublisher.publish(promotion.pullDomainEvents())
 
