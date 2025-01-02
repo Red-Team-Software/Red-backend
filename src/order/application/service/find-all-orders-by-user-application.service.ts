@@ -33,7 +33,7 @@ export class FindAllOdersByUserApplicationService extends IApplicationService<Fi
 
         let response = await this.orderRepository.findAllOrdersByUser(data);
 
-        if (response.isFailure()) return Result.fail(new NotFoundOrderApplicationException());
+        if (!response.isSuccess()) return Result.fail(new NotFoundOrderApplicationException());
 
         let orders = response.getValue;
 
@@ -103,8 +103,8 @@ export class FindAllOdersByUserApplicationService extends IApplicationService<Fi
 
         orders.forEach( (order) => {
 
-            let associatedProducts;
-            let associatedBundles;
+            let associatedProducts: productsOrderResponse[];
+            let associatedBundles: bundlesOrderResponse[];
             
             if (domainProducts) associatedProducts = domainProducts.filter((product) => product.orderid === order.getId().orderId); 
             

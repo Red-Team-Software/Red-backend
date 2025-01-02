@@ -31,7 +31,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
 
         let response = await this.orderRepository.findOrderById(OrderId.create(data.orderId));
 
-        if (response.isFailure()) return Result.fail(new NotFoundOrderApplicationException());
+        if (!response.isSuccess()) return Result.fail(new NotFoundOrderApplicationException());
 
         let order = response.getValue;
 

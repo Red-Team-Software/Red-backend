@@ -101,8 +101,8 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
 
         orders.forEach( (order) => {
 
-            let associatedProducts;
-            let associatedBundles;
+            let associatedProducts: productsOrderResponse[];
+            let associatedBundles: bundlesOrderResponse[];
             
             if (domainProducts) associatedProducts = domainProducts.filter((product) => product.orderid === order.getId().orderId); 
             
