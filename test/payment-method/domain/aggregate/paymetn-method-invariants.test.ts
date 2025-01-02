@@ -1,13 +1,13 @@
 import * as assert from 'assert';
-import { Product } from 'src/product/domain/aggregate/product.aggregate';
-import { ProductDescription } from 'src/product/domain/value-object/product-description';
-import { ProductID } from 'src/product/domain/value-object/product-id';
-import { ProductName } from 'src/product/domain/value-object/product-name';
-import { ProductStock } from 'src/product/domain/value-object/product-stock';
-import { ProductPrice } from 'src/product/domain/value-object/product-price';
-import { ProductWeigth } from 'src/product/domain/value-object/product-weigth';
-import { ProductImage } from 'src/product/domain/value-object/product-image';
 import { InvalidProductIdException } from 'src/product/domain/domain-exceptions/invalid-product-id-exception';
+import { PaymentMethod } from 'src/order/domain/entities/payment/value-object/payment-method';
+import { OrderPayment } from 'src/order/domain/entities/payment/order-payment-entity';
+import { PaymentMethodAgregate } from 'src/payment-methods/domain/agregate/payment-method-agregate';
+import { PaymentMethodId } from 'src/payment-methods/domain/value-objects/payment-method-id';
+import { PaymentMethodName } from 'src/payment-methods/domain/value-objects/payment-method-name';
+import { PaymentMethodState } from 'src/payment-methods/domain/value-objects/payment-method-state';
+import { PaymentMethodImage } from 'src/payment-methods/domain/value-objects/payment-method-image';
+import { InvalidPaymentMethodIdException } from 'src/payment-methods/domain/exceptions/invalid-payment-method-id-exception';
 
 
 describe("Payment Method Aggregate Invariants", () => {
@@ -17,27 +17,21 @@ describe("Payment Method Aggregate Invariants", () => {
     caughtError = null
   })
 
-  test("should not create a payment method with invalid UserId", () => {
+  test("should not create a payment method with invalid PaymentMethodId", () => {
     try {
-        Product.initializeAggregate(
-            ProductID.create('product-123'),
-            ProductDescription.create('Product Description'),
-            ProductName.create('Product Name'),
-            ProductStock.create(10),
-            [
-                ProductImage.create('image-1'),
-                ProductImage.create('image-2')
-            ],
-            ProductPrice.create(10,'usd'),
-            ProductWeigth.create(10,'kg')
-        )
+      PaymentMethodAgregate.initializeAgregate(
+        PaymentMethodId.create('12345'),
+        PaymentMethodName.create('stripe'),
+        PaymentMethodState.create('active'),
+        PaymentMethodImage.create('image-1')
+      )
     } 
     catch (error) {
       caughtError = error
     }
     assert.ok(
-      caughtError instanceof InvalidProductIdException,
-      `Expected InvalidProductIdException but got ${caughtError}`
+      caughtError instanceof InvalidPaymentMethodIdException,
+      `Expected InvalidPaymentMethodIdException but got ${caughtError}`
     )
   })
 })
