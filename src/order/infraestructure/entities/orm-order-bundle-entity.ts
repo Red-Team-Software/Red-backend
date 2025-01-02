@@ -23,6 +23,12 @@ export class OrmOrderBundleEntity {
     @Column('integer')
     quantity: number; // Cantidad de productos en la orden
 
+    @Column('numeric')
+    price: number
+
+    @Column('varchar')
+    currency: string
+
     static create(
         order: string,
         bundle: string,
