@@ -12,6 +12,13 @@ import { PromotionUpdatedDescription } from "../domain-events/promotion-updated-
 import { PromotionUpdatedName } from "../domain-events/promotion-updated-name"
 import { PromotionUpdatedState } from "../domain-events/promotion-updated-state"
 import { PromotionUpdatedDiscount } from "../domain-events/promotion-updated-discount"
+import { PromotionUpdatedProducts } from "../domain-events/promotion-updated-products"
+import { PromotionUpdatedBundles } from "../domain-events/promotion-updated-bundles"
+import { PromotionUpdatedCategories } from "../domain-events/promotion-updated-categories"
+import { InvaliPromotionException } from "../domain-exceptions/invalid-promotion-exception"
+import { InvalidPromotionProductsIdException } from "../domain-exceptions/invalid-promotion-products-id-exception"
+import { InvalidPromotionBundlesIdException } from "../domain-exceptions/invalid-promotion-bundles-id-exception"
+import { InvalidPromotionCategoriesIdException } from "../domain-exceptions/invalid-promotion-categories-id-exception"
 
 
 export class Promotion extends AggregateRoot <PromotionId>{
@@ -38,11 +45,70 @@ export class Promotion extends AggregateRoot <PromotionId>{
                 const promotionUpdatedDiscount: PromotionUpdatedDiscount = event as PromotionUpdatedDiscount
                 this.promotionDiscount=promotionUpdatedDiscount.promotionDiscount
                 break;
+            case 'PromotionUpdatedProducts':
+                const promotionUpdatedProducts: PromotionUpdatedProducts = event as PromotionUpdatedProducts
+                this.products=promotionUpdatedProducts.products
+                break;
+            case 'PromotionUpdatedBundles':
+                const promotionUpdatedBundles: PromotionUpdatedBundles = event as PromotionUpdatedBundles
+                this.bundles=promotionUpdatedBundles.bundles=promotionUpdatedBundles.bundles
+                break;
+            case 'PromotionUpdatedCategories':
+                const promotionUpdatedCategories: PromotionUpdatedCategories = event as PromotionUpdatedCategories
+                this.categories=promotionUpdatedCategories.categories
+                break;
         }
     }
-    protected validateState(): void {
 
+    protected validateProducts():void{
+        for(const productId of this.products){
+            let elements=this.products.filter(product=>
+                productId.equals(product)
+            )
+        if (elements.length!==1)
+            throw new InvalidPromotionProductsIdException(productId.Value,elements.length)
+        }
     }
+
+    protected validateBundles():void{
+        for(const bundleId of this.bundles){
+            let elements=this.bundles.filter(product=>
+                bundleId.equals(product)
+            )
+        if (elements.length!==1)
+            throw new InvalidPromotionBundlesIdException(bundleId.Value,elements.length)
+        }
+    }
+
+    protected validateCategories():void{
+        for(const categoryId of this.categories){
+            let elements=this.categories.filter(category=>
+                categoryId.equals(category)
+            )
+        if (elements.length!==1)
+            throw new InvalidPromotionCategoriesIdException(categoryId.Value,elements.length)
+        }
+    }
+
+    protected validateState(): void {
+        if(
+            !this.getId() ||
+            !this.PromotionDescription ||
+            !this.promotionName ||
+            !this.promotionState ||
+            !this.promotionDiscount ||
+            !this.products ||
+            !this.bundles ||
+            !this.categories
+        )
+        throw new InvaliPromotionException()
+
+        this.validateProducts()
+        this.validateBundles()
+        this.validateCategories()
+        
+    }
+
     private constructor(
         promotionId:PromotionId,
         private promotionDescription:PromotionDescription,
@@ -90,6 +156,33 @@ export class Promotion extends AggregateRoot <PromotionId>{
                 discount
             )
         )
+    }
+
+    updateProducts(products:ProductID[]){
+        this.apply(
+            PromotionUpdatedProducts.create(
+                this.getId(),
+                products
+            )
+        )  
+    }
+
+    updateBundles(bundles:BundleId[]){
+        this.apply(
+            PromotionUpdatedBundles.create(
+                this.getId(),
+                bundles
+            )
+        )  
+    }
+
+    updateCategories(categories:CategoryID[]){
+        this.apply(
+            PromotionUpdatedCategories.create(
+                this.getId(),
+                categories
+            )
+        )  
     }
 
     static Registerpromotion(

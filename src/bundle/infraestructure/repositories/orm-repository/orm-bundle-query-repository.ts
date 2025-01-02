@@ -44,6 +44,7 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
                 }
                 return Result.success(bundles)
             }catch(e){
+                console.log(e)
                 return Result.fail( new NotFoundException('bundles empty please try again'))
             }
         }    
@@ -72,6 +73,7 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
                 }
                 return Result.success(bundles)
             }catch(e){
+                console.log(e)
                 return Result.fail( new NotFoundException('bundles not foudnd please try again'))
             }
         }     

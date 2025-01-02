@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Patch, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { ExceptionDecorator } from 'src/common/application/aspects/exeption-decorator/exception-decorator';
 import { CreateProductApplicationService } from 'src/product/application/services/command/create-product-application.service';
@@ -43,6 +43,11 @@ import { OrmUserQueryRepository } from 'src/user/infraestructure/repositories/or
 import { OrmProductQueryRepository } from 'src/product/infraestructure/repositories/orm-repository/orm-product-query-repository';
 import { FindAllPromotionApplicationService } from 'src/promotion/application/services/query/find-all-promotion-application.service';
 import { FindPromotionByIdApplicationService } from 'src/promotion/application/services/query/find-promotion-by-id-application.service';
+import { ByIdDTO } from 'src/common/infraestructure/dto/entry/by-id.dto';
+import { SecurityDecorator } from 'src/common/application/aspects/security-decorator/security-decorator';
+import { UpdatePromotionApplicationService } from 'src/promotion/application/services/command/update-promotion-application.service';
+import { UserRoles } from 'src/user/domain/value-object/enum/user.roles';
+import { UpdatePromotionInfraestructureRequestDTO } from '../dto/request/update-promotion-infraestructure-request-dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -138,10 +143,10 @@ export class PromotionController {
     type: FindPromotionByIdInfraestructureResponseDTO,
   })
   @UseGuards(JwtAuthGuard)
-  @Get('')
-  async getProductById(
+  @Get('/:id')
+  async getPromotionById(
     @GetCredential() credential:ICredential,
-    @Query() entry:FindPromotionByIdInfraestructureRequestDTO
+    @Param() entry:FindPromotionByIdInfraestructureRequestDTO
   ){
 
     let service= new ExceptionDecorator(
@@ -157,4 +162,32 @@ export class PromotionController {
     let response= await service.execute({userId:credential.account.idUser,...entry})
     return response.getValue
   }
+
+    @UseGuards(JwtAuthGuard)
+    @Patch('update/:id')
+    async updatePromotion(
+      @GetCredential() credential:ICredential,
+      @Param() entryId:ByIdDTO,
+      @Body() entry:UpdatePromotionInfraestructureRequestDTO,
+    ){
+      let service= new ExceptionDecorator(
+        new SecurityDecorator(
+            new PerformanceDecorator(
+              new UpdatePromotionApplicationService(
+                this.ormPromotionCommandRepo,
+                this.ormPromotionQueryRepo,
+                this.ormQueryProductRepo,
+                this.ormQueryBundleRepo,
+                new RabbitMQPublisher(this.channel)
+              ),new NestTimer(),new NestLogger(new Logger())
+          ),credential,[UserRoles.ADMIN])
+        )
+  
+      let response= await service.execute({
+        ...entry,
+        userId:credential.account.idUser,
+        id:entryId.id
+      })
+      return response.getValue
+    }
 }

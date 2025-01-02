@@ -184,7 +184,8 @@ export class User extends AggregateRoot <UserId>{
                 direction
             )
         )    
-    }    get UserName():UserName {return this.userName}
+    }    
+    get UserName():UserName {return this.userName}
     get UserPhone():UserPhone {return this.userPhone}
     get UserImage():UserImage {return this.userImage}
     get UserDirections():UserDirection[] {return this.userDirections}

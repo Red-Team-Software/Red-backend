@@ -121,7 +121,7 @@ export class BundleController {
   return response.getValue
   }
 
-  @Get('all')
+  @Get('many')
   async getAllBundles(
     @GetCredential() credential:ICredential,
     @Query() entry:FindAllBundlesInfraestructureRequestDTO

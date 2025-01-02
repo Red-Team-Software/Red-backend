@@ -14,21 +14,21 @@ export class OrmPromotionEntity implements IOrmModelPromotion{
     @Column( { type: 'enum', enum: PromotionStateEnum }) state: string
     @Column( 'numeric' ) discount: number
 
-    @ManyToMany(() => OrmProductEntity, product => product.promotions,{eager:true})   
+    @ManyToMany(() => OrmProductEntity, product => product.promotions,{eager:true, onDelete:'CASCADE'})   
     @JoinTable({
         name: "promotion_product",
         joinColumn: {
             name: "promotion_id",
-            referencedColumnName: "id"
+            referencedColumnName: "id",
         },
         inverseJoinColumn: {
             name: "product_id",
-            referencedColumnName: "id"
+            referencedColumnName: "id",
         }
     })
     products?: OrmProductEntity[]
 
-    @ManyToMany(() => OrmBundleEntity, bundle => bundle.promotions,{eager:true})   
+    @ManyToMany(() => OrmBundleEntity, bundle => bundle.promotions,{eager:true, onDelete:'CASCADE'})   
     @JoinTable({
         name: "promotion_bundle",
         joinColumn: {
