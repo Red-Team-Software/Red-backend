@@ -1,8 +1,8 @@
-interface IPromotion {
+export interface IPromotion {
     id:string,
     description:string,
     name:string,
-    avaleableState:boolean,
+    state:string,
     discount:number,
     products:{
         id:string,

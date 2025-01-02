@@ -1,5 +1,4 @@
-import { AggregateRoot, DomainEvent, Entity } from "src/common/domain";
-
+import { AggregateRoot, DomainEvent} from "src/common/domain";
 import { BundleRegistered } from "../domain-events/bundle-registered";
 import { BundleId } from "../value-object/bundle-id";
 import { BundleDescription } from "../value-object/bundle-description";
@@ -11,6 +10,7 @@ import { BundlePrice } from "../value-object/bundle-price";
 import { BundleWeigth } from "../value-object/bundle-weigth";
 import { ProductID } from "src/product/domain/value-object/product-id";
 import { InvalidBundleException } from "../domain-exceptions/invalid-bundle-exception";
+import { InvalidBundleProductsIdException } from "../domain-exceptions/invalid-bundle-products-id-exception";
 
 export class Bundle extends AggregateRoot <BundleId>{
     protected when(event: DomainEvent): void {
@@ -24,8 +24,10 @@ export class Bundle extends AggregateRoot <BundleId>{
                 this.bundleImages= bundleRegistered.bundleImages
                 this.bundlePrice= bundleRegistered.bundlePrice
                 this.bundleWeigth= bundleRegistered.bundleWeigth
+                this.productsId=bundleRegistered.productId
         }
     }
+
     protected validateState(): void {
         if (! this.bundleDescription ||
         ! this.bundleDescription ||
@@ -34,8 +36,16 @@ export class Bundle extends AggregateRoot <BundleId>{
         ! this.bundleImages ||
         ! this.bundlePrice ||
         ! this.bundleWeigth ||
-        this.productId.length<2)
+        this.productsId.length<2)
         throw new InvalidBundleException()
+
+        for(const productId of this.productsId){
+            let elements=this.productsId.filter(product=>
+                productId.equals(product)
+            )
+            if (elements.length!==1)
+                throw new InvalidBundleProductsIdException(productId.Value,elements.length)
+        }
     }
     private constructor(
         bundleId:BundleId,
@@ -45,7 +55,7 @@ export class Bundle extends AggregateRoot <BundleId>{
         private bundleImages:BundleImage[],
         private bundlePrice:BundlePrice,
         private bundleWeigth:BundleWeigth,
-        private productId:ProductID[],
+        private productsId:ProductID[],
         private bundleCaducityDate?:BundleCaducityDate,
     ){
         super(bundleId)
@@ -88,6 +98,8 @@ export class Bundle extends AggregateRoot <BundleId>{
                 bundleCaducityDate
             )
         )
+        bundle.validateState()
+
         return bundle
     }
     static initializeAggregate(
@@ -124,5 +136,5 @@ export class Bundle extends AggregateRoot <BundleId>{
     get BundleImages():BundleImage[]{return this.bundleImages}
     get BundlePrice():BundlePrice{return this.bundlePrice}
     get BundleWeigth():BundleWeigth{return this.bundleWeigth}
-    get ProductId():ProductID[]{return this.productId}
+    get ProductId():ProductID[]{return this.productsId}
 }

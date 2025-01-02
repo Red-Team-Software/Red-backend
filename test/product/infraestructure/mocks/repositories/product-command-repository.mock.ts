@@ -19,6 +19,7 @@ export class ProductCommadRepositoryMock implements ICommandProductRepository{
     }
     async updateProduct(product: Product): Promise<Result<Product>> {
         this.products = this.products.filter((p) => p.getId().equals(product.getId()))
+        this.products.push(product)
         return Result.success(product)
     }
 }

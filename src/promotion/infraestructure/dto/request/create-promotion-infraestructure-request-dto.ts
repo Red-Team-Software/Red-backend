@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsBoolean, IsNumber, IsArray, IsUUID, ArrayNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsBoolean, IsNumber, IsArray, IsUUID, ArrayNotEmpty, IsOptional, IsEnum } from 'class-validator';
+import { PromotionStateEnum } from 'src/promotion/domain/value-object/enum/promotion-state.enum';
+import { PromotionState } from 'src/promotion/domain/value-object/promotion-state';
 
 export class CreatePromotionInfraestructureRequestDTO {
     @ApiProperty({ required: true, default: 'Promocion de navidad 2025 sobre los productos navideños' })
@@ -10,9 +12,9 @@ export class CreatePromotionInfraestructureRequestDTO {
     @IsString()
     name: string;
     
-    @ApiProperty({ example: true })
-    @IsBoolean()
-    avaleableState: boolean;
+    @ApiProperty({ example: 'avaleable', enum:PromotionStateEnum })
+    @IsEnum(PromotionStateEnum)
+    state: string;
 
     @ApiProperty({ example: 0.5 })
     @IsNumber()

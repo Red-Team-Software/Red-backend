@@ -11,7 +11,7 @@ describe("Product Image Invariants", () => {
 
   test("should not create a Product image with invalid image", () => {
     try {
-        ProductImage.create(`test`)
+        ProductImage.create(`https://imagen.com`)
     } catch (error) {
       caughtError = error
     }

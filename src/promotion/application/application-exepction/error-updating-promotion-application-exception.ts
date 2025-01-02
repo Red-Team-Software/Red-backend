@@ -2,6 +2,6 @@ import { ApplicationException } from "src/common/application/application-exeptio
 
 export class ErrorUpdatingPromotionApplicationException extends ApplicationException{
     constructor(id:string) {
-        super('Error updating promotion');
+        super(`Error updating promotion with id ${id}`);
     }
 }

@@ -1,9 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { Transform } from "class-transformer"
-import { ArrayMinSize, IsArray, IsBase64, isBase64, IsDate, IsDateString, IsNegative, IsNumber, IsOptional, isPositive, IsPositive, IsString, MinLength } from "class-validator"
+import { IsDateString, IsNumber, IsOptional, IsPositive, IsString, MinLength } from "class-validator"
 
 export class CreateProductInfraestructureRequestDTO{
-
   
     @ApiProperty( { required: true, default: 'lechuga' })
     @IsString()

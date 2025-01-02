@@ -46,23 +46,23 @@ $ pnpm build
 ## Test
 
 ```bash
-# unit tests
-$ pnpm run test
+# Run all tests
+$ pnpm test
 
-# e2e tests
-$ pnpm run test:e2e
+# Run Jest test
+$ pnpm test:jest
 
-# test coverage
-$ pnpm run test:cov
+# test Cucumber test
+$ pnpm test:cucumber
 ```
 
 ## How to use it??
 
 ```bash
-# execute the following command
+# execute the following command to execute the docker cotainers
 $ docker compose up -d
 
-# test coverage
+# execute the following command to execute the API
 $ pnpm dev
 ```
 
@@ -152,6 +152,20 @@ Nest is [MIT licensed](LICENSE).
             </a>
             <br><a href="https://stripe.com/" title="Commits">📖</a>
         </td>
+        <td align="center"> 
+            <a href="https://jestjs.io/" rel="nofollow"> 
+                <img src="./public/images/dependencies/jest-logo-png-transparent.png" width="50px;" alt="" style="max-width:100%;">
+                <br><sub><b>Jest</b></sub>
+            </a>
+            <br><a href="https://jestjs.io/" title="Commits">📖</a>
+        </td>
+        <td align="center"> 
+            <a href="https://cucumber.io/" rel="nofollow"> 
+                <img src="./public/images/dependencies/cucumber-logo-png-transparent.png" width="50px;" alt="" style="max-width:100%;">
+                <br><sub><b>Cucumber</b></sub>
+            </a>
+            <br><a href="https://cucumber.io/" title="Commits">📖</a>
+        </td>
     </tr>
 </tbody>
 </table>
@@ -203,27 +217,27 @@ NT: Hoy 08/11/2024 Ponceleon si completo su responsabilidad (3 dias despues de l
 
 | Task                                     | Time required | Assigned to | Current Status | Finished               |
 |------------------------------------------|---------------|-------------|----------------|------------------------|
-| Registro de usuario                      | 2 weeks       | Fung        | On going       | :construction: Working |
-| Iniciar Sesión                           | 2 weeks       | Fung        | On going       | :construction: Working |
-| Recuperación de contraseña               | 2 weeks       | Fung        | On going       | :construction: Working |
-| Cierre de sesión                         | 2 weeks       | Fung        | On going       | :construction: Working |
-| Modificar perfil                         | 2 weeks       | Fung        | On going       | :construction: Working |
-| Agregar dirección de entrega             | 2 weeks       | Fung        | On going       | :construction: Working |
-| Editar dirección de entrega              | 2 weeks       | Fung        | On going       | :construction: Working |
-| Eliminar dirección de entrega            | 2 weeks       | Fung        | On going       | :construction: Working |
-| Establecer dirección predeterminada      | 2 weeks       | Fung        | On going       | :construction: Working |
-| Notificación por cambio de contraseña    | 2 weeks       | Fung        | On going       | :construction: Working |
-| Promociones de productos                 | 2 weeks       | Fung        | On going       | :construction: Working |
-| Ver historial de órdenes pasadas         | 2 weeks       | Gabriel     | On going       | :construction: Working |
-| Repetir una orden pasada                 | 2 weeks       | Gabriel     | On going       | :construction: Working |
-| Cancelar una orden activa                | 2 weeks       | Gabriel     | On going       | :construction: Working |
-| Visualización de impuestos               | 2 weeks       | Gabriel     | On going       | :construction: Working |
-| Visualización de tarifa de envío         | 2 weeks       | Gabriel     | On going       | :construction: Working |
-| Notificación de cancelación de orden     | 2 weeks       | Gabriel     | On going       | :construction: Working |
-| Aplicar cupones de descuento             | 2 weeks       | Ponceleon   | On going       | :construction: Working |
-| Notificación de promociones              | 2 weeks       | Ponceleon   | On going       | :construction: Working |
-| Notificación de cupones                  | 2 weeks       | Ponceleon   | On going       | :construction: Working |
-| Ver productos más vendidos               | 2 weeks       | Ponceleon   | On going       | :construction: Working |
+| Registro de usuario                      | 2 weeks       | Fung        | done           | ✅ done               |
+| Iniciar Sesión                           | 2 weeks       | Fung        | done           | ✅ done               |
+| Recuperación de contraseña               | 2 weeks       | Fung        | done           | ✅ done               |
+| Cierre de sesión                         | 2 weeks       | Fung        | done           | ✅ done               |
+| Modificar perfil                         | 2 weeks       | Fung        | done           | ✅ done               |
+| Agregar dirección de entrega             | 2 weeks       | Fung        | done           | ✅ done               |
+| Editar dirección de entrega              | 2 weeks       | Fung        | done           | ✅ done               |
+| Eliminar dirección de entrega            | 2 weeks       | Fung        | done           | ✅ done               |
+| Establecer dirección predeterminada      | 2 weeks       | Fung        | done           | ✅ done               |
+| Notificación por cambio de contraseña    | 2 weeks       | Fung        | NOT done       | ❌ NOT done           |
+| Promociones de productos                 | 2 weeks       | Fung        | done           | ✅ done               |
+| Ver historial de órdenes pasadas         | 2 weeks       | Gabriel     | done           | ✅ done               |
+| Repetir una orden pasada                 | 2 weeks       | Gabriel     | done           | ✅ done               |
+| Cancelar una orden activa                | 2 weeks       | Gabriel     | done           | ✅ done               |
+| Visualización de impuestos               | 2 weeks       | Gabriel     | done           | ✅ done               |
+| Visualización de tarifa de envío         | 2 weeks       | Gabriel     | done           | ✅ done               |
+| Notificación de cancelación de orden     | 2 weeks       | Gabriel     | done           | ✅ done               |
+| Aplicar cupones de descuento             | 2 weeks       | Ponceleon   | done           | ✅ done               |
+| Notificación de promociones              | 2 weeks       | Ponceleon   | done           | ✅ done               |
+| Notificación de cupones                  | 2 weeks       | Ponceleon   | done           | ✅ done               |
+| Ver productos más vendidos               | 2 weeks       | Ponceleon   | NOT done       | ❌ NOT done           |
 
 
 #### Leyenda

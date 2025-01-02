@@ -74,6 +74,7 @@ export class CreateProductApplicationService extends IApplicationService
         await this.eventPublisher.publish(product.pullDomainEvents())
         let response:CreateProductApplicationResponseDTO={
             ...command,
+            productId:product.getId().Value,
             images:product.ProductImages.map(image=>image.Value)
         }
         return Result.success(response)

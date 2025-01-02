@@ -8,7 +8,7 @@ import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
 import { FindAllProductsApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-application-request-dto";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
-import { FindAllProductsbyNameApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-and-combos-request-dto";
+import { FindAllProductsbyNameApplicationRequestDTO } from "src/product/application/dto/request/find-all-products-and-combos-application-request-dto";
 import { ProductID } from "src/product/domain/value-object/product-id";
 import { ProductName } from "src/product/domain/value-object/product-name";
 import { IProductModel } from "src/product/application/model/product.model.interface";

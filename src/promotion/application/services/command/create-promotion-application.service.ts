@@ -11,17 +11,16 @@ import { ErrorPromotionNameAlreadyApplicationException } from "../../application
 import { Promotion } from "src/promotion/domain/aggregate/promotion.aggregate"
 import { PromotionId } from "src/promotion/domain/value-object/promotion-id"
 import { PromotionDescription } from "src/promotion/domain/value-object/promotion-description"
-import { PromotionAvaleableState } from "src/promotion/domain/value-object/promotion-avaleable-state"
 import { PromotionDiscount } from "src/promotion/domain/value-object/promotion-discount"
 import { ProductID } from "src/product/domain/value-object/product-id"
 import { BundleId } from "src/bundle/domain/value-object/bundle-id"
-import { CategoryID } from "src/category/domain/value-object/category-id"
 import { ErrorCreatingPromotionApplicationException } from "../../application-exepction/error-creating-promotion-application-exception"
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository"
 import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository"
 import { ErrorCreatingPromotionProductNotFoudApplicationException } from "../../application-exepction/error-creating-promotion-product-not-found-application-exception"
 import { Product } from "src/product/domain/aggregate/product.aggregate"
 import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate"
+import { PromotionState } from "src/promotion/domain/value-object/promotion-state"
 
 
 export class CreatePromotionApplicationService extends IApplicationService 
@@ -74,7 +73,7 @@ export class CreatePromotionApplicationService extends IApplicationService
             PromotionId.create(await this.idGen.genId()),
             PromotionDescription.create(command.description),
             PromotionName.create(command.name),
-            PromotionAvaleableState.create(command.avaleableState),
+            PromotionState.create(command.state),
             PromotionDiscount.create(command.discount),
             command.products.map(product=>ProductID.create(product)),
             command.bundles.map(bundle=>BundleId.create(bundle)),

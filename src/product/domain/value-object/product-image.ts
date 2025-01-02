@@ -17,7 +17,9 @@ export class ProductImage implements ValueObject<ProductImage> {
     }
 
     private constructor(image:string){
-        if (image.length<5) throw new InvalidProductImageException()
+        const regex=new RegExp(/http?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp)/)
+        if (!regex.test(image)) 
+            throw new InvalidProductImageException()
         this.image=image
     }
 

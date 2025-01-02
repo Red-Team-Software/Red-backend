@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Patch, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { OrmProductRepository } from '../repositories/orm-repository/orm-product-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateProductInfraestructureRequestDTO } from '../dto-request/create-product-infraestructure-request-dto';
@@ -20,7 +20,7 @@ import { FindAllProductsAndBundlesInfraestructureRequestDTO } from '../dto-reque
 import { FindAllProductsAndComboApplicationService } from 'src/product/application/services/query/find-all-product-and-combo-by-name-application.service';
 import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
 import { OrmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository';
-import { FindAllProductsbyNameApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-and-combos-request-dto';
+import { FindAllProductsbyNameApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-and-combos-application-request-dto';
 import { FindProductByIdInfraestructureRequestDTO } from '../dto-request/find-product-by-id-infraestructure-request-dto';
 import { FindProductByIdApplicationService } from 'src/product/application/services/query/find-product-by-id-application.service';
 import { RabbitMQPublisher } from 'src/common/infraestructure/events/publishers/rabbit-mq-publisher';
@@ -37,6 +37,11 @@ import { NestTimer } from 'src/common/infraestructure/timer/nets-timer';
 import { ICommandProductRepository } from 'src/product/domain/repository/product.command.repositry.interface';
 import { SecurityDecorator } from 'src/common/application/aspects/security-decorator/security-decorator';
 import { UserRoles } from 'src/user/domain/value-object/enum/user.roles';
+import { DeleteProductByIdInfraestructureRequestDTO } from '../dto-request/delete-product-by-id-infraestructure-request-dto';
+import { DeleteProductApplicationService } from 'src/product/application/services/command/delete-product-application.service';
+import { ByIdDTO } from 'src/common/infraestructure/dto/entry/by-id.dto';
+import { UpdateProductInfraestructureRequestDTO } from '../dto-request/update-product-infraestructure-request-dto';
+import { UpdateProductApplicationService } from 'src/product/application/services/command/update-product-application.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -170,6 +175,70 @@ export class ProductController {
     )
     
     let response= await service.execute({userId:credential.account.idUser,...entry})
+    return response.getValue
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('delete/:id')
+  async deletetProductById(
+    @GetCredential() credential:ICredential,
+    @Param() entry:DeleteProductByIdInfraestructureRequestDTO
+  ){
+    let service= new ExceptionDecorator(
+      new SecurityDecorator(
+        new LoggerDecorator(
+          new PerformanceDecorator(
+            new DeleteProductApplicationService(
+              new RabbitMQPublisher(this.channel),
+              this.ormCommandProductRepo,
+              this.ormQueryProductRepo,
+              new CloudinaryService()              
+            ),new NestTimer(),new NestLogger(new Logger())
+          ),new NestLogger(new Logger())
+        ),credential,[UserRoles.ADMIN])
+      )
+    
+    let response= await service.execute({userId:credential.account.idUser,...entry})
+    return response.getValue
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('update/:id')
+  @UseInterceptors(FilesInterceptor('images'))  
+  async updateProduct(
+    @GetCredential() credential:ICredential,
+    @Param() entryId:ByIdDTO,
+    @Body() entry:UpdateProductInfraestructureRequestDTO,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({
+            fileType:/(jpeg|.jpg|.png)$/
+          }),
+        ],
+        fileIsRequired:false
+      }),
+    ) images?: Express.Multer.File[]
+  ){
+    let service= new ExceptionDecorator(
+      new SecurityDecorator(
+          new PerformanceDecorator(
+            new UpdateProductApplicationService(
+              new RabbitMQPublisher(this.channel),
+              this.ormCommandProductRepo,
+              this.ormQueryProductRepo,
+              new CloudinaryService(),
+              new UuidGen()              
+            ),new NestTimer(),new NestLogger(new Logger())
+        ),credential,[UserRoles.ADMIN])
+      )
+    let buffers=images ? images.map(image=>image.buffer) : null
+
+    let response= await service.execute({
+      ...entry,
+      userId:credential.account.idUser,
+      productId:entryId.id,
+      images:buffers})
     return response.getValue
   }
 }

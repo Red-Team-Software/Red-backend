@@ -33,6 +33,8 @@ import { PerformanceDecorator } from "src/common/application/aspects/performance
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler"
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
 import { ICommandBundleRepository } from "src/bundle/domain/repository/bundle.command.repository.interface"
+import { OrmProductQueryRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-query-repository"
+import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -42,6 +44,7 @@ export class BundleController {
 
   private readonly ormBundleCommandRepo:ICommandBundleRepository
   private readonly ormQueryBundletRepo:IQueryBundleRepository
+  private readonly ormQueryProductRepo:IQueryProductRepository
   private readonly idGen: IIdGen<string> 
   private readonly auditRepository: IAuditRepository
   
@@ -52,6 +55,7 @@ export class BundleController {
     this.idGen= new UuidGen()
     this.ormQueryBundletRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
+    this.ormQueryProductRepo=new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
   }
 
   @Post('create')
@@ -75,6 +79,7 @@ export class BundleController {
               new RabbitMQPublisher(this.channel),
               this.ormQueryBundletRepo,
               this.ormBundleCommandRepo,
+              this.ormQueryProductRepo,
               this.idGen,
               new CloudinaryService()
             ),new NestTimer(),new NestLogger(new Logger())
@@ -116,7 +121,7 @@ export class BundleController {
   return response.getValue
   }
 
-  @Get('all')
+  @Get('many')
   async getAllBundles(
     @GetCredential() credential:ICredential,
     @Query() entry:FindAllBundlesInfraestructureRequestDTO

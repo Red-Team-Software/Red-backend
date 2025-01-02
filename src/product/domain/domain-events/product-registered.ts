@@ -7,6 +7,7 @@ import { ProductName } from '../value-object/product-name';
 import { ProductPrice } from '../value-object/product-price';
 import { ProductStock } from '../value-object/product-stock';
 import { ProductWeigth } from '../value-object/product-weigth';
+
 export class ProductRegistered extends DomainEvent {
     serialize(): string {
         let data= {  
