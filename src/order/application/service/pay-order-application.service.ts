@@ -51,6 +51,8 @@ import { BundleDetailId } from 'src/order/domain/entities/bundle-detail/value_ob
 import { BundleDetailQuantity } from 'src/order/domain/entities/bundle-detail/value_object/bundle-detail-quantity';
 import { ProductDetailId } from 'src/order/domain/entities/product-detail/value_object/product-detail-id';
 import { ProductDetailQuantity } from 'src/order/domain/entities/product-detail/value_object/product-detail-quantity';
+import { ProductDetailPrice } from 'src/order/domain/entities/product-detail/value_object/product-detail-price';
+import { BundleDetailPrice } from 'src/order/domain/entities/bundle-detail/value_object/bundle-detail-price';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -89,42 +91,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         if (!paymentResponse.isSuccess())
             return Result.fail(paymentResponse.getError)
 
-
-        if(data.products){
-            for (const product of data.products){
-                let domain=await this.productRepository.findProductById(ProductID.create(product.id))
-
-                if(!domain.isSuccess())
-                    return Result.fail(new ErrorCreatingOrderProductNotFoundApplicationException())
-
-                products.push(domain.getValue)
-            }
-            
-            if (data.products)
-                orderproducts=data.products.map(product=>ProductDetail.create(
-                ProductDetailId.create(product.id),
-                ProductDetailQuantity.create(product.quantity))
-            )
-        }
-
-        if(data.bundles){
-            for (const bundle of data.bundles){
-                let domain=await this.bundleRepository.findBundleById(BundleId.create(bundle.id))
-
-                if(!domain.isSuccess())
-                    return Result.fail(new ErrorCreatingOrderBundleNotFoundApplicationException())
-                bundles.push(domain.getValue)
-            }
-
-            if (data.bundles)
-                orderBundles=data.bundles.map(bundle=>
-                    BundleDetail.create(
-                        BundleDetailId.create(bundle.id),
-                        BundleDetailQuantity.create(bundle.quantity)
-                    )
-            )
-        }
-
         let findPromotion: FindAllPromotionApplicationRequestDTO = {
             userId: data.userId,
             name: '',
@@ -136,12 +102,75 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
         if (promoResponse.isSuccess()) promotions = promoResponse.getValue;
 
+
+        if(data.products){
+            for (const product of data.products){
+                let domain=await this.productRepository.findProductById(ProductID.create(product.id))
+
+                if(!domain.isSuccess())
+                    return Result.fail(new ErrorCreatingOrderProductNotFoundApplicationException())
+
+                products.push(domain.getValue)
+            }
+            
+            if (data.products){
+                products.forEach(product => {
+                    let promotion = promotions.find(promo => {
+                        return promo.Products.some(productId => productId.Value === product.getId().Value);
+                    });
+        
+                    let productTotal = product.ProductPrice.Price;
+        
+                    if (promotion) productTotal -= (product.ProductPrice.Price * (promotion.PromotionDiscounts.Value));
+        
+                    let pr = ProductDetail.create(
+                        ProductDetailId.create(product.getId().Value),
+                        ProductDetailQuantity.create(data.products.find(p=>p.id==product.getId().Value).quantity),
+                        ProductDetailPrice.create(productTotal, product.ProductPrice.Currency)
+                    );
+
+                    orderproducts.push( pr );
+
+                });
+            }
+        }
+
+
+        
+        if(data.bundles){
+            for (const bundle of data.bundles){
+                let domain=await this.bundleRepository.findBundleById(BundleId.create(bundle.id))
+
+                if(!domain.isSuccess())
+                    return Result.fail(new ErrorCreatingOrderBundleNotFoundApplicationException())
+                bundles.push(domain.getValue)
+            }
+
+            if (data.bundles)
+                bundles.forEach(bundle => {
+                    let promotion = promotions.find(promo => {
+                        return promo.Bundles.some(bundleId => bundleId.Value === bundle.getId().Value);
+                    });
+        
+                    let bundleTotal = bundle.BundlePrice.Price;
+        
+                    if (promotion) bundleTotal -= (bundle.BundlePrice.Price * (promotion.PromotionDiscounts.Value ));
+        
+                    let bu = BundleDetail.create(
+                        BundleDetailId.create(bundle.getId().Value),
+                        BundleDetailQuantity.create(data.bundles.find(b=>b.id==bundle.getId().Value).quantity),
+                        BundleDetailPrice.create(bundleTotal, bundle.BundlePrice.Currency)
+                    );
+
+                    orderBundles.push( bu );
+                });
+                
+        
+        }
+
         let amount = this.calculateAmount.calculateAmount(
-            products,
-            bundles,
             orderproducts,
             orderBundles,
-            promotions,
             data.currency
         );
 

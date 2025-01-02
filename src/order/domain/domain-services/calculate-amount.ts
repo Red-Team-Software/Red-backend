@@ -21,63 +21,20 @@ export class CalculateAmount {
     //TODO: Refactor when coupon and discount are implemented
 
     calculateAmount(
-        products: Product[], 
-        bundles: Bundle[],
         orderProducts: ProductDetail[],
         orderBundles: BundleDetail[],
-        promotions: Promotion[],
         currency: string
     ): OrderTotalAmount {
         let amount = 0;
 
-        let productPriceTotals: productPriceTotal[] = [];
-        let bundlePriceTotals: bundlePriceTotal[] = [];
-
-        products.forEach(product => {
-            let promotion = promotions.find(promo => {
-                return promo.Products.some(productId => productId.Value === product.getId().Value);
-            });
-
-            let productTotal = product.ProductPrice.Price;
-
-            if (promotion) productTotal -= (product.ProductPrice.Price * (promotion.PromotionDiscounts.Value));
-
-            productPriceTotals.push({
-            productId: product.getId().Value,
-            total: productTotal
-            });
-        });
-
-        bundles.forEach(bundle => {
-            let promotion = promotions.find(promo => {
-                return promo.Bundles.some(bundleId => bundleId.Value === bundle.getId().Value);
-            });
-
-            let bundleTotal = bundle.BundlePrice.Price;
-
-            if (promotion) bundleTotal -= (bundle.BundlePrice.Price * (promotion.PromotionDiscounts.Value ));
-
-            bundlePriceTotals.push({
-            bundleId: bundle.getId().Value,
-            total: bundleTotal
-            });
-        });
-
         //TODO: Agregarle tambien el descuento por categoria si lo tiene 
 
-        // productPriceTotals.forEach(product => {
-
-
-        // });
-
-        productPriceTotals.forEach(product => {
-            let orderProduct = orderProducts.find(op => op.ProductDetailId.productDetailId === product.productId);
-            amount += product.total * orderProduct.Quantity.Quantity;
+        orderProducts.forEach(product => {
+            amount += product.Price.Price * product.Quantity.Quantity;
         });
 
-        bundlePriceTotals.forEach(bundle => {
-            let orderBundle = orderBundles.find(ob => ob.BundleDetailId.BundleDetailId === bundle.bundleId);
-            amount += bundle.total * orderBundle.Quantity.Quantity;
+        orderBundles.forEach(bundle => {
+            amount += bundle.Price.Price * bundle.Quantity.Quantity;
         });
 
         return OrderTotalAmount.create(amount, currency);

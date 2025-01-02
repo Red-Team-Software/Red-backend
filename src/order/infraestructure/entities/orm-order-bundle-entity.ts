@@ -32,12 +32,16 @@ export class OrmOrderBundleEntity {
     static create(
         order: string,
         bundle: string,
-        quantity: number
+        quantity: number,
+        price: number,
+        currency: string
     ): OrmOrderBundleEntity {
         const orderProduct = new OrmOrderBundleEntity();
         orderProduct.order_id = order;
         orderProduct.bundle_id = bundle;
         orderProduct.quantity = quantity;
+        orderProduct.price = price;
+        orderProduct.currency = currency;
         return orderProduct;
     }
 }

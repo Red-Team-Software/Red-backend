@@ -42,6 +42,8 @@ import { ProductDetailId } from "src/order/domain/entities/product-detail/value_
 import { ProductDetailQuantity } from "src/order/domain/entities/product-detail/value_object/product-detail-quantity";
 import { BundleDetailId } from "src/order/domain/entities/bundle-detail/value_object/bundle-detail-id";
 import { BundleDetailQuantity } from "src/order/domain/entities/bundle-detail/value_object/bundle-detail-quantity";
+import { ProductDetailPrice } from "src/order/domain/entities/product-detail/value_object/product-detail-price";
+import { BundleDetailPrice } from "src/order/domain/entities/bundle-detail/value_object/bundle-detail-price";
 
 
 export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
@@ -73,7 +75,11 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
                 let response = await this.ormProductRepository.findProductById(ProductID.create(product.product_id));
                 products.push( ProductDetail.create(
                     ProductDetailId.create(response.getValue.getId().Value),
-                    ProductDetailQuantity.create(product.quantity)
+                    ProductDetailQuantity.create(product.quantity),
+                    ProductDetailPrice.create(
+                        product.price,
+                        product.currency
+                    )
                 ))
             }
         }
@@ -83,7 +89,11 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
                 let response = await this.ormBundleRepository.findBundleById(BundleId.create(bundle.bundle_id));
                 bundles.push( BundleDetail.create(
                     BundleDetailId.create(response.getValue.getId().Value),
-                    BundleDetailQuantity.create(bundle.quantity)
+                    BundleDetailQuantity.create(bundle.quantity),
+                    BundleDetailPrice.create(
+                        bundle.price,
+                        bundle.currency
+                    )
                 ))
             }
         }
@@ -157,7 +167,9 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
                 OrmOrderProductEntity.create(
                     domainEntity.getId().orderId,
                     response.getValue.getId().Value,
-                    product.Quantity.Quantity
+                    product.Quantity.Quantity,
+                    product.Price.Price,
+                    product.Price.Currency
                 )
             )
         }
@@ -174,7 +186,9 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
                 OrmOrderBundleEntity.create(
                     domainEntity.getId().orderId,
                     response.getValue.getId().Value,
-                    bundle.Quantity.Quantity
+                    bundle.Quantity.Quantity,
+                    bundle.Price.Price,
+                    bundle.Price.Currency
                 )
             )
         }

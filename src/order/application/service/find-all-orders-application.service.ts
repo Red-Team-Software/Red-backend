@@ -64,7 +64,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
                         nombre: domain.getValue.ProductName.Value,
                         descripcion: domain.getValue.ProductDescription.Value,
                         quantity: prod.Quantity.Quantity,
-                        price: domain.getValue.ProductPrice.Price,
+                        price: prod.Price.Price,
                         images: domain.getValue.ProductImages.map((image)=>image.Value),
                         currency: domain.getValue.ProductPrice.Currency,
                         orderid: product.orderid
@@ -86,7 +86,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
                         nombre: domain.getValue.BundleName.Value,
                         descripcion: domain.getValue.BundleDescription.Value,
                         quantity: bund.Quantity.Quantity,
-                        price: domain.getValue.BundlePrice.Price,
+                        price: bund.Price.Price,
                         images: domain.getValue.BundleImages.map((image)=>image.Value),
                         currency: domain.getValue.BundlePrice.Currency,
                         orderid: bundle.orderid
