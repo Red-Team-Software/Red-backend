@@ -18,9 +18,7 @@ import { PromotionDescription } from "src/promotion/domain/value-object/promotio
 import { PromotionName } from "src/promotion/domain/value-object/promotion-name"
 import { PromotionDiscount } from "src/promotion/domain/value-object/promotion-discount"
 import { CreatePromotionApplicationService } from "src/promotion/application/services/command/create-promotion-application.service"
-import { PromotionCommandRepositoryMock } from '../infraestructure/mocks/repositories/promotion-command-repository.mock';
-import { PromotionQueryRepositoryMock } from "../infraestructure/mocks/repositories/promotion-query-repository.mock"
-import { ProductQueryRepositoryMock } from '../../product/infraestructure/mocks/repositories/product-query-repository.mock';
+
 import { Product } from "src/product/domain/aggregate/product.aggregate"
 import { ProductDescription } from "src/product/domain/value-object/product-description"
 import { ProductImage } from "src/product/domain/value-object/product-image"
@@ -31,6 +29,9 @@ import { ProductWeigth } from "src/product/domain/value-object/product-weigth"
 import { BundleQueryRepositoryMock } from "test/bundle/infraestructure/mocks/repositories/bundle-query-repository.mock"
 import { ErrorPromotionNameAlreadyApplicationException } from "src/promotion/application/application-exepction/error-promotion-name-already-exist-application-exception";
 import { PromotionState } from "src/promotion/domain/value-object/promotion-state";
+import { ProductQueryRepositoryMock } from "test/product/infraestructure/mocks/repositories/product-query-repository.mock";
+import { PromotionCommandRepositoryMock } from "test/promotion/infraestructure/mocks/repositories/promotion-command-repository.mock";
+import { PromotionQueryRepositoryMock } from "test/promotion/infraestructure/mocks/repositories/promotion-query-repository.mock";
 
 
 const promotions: Promotion[] = [

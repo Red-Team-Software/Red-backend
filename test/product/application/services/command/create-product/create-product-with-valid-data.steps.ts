@@ -1,19 +1,11 @@
 import { CreateProductApplicationService } from "src/product/application/services/command/create-product-application.service"
 import { Product } from "src/product/domain/aggregate/product.aggregate"
-import { ProductDescription } from "src/product/domain/value-object/product-description"
-import { ProductID } from "src/product/domain/value-object/product-id"
-import { ProductImage } from "src/product/domain/value-object/product-image"
-import { ProductName } from "src/product/domain/value-object/product-name"
-import { ProductPrice } from "src/product/domain/value-object/product-price"
-import { ProductStock } from "src/product/domain/value-object/product-stock"
-import { ProductWeigth } from "src/product/domain/value-object/product-weigth"
 import { EventPublisherMock } from "test/common/infraestructure/mocks/event-publisher.mock"
 import { ProductCommadRepositoryMock } from "test/product/infraestructure/mocks/repositories/product-command-repository.mock"
 import { IdGeneratorMock } from "test/common/infraestructure/mocks/id-generator.mock"
 import { FileUploaderMock } from "test/common/infraestructure/mocks/file-uploader.mock"
 import { When, Then } from "@cucumber/cucumber"
 import * as assert from 'assert';
-import { ErrorProductNameAlreadyExistApplicationException } from "src/product/application/application-exepction/error-product-name-already-exist-application-exception"
 import { ProductQueryRepositoryMock } from "test/product/infraestructure/mocks/repositories/product-query-repository.mock"
 
 let caughtError:any

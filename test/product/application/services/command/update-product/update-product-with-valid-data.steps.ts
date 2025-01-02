@@ -37,7 +37,7 @@ When(
       ProductID.create(id),
       ProductDescription.create('descripcion de comida china'),
       ProductName.create('cachito'),
-      ProductStock.create(10),
+      ProductStock.create(stock),
       [
         ProductImage.create('http://image-123.jpg')
       ],
