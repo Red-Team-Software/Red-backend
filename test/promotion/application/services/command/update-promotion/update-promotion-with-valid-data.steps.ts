@@ -154,6 +154,5 @@ Then('The promotion should be updated of the id {string}',
 async (
   id:string
 ) => {
-  console.log(caughtError)
   assert.strictEqual(caughtError, undefined, `Expected no error but got ${caughtError}`);
 })

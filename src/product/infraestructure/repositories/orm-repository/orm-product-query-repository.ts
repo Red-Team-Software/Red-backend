@@ -64,7 +64,6 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             )
 
         }catch(e){
-            console.log(e)
             return Result.fail( new NotFoundException('Find product unsucssessfully'))
         }  
     }

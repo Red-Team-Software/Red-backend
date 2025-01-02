@@ -84,9 +84,9 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         let orderBundles: OrderBundle[] = [];
         let promotions: Promotion[] = [];
 
-        let paymentResponse=await this.paymentQueryRepository.findMethodById(PaymentMethodId.create(data.paymentId))
-
-        console.log(paymentResponse)
+        let paymentResponse=await this.paymentQueryRepository.findMethodById(
+            PaymentMethodId.create(data.paymentId)
+        )
 
         if (!paymentResponse.isSuccess())
             return Result.fail(paymentResponse.getError)
@@ -221,7 +221,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             if (responseDB.isFailure()) 
                 return Result.fail(new ErrorCreatingOrderApplicationException());
 
-            await this.eventPublisher.publish(order.pullDomainEvents());
+            await this.eventPublisher.publish(response.getValue.pullDomainEvents());
 
             let productsresponse:{
                 id: string,

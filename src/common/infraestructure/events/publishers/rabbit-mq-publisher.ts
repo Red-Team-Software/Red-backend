@@ -30,7 +30,7 @@ export class RabbitMQPublisher extends IEventPublisher {
 
 	async publish(events: DomainEvent[]): Promise<void> {
 		for (const event of events) {
-			const routingKey = event.constructor.name; // Usamos el nombre del evento como routing key
+			const routingKey = event.constructor.name // Usamos el nombre del evento como routing key
 			this.channel.publish(
 				this.exchangeName,
 				routingKey, // Utiliza el nombre del evento como routingKey  (Por ahora es vacio que me funciono)

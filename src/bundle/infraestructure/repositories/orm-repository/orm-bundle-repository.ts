@@ -31,7 +31,6 @@ export class OrmBundleRepository extends Repository<OrmBundleEntity> implements 
             }
             return Result.success(bundle)
         }catch(e){
-            console.log(e)
             return Result.fail( new PersistenceException('Create bundle unsucssessfully') )
         }    }
     async deleteBundleById(id: BundleId): Promise<Result<BundleId>> {

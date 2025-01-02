@@ -70,7 +70,6 @@ export class OrmPromotionCommandRepository extends Repository<OrmPromotionEntity
             return Result.success(promotion)
         
         } catch (e) {
-            console.log(e)
             return Result.fail(new PersistenceException('Update product unsucssessfully'))
         }
     }

@@ -52,6 +52,9 @@ import { NestTimer } from "src/common/infraestructure/timer/nets-timer";
 import { IDeliveringOrder } from "../interfaces/delivering-order.interface";
 import { OrderDeliveringPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/order-delivering-push-notification-application-request-dto";
 import { NewBundlePushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-bundle-push-notification-application-request-dto";
+import { NotificationQueues } from "../queues/notification.queues";
+import { UserId } from "src/user/domain/value-object/user-id";
+import { OrderDeliveringPushNotificationApplicationService } from "src/notification/application/services/command/order-delivering-push-notification-application.service";
 
 @ApiTags('Notification')
 @Controller('notification')
@@ -64,6 +67,23 @@ export class NotificationController {
     private readonly querySessionRepository:IQueryTokenSessionRepository<ISession>;
     private readonly auditRepository: IAuditRepository
 
+    private initializeQueues():void{        
+        NotificationQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+    }
+
+    private buildQueue(name: string, pattern: string) {
+        this.subscriber.buildQueue({
+          name,
+          pattern,
+          exchange: {
+            name: 'DomainEvent',
+            type: 'direct',
+            options: {
+              durable: false,
+            },
+          },
+        })
+    }
 
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -75,92 +95,11 @@ export class NotificationController {
         this.querySessionRepository= new OrmTokenQueryRepository(PgDatabaseSingleton.getInstance());
         this.auditRepository=new OrmAuditRepository(PgDatabaseSingleton.getInstance())
 
-        this.subscriber.buildQueue({
-            name:'ProductEvents',
-            pattern: 'ProductRegistered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
 
-        this.subscriber.buildQueue({
-            name:'BundleEvents',
-            pattern: 'BundleRegistered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'OrderEvents',
-            pattern: 'OrderRegistered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'OrderEvents/CancelOrder',
-            pattern: 'OrderStatusCancelled',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'OrderEvents/OrderStatusDelivering',
-            pattern: 'OrderStatusDelivering',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'OrderEvents/OrderStatusDelivered',
-            pattern: 'OrderStatusDelivered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'CuponEvents',
-            pattern: 'CuponRegistered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        })
+        this.initializeQueues()
 
         this.subscriber.consume<ICreateProduct>(
-            { name: 'ProductEvents'}, 
+            { name: 'ProductEvents/ProductRegistered'}, 
             (data):Promise<void>=>{
                 this.sendEmailToCreateProduct(data)
                 this.sendPushToCreatedProduct(data)
@@ -169,7 +108,7 @@ export class NotificationController {
         );
 
         this.subscriber.consume<ICreateBundle>(
-            { name: 'BundleEvents'}, 
+            { name: 'BundleEvents/BundleRegistered'}, 
             (data):Promise<void>=>{
                 this.sendPushToCreatedBundle(data)
                 this.sendEmailToCreateBundle(data)
@@ -178,7 +117,7 @@ export class NotificationController {
         );
 
         this.subscriber.consume<ICreateOrder>(
-            { name: 'OrderEvents'}, 
+            { name: 'OrderEvents/OrderRegistered'}, 
             (data):Promise<void>=>{
                 this.sendPushOrderCreated(data)
                 this.sendEmailOrderCreated(data)
@@ -187,12 +126,40 @@ export class NotificationController {
         )
         
         this.subscriber.consume<ICreateCupon>(
-            { name: 'CuponEvents'}, 
+            { name: 'CuponEvents/Createcupon'}, 
             (data):Promise<void>=>{
                 this.sendPushCuponCreated(data)
                 return
             }
         )
+
+        this.subscriber.consume<ICancelOrder>(
+            { name: 'OrderEvents/CancelOrder'}, 
+            (data):Promise<void>=>{
+                this.sendPushOrderCancelled(data)
+                this.sendEmailOrderCancelled(data)
+                return
+            }
+        );
+
+        this.subscriber.consume<IDeliveringOrder>(
+            { name: 'OrderEvents/OrderStatusDelivered'}, 
+            (data):Promise<void>=>{
+                console.log('esta en delivered')
+                this.sendPushOrderDelivered(data)
+                return
+            }
+        );
+
+        this.subscriber.consume<IDeliveringOrder>(
+            { name: 'OrderEvents/OrderStatusDelivering'}, 
+            (data):Promise<void>=>{
+                console.log('esta en delivering')
+                this.sendPushOrderDelivering(data)
+                return
+            }
+        );
+
     }
 
     
@@ -221,56 +188,33 @@ export class NotificationController {
         }
         service.execute(data)
 
-        this.subscriber.consume<ICancelOrder>(
-            { name: 'OrderEvents/CancelOrder'}, 
-            (data):Promise<void>=>{
-                this.sendPushOrderCancelled(data)
-                this.sendEmailOrderCancelled(data)
-                return
-            }
-        );
-
-        this.subscriber.consume<IDeliveredOrder>(
-            { name: 'OrderEvents/OrderStatusDelivered'}, 
-            (data):Promise<void>=>{
-                this.sendPushOrderDelivered(data)
-                return
-            }
-        );
-
-        this.subscriber.consume<IDeliveringOrder>(
-            { name: 'OrderEvents/OrderStatusDelivering'}, 
-            (data):Promise<void>=>{
-                this.sendPushOrderDelivering(data)
-                return
-            }
-        );
-
     }
 
     async sendPushOrderDelivering(entry:IDeliveringOrder){
         let service= new ExceptionDecorator(
             new LoggerDecorator(
-                new OrderDeliveredPushNotificationApplicationService(
+                new OrderDeliveringPushNotificationApplicationService(
                     this.pushsender
                 ),
             new NestLogger(new Logger())
             )
-        );
+        )
         
-        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+        const tokensResponse=await this.querySessionRepository.findSessionLastSessionByUserId(
+            UserId.create(entry.orderUserId)
+        )
 
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;
 
         let data: OrderDeliveringPushNotificationApplicationRequestDTO={
-            userId:'none',
+            userId:entry.orderUserId,
             tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderId:entry.orderId
-        };
+        }
         service.execute(data);
-    };
+    }
 
 
     async sendPushOrderDelivered(entry:IDeliveredOrder){
@@ -281,21 +225,23 @@ export class NotificationController {
                 ),
             new NestLogger(new Logger())
             )
-        );
+        )
         
-        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+        const tokensResponse=await this.querySessionRepository.findSessionLastSessionByUserId(
+            UserId.create(entry.orderUserId)
+        )
 
         if (!tokensResponse.isSuccess())
-            throw tokensResponse.getError;
+            throw tokensResponse.getError
 
         let data: OrderDeliveredPushNotificationApplicationRequestDTO={
-            userId:'none',
+            userId:entry.orderUserId,
             tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderId:entry.orderId
-        };
+        }
         service.execute(data);
-    };
+    }
 
     async sendPushOrderCancelled(entry:ICancelOrder){
         let service= new ExceptionDecorator(
@@ -307,13 +253,15 @@ export class NotificationController {
             )
         );
 
-        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+        const tokensResponse=await this.querySessionRepository.findSessionLastSessionByUserId(
+            UserId.create(entry.orderUserId)
+        )
 
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;
 
         let data: CancelOrderPushNotificationApplicationRequestDTO={
-            userId:'none',
+            userId:entry.orderUserId,
             tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderId:entry.orderId
@@ -334,9 +282,9 @@ export class NotificationController {
         emailsender.setVariablesToSend({
             username:'customer',
             orderid: entry.orderId
-        });
+        })
         await emailsender.sendEmail(accountResponse.getValue.email);
-    };
+    }
 
     async sendPushOrderCreated(entry:ICreateOrder){
         
@@ -349,21 +297,23 @@ export class NotificationController {
             )
         );
 
-        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+        const tokensResponse=await this.querySessionRepository.findSessionLastSessionByUserId(
+            UserId.create(entry.orderUserId)
+        )
 
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;
         
         let data:NewOrderPushNotificationApplicationRequestDTO={
-            userId:'none',
+            userId:entry.orderUserId,
             tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderCreateDate:entry.orderCreateDate,
             totalAmount:entry.totalAmount.amount,
             currency:entry.totalAmount.currency
-        };
+        }
         service.execute(data);
-    };
+    }
 
     async sendEmailOrderCreated(entry:ICreateOrder){
 
