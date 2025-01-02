@@ -113,7 +113,7 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
                 : null,
                 name:ormBundle.name,
                 stock:ormBundle.stock,
-                image:ormBundle.images.map(image=>image.image),
+                images:ormBundle.images.map(image=>image.image),
                 price:ormBundle.price,
                 currency:ormBundle.currency,
                 weigth:ormBundle.weigth,
