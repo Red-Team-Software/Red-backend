@@ -37,39 +37,12 @@ export class OrmPromotionCommandRepository extends Repository<OrmPromotionEntity
         const persis = await this.mapper.fromDomaintoPersistence(promotion)
         try {
 
-            await this.createQueryBuilder()
-            .delete()
-            .from('promotion_product')
-            .where('promotion_id = :promotionId', { promotionId: persis.id })
-            .execute();
-    
-          await this.createQueryBuilder()
-            .delete()
-            .from('promotion_bundle')
-            .where('promotion_id = :promotionId', { promotionId: persis.id })
-            .execute();
-
-            const result = await this.upsert(persis,['id'])
-            
-            for (const product of persis.products) {
-                await this.createQueryBuilder()
-                  .insert()
-                  .into('promotion_product')
-                  .values({ promotion_id: persis.id, product_id: product.id })
-                  .execute();
-              }  
-            
-            for (const bundle of persis.bundles) {
-                await this.createQueryBuilder()
-                  .insert()
-                  .into('promotion_bundle')
-                  .values({ promotion_id: persis.id, bundle_id:bundle.id })
-                  .execute();
-              } 
-              
+            const result = await this.save(persis)
+                          
             return Result.success(promotion)
         
         } catch (e) {
+            console.log(e)
             return Result.fail(new PersistenceException('Update product unsucssessfully'))
         }
     }

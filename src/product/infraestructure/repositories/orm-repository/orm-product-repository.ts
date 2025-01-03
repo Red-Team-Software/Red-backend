@@ -58,7 +58,7 @@ export class OrmProductRepository extends Repository<OrmProductEntity> implement
 
             for (const image of persis.images) {
                 await this.ormProductImageRepository.save(image);
-              }
+            }
             return Result.success(product)
         } catch (e) {
             return Result.fail(new PersistenceException('Update product unsucssessfully'))

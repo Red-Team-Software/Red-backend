@@ -19,7 +19,9 @@ export class OrmBundleEntity implements IBundle{
     @Column( 'integer' ) weigth: number;
     @Column( 'varchar' ) measurament: string;
 
-    @ManyToMany(() => OrmPromotionEntity, promotion => promotion.bundles)   
+    @ManyToMany(() => OrmPromotionEntity, promotion => promotion.bundles, 
+    {onDelete:'CASCADE' , onUpdate:'CASCADE'} 
+    )   
     promotions?: OrmPromotionEntity[]
 
 
