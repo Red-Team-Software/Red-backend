@@ -439,7 +439,10 @@ export class NotificationController {
                 ),this.auditRepository,new DateHandler()
             )
         )
-        let response=await service.execute({userId:'none',...entry,session:credential.session})
+        let response=await service.execute({
+            userId:credential.account.idUser,
+            ...entry,session:credential.session
+        })
         return response.getValue
     };
 }
