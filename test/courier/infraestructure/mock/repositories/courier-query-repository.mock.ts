@@ -8,12 +8,8 @@ import { CourierName } from "src/courier/domain/value-objects/courier-name";
 
 export class CourierQueryRepositoryMock implements ICourierQueryRepository{
     
-    constructor (private readonly couriers: Courier[] = []) {
-        let c1 = Courier.initializeAggregate(
-            CourierId.create("84a5dcce-2b53-49f7-8ab2-079c2d42df0f"),
-            CourierName.create('Juan Perez'),
-            CourierImage.create('http://image-123.jpg')
-        )
+    constructor (private readonly couriers: Courier[] ) {
+    
 
     }
     

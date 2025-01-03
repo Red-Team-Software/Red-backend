@@ -9,27 +9,10 @@ import { PaymentMethodState } from "src/payment-methods/domain/value-objects/pay
 
 
 export class PaymentMethodQueryRepositoryMock implements IPaymentMethodQueryRepository{
-    
-    paymentMethod: PaymentMethodAgregate[] = [];
 
-    constructor(){
-        
-        let m1 = PaymentMethodAgregate.initializeAgregate(
-            PaymentMethodId.create("5c84a611-a1dd-4944-a60d-baad170c4593"),
-            PaymentMethodName.create('Paypal'),
-            PaymentMethodState.create('active'),
-            PaymentMethodImage.create('image-2')
-        );
 
-        let m2 = PaymentMethodAgregate.initializeAgregate(
-            PaymentMethodId.create("4ba7289d-9c8c-411a-8c88-8f596e5821fa"),
-            PaymentMethodName.create('Stripe'),
-            PaymentMethodState.create('active'),
-            PaymentMethodImage.create('image-2')
-        );
-        
-        this.paymentMethod.push(m1);
-        this.paymentMethod.push(m2);
+    constructor(private readonly paymentMethod: PaymentMethodAgregate[]){
+
     }
 
 

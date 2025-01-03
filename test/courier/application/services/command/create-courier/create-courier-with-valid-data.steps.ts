@@ -29,6 +29,6 @@ When('Trying to create a Courier with name {string}', async (name:string) => {
     }
 })
 
-Then('The product {string} should be created successfully', async (name:string) => {
+Then('The courier {string} should be created successfully', async (name:string) => {
     assert.strictEqual(caughtError, undefined, `Expected no error but got ${caughtError}`);
 })
