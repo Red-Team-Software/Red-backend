@@ -71,8 +71,6 @@ export class OrmPaymentMethodQueryRepository extends Repository<PaymentMethodEnt
                 let response = await this.paymentMethodMapper.fromPersistencetoDomain(method);
                 methodDomain.push(response);
             };
-
-            console.log(methodDomain);
             
             return Result.success(methodDomain);
         

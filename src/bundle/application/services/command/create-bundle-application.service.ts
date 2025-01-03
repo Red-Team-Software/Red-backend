@@ -9,7 +9,6 @@ import { BundleStock } from "src/bundle/domain/value-object/bundle-stock"
 import { BundleWeigth } from "src/bundle/domain/value-object/bundle-weigth"
 import { CreateBundleApplicationRequestDTO } from "../../dto/request/create-bundle-application-request-dto"
 import { ErrorCreatingBundleApplicationException } from "../../application-exeption/error-creating-bundle-application-exception"
-import { ErrorNameAlreadyApplicationException } from "../../application-exeption/error-name-already-exist-application-exception"
 import { ErrorUploadingImagesApplicationException } from "../../application-exeption/error-uploading-images-application-exception"
 import { FileUploaderResponseDTO } from "src/common/application/file-uploader/dto/response/file-uploader-response-dto"
 import { IApplicationService } from "src/common/application/services"
@@ -22,6 +21,8 @@ import { TypeFile } from "src/common/application/file-uploader/enums/type-file.e
 import { CreateBundleApplicationResponseDTO } from "../../dto/response/create-bundles-application-response-dto"
 import { IQueryBundleRepository } from "../../query-repository/query-bundle-repository"
 import { ICommandBundleRepository } from "src/bundle/domain/repository/bundle.command.repository.interface"
+import { ErrorBundleNameAlreadyApplicationException } from "../../application-exeption/error-bundle-name-already-exist-application-exception"
+import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository"
 
 export class CreateBundleApplicationService extends IApplicationService 
 <CreateBundleApplicationRequestDTO,CreateBundleApplicationResponseDTO> {
@@ -30,6 +31,7 @@ export class CreateBundleApplicationService extends IApplicationService
         private readonly eventPublisher: IEventPublisher,
         private readonly bundleQueryRepository:IQueryBundleRepository,
         private readonly bundleCommadRepository:ICommandBundleRepository,
+        private readonly productQueryRepository:IQueryProductRepository,
         private readonly idGen:IIdGen<string>,
         private readonly fileUploader:IFileUploader
     ){
@@ -43,7 +45,13 @@ export class CreateBundleApplicationService extends IApplicationService
             return Result.fail(new ErrorCreatingBundleApplicationException())
 
         if (search.getValue) 
-            return Result.fail(new ErrorNameAlreadyApplicationException())
+            return Result.fail(new ErrorBundleNameAlreadyApplicationException(command.name))
+
+        for (const product of command.productId){
+            let productResponse=await this.productQueryRepository.findProductById(ProductID.create(product))
+            if (!productResponse.isSuccess())
+                return Result.fail(productResponse.getError)
+        }
 
         let uploaded:FileUploaderResponseDTO[]=[]
         for (const image of command.images){
@@ -61,13 +69,15 @@ export class CreateBundleApplicationService extends IApplicationService
         let bundle=Bundle.Registerbundle(
             BundleId.create(id),
             BundleDescription.create(command.description),
-            BundleCaducityDate.create(command.caducityDate),
             BundleName.create(command.name),
             BundleStock.create(command.stock),
             uploaded.map(image=>BundleImage.create(image.url)),
             BundlePrice.create(command.price,command.currency),
             BundleWeigth.create(command.weigth,command.measurement),
-            command.productId.map(id=>ProductID.create(id))
+            command.productId.map(id=>ProductID.create(id)),
+            command.caducityDate
+            ? BundleCaducityDate.create(command.caducityDate)
+            : null
         )
         let result=await this.bundleCommadRepository.createBundle(bundle)
 
@@ -78,6 +88,7 @@ export class CreateBundleApplicationService extends IApplicationService
     
         let response:CreateBundleApplicationResponseDTO={
             ...command,
+            bundleId:bundle.getId().Value,
             images:bundle.BundleImages.map(image=>image.Value)
         }
         return Result.success(response)

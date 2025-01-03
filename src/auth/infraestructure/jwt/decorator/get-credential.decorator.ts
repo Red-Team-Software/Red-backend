@@ -5,7 +5,6 @@ export const GetCredential = createParamDecorator(
         const request = context.switchToHttp().getRequest()
         if (!request.credential) 
             throw new NotFoundException(' 404 credential not found')
-        // console.log(request.credential)
         return request.credential
     }
 )

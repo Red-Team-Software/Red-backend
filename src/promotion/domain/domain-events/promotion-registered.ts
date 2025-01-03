@@ -2,7 +2,7 @@ import { BundleId } from "src/bundle/domain/value-object/bundle-id"
 import { CategoryID } from "src/category/domain/value-object/category-id"
 import { DomainEvent } from "src/common/domain"
 import { ProductID } from "src/product/domain/value-object/product-id"
-import { PromotionAvaleableState } from "../value-object/promotion-avaleable-state"
+import { PromotionState } from "../value-object/promotion-state"
 import { PromotionDescription } from "../value-object/promotion-description"
 import { PromotionDiscount } from "../value-object/promotion-discount"
 import { PromotionId } from "../value-object/promotion-id"
@@ -14,7 +14,7 @@ export class PromotionRegistered extends DomainEvent {
             promotionId:this.promotionId.Value,
             promotionDescription:this.promotionDescription.Value,
             promotionName:this.promotionName,
-            promotionAvaleableState:this.promotionAvaleableState,
+            promotionState:this.promotionState,
             promotionDiscount:this.promotionDiscount.Value,
             products:this.products.map(product=>product.Value),
             bundles:this.bundles.map(bundle=>bundle.Value),
@@ -27,7 +27,7 @@ export class PromotionRegistered extends DomainEvent {
         promotionId:PromotionId,
         promotionDescription:PromotionDescription,
         promotionName:PromotionName,
-        promotionAvaleableState:PromotionAvaleableState,
+        promotionState:PromotionState,
         promotionDiscount:PromotionDiscount,
         products:ProductID[],
         bundles:BundleId[],
@@ -37,7 +37,7 @@ export class PromotionRegistered extends DomainEvent {
             promotionId,
             promotionDescription,
             promotionName,
-            promotionAvaleableState,
+            promotionState,
             promotionDiscount,
             products,
             bundles,
@@ -48,7 +48,7 @@ export class PromotionRegistered extends DomainEvent {
         public promotionId:PromotionId,
         public promotionDescription:PromotionDescription,
         public promotionName:PromotionName,
-        public promotionAvaleableState:PromotionAvaleableState,
+        public promotionState:PromotionState,
         public promotionDiscount:PromotionDiscount,
         public products:ProductID[],
         public bundles:BundleId[],

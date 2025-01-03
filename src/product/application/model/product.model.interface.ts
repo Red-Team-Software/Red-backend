@@ -1,10 +1,10 @@
 export interface IProductModel{
     id:string,
     description:string,
-    caducityDate:Date,
+    caducityDate?:Date,
     name:string,
     stock:number,
-    image:string[],
+    images:string[],
     price:number,
     currency:string,
     weigth:number,

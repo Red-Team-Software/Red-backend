@@ -1,7 +1,7 @@
 export interface ICreateProduct {
     productId:           string;
     productDescription:  string;
-    productCaducityDate: Date;
+    productCaducityDate?: Date;
     productName:         string;
     productStock:        number;
     productImage:        string[];

@@ -3,7 +3,7 @@ import { IQueryProductRepository } from "../../query-repository/query-product-re
 import { Result } from "src/common/utils/result-handler/result"
 import { NotFoundProductApplicationException } from "../../application-exepction/not-found-product-application-exception"
 import { FindAllProductsAndCombosApplicationResponseDTO } from "../../dto/response/find-all-products-and-combos-application-response-dto"
-import { FindAllProductsbyNameApplicationRequestDTO } from "../../dto/request/find-all-products-and-combos-request-dto"
+import { FindAllProductsbyNameApplicationRequestDTO } from "../../dto/request/find-all-products-and-combos-application-request-dto"
 import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository"
 import { NotFoundBundleApplicationException } from "src/bundle/application/application-exeption/not-found-bundle-application-exception"
 

@@ -1,9 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { Transform } from "class-transformer"
-import { ArrayMinSize, IsArray, IsBase64, isBase64, IsDate, IsDateString, IsNegative, IsNumber, isPositive, IsPositive, IsString, MinLength } from "class-validator"
+import { IsDateString, IsNumber, IsOptional, IsPositive, IsString, MinLength } from "class-validator"
 
 export class CreateProductInfraestructureRequestDTO{
-
   
     @ApiProperty( { required: true, default: 'lechuga' })
     @IsString()
@@ -15,8 +14,9 @@ export class CreateProductInfraestructureRequestDTO{
     @MinLength( 3 )
     description: string
 
-    @ApiProperty( { required: true, default: '2024-11-06' })
+    @ApiProperty( { required: false, default: '2024-11-06' })
     @IsDateString()
+    @IsOptional()
     caducityDate: Date
 
     @ApiProperty( { required: true, default: '50' })

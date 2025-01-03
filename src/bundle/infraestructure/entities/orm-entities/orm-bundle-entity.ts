@@ -11,7 +11,7 @@ export class OrmBundleEntity implements IBundle{
     @PrimaryColumn({type:"uuid"}) id:string
     @Column( 'varchar', { unique: true }   ) name: string
     @Column( 'varchar' ) desciption: string
-    @Column( 'timestamp', { default: () => 'CURRENT_TIMESTAMP' } ) caducityDate: Date
+    @Column( 'timestamp', { nullable:true } ) caducityDate?: Date
     @OneToMany( () => OrmBundleImage,   image => image.bundle,{ eager: true }) images: OrmBundleImage[]   
     @Column( 'integer' ) stock: number
     @Column('numeric') price: number

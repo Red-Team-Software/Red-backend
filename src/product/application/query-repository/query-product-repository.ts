@@ -1,7 +1,7 @@
 import { Result } from "src/common/utils/result-handler/result";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { FindAllProductsApplicationRequestDTO } from "../dto/request/find-all-products-application-request-dto";
-import { FindAllProductsbyNameApplicationRequestDTO } from "../dto/request/find-all-products-and-combos-request-dto";
+import { FindAllProductsbyNameApplicationRequestDTO } from "../dto/request/find-all-products-and-combos-application-request-dto";
 import { ProductID } from "src/product/domain/value-object/product-id";
 import { ProductName } from "src/product/domain/value-object/product-name";
 import { IProductModel } from "../model/product.model.interface";

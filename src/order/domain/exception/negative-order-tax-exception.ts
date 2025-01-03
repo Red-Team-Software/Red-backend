@@ -1,5 +1,4 @@
-import { DomainException } from "src/common/domain/domain-exeption/domain-exception";
-
+import { DomainException } from "src/common/domain/domain-exception/domain-exception";
 
 export class NegativeOrderTaxException extends DomainException {
     constructor() {

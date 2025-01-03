@@ -23,7 +23,7 @@ export class OrderRegistered extends DomainEvent {
             totalAmount: this.totalAmount,
             orderDirection: this.orderDirection,
             orderCourier: this.orderCourier,
-            orderUserId: this.orderUserId,
+            orderUserId: this.orderUserId.userId,
             products: this.products,
             bundles: this.bundles,
             orderReceivedDate: this.orderReceivedDate?.OrderReceivedDate,

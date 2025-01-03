@@ -32,7 +32,7 @@ IApplicationService<FindAllPromotionApplicationRequestDTO,FindAllPromotionApplic
                 id:promotion.getId().Value,
                 description:promotion.PromotionDescription.Value,
                 name:promotion.PromotionName.Value,
-                avaleableState:promotion.PromotionAvaleableState.Value,
+                state:promotion.PromotionState.Value,
                 discount:promotion.PromotionDiscounts.Value,
                 products:promotion.Products.map(product=>product.Value),
                 bundles:promotion.Bundles.map(bundle=>bundle.Value),

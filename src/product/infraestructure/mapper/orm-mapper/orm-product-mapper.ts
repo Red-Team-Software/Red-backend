@@ -30,7 +30,9 @@ export class OrmProductMapper implements IMapper <Product,OrmProductEntity>{
             id:domainEntity.getId().Value,
             name: domainEntity.ProductName.Value,
             desciption: domainEntity.ProductDescription.Value,
-            caducityDate: domainEntity.ProductCaducityDate.Value,
+            caducityDate: domainEntity.ProductCaducityDate
+            ? domainEntity.ProductCaducityDate.Value
+            : null,
             stock: domainEntity.ProductStock.Value,
             images: ormImages,
             price:domainEntity.ProductPrice.Price,
@@ -45,12 +47,14 @@ export class OrmProductMapper implements IMapper <Product,OrmProductEntity>{
         let product=Product.initializeAggregate(
             ProductID.create(infraEstructure.id),
             ProductDescription.create(infraEstructure.desciption),
-            ProductCaducityDate.create(infraEstructure.caducityDate),
             ProductName.create(infraEstructure.name),
             ProductStock.create(infraEstructure.stock),
             infraEstructure.images.map((ormimage)=>ProductImage.create(ormimage.image)),
             ProductPrice.create(Number(infraEstructure.price),infraEstructure.currency),
-            ProductWeigth.create(infraEstructure.weigth,infraEstructure.measurament)
+            ProductWeigth.create(infraEstructure.weigth,infraEstructure.measurament),
+            infraEstructure.caducityDate
+            ?  ProductCaducityDate.create(infraEstructure.caducityDate)
+            : null
         )
         return product
     }
