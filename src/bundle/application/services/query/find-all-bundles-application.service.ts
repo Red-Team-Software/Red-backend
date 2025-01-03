@@ -3,7 +3,7 @@ import { FindAllBundlesApplicationRequestDTO } from "../../dto/request/find-all-
 import { FindAllBundlesApplicationResponseDTO } from "../../dto/response/find-all-bundles-application-response-dto"
 import { IQueryBundleRepository } from "../../query-repository/query-bundle-repository"
 import { Result } from "src/common/utils/result-handler/result"
-import { NotFoundBundleApplicationException } from "../../application-exeption/not-found-bundle-application-exception"
+import { NotFoundBundleApplicationException } from "../../application-exception/not-found-bundle-application-exception"
 
 export class FindAllBundlesApplicationService extends 
 IApplicationService<FindAllBundlesApplicationRequestDTO,FindAllBundlesApplicationResponseDTO[]>{

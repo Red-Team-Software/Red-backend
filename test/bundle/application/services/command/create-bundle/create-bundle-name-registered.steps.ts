@@ -14,7 +14,7 @@ import { BundlePrice } from "src/bundle/domain/value-object/bundle-price"
 import { BundleWeigth } from "src/bundle/domain/value-object/bundle-weigth"
 import { CreateBundleApplicationService } from "src/bundle/application/services/command/create-bundle-application.service"
 import { BundleCommadRepositoryMock } from "test/bundle/infraestructure/mocks/repositories/bundle-command-repository.mock"
-import { ErrorBundleNameAlreadyApplicationException } from "src/bundle/application/application-exeption/error-bundle-name-already-exist-application-exception";
+import { ErrorBundleNameAlreadyApplicationException } from "src/bundle/application/application-exception/error-bundle-name-already-exist-application-exception";
 import { ProductQueryRepositoryMock } from "test/product/infraestructure/mocks/repositories/product-query-repository.mock";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { ProductDescription } from "src/product/domain/value-object/product-description";

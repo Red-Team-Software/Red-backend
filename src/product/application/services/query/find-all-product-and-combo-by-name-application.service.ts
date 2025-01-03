@@ -5,7 +5,7 @@ import { NotFoundProductApplicationException } from "../../application-exepction
 import { FindAllProductsAndCombosApplicationResponseDTO } from "../../dto/response/find-all-products-and-combos-application-response-dto"
 import { FindAllProductsbyNameApplicationRequestDTO } from "../../dto/request/find-all-products-and-combos-application-request-dto"
 import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository"
-import { NotFoundBundleApplicationException } from "src/bundle/application/application-exeption/not-found-bundle-application-exception"
+import { NotFoundBundleApplicationException } from "src/bundle/application/application-exception/not-found-bundle-application-exception"
 
 
 export class FindAllProductsAndComboApplicationService extends 

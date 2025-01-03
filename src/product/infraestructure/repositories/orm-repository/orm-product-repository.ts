@@ -39,8 +39,12 @@ export class OrmProductRepository extends Repository<OrmProductEntity> implement
     async deleteProductById(id: ProductID): Promise<Result<ProductID>> {
         try {
             const result = await this.delete({ id: id.Value })
+            
             if(result.affected!==1)
                 return Result.fail(new PersistenceException('Delete product unsucssessfully'))
+            
+            await this.ormProductImageRepository.delete({product_id:id.Value})
+            
             return Result.success(id) 
         } catch (e) {
             return Result.fail(new PersistenceException('Delete product unsucssessfully'))

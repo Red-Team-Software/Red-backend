@@ -8,7 +8,8 @@ export class OrmBundleImage implements IBundleImage
     @PrimaryColumn("uuid", { primaryKeyConstraintName: "pk_bundle_image_id" })
     id: string
     @Column( 'varchar' ) image: string
-    @ManyToOne( () => OrmBundleEntity ) @JoinColumn( { name: 'bundle_id' } ) bundle: OrmBundleEntity
+    @ManyToOne( () => OrmBundleEntity, { onDelete: 'CASCADE',   onUpdate: 'CASCADE'} ) 
+    @JoinColumn( { name: 'bundle_id' }) bundle: OrmBundleEntity
     @Column( 'varchar' ) bundle_id: string
     static create ( 
         id: string,

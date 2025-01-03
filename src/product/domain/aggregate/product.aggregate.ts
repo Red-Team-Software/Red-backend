@@ -76,9 +76,9 @@ export class Product extends AggregateRoot <ProductID>{
         super(productId)
     }
 
-    delete(id:ProductID):void{
+    delete():void{
         this.apply(
-            ProductDeleted.create(id)
+            ProductDeleted.create(this.getId())
         )
     }
 

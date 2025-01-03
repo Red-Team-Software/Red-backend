@@ -7,7 +7,7 @@ import { BundleName } from "src/bundle/domain/value-object/bundle-name"
 import { BundlePrice } from "src/bundle/domain/value-object/bundle-price"
 import { BundleStock } from "src/bundle/domain/value-object/bundle-stock"
 import { BundleWeigth } from "src/bundle/domain/value-object/bundle-weigth"
-import { ErrorUploadingImagesApplicationException } from "../../application-exeption/error-uploading-images-application-exception"
+import { ErrorUploadingImagesApplicationException } from "../../application-exception/error-uploading-images-application-exception"
 import { FileUploaderResponseDTO } from "src/common/application/file-uploader/dto/response/file-uploader-response-dto"
 import { IApplicationService } from "src/common/application/services"
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract"
@@ -18,12 +18,12 @@ import { Result } from "src/common/utils/result-handler/result"
 import { TypeFile } from "src/common/application/file-uploader/enums/type-file.enum"
 import { IQueryBundleRepository } from "../../query-repository/query-bundle-repository"
 import { ICommandBundleRepository } from "src/bundle/domain/repository/bundle.command.repository.interface"
-import { ErrorBundleNameAlreadyApplicationException } from "../../application-exeption/error-bundle-name-already-exist-application-exception"
+import { ErrorBundleNameAlreadyApplicationException } from "../../application-exception/error-bundle-name-already-exist-application-exception"
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository"
 import { UpdateBundleApplicationResponseDTO } from '../../dto/response/update-bundle-application-response-dto';
-import { NotFoundBundleApplicationException } from '../../application-exeption/not-found-bundle-application-exception';
+import { NotFoundBundleApplicationException } from '../../application-exception/not-found-bundle-application-exception';
 import { Product } from 'src/product/domain/aggregate/product.aggregate';
-import { ErrorUpdatingBundleApplicationException } from '../../application-exeption/error-updating-bundle-application-exception';
+import { ErrorUpdatingBundleApplicationException } from '../../application-exception/error-updating-bundle-application-exception';
 import { BundleImage } from 'src/bundle/domain/value-object/bundle-image';
 
 export class UpdateBundleApplicationService extends IApplicationService 

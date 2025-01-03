@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
+import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
 import { FilesInterceptor } from "@nestjs/platform-express/multer"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
@@ -40,6 +40,8 @@ import { UpdateBundleInfraestructureRequestDTO } from "../dto-request/update-bun
 import { SecurityDecorator } from "src/common/application/aspects/security-decorator/security-decorator"
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles"
 import { UpdateBundleApplicationService } from "src/bundle/application/services/command/update-bundle-application.service"
+import { DeleteBundleByIdInfraestructureRequestDTO } from "../dto-request/delete-bundle-by-id-infraestructure-request-dto"
+import { DeleteBundleApplicationService } from "src/bundle/application/services/command/delete-bundle-application.service"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -171,36 +173,39 @@ export class BundleController {
     return response.getValue
   }
 
-    @UseGuards(JwtAuthGuard)
-    @Patch('update/:id')
-    @UseInterceptors(FilesInterceptor('images'))  
-    async updateProduct(
-      @GetCredential() credential:ICredential,
-      @Param() entryId:ByIdDTO,
-      @Body() entry:UpdateBundleInfraestructureRequestDTO,
-      @UploadedFiles(
-        new ParseFilePipe({
-          validators: [
-            new FileTypeValidator({
-              fileType:/(jpeg|.jpg|.png)$/
-            }),
-          ],
-          fileIsRequired:false
-        }),
-      ) images?: Express.Multer.File[]
+  @UseGuards(JwtAuthGuard)
+  @Patch('update/:id')
+  @UseInterceptors(FilesInterceptor('images'))  
+  async updateProduct(
+    @GetCredential() credential:ICredential,
+    @Param() entryId:ByIdDTO,
+    @Body() entry:UpdateBundleInfraestructureRequestDTO,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({
+            fileType:/(jpeg|.jpg|.png)$/
+          }),
+        ],
+        fileIsRequired:false
+      }),
+    ) images?: Express.Multer.File[]
     ){
       let service= new ExceptionDecorator(
-        new SecurityDecorator(
-            new PerformanceDecorator(
-              new UpdateBundleApplicationService(
-                new RabbitMQPublisher(this.channel),
-                this.ormQueryBundletRepo,
-                this.ormBundleCommandRepo,
-                this.ormQueryProductRepo,
-                this.idGen,
-                new CloudinaryService()
-              ),new NestTimer(),new NestLogger(new Logger())
-          ),credential,[UserRoles.ADMIN])
+        new AuditDecorator(
+            new SecurityDecorator(
+                new PerformanceDecorator(
+                  new UpdateBundleApplicationService(
+                    new RabbitMQPublisher(this.channel),
+                    this.ormQueryBundletRepo,
+                    this.ormBundleCommandRepo,
+                    this.ormQueryProductRepo,
+                    this.idGen,
+                    new CloudinaryService()
+                  ),new NestTimer(),new NestLogger(new Logger())
+              ),credential,[UserRoles.ADMIN])
+            ,this.auditRepository,new DateHandler()
+          )
         )
       let buffers=images ? images.map(image=>image.buffer) : null
   
@@ -211,4 +216,31 @@ export class BundleController {
         images:buffers})
       return response.getValue
     }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('delete/:id')
+  async deletetProductById(
+    @GetCredential() credential:ICredential,
+    @Param() entry:DeleteBundleByIdInfraestructureRequestDTO
+  ){
+    let service= new ExceptionDecorator(
+      new AuditDecorator(
+        new SecurityDecorator(
+            new LoggerDecorator(
+              new PerformanceDecorator(
+                new DeleteBundleApplicationService(
+                  new RabbitMQPublisher(this.channel),
+                  this.ormBundleCommandRepo,
+                  this.ormQueryBundletRepo,
+                  new CloudinaryService()              
+                ),new NestTimer(),new NestLogger(new Logger())
+              ),new NestLogger(new Logger())
+            ),credential,[UserRoles.ADMIN])
+          ,this.auditRepository,new DateHandler()
+        )
+      )
+    
+    let response= await service.execute({userId:credential.account.idUser,...entry})
+    return response.getValue
+  }
 }

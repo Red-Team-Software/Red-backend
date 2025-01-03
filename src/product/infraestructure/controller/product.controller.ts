@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Patch, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { OrmProductRepository } from '../repositories/orm-repository/orm-product-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateProductInfraestructureRequestDTO } from '../dto-request/create-product-infraestructure-request-dto';
@@ -185,17 +185,20 @@ export class ProductController {
     @Param() entry:DeleteProductByIdInfraestructureRequestDTO
   ){
     let service= new ExceptionDecorator(
-      new SecurityDecorator(
-        new LoggerDecorator(
-          new PerformanceDecorator(
-            new DeleteProductApplicationService(
-              new RabbitMQPublisher(this.channel),
-              this.ormCommandProductRepo,
-              this.ormQueryProductRepo,
-              new CloudinaryService()              
-            ),new NestTimer(),new NestLogger(new Logger())
-          ),new NestLogger(new Logger())
-        ),credential,[UserRoles.ADMIN])
+      new AuditDecorator(
+        new SecurityDecorator(
+            new LoggerDecorator(
+              new PerformanceDecorator(
+                new DeleteProductApplicationService(
+                  new RabbitMQPublisher(this.channel),
+                  this.ormCommandProductRepo,
+                  this.ormQueryProductRepo,
+                  new CloudinaryService()              
+                ),new NestTimer(),new NestLogger(new Logger())
+              ),new NestLogger(new Logger())
+            ),credential,[UserRoles.ADMIN])
+          ,this.auditRepository,new DateHandler()
+        )
       )
     
     let response= await service.execute({userId:credential.account.idUser,...entry})
@@ -221,17 +224,20 @@ export class ProductController {
     ) images?: Express.Multer.File[]
   ){
     let service= new ExceptionDecorator(
-      new SecurityDecorator(
-          new PerformanceDecorator(
-            new UpdateProductApplicationService(
-              new RabbitMQPublisher(this.channel),
-              this.ormCommandProductRepo,
-              this.ormQueryProductRepo,
-              new CloudinaryService(),
-              new UuidGen()              
-            ),new NestTimer(),new NestLogger(new Logger())
-        ),credential,[UserRoles.ADMIN])
+      new AuditDecorator(
+        new SecurityDecorator(
+            new PerformanceDecorator(
+              new UpdateProductApplicationService(
+                new RabbitMQPublisher(this.channel),
+                this.ormCommandProductRepo,
+                this.ormQueryProductRepo,
+                new CloudinaryService(),
+                new UuidGen()              
+              ),new NestTimer(),new NestLogger(new Logger())
+          ),credential,[UserRoles.ADMIN]),
+        this.auditRepository,new DateHandler()
       )
+    )
     let buffers=images ? images.map(image=>image.buffer) : null
 
     let response= await service.execute({

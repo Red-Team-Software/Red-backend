@@ -23,7 +23,7 @@ export class OrmBundleEntity implements IBundle{
     promotions?: OrmPromotionEntity[]
 
 
-    @ManyToMany(()=>OrmProductEntity, {eager:true})
+    @ManyToMany(()=>OrmProductEntity, {eager:true, onDelete: 'CASCADE', onUpdate: 'CASCADE'})
     @JoinTable({
         name: "bundle_product",
         joinColumn: {
@@ -37,7 +37,10 @@ export class OrmBundleEntity implements IBundle{
     })
     products: OrmProductEntity[];
 
-    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.bundle)
+    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.bundle, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+    })
     order_bundles?: OrmOrderBundleEntity[]
 
     static create ( 
