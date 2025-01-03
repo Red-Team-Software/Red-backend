@@ -45,8 +45,32 @@ export class OrmBundleRepository extends Repository<OrmBundleEntity> implements 
     async updateBundle(bundle: Bundle): Promise<Result<Bundle>> {
         const persis = await this.mapper.fromDomaintoPersistence(bundle)
         try {
-            const result = await this.save(persis)
+
+            await this.createQueryBuilder()
+            .delete()
+            .from('bundle_product')
+            .where('bundle_id = :bundle_id', { bundle_id: persis.id })
+            .execute();
+
+            await this.ormBundleImageRepository.delete({bundle_id:persis.id})
+
+            const result = await this.upsert(persis,['id'])
+
+            for (const image of persis.images) {
+                await this.ormBundleImageRepository.save(image);
+            }
+
+            for (const product of persis.products) {
+                await this.createQueryBuilder()
+                  .insert()
+                  .into('bundle_product')
+                  .values({ product_id: product.id, bundle_id:persis.id })
+                  .execute();
+              } 
+
+            
             return Result.success(bundle)
+
         } catch (e) {
             return Result.fail(new PersistenceException('Update bundle unsucssessfully'))
         }

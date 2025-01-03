@@ -30,7 +30,7 @@ export class UpdateProductInfraestructureRequestDTO{
         @IsOptional()
         stock: number
     
-        @ApiProperty( { required: true, default: '5' })
+        @ApiProperty( { required: false, default: '5' })
         @IsNumber()
         @IsPositive()
         @Transform(({ value }) => {
@@ -39,12 +39,12 @@ export class UpdateProductInfraestructureRequestDTO{
         @IsOptional()
         price:number
     
-        @ApiProperty( { required: true, default: 'usd' })
+        @ApiProperty( { required: false, default: 'usd' })
         @IsString()
         @IsOptional()
         currency: string
     
-        @ApiProperty( { required: true, default: '100' })
+        @ApiProperty( { required: false, default: 1 })
         @IsPositive()
         @Transform(({ value }) => {
           return Number(value);
@@ -52,7 +52,7 @@ export class UpdateProductInfraestructureRequestDTO{
         @IsOptional()
         weigth: number
     
-        @ApiProperty( { required: true, default: 'kg' })
+        @ApiProperty( { required: false, default: 'kg' })
         @IsString()
         @IsOptional()
         measurement: string

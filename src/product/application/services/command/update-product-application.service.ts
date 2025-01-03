@@ -82,6 +82,18 @@ export class UpdateProductApplicationService extends IApplicationService
             product.updateCurrency(ProductPrice.create(command.price,command.currency))
         }
 
+        if (command.weigth && !command.measurement)
+            product.updateWeigth(ProductWeigth.create(
+                command.weigth,product.ProductWeigth.Measure
+            )
+        )
+
+        if (!command.weigth && command.measurement)
+            product.updateWeigth(ProductWeigth.create(
+                product.ProductWeigth.Weigth,command.measurement
+            )
+        )
+
         if (command.weigth && command.measurement)
             product.updateWeigth(ProductWeigth.create(command.weigth,command.measurement))
 

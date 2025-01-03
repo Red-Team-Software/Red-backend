@@ -145,7 +145,6 @@ export class NotificationController {
         this.subscriber.consume<IDeliveringOrder>(
             { name: 'OrderEvents/OrderStatusDelivered'}, 
             (data):Promise<void>=>{
-                console.log('esta en delivered')
                 this.sendPushOrderDelivered(data)
                 return
             }
@@ -154,7 +153,6 @@ export class NotificationController {
         this.subscriber.consume<IDeliveringOrder>(
             { name: 'OrderEvents/OrderStatusDelivering'}, 
             (data):Promise<void>=>{
-                console.log('esta en delivering')
                 this.sendPushOrderDelivering(data)
                 return
             }

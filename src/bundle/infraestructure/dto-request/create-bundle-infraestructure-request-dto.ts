@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { Transform } from "class-transformer"
-import { IsArray, IsDateString, IsNumber, IsOptional, IsPositive, IsString, MinLength } from "class-validator"
+import { IsArray, IsDateString, IsNumber, IsOptional, IsPositive, IsString, IsUUID, MinLength } from "class-validator"
 
 export class CreateBundleInfraestructureRequestDTO{
 
@@ -54,5 +54,6 @@ export class CreateBundleInfraestructureRequestDTO{
     @ApiProperty({required:true})
     @IsArray()
     @IsString({each: true})
+    @IsUUID('4', { each: true })
     productId:string[]
 }
