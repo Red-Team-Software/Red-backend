@@ -4,7 +4,7 @@ export interface UpdatePromotionApplicationRequestDTO extends IServiceRequestDto
     id:string
     description?:string
     name?:string
-    avaleableState?:boolean
+    state?:string
     discount?:number
     products?:string[]
     bundles?:string[]

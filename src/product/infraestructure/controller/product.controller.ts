@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { OrmProductRepository } from '../repositories/orm-repository/orm-product-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateProductInfraestructureRequestDTO } from '../dto-request/create-product-infraestructure-request-dto';
@@ -20,7 +20,7 @@ import { FindAllProductsAndBundlesInfraestructureRequestDTO } from '../dto-reque
 import { FindAllProductsAndComboApplicationService } from 'src/product/application/services/query/find-all-product-and-combo-by-name-application.service';
 import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
 import { OrmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository';
-import { FindAllProductsbyNameApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-and-combos-request-dto';
+import { FindAllProductsbyNameApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-and-combos-application-request-dto';
 import { FindProductByIdInfraestructureRequestDTO } from '../dto-request/find-product-by-id-infraestructure-request-dto';
 import { FindProductByIdApplicationService } from 'src/product/application/services/query/find-product-by-id-application.service';
 import { RabbitMQPublisher } from 'src/common/infraestructure/events/publishers/rabbit-mq-publisher';
@@ -35,6 +35,24 @@ import { OrmAuditRepository } from 'src/common/infraestructure/repository/orm-re
 import { DateHandler } from 'src/common/infraestructure/date-handler/date-handler';
 import { NestTimer } from 'src/common/infraestructure/timer/nets-timer';
 import { ICommandProductRepository } from 'src/product/domain/repository/product.command.repositry.interface';
+import { SecurityDecorator } from 'src/common/application/aspects/security-decorator/security-decorator';
+import { UserRoles } from 'src/user/domain/value-object/enum/user.roles';
+import { DeleteProductByIdInfraestructureRequestDTO } from '../dto-request/delete-product-by-id-infraestructure-request-dto';
+import { DeleteProductApplicationService } from 'src/product/application/services/command/delete-product-application.service';
+import { ByIdDTO } from 'src/common/infraestructure/dto/entry/by-id.dto';
+import { UpdateProductInfraestructureRequestDTO } from '../dto-request/update-product-infraestructure-request-dto';
+import { UpdateProductApplicationService } from 'src/product/application/services/command/update-product-application.service';
+import { RabbitMQSubscriber } from 'src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber';
+import { ProductQueues } from '../queues/product.queues';
+import { ICreateOrder } from '../interfaces/create-order.interface';
+import { IQueryAccountRepository } from 'src/auth/application/repository/query-account-repository.interface';
+import { IAccount } from 'src/auth/application/model/account.interface';
+import { ISession } from 'src/auth/application/model/session.interface';
+import { IQueryTokenSessionRepository } from 'src/auth/application/repository/query-token-session-repository.interface';
+import { OrmTokenQueryRepository } from 'src/auth/infraestructure/repositories/orm-repository/orm-token-query-session-repository';
+import { OrmAccountQueryRepository } from 'src/auth/infraestructure/repositories/orm-repository/orm-account-query-repository';
+import { AdjustProductStockApplicationService } from 'src/product/application/services/command/adjust-product-stock-application.service';
+import { FindAllProductsApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-application-request-dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -47,6 +65,26 @@ export class ProductController {
   private readonly ormQueryProductRepo:IQueryProductRepository
   private readonly ormBundleQueryRepo:IQueryBundleRepository
   private readonly auditRepository: IAuditRepository
+  private readonly subscriber: RabbitMQSubscriber
+
+
+  private initializeQueues():void{        
+    ProductQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+  }
+  
+  private buildQueue(name: string, pattern: string) {
+      this.subscriber.buildQueue({
+            name,
+            pattern,
+            exchange: {
+              name: 'DomainEvent',
+              type: 'direct',
+              options: {
+                durable: false,
+              },
+       },
+    })
+  }
   
   constructor(
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -56,6 +94,37 @@ export class ProductController {
     this.ormQueryProductRepo= new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormBundleQueryRepo= new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
+    this.subscriber= new RabbitMQSubscriber(this.channel)
+    
+    this.initializeQueues()
+
+
+    this.subscriber.consume<ICreateOrder>(
+        { name: 'OrderReduce/OrderRegistered'}, 
+        (data):Promise<void>=>{
+          this.reduceProductStock(data)
+          return
+        }
+    )
+  }
+
+  async reduceProductStock (data:ICreateOrder){
+
+    if(data.products.length==0)
+      return
+
+    let service= new ExceptionDecorator(
+      new AuditDecorator(
+          new PerformanceDecorator(
+            new AdjustProductStockApplicationService(
+              new RabbitMQPublisher(this.channel),
+              this.ormCommandProductRepo,
+              this.ormQueryProductRepo
+            ),new NestTimer(),new NestLogger(new Logger())
+        ),this.auditRepository,new DateHandler()
+      )
+    )
+    await service.execute({userId:data.orderUserId,products:data.products})
   }
 
   @UseGuards(JwtAuthGuard)
@@ -73,26 +142,28 @@ export class ProductController {
     }),
   ) images: Express.Multer.File[]) {
 
-    let service= new ExceptionDecorator(
-      new AuditDecorator(
-        new PerformanceDecorator(
-          new CreateProductApplicationService(
-            new RabbitMQPublisher(this.channel),
-            this.ormCommandProductRepo,
-            this.ormQueryProductRepo,
-            this.idGen,
-            new CloudinaryService()
-          ),new NestTimer(),new NestLogger(new Logger())
-        ),this.auditRepository,new DateHandler()
+    let service=
+    new ExceptionDecorator(
+      new SecurityDecorator(
+        new AuditDecorator(
+          new PerformanceDecorator(
+            new CreateProductApplicationService(
+              new RabbitMQPublisher(this.channel),
+              this.ormCommandProductRepo,
+              this.ormQueryProductRepo,
+              this.idGen,
+              new CloudinaryService()
+            ),new NestTimer(),new NestLogger(new Logger())
+          ),this.auditRepository,new DateHandler()
+        ),credential,[UserRoles.ADMIN])
       )
-    )
       let buffers=images.map(image=>image.buffer)
     let response= await service.execute({userId:credential.account.idUser,...entry,images:buffers})
     return response.getValue
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('all')
+  @Get('many')
   async getAllProducts(
     @GetCredential() credential:ICredential,
     @Query() entry:FindAllProductsInfraestructureRequestDTO
@@ -102,7 +173,12 @@ export class ProductController {
     if(!entry.perPage)
       entry.perPage=10
 
-    const pagination:PaginationRequestDTO={userId:credential.account.idUser,page:entry.page, perPage:entry.perPage}
+    const pagination:FindAllProductsApplicationRequestDTO={
+      userId:credential.account.idUser,
+      page:entry.page,
+      perPage:entry.perPage,
+      ...entry
+    }
 
     let service= new ExceptionDecorator(
         new LoggerDecorator(
@@ -118,7 +194,7 @@ export class ProductController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('all-product-bundle')
+  @Get('/all-product-bundle')
   async getAllProductsAndBundles(
     @GetCredential() credential:ICredential,
     @Query() entry:FindAllProductsAndBundlesInfraestructureRequestDTO
@@ -150,12 +226,11 @@ export class ProductController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('')
+  @Get('/:id')
   async getProductById(
     @GetCredential() credential:ICredential,
-    @Query() entry:FindProductByIdInfraestructureRequestDTO
+    @Param() entry:FindProductByIdInfraestructureRequestDTO
   ){
-
     let service= new ExceptionDecorator(
       new LoggerDecorator(
         new PerformanceDecorator(
@@ -167,6 +242,76 @@ export class ProductController {
     )
     
     let response= await service.execute({userId:credential.account.idUser,...entry})
+    return response.getValue
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('delete/:id')
+  async deletetProductById(
+    @GetCredential() credential:ICredential,
+    @Param() entry:DeleteProductByIdInfraestructureRequestDTO
+  ){
+    let service= new ExceptionDecorator(
+      new AuditDecorator(
+        new SecurityDecorator(
+            new LoggerDecorator(
+              new PerformanceDecorator(
+                new DeleteProductApplicationService(
+                  new RabbitMQPublisher(this.channel),
+                  this.ormCommandProductRepo,
+                  this.ormQueryProductRepo,
+                  new CloudinaryService()              
+                ),new NestTimer(),new NestLogger(new Logger())
+              ),new NestLogger(new Logger())
+            ),credential,[UserRoles.ADMIN])
+          ,this.auditRepository,new DateHandler()
+        )
+      )
+    
+    let response= await service.execute({userId:credential.account.idUser,...entry})
+    return response.getValue
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('update/:id')
+  @UseInterceptors(FilesInterceptor('images'))  
+  async updateProduct(
+    @GetCredential() credential:ICredential,
+    @Param() entryId:ByIdDTO,
+    @Body() entry:UpdateProductInfraestructureRequestDTO,
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({
+            fileType:/(jpeg|.jpg|.png)$/
+          }),
+        ],
+        fileIsRequired:false
+      }),
+    ) images?: Express.Multer.File[]
+  ){
+    let service= new ExceptionDecorator(
+      new AuditDecorator(
+        new SecurityDecorator(
+            new PerformanceDecorator(
+              new UpdateProductApplicationService(
+                new RabbitMQPublisher(this.channel),
+                this.ormCommandProductRepo,
+                this.ormQueryProductRepo,
+                new CloudinaryService(),
+                new UuidGen()              
+              ),new NestTimer(),new NestLogger(new Logger())
+          ),credential,[UserRoles.ADMIN]),
+        this.auditRepository,new DateHandler()
+      )
+    )
+    let buffers=images ? images.map(image=>image.buffer) : null
+
+    let response= await service.execute({
+      ...entry,
+      userId:credential.account.idUser,
+      productId:entryId.id,
+      images:buffers})
     return response.getValue
   }
 }

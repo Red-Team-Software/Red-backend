@@ -17,8 +17,12 @@ export class ProductStock implements ValueObject<ProductStock> {
     }
 
     private constructor(stock:number){
-        if (stock<0) throw new InvalidProductStockException()
+        if (stock<0) throw new InvalidProductStockException(stock)
         this.stock=stock
+    }
+
+    reduceQuantity(quantity:number):ProductStock{
+       return new ProductStock(this.stock-quantity) 
     }
 
 }

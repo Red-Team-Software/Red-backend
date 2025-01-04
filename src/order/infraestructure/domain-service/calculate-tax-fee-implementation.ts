@@ -1,5 +1,5 @@
 import { OrderTotalAmount } from 'src/order/domain/value_objects/order-totalAmount';
-import { ICalculateTaxesFee } from '../../domain/domain-services/calculate-taxes-fee.interface';
+import { ICalculateTaxesFee } from '../../domain/domain-services/interfaces/calculate-taxes-fee.interface';
 import { OrderTaxes } from 'src/order/domain/value_objects/order-taxes';
 import { Result } from 'src/common/utils/result-handler/result';
 

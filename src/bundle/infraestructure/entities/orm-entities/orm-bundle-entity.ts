@@ -4,6 +4,7 @@ import { OrmBundleImage } from "./orm-bundle-image";
 import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
 import { OrmOrderBundleEntity } from "src/order/infraestructure/entities/orm-order-bundle-entity";
 import { OrmPromotionEntity } from '../../../../promotion/infraestructure/entities/orm-entities/orm-promotion-entity';
+import { OrmCategoryEntity } from "src/category/infraestructure/entities/orm-entities/orm-category-entity";
 
 @Entity('bundle')
 export class OrmBundleEntity implements IBundle{
@@ -11,7 +12,7 @@ export class OrmBundleEntity implements IBundle{
     @PrimaryColumn({type:"uuid"}) id:string
     @Column( 'varchar', { unique: true }   ) name: string
     @Column( 'varchar' ) desciption: string
-    @Column( 'timestamp', { default: () => 'CURRENT_TIMESTAMP' } ) caducityDate: Date
+    @Column( 'timestamp', { nullable:true } ) caducityDate?: Date
     @OneToMany( () => OrmBundleImage,   image => image.bundle,{ eager: true }) images: OrmBundleImage[]   
     @Column( 'integer' ) stock: number
     @Column('numeric') price: number
@@ -19,11 +20,12 @@ export class OrmBundleEntity implements IBundle{
     @Column( 'integer' ) weigth: number;
     @Column( 'varchar' ) measurament: string;
 
-    @ManyToMany(() => OrmPromotionEntity, promotion => promotion.bundles)   
+    @ManyToMany(() => OrmPromotionEntity, promotion => promotion.bundles, 
+    {onDelete:'CASCADE' , onUpdate:'CASCADE'} 
+    )   
     promotions?: OrmPromotionEntity[]
 
-
-    @ManyToMany(()=>OrmProductEntity, {eager:true})
+    @ManyToMany(()=>OrmProductEntity, {eager:true, onDelete: 'CASCADE', onUpdate: 'CASCADE'})
     @JoinTable({
         name: "bundle_product",
         joinColumn: {
@@ -37,7 +39,16 @@ export class OrmBundleEntity implements IBundle{
     })
     products: OrmProductEntity[];
 
-    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.bundle)
+    @ManyToMany(() => OrmCategoryEntity, category => category.bundles,{
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
+    })
+    categories?: OrmCategoryEntity[];
+
+    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.bundle, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+    })
     order_bundles?: OrmOrderBundleEntity[]
 
     static create ( 
@@ -51,7 +62,8 @@ export class OrmBundleEntity implements IBundle{
         currency:string,
         weigth:number,
         measurament:string,
-        products: OrmProductEntity[]
+        products: OrmProductEntity[],
+        categories: OrmCategoryEntity[]
     ): OrmBundleEntity
     {
         const bundle = new OrmBundleEntity()
@@ -66,6 +78,7 @@ export class OrmBundleEntity implements IBundle{
         bundle.weigth=weigth
         bundle.measurament=measurament
         bundle.products=products
+        bundle.categories=categories
         return bundle
     }
 }

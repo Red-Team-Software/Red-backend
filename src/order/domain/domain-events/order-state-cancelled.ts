@@ -11,7 +11,7 @@ export class OrderStatusCancelled extends DomainEvent {
         let data = {
             orderId: this.orderId.orderId,
             orderState: this.orderState.orderState,
-            orderUserId: this.orderUserId,
+            orderUserId: this.orderUserId.userId,
         }
         
         return JSON.stringify(data);

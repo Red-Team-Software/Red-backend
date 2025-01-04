@@ -99,23 +99,32 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
             .leftJoinAndSelect('bundle.images', 'bundle_image')
             .leftJoinAndSelect('bundle.promotions','promotion')
             .leftJoinAndSelect('bundle.products','products')
+            .leftJoinAndSelect('bundle.categories','categories')
             .getOne();
             
             if(!ormBundle)
-                return Result.fail( new NotFoundException('Find promotion unsucssessfully'))
+                return Result.fail( new NotFoundException('Find bundle unsucssessfully'))
 
             return Result.success({
                 id:ormBundle.id,
                 description:ormBundle.desciption,
-                caducityDate:ormBundle.caducityDate,
+                caducityDate:
+                ormBundle.caducityDate
+                ? ormBundle.caducityDate
+                : null,
                 name:ormBundle.name,
                 stock:ormBundle.stock,
                 images:ormBundle.images.map(image=>image.image),
-                price:ormBundle.price,
+                price:Number(ormBundle.price),
                 currency:ormBundle.currency,
                 weigth:ormBundle.weigth,
                 measurement:ormBundle.measurament,
-                categories:[],
+                categories:ormBundle.categories
+                ? ormBundle.categories.map(category=>({
+                    id:category.id,
+                    name:category.name
+                }))
+                : [],
                 promotion:ormBundle.promotions
                 ? ormBundle.promotions.map(promotion=>({
                     id:promotion.id,

@@ -22,12 +22,31 @@ export class OrderRegistered extends DomainEvent {
             orderCreateDate: this.orderCreateDate.OrderCreatedDate,
             totalAmount: this.totalAmount,
             orderDirection: this.orderDirection,
-            orderCourier: this.orderCourier,
-            orderUserId: this.orderUserId,
-            products: this.products,
-            bundles: this.bundles,
-            orderReceivedDate: this.orderReceivedDate?.OrderReceivedDate,
-            orderReport: this.orderReport?.getId(),
+            orderCourier: {
+                id:this.orderCourier.getId().OrderCourierId,
+            },
+            orderUserId: this.orderUserId.userId,
+            products: this.products
+            ? this.products.map(p=>({
+                id:p.OrderProductId.OrderProductId,
+                quantity:p.Quantity.Quantity
+            }))
+            : [],
+            bundles: this.bundles 
+            ? this.bundles.map(b=>({
+                id:b.OrderBundleId.OrderBundleId,
+                quantity:b.Quantity.OrderBundleQuantity
+            }))
+            :[],
+            orderReceivedDate: this.orderReceivedDate
+            ? this.orderReceivedDate.OrderReceivedDate
+            : null,
+            orderReport: this.orderReport
+            ? {
+                id:this.orderReport.getId().OrderReportId,
+                description:this.orderReport.Description
+            }
+            : null,
             orderPayment: this.orderPayment
         }
         

@@ -47,7 +47,7 @@ import { AuditDecorator } from "src/common/application/aspects/audit-decorator/a
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler"
 import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator"
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
-import { IGeocodification } from "src/order/domain/domain-services/geocodification-interface"
+import { IGeocodification } from "src/order/domain/domain-services/interfaces/geocodification-interface"
 import { GeocodificationHereMapsDomainService } from "src/order/infraestructure/domain-service/geocodification-here-maps-domain-service"
 import { HereMapsSingelton } from "src/payments/infraestructure/here-maps-singleton"
 import { FindUserDirectionsByIdApplicationRequestDTO } from "src/user/application/dto/response/find-directions-by-user-id-response-dto"
@@ -154,8 +154,6 @@ export class UserController {
     for (let direction of directions){
       let geo = OrderDirection.create(direction.lat,direction.lng);
       let geoReponse= await this.geocodification.LatitudeLongitudetoDirecction(geo);
-
-      console.log('response:',geoReponse.getValue)
 
       dir.push({
         ...direction,

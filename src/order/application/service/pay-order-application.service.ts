@@ -3,10 +3,10 @@ import { Result } from 'src/common/utils/result-handler/result';
 import { OrderPayApplicationServiceRequestDto } from '../dto/request/order-pay-request-dto';
 import { OrderPayResponseDto } from '../dto/response/order-pay-response-dto';
 import { IEventPublisher } from 'src/common/application/events/event-publisher/event-publisher.abstract';
-import { ICalculateShippingFee } from 'src/order/domain/domain-services/calculate-shippping-fee.interfafe';
-import { ICalculateTaxesFee } from 'src/order/domain/domain-services/calculate-taxes-fee.interface';
+import { ICalculateShippingFee } from 'src/order/domain/domain-services/interfaces/calculate-shippping-fee.interface';
+import { ICalculateTaxesFee } from 'src/order/domain/domain-services/interfaces/calculate-taxes-fee.interface';
 import { OrderTotalAmount } from 'src/order/domain/value_objects/order-totalAmount';
-import { IPaymentMethodService } from 'src/order/domain/domain-services/payment-method-interface';
+import { IPaymentMethodService } from 'src/order/domain/domain-services/interfaces/payment-method-interface';
 import { OrderDirection } from 'src/order/domain/value_objects/order-direction';
 import { ErrorCreatingPaymentApplicationException } from '../application-exception/error-creating-payment-application.exception';
 import { ErrorObtainingTaxesApplicationException } from '../application-exception/error-obtaining-taxes.application.exception';
@@ -19,7 +19,7 @@ import { OrderState } from 'src/order/domain/value_objects/order-state';
 import { OrderShippingFee } from 'src/order/domain/value_objects/order-shipping-fee';
 import { OrderReceivedDate } from 'src/order/domain/value_objects/order-received-date';
 import { ErrorCreatingOrderApplicationException } from '../application-exception/error-creating-order-application.exception';
-import { IGeocodification } from 'src/order/domain/domain-services/geocodification-interface';
+import { IGeocodification } from 'src/order/domain/domain-services/interfaces/geocodification-interface';
 import { OrderAddressStreet } from 'src/order/domain/value_objects/order-direction-street';
 import { OrderProduct } from 'src/order/domain/entities/order-product/order-product-entity';
 import { OrderBundle } from 'src/order/domain/entities/order-bundle/order-bundle-entity';
@@ -35,7 +35,6 @@ import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../applica
 import { Bundle } from 'src/bundle/domain/aggregate/bundle.aggregate';
 import { OrderReport } from 'src/order/domain/entities/report/report-entity';
 import { OrderPayment } from 'src/order/domain/entities/payment/order-payment-entity';
-import { CalculateAmount } from 'src/order/domain/domain-services/calculate-amount';
 import { ICourierQueryRepository } from 'src/courier/application/query-repository/courier-query-repository-interface';
 import { OrderCourier } from 'src/order/domain/entities/order-courier/order-courier-entity';
 import { OrderCourierId } from 'src/order/domain/entities/order-courier/value-object/order-courier-id';
@@ -51,11 +50,12 @@ import { FindAllPromotionApplicationRequestDTO } from 'src/promotion/application
 import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
 import { IPaymentMethodQueryRepository } from 'src/payment-methods/application/query-repository/orm-query-repository.interface';
 import { PaymentMethodId } from 'src/payment-methods/domain/value-objects/payment-method-id';
+import { CalculateAmountService } from 'src/order/domain/domain-services/services/calculate-amount.service';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
     
-    private readonly calculateAmount = new CalculateAmount();
+    private readonly calculateAmount = new CalculateAmountService();
 
     constructor(
         private readonly eventPublisher: IEventPublisher,
@@ -84,9 +84,9 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         let orderBundles: OrderBundle[] = [];
         let promotions: Promotion[] = [];
 
-        let paymentResponse=await this.paymentQueryRepository.findMethodById(PaymentMethodId.create(data.paymentId))
-
-        console.log(paymentResponse)
+        let paymentResponse=await this.paymentQueryRepository.findMethodById(
+            PaymentMethodId.create(data.paymentId)
+        )
 
         if (!paymentResponse.isSuccess())
             return Result.fail(paymentResponse.getError)
@@ -221,7 +221,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             if (responseDB.isFailure()) 
                 return Result.fail(new ErrorCreatingOrderApplicationException());
 
-            await this.eventPublisher.publish(order.pullDomainEvents());
+            await this.eventPublisher.publish(response.getValue.pullDomainEvents());
 
             let productsresponse:{
                 id: string,
