@@ -52,6 +52,7 @@ import { IQueryTokenSessionRepository } from 'src/auth/application/repository/qu
 import { OrmTokenQueryRepository } from 'src/auth/infraestructure/repositories/orm-repository/orm-token-query-session-repository';
 import { OrmAccountQueryRepository } from 'src/auth/infraestructure/repositories/orm-repository/orm-account-query-repository';
 import { AdjustProductStockApplicationService } from 'src/product/application/services/command/adjust-product-stock-application.service';
+import { FindAllProductsApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-application-request-dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -172,7 +173,12 @@ export class ProductController {
     if(!entry.perPage)
       entry.perPage=10
 
-    const pagination:PaginationRequestDTO={userId:credential.account.idUser,page:entry.page, perPage:entry.perPage}
+    const pagination:FindAllProductsApplicationRequestDTO={
+      userId:credential.account.idUser,
+      page:entry.page,
+      perPage:entry.perPage,
+      ...entry
+    }
 
     let service= new ExceptionDecorator(
         new LoggerDecorator(

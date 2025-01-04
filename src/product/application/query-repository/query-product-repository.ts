@@ -7,7 +7,7 @@ import { ProductName } from "src/product/domain/value-object/product-name";
 import { IProductModel } from "../model/product.model.interface";
 
 export interface IQueryProductRepository{
-    findAllProducts(criteria:FindAllProductsApplicationRequestDTO):Promise<Result<Product[]>> 
+    findAllProducts(criteria:FindAllProductsApplicationRequestDTO):Promise<Result<IProductModel[]>> 
     findAllProductsByName(criteria:FindAllProductsbyNameApplicationRequestDTO):Promise<Result<Product[]>>
     findProductById( id: ProductID ): Promise<Result<Product>>
     findProductWithMoreDetailById( id: ProductID ): Promise<Result<IProductModel>>
