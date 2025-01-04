@@ -1,9 +1,13 @@
 import { Product } from "src/product/domain/aggregate/product.aggregate";
-import { OrderTotalAmount } from "../value_objects/order-totalAmount";
+import { OrderTotalAmount } from "../../value_objects/order-totalAmount";
 import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate";
-import { OrderProduct } from "../entities/order-product/order-product-entity";
-import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
+import { OrderProduct } from "../../entities/order-product/order-product-entity";
+import { OrderBundle } from "../../entities/order-bundle/order-bundle-entity";
 import { Promotion } from "src/promotion/domain/aggregate/promotion.aggregate";
+import { OrderProductId } from "../../entities/order-product/value_object/order-productId";
+import { OrderBundleId } from "../../entities/order-bundle/value_object/order-bundlesId";
+import { InsufficientBundleStockException } from "../../exception/insufficient-bundle-stock-exception";
+import { InsufficientProductStockException } from "../../exception/insufficient-product-stock-exception";
 
 
 type productPriceTotal = {
@@ -16,7 +20,7 @@ type bundlePriceTotal = {
     total: number
 }
 
-export class CalculateAmount {
+export class CalculateAmountService {
 
     //TODO: Refactor when coupon and discount are implemented
 
@@ -40,7 +44,20 @@ export class CalculateAmount {
 
             let productTotal = product.ProductPrice.Price;
 
-            if (promotion) productTotal -= (product.ProductPrice.Price * (promotion.PromotionDiscounts.Value));
+            if (promotion) 
+                productTotal -= (product.ProductPrice.Price * (promotion.PromotionDiscounts.Value));
+
+            const orderProduct= orderProducts.find(
+                ob => ob.OrderProductId.equals( OrderProductId.create(product.getId().Value))
+            )
+
+            if (orderProduct.Quantity.Quantity > product.ProductStock.Value) 
+                throw new InsufficientProductStockException(
+                    product.getId().Value,
+                    product.ProductName.Value,
+                    orderProduct.Quantity.Quantity,
+                    product.ProductStock.Value
+                )
 
             productPriceTotals.push({
             productId: product.getId().Value,
@@ -57,11 +74,23 @@ export class CalculateAmount {
 
             if (promotion) bundleTotal -= (bundle.BundlePrice.Price * (promotion.PromotionDiscounts.Value ));
 
+            const orderBundle= orderBundles.find(
+                ob => ob.OrderBundleId.equals( OrderBundleId.create(bundle.getId().Value))
+            )
+
+            if (orderBundle.Quantity.OrderBundleQuantity > bundle.BundleStock.Value) 
+                throw new InsufficientBundleStockException(
+                    bundle.getId().Value,
+                    bundle.BundleName.Value,
+                    orderBundle.Quantity.OrderBundleQuantity,
+                    bundle.BundleStock.Value
+                )
+
             bundlePriceTotals.push({
             bundleId: bundle.getId().Value,
             total: bundleTotal
-            });
-        });
+            })
+        })
 
         //TODO: Agregarle tambien el descuento por categoria si lo tiene 
 

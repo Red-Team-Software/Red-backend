@@ -10,8 +10,8 @@ import { IEventPublisher } from "src/common/application/events/event-publisher/e
 import { IApplicationService } from "src/common/application/services";
 import { OrderPayApplicationServiceRequestDto } from "src/order/application/dto/request/order-pay-request-dto";
 import { LoggerDecorator } from "src/common/application/aspects/logger-decorator/logger-decorator";
-import { ICalculateShippingFee } from "src/order/domain/domain-services/calculate-shippping-fee.interfafe";
-import { ICalculateTaxesFee } from "src/order/domain/domain-services/calculate-taxes-fee.interface";
+import { ICalculateShippingFee } from "src/order/domain/domain-services/interfaces/calculate-shippping-fee.interface";
+import { ICalculateTaxesFee } from "src/order/domain/domain-services/interfaces/calculate-taxes-fee.interface";
 import { CalculateTaxesFeeImplementation } from "../domain-service/calculate-tax-fee-implementation";
 import { NestLogger } from "src/common/infraestructure/logger/nest-logger";
 import { CalculateShippingFeeHereMaps } from "../domain-service/calculate-shipping-here-maps";
@@ -35,7 +35,7 @@ import { FindAllOrdersApplicationServiceResponseDto } from "src/order/applicatio
 import { FindAllOdersApplicationService } from "src/order/application/service/find-all-orders-application.service";
 import { Channel } from 'amqplib';
 import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher";
-import { IGeocodification } from "src/order/domain/domain-services/geocodification-interface";
+import { IGeocodification } from "src/order/domain/domain-services/interfaces/geocodification-interface";
 import { GeocodificationHereMapsDomainService } from "../domain-service/geocodification-here-maps-domain-service";
 import { OrmProductQueryRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-query-repository";
 import { OrmProductRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-repository";

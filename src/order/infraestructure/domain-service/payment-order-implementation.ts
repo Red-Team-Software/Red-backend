@@ -1,7 +1,7 @@
 import { StripeSingelton } from "src/payments/infraestructure/stripe-singelton";
 import Stripe from "stripe";
 import { OrderPayment } from "../../domain/value_objects/order-payment";
-import { IPaymentService } from "../../domain/domain-services/payment-interface";
+import { IPaymentService } from "../../domain/domain-services/interfaces/payment-interface";
 import { Result } from "src/common/utils/result-handler/result";
 import { OrderStripePaymentMethod } from "src/order/domain/value_objects/order-stripe-payment-method";
 

@@ -134,8 +134,8 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
           if (criteria.discount && criteria.discount > 0) 
             query.andWhere('promotion.discount = :discount', { discount: criteria.discount })
         
-        //   if (criteria.category && criteria.category.length > 0) 
-        //     query.andWhere('category.id IN (:...categories)', { categories: criteria.category })
+          if (criteria.category && criteria.category.length > 0) 
+            query.andWhere('category.id IN (:...categories)', { categories: criteria.category })
 
         if (criteria.popular) {
             query.addSelect(subQuery => {

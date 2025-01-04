@@ -10,7 +10,7 @@ import { OrderCourierDirection } from "src/order/domain/entities/order-courier/v
 import { OrderCourier } from "src/order/domain/entities/order-courier/order-courier-entity";
 import { ErrorModifingOrderDeliveryApplicationException } from "../application-exception/error-modifing-order-delivery-location.application.exception";
 import { ModifyCourierLocationRequestDto } from "../dto/request/modify-courier-location-request.dto";
-import { IGeocodification } from "src/order/domain/domain-services/geocodification-interface";
+import { IGeocodification } from "src/order/domain/domain-services/interfaces/geocodification-interface";
 
 
 
