@@ -42,7 +42,6 @@ export class OrmBundleRepository extends Repository<OrmBundleEntity> implements 
 
             return Result.success(id) 
         } catch (e) {
-            console.log(e)
             return Result.fail(new PersistenceException('Delete bundle unsucssessfully'))
         }
 

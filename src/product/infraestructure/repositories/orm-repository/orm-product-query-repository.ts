@@ -133,8 +133,6 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
     async findProductByName(productName: ProductName): Promise<Result<Product[]>> {
         try{
             const product = await this.findBy({name:productName.Value})
-            if(product.length==0) 
-                return Result.fail( new NotFoundException('Find product by name unsucssessfully they are 0 registered'))
             let domain=product.map(async infraestrcuture=>await this.mapper.fromPersistencetoDomain(infraestrcuture))
             return Result.success(await Promise.all(domain))
         }

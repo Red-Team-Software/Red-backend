@@ -145,6 +145,15 @@ export class Product extends AggregateRoot <ProductID>{
         )
     }
 
+    reduceQuantiy(quantity:number):void{
+        this.apply(
+            ProductUpdatedStock.create(
+                this.getId(),
+                this.productStock.reduceQuantity(quantity)
+            )
+        )
+    }
+
     static RegisterProduct(
         productId:ProductID,
         productDescription:ProductDescription,

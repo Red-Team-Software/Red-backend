@@ -42,6 +42,16 @@ import { DeleteProductApplicationService } from 'src/product/application/service
 import { ByIdDTO } from 'src/common/infraestructure/dto/entry/by-id.dto';
 import { UpdateProductInfraestructureRequestDTO } from '../dto-request/update-product-infraestructure-request-dto';
 import { UpdateProductApplicationService } from 'src/product/application/services/command/update-product-application.service';
+import { RabbitMQSubscriber } from 'src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber';
+import { ProductQueues } from '../queues/product.queues';
+import { ICreateOrder } from '../interfaces/create-order.interface';
+import { IQueryAccountRepository } from 'src/auth/application/repository/query-account-repository.interface';
+import { IAccount } from 'src/auth/application/model/account.interface';
+import { ISession } from 'src/auth/application/model/session.interface';
+import { IQueryTokenSessionRepository } from 'src/auth/application/repository/query-token-session-repository.interface';
+import { OrmTokenQueryRepository } from 'src/auth/infraestructure/repositories/orm-repository/orm-token-query-session-repository';
+import { OrmAccountQueryRepository } from 'src/auth/infraestructure/repositories/orm-repository/orm-account-query-repository';
+import { AdjustProductStockApplicationService } from 'src/product/application/services/command/adjust-product-stock-application.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -54,6 +64,28 @@ export class ProductController {
   private readonly ormQueryProductRepo:IQueryProductRepository
   private readonly ormBundleQueryRepo:IQueryBundleRepository
   private readonly auditRepository: IAuditRepository
+  private readonly subscriber: RabbitMQSubscriber
+  private readonly accountQueryRepo:IQueryAccountRepository<IAccount>
+  private readonly sessionRepository: IQueryTokenSessionRepository<ISession>
+
+
+  private initializeQueues():void{        
+    ProductQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+  }
+  
+  private buildQueue(name: string, pattern: string) {
+      this.subscriber.buildQueue({
+            name,
+            pattern,
+            exchange: {
+              name: 'DomainEvent',
+              type: 'direct',
+              options: {
+                durable: false,
+              },
+       },
+    })
+  }
   
   constructor(
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -63,6 +95,35 @@ export class ProductController {
     this.ormQueryProductRepo= new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormBundleQueryRepo= new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
+    this.subscriber= new RabbitMQSubscriber(this.channel)
+    this.accountQueryRepo= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance())
+    this.sessionRepository= new OrmTokenQueryRepository(PgDatabaseSingleton.getInstance())
+    this.initializeQueues()
+
+
+    this.subscriber.consume<ICreateOrder>(
+        { name: 'OrderReduce/OrderRegistered'}, 
+        (data):Promise<void>=>{
+          this.reduceProductStock(data)
+          return
+        }
+    )
+  }
+
+  async reduceProductStock (data:ICreateOrder){
+
+    let service= new ExceptionDecorator(
+      new AuditDecorator(
+          new PerformanceDecorator(
+            new AdjustProductStockApplicationService(
+              new RabbitMQPublisher(this.channel),
+              this.ormCommandProductRepo,
+              this.ormQueryProductRepo
+            ),new NestTimer(),new NestLogger(new Logger())
+        ),this.auditRepository,new DateHandler()
+      )
+    )
+    await service.execute({userId:data.orderUserId,products:data.products})
   }
 
   @UseGuards(JwtAuthGuard)

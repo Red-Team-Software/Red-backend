@@ -5,7 +5,6 @@ import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { ICommandPromotionRepository } from "src/promotion/domain/repository/promotion.command.repository.interface";
 import { Promotion } from "src/promotion/domain/aggregate/promotion.aggregate";
 import { OrmPromotionMapper } from "../../mapper/orm-mapper/orm-promotion-mapper";
-import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
 import { OrmPromotionEntity } from "../../entities/orm-entities/orm-promotion-entity";
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 
@@ -42,7 +41,6 @@ export class OrmPromotionCommandRepository extends Repository<OrmPromotionEntity
             return Result.success(promotion)
         
         } catch (e) {
-            console.log(e)
             return Result.fail(new PersistenceException('Update product unsucssessfully'))
         }
     }

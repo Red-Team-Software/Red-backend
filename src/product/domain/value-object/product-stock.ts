@@ -21,4 +21,8 @@ export class ProductStock implements ValueObject<ProductStock> {
         this.stock=stock
     }
 
+    reduceQuantity(quantity:number):ProductStock{
+       return new ProductStock(this.stock-quantity) 
+    }
+
 }
