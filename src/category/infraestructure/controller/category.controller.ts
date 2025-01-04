@@ -39,7 +39,10 @@ import { DeleteCategoryByIdInfraestructureRequestDTO } from '../dto-request/delt
 import { UpdateCategoryApplicationService } from 'src/category/application/services/command/update-category-application';
 import { ByIdDTO } from 'src/common/infraestructure/dto/entry/by-id.dto';
 import { UpdateCategoryInfraestructureRequestDTO } from '../dto-request/update-category-infraestructure-request-dto';
-import { buffer } from 'stream/consumers';
+import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
+import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
+import { OrmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository';
+import { OrmProductQueryRepository } from 'src/product/infraestructure/repositories/orm-repository/orm-product-query-repository';
 
 @Controller('category')
 @ApiBearerAuth()
@@ -47,17 +50,21 @@ import { buffer } from 'stream/consumers';
 @ApiTags("Category")
 export class CategoryController {
 
-  private readonly ormCategoryRepo: ICategoryRepository;
-  private readonly idGen: IIdGen<string>;
-  private readonly ormCategoryQueryRepo: IQueryCategoryRepository;
-  ormQueryCategoryRepo: IQueryCategoryRepository;
+  private readonly ormCategoryRepo: ICategoryRepository
+  private readonly idGen: IIdGen<string>
+  private readonly ormCategoryQueryRepo: IQueryCategoryRepository
+  private readonly ormQueryCategoryRepo: IQueryCategoryRepository
+  private readonly ormQueryBundleRepo:IQueryBundleRepository
+  private readonly ormQueryProductRepo:IQueryProductRepository
   
   constructor(
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
   ) {
     this.idGen = new UuidGen();
-    this.ormCategoryRepo = new OrmCategoryRepository(PgDatabaseSingleton.getInstance());
-    this.ormCategoryQueryRepo = new OrmCategoryQueryRepository(PgDatabaseSingleton.getInstance());
+    this.ormCategoryRepo = new OrmCategoryRepository(PgDatabaseSingleton.getInstance())
+    this.ormCategoryQueryRepo = new OrmCategoryQueryRepository(PgDatabaseSingleton.getInstance())
+    this.ormQueryBundleRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
+    this.ormQueryProductRepo=new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
   }
 
   @Post('create')
@@ -75,11 +82,16 @@ export class CategoryController {
       })
     ) image: Express.Multer.File
   ) {
+
+    if(!entry.bundles) entry.bundles=[]
     if(!entry.products) entry.products=[]
+
     let service = new ExceptionDecorator(
       new CreateCategoryApplication(
         new RabbitMQPublisher(this.channel),
         this.ormCategoryRepo,
+        this.ormQueryProductRepo,
+        this.ormQueryBundleRepo,
         this.idGen,
         new CloudinaryService()
       )
@@ -113,10 +125,10 @@ export class CategoryController {
 // @Get('Category')
 //  async getCategoryById()
 
-  @Get('CategoryByProductId')
+  @Get('categorybyproductid/:id')
   async getCategoryByProductId(
     @GetCredential() credential:ICredential,
-    @Query() entry: FindCategoryByProductIdInfraestructureRequestDTO
+    @Param() entry: FindCategoryByProductIdInfraestructureRequestDTO
   ){
     let service= new ExceptionDecorator(
       new LoggerDecorator(
@@ -131,10 +143,10 @@ export class CategoryController {
     return response.getValue
   }
 
-  @Get('CategoryByBundleId')
+  @Get('categorybybundleid/:id')
   async getCategoryByBundleId(
     @GetCredential() credential: ICredential,
-    @Query() entry: FindCategoryByBundleIdInfraestructureRequestDTO
+    @Param() entry: FindCategoryByBundleIdInfraestructureRequestDTO
   ) {
   let service = new ExceptionDecorator(
     new LoggerDecorator(
@@ -149,10 +161,10 @@ export class CategoryController {
   return response.getValue;
 }
 
-  @Get('')
+  @Get(':id')
   async getProductById(
     @GetCredential() credential:ICredential,
-    @Query() entry:FindCategoryByIdInfraestructureRequestDTO
+    @Param() entry:FindCategoryByIdInfraestructureRequestDTO
   ){
 
     let service= new ExceptionDecorator(

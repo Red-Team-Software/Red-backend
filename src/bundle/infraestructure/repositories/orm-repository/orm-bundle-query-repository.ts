@@ -99,6 +99,7 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
             .leftJoinAndSelect('bundle.images', 'bundle_image')
             .leftJoinAndSelect('bundle.promotions','promotion')
             .leftJoinAndSelect('bundle.products','products')
+            .leftJoinAndSelect('bundle.categories','categories')
             .getOne();
             
             if(!ormBundle)
@@ -118,7 +119,12 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
                 currency:ormBundle.currency,
                 weigth:ormBundle.weigth,
                 measurement:ormBundle.measurament,
-                categories:[],
+                categories:ormBundle.categories
+                ? ormBundle.categories.map(category=>({
+                    id:category.id,
+                    name:category.name
+                }))
+                : [],
                 promotion:ormBundle.promotions
                 ? ormBundle.promotions.map(promotion=>({
                     id:promotion.id,

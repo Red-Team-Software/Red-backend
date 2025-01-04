@@ -9,4 +9,11 @@ export interface ICategory{
         price :number,
         images:string[]
     }[] 
+    bundles: {
+        id:string
+        name:string,
+        description :string,
+        price :number,
+        images:string[]
+    }[] 
 }

@@ -12,7 +12,9 @@ export class OrmCategoryEntity {
     @Column({ type: 'varchar', length: 100 })
     name: string;
 
-    @ManyToMany(() => OrmProductEntity, (product) => product.categories, { eager: true })
+    @ManyToMany(() => OrmProductEntity, (product) => product.categories, { eager: true, cascade:true,
+        onUpdate: 'CASCADE',
+    })
     @JoinTable({
         name: "category_product",
         joinColumn: {
@@ -26,7 +28,9 @@ export class OrmCategoryEntity {
     })
     products?: OrmProductEntity[];
 
-    @ManyToMany(() => OrmBundleEntity, (bundle) => bundle.categories, { eager: true })
+    @ManyToMany(() => OrmBundleEntity, (bundle) => bundle.categories, { eager: true, cascade:true,
+        onUpdate: 'CASCADE'
+     })
     @JoinTable({
         name: "category_bundle",
         joinColumn: {
@@ -44,7 +48,13 @@ export class OrmCategoryEntity {
     @JoinColumn()
     image: OrmCategoryImage;
 
-    static create(id: string, name: string, image: OrmCategoryImage, products: OrmProductEntity[], bundles: OrmBundleEntity[]): OrmCategoryEntity {
+    static create(
+        id: string,
+        name: string,
+        image: OrmCategoryImage,
+        products: OrmProductEntity[],
+        bundles: OrmBundleEntity[]): OrmCategoryEntity 
+    {
         const category = new OrmCategoryEntity();
         category.id = id;
         category.name = name;

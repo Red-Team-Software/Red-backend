@@ -39,19 +39,11 @@ export class OrmBundleEntity implements IBundle{
     })
     products: OrmProductEntity[];
 
-    @ManyToMany(() => OrmCategoryEntity, category => category.bundles, { eager: true })
-    @JoinTable({
-        name: "category_bundle",
-        joinColumn: {
-            name: "bundle_id",
-            referencedColumnName: "id"
-        },
-        inverseJoinColumn: {
-            name: "category_id",
-            referencedColumnName: "id"
-        }
+    @ManyToMany(() => OrmCategoryEntity, category => category.bundles,{
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
     })
-    categories: OrmCategoryEntity[];
+    categories?: OrmCategoryEntity[];
 
     @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.bundle, {
     onDelete: 'CASCADE',
