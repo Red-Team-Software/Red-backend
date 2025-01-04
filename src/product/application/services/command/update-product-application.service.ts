@@ -117,10 +117,10 @@ export class UpdateProductApplicationService extends IApplicationService
             
             for(const image of product.ProductImages){
             
-            let fileResponse=await this.fileUploader.deleteFile(image.Value)
+                let fileResponse=await this.fileUploader.deleteFile(image.Value)
 
-            if (!fileResponse.isSuccess())
-                return Result.fail(new ErrorDeletingImagesApplicationException())
+                if (!fileResponse.isSuccess())
+                    return Result.fail(new ErrorDeletingImagesApplicationException())
             }
 
             for (const updatedimages of command.images){

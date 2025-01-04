@@ -8,6 +8,11 @@ import { DomainEvent } from 'src/common/domain/domain-event/domain-event';
 import { CategoryCreated } from '../domain-events/category-created';
 import { ProductID } from 'src/product/domain/value-object/product-id';
 import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
+import { CategoryDeleted } from '../domain-events/category-deleted';
+import { CategoryUpdatedName } from '../domain-events/update-category-name';
+import { CategoryUpdatedImage } from '../domain-events/update-category-image';
+import { CategoryUpdatedProducts } from '../domain-events/update-category-products';
+import { CategoryUpdatedBundles } from '../domain-events/category-update-bundles';
 
 export class Category extends AggregateRoot<CategoryID> {
     private categoryName: CategoryName;
@@ -74,20 +79,47 @@ export class Category extends AggregateRoot<CategoryID> {
         }
     }
 
+    delete(id:CategoryID):void{
+        this.apply(
+            CategoryDeleted.create(id)
+        )
+    }
+
+    // Métodos de actualización
+    public updateName(name: CategoryName): void {
+        this.categoryName = name;
+        this.apply(CategoryUpdatedName.create(this.getId(), name));
+    }
+
+    public updateImage(image: CategoryImage | null): void {
+        this.categoryImage = image;
+        this.apply(CategoryUpdatedImage.create(this.getId(), image));
+    }
+
+    public updateProducts(products: ProductID[]): void {
+        this.products = products;
+        this.apply(CategoryUpdatedProducts.create(this.getId(), products));
+    }
+
+    public updateBundles(bundles: BundleId[]): void {
+        this.bundles = bundles;
+        this.apply(CategoryUpdatedBundles.create(this.getId(), bundles));
+    }
+
     // Métodos `get` para acceder a los campos de la categoría
-    getName(): CategoryName {
+    get Name(): CategoryName {
         return this.categoryName;
     }
 
-    getImage(): CategoryImage | null {
+    get Image(): CategoryImage | null {
         return this.categoryImage;
     }
 
-    getProducts(): ProductID[] {
+    get Products(): ProductID[] {
         return this.products;
     }
 
-    getBundles(): BundleId[] {
+    get Bundles(): BundleId[] {
         return this.bundles;
     }
 }

@@ -1,9 +1,9 @@
 import { IApplicationService } from 'src/common/application/services/application.service.interface';
 import { Result } from 'src/common/utils/result-handler/result';
 import { IQueryCategoryRepository } from 'src/category/application/query-repository/query-category-repository';
-import { FindAllCategoriesApplicationRequestDTO } from '../dto/request/find-all-categories-request.dto';
-import { FindAllCategoriesApplicationResponseDTO } from '../dto/response/find-all-categories-response.dto';
-import { NotFoundCategoryApplicationException } from '../application-exception/not-found-category-application-exception';
+import { FindAllCategoriesApplicationRequestDTO } from '../../dto/request/find-all-categories-request.dto';
+import { FindAllCategoriesApplicationResponseDTO } from '../../dto/response/find-all-categories-response.dto';
+import { NotFoundCategoryApplicationException } from '../../application-exception/not-found-category-application-exception';
 
 export class FindAllCategoriesApplicationService extends IApplicationService<
   FindAllCategoriesApplicationRequestDTO,
@@ -29,10 +29,10 @@ export class FindAllCategoriesApplicationService extends IApplicationService<
     categories.forEach((category) => {
       responseDto.push( {
         categoryId: category.getId().Value,
-        categoryName: category.getName().Value,
-        categoryImage: category.getImage().Value,
+        categoryName: category.Name.Value,
+        categoryImage: category.Image.Value,
         //TODO QUITAR ESTO DE POR MEDIO DE {id:strin}
-        products: category.getProducts().map((productId) => ({id:productId.Value})),
+        products: category.Products.map((productId) => ({id:productId.Value})),
       })
     });
 

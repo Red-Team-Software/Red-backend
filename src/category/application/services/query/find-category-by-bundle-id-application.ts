@@ -1,10 +1,9 @@
 import { IApplicationService } from "src/common/application/services/application.service.interface";
 import { IQueryCategoryRepository } from "src/category/application/query-repository/query-category-repository";
 import { Result } from "src/common/utils/result-handler/result";
-import { NotFoundCategoryApplicationException } from "../application-exception/not-found-category-application-exception";
-import { FindCategoryByBundleIdApplicationRequestDTO } from "../dto/request/find-category-by-bundle-id-application-request.dto";
-import { FindCategoryByBundleIdApplicationResponseDTO } from "../dto/response/find-category-by-bundle-id-application-response.dto";
-
+import { NotFoundCategoryApplicationException } from "../../application-exception/not-found-category-application-exception";
+import { FindCategoryByBundleIdApplicationRequestDTO } from "../../dto/request/find-category-by-bundle-id-application-request.dto";
+import { FindCategoryByBundleIdApplicationResponseDTO } from "../../dto/response/find-category-by-bundle-id-application-response.dto";
 export class FindCategoryByBundleIdApplicationService extends IApplicationService<
   FindCategoryByBundleIdApplicationRequestDTO,
   FindCategoryByBundleIdApplicationResponseDTO[]
@@ -27,9 +26,9 @@ export class FindCategoryByBundleIdApplicationService extends IApplicationServic
     const categories = response.getValue;
     const responseDto: FindCategoryByBundleIdApplicationResponseDTO[] = categories.map((category) => ({
       id: category.getId().Value,
-      name: category.getName().Value,
-      image: category.getImage().Value,
-      bundles: category.getBundles().map((bundleId) => bundleId.Value),
+      name: category.Name.Value,
+      image: category.Image.Value,
+      bundles: category.Bundles.map((bundleId) => bundleId.Value),
     }));
 
     return Result.success(responseDto);

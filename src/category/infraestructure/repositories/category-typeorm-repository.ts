@@ -174,4 +174,23 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
             return Result.fail(new NotFoundCategoryApplicationException());
         }
     }
+
+    async updateCategory(category: Category): Promise<Result<Category>> {
+        const persis = await this.mapper.fromDomaintoPersistence(category);
+        try {
+            // Actualiza la entidad principal (categoría)
+            const result = await this.upsert(persis, ['id']);
+
+            // Elimina las imágenes antiguas asociadas a la categoría
+            if (persis.image) {
+                await this.ormCategoryImageRepository.delete({ category: { id: category.getId().Value } });
+                await this.ormCategoryImageRepository.save(persis.image);
+            }
+
+            return Result.success(category);
+        } catch (e) {
+            return Result.fail(new PersistenceException('Update category unsuccessfully'));
+        }
+    }
+    
 }
