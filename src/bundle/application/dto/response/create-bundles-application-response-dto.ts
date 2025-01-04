@@ -1,6 +1,7 @@
 import { IServiceResponseDto } from "src/common/application/services"
 
 export interface CreateBundleApplicationResponseDTO extends IServiceResponseDto {
+    bundleId:string
     name: string,
     description: string,
     caducityDate: Date,

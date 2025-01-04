@@ -45,6 +45,12 @@ import { IDateHandler } from 'src/common/application/date-handler/date-handler.i
 import { ErrorCreatingOrderCourierNotFoundApplicationException } from '../application-exception/error-creating-order-courier-not-found-application.exception';
 import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
 import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
+import { IQueryPromotionRepository } from 'src/promotion/application/query-repository/promotion.query.repository.interface';
+import { Promotion } from 'src/promotion/domain/aggregate/promotion.aggregate';
+import { FindAllPromotionApplicationRequestDTO } from 'src/promotion/application/dto/request/find-all-promotion-application-request-dto';
+import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
+import { IPaymentMethodQueryRepository } from 'src/payment-methods/application/query-repository/orm-query-repository.interface';
+import { PaymentMethodId } from 'src/payment-methods/domain/value-objects/payment-method-id';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -62,7 +68,9 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly productRepository:IQueryProductRepository,
         private readonly bundleRepository:IQueryBundleRepository,
         private readonly ormCourierQueryRepository: ICourierQueryRepository,
-        private readonly dateHandler: IDateHandler
+        private readonly dateHandler: IDateHandler,
+        private readonly queryPromotionRepositoy: IQueryPromotionRepository,
+        private readonly paymentQueryRepository:IPaymentMethodQueryRepository
         
     ){
         super()
@@ -70,10 +78,19 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
     
     async execute(data: OrderPayApplicationServiceRequestDto): Promise<Result<OrderPayResponseDto>> {
 
-        let products:Product[]=[]
-        let bundles:Bundle[]=[]
-        let orderproducts: OrderProduct[] = []
+        let products:Product[]=[];
+        let bundles:Bundle[]=[];
+        let orderproducts: OrderProduct[] = [];
         let orderBundles: OrderBundle[] = [];
+        let promotions: Promotion[] = [];
+
+        let paymentResponse=await this.paymentQueryRepository.findMethodById(
+            PaymentMethodId.create(data.paymentId)
+        )
+
+        if (!paymentResponse.isSuccess())
+            return Result.fail(paymentResponse.getError)
+
 
         if(data.products){
             for (const product of data.products){
@@ -90,7 +107,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 OrderProductId.create(product.id),
                 OrderProductQuantity.create(product.quantity))
             )
-
         }
 
         if(data.bundles){
@@ -111,31 +127,49 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             )
         }
 
-        let amount = this.calculateAmount.calculateAmount(products,bundles,orderproducts,orderBundles,data.currency)
+        let findPromotion: FindAllPromotionApplicationRequestDTO = {
+            userId: data.userId,
+            name: '',
+            perPage: 1000,
+            page: 0
+        }
+
+        let promoResponse = await this.queryPromotionRepositoy.findAllPromotion(findPromotion);
+
+        if (promoResponse.isSuccess()) promotions = promoResponse.getValue;
+
+        let amount = this.calculateAmount.calculateAmount(
+            products,
+            bundles,
+            orderproducts,
+            orderBundles,
+            promotions,
+            data.currency
+        );
 
             let orderAddress = OrderAddressStreet.create(data.address);
         
-            // let address = await this.geocodificationAddress.DirecctiontoLatitudeLongitude(orderAddress);
+            let address = await this.geocodificationAddress.DirecctiontoLatitudeLongitude(orderAddress);
             
-            // let orderDirection = OrderDirection.create(address.getValue.Latitude, address.getValue.Longitude);
+            let orderDirection = OrderDirection.create(address.getValue.Latitude, address.getValue.Longitude);
 
-            let orderDirection = OrderDirection.create(10.4399, -66.89275);
+            //let orderDirection = OrderDirection.create(10.4399, -66.89275);
 
-            // let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
+            let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
 
-            let shippingFee = OrderShippingFee.create(10);
+            //let shippingFee = OrderShippingFee.create(10);
 
-            // if (!shippingFee.isSuccess())
-            //  return Result.fail(new ErrorObtainingShippingFeeApplicationException());
+            if (!shippingFee.isSuccess())
+                return Result.fail(new ErrorObtainingShippingFeeApplicationException());
 
             let taxes = await this.calculateTaxesFee.calculateTaxesFee(amount);
 
             if (!taxes.isSuccess()) 
                 return Result.fail(new ErrorObtainingTaxesApplicationException());
             
-            //let amountTotal = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.getValue.OrderTaxes;
+            let amountTotal = amount.OrderAmount + shippingFee.getValue.OrderShippingFee + taxes.getValue.OrderTaxes;
             
-            let amountTotal = amount.OrderAmount + shippingFee.OrderShippingFee + taxes.getValue.OrderTaxes;
+            //let amountTotal = amount.OrderAmount + shippingFee.OrderShippingFee + taxes.getValue.OrderTaxes;
 
             let total = OrderTotalAmount.create(amountTotal, data.currency);
             
@@ -187,7 +221,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             if (responseDB.isFailure()) 
                 return Result.fail(new ErrorCreatingOrderApplicationException());
 
-            await this.eventPublisher.publish(order.pullDomainEvents());
+            await this.eventPublisher.publish(response.getValue.pullDomainEvents());
 
             let productsresponse:{
                 id: string,

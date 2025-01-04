@@ -11,6 +11,8 @@ import { OrmDirectionUserEntity } from "../../entities/orm-entities/orm-directio
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { OrmUserQueryRepository } from "./orm-user-query-repository";
 import { OrmWalletEntity } from "../../entities/orm-entities/orm-wallet-entity";
+import { UserId } from "src/user/domain/value-object/user-id";
+import { UserDirection } from "src/user/domain/value-object/user-direction";
 
 
 
@@ -28,16 +30,16 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
         this.ormDirectionUserRepository=dataSource.getRepository(OrmDirectionUserEntity)
         this.ormWalletRepository=dataSource.getRepository(OrmWalletEntity)
     }
-    async deleteUserDirection(idUser:string,lat:number, lng:number): Promise<Result<string>> {
+    async deleteUserDirection(idUser:UserId,direction:UserDirection): Promise<Result<UserId>> {
         try {
-            let ormDirection=await this.ormDirectionRepository.findOneBy({lat,lng})
+            let ormDirection=await this.ormDirectionRepository.findOneBy({lat:direction.Lat,lng:direction.Lng})
 
             if (!ormDirection)
                 return Result.fail(new PersistenceException('Update user unsucssessfully'))
 
             let resultDelete = await this.ormDirectionUserRepository.delete({
                 direction_id:ormDirection.id,
-                user_id:idUser
+                user_id:idUser.Value
             })
                     
             if (!resultDelete)

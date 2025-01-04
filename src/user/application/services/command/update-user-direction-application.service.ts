@@ -46,7 +46,8 @@ export class UpdateUserDirectionApplicationService extends IApplicationService
 
         let directionsToDelete=currentDirections.filter(
             (direction)=>!modifiedDirections.find(
-                (current)=>direction.equals(current)
+                (current)=>direction.Lat==current.Lat&&
+                direction.Lng==current.Lng
             )
         )
 
@@ -59,9 +60,8 @@ export class UpdateUserDirectionApplicationService extends IApplicationService
             for (const directionToDelete of directionsToDelete){
 
                 let deleteResponse=await this.commandUserRepository.deleteUserDirection(
-                    user.getId().Value,
-                    directionToDelete.Lat,
-                    directionToDelete.Lng
+                    user.getId(),
+                    directionToDelete
                 )
                 if (!deleteResponse.isSuccess())
                     return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))

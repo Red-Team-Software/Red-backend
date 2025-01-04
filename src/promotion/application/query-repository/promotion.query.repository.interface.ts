@@ -3,6 +3,7 @@ import { PromotionId } from "src/promotion/domain/value-object/promotion-id"
 import { FindAllPromotionApplicationRequestDTO } from "../dto/request/find-all-promotion-application-request-dto"
 import { PromotionName } from "src/promotion/domain/value-object/promotion-name"
 import { Promotion } from "src/promotion/domain/aggregate/promotion.aggregate"
+import { IPromotion } from "../model/promotion.interface"
 
 
 export interface IQueryPromotionRepository{

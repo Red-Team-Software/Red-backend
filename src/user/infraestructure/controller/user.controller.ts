@@ -47,6 +47,12 @@ import { AuditDecorator } from "src/common/application/aspects/audit-decorator/a
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler"
 import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator"
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
+import { IGeocodification } from "src/order/domain/domain-services/geocodification-interface"
+import { GeocodificationHereMapsDomainService } from "src/order/infraestructure/domain-service/geocodification-here-maps-domain-service"
+import { HereMapsSingelton } from "src/payments/infraestructure/here-maps-singleton"
+import { FindUserDirectionsByIdApplicationRequestDTO } from "src/user/application/dto/response/find-directions-by-user-id-response-dto"
+import { OrderDirection } from "src/order/domain/value_objects/order-direction"
+import { GeocodificationOpenStreeMapsDomainService } from "src/order/infraestructure/domain-service/geocodification-naminatim-maps-domain-service"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -62,7 +68,8 @@ export class UserController {
   private readonly auditRepository: IAuditRepository
   private readonly imageTransformer:ImageTransformer
   private readonly encryptor: IEncryptor
-
+  private readonly geocodification: IGeocodification
+  private readonly hereMapsSingelton: HereMapsSingelton;
 
   
   constructor(
@@ -76,6 +83,8 @@ export class UserController {
     this.ormAccountQueryRepo= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance())
     this.imageTransformer= new ImageTransformer()
     this.encryptor= new BcryptEncryptor()
+    this.hereMapsSingelton= HereMapsSingelton.getInstance()
+    this.geocodification= new GeocodificationOpenStreeMapsDomainService()
 
   }
 
@@ -104,7 +113,8 @@ export class UserController {
       let service= 
       new ExceptionDecorator(
         new AuditDecorator(
-          new LoggerDecorator(
+          // new LoggerDecorator(
+            new PerformanceDecorator(
               new UpdateProfileApplicationService(
                 this.ormUserCommandRepo,
                 this.ormUserQueryRepo,
@@ -114,7 +124,8 @@ export class UserController {
                 new CloudinaryService(),
                 this.idGen,
                 this.encryptor
-            ), new NestLogger(new Logger())
+            // ), new NestLogger(new Logger())
+            ), new NestTimer(), new NestLogger(new Logger())
           ),this.auditRepository, new DateHandler()
         )
     )
@@ -134,8 +145,25 @@ export class UserController {
 
   @Get('directions')
   async findUserDirectionById(@GetCredential() credential:ICredential){
-    let response=await this.ormUserQueryRepo.findUserDirectionsByUserId(UserId.create(credential.account.idUser))
-    return response.getValue
+    let response=await this.ormUserQueryRepo.findUserDirectionsByUserId(UserId.create(credential.account.idUser));
+
+    let directions = response.getValue
+
+    let dir: FindUserDirectionsByIdApplicationRequestDTO[] = [];
+
+    for (let direction of directions){
+      let geo = OrderDirection.create(direction.lat,direction.lng);
+      let geoReponse= await this.geocodification.LatitudeLongitudetoDirecction(geo);
+
+      dir.push({
+        ...direction,
+        address:geoReponse.isSuccess()
+        ? geoReponse.getValue.Address
+        : 'no direction get it'
+      })
+    }
+
+    return dir
   }
 
   @Post('add-directions')

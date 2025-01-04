@@ -34,7 +34,9 @@ export class CreateReportApplicationService extends IApplicationService<CreateOr
 
         let newOrder = response.getValue;
 
-        if (newOrder.OrderState.orderState !== 'canceled') return Result.fail(new ErrorCreatingOrderReportApplicationException());
+        if (newOrder.OrderState.orderState !== 'cancelled') return Result.fail(
+            new ErrorCreatingOrderReportApplicationException()
+        );
 
         let orderReport: OrderReport = OrderReport.create(
             OrderReportId.create( await this.idGen.genId() ),

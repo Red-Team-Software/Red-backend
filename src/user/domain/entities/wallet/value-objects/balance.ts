@@ -1,6 +1,7 @@
 import { ValueObject } from "src/common/domain"
-import { InvalidBallanceException } from "../domain-exceptions/invalid-ballance-exception"
 import { WalletCurrencyEnum } from "./enums/wallet-currency.enum"
+import { InvalidBallanceAmountException } from "../domain-exceptions/invalid-ballance-amount-exception"
+import { InvalidBallanceCurrencyException } from "../domain-exceptions/invalid-ballance-currency-exception"
 
 
 export class Ballance implements ValueObject<Ballance> {
@@ -24,12 +25,10 @@ export class Ballance implements ValueObject<Ballance> {
     }
 
     private constructor(amount:number,currency:string){
-        if (amount<0) throw new InvalidBallanceException(currency,amount)
+        if (amount<0) throw new InvalidBallanceAmountException(amount)
         if ( 
-            WalletCurrencyEnum.bsf != currency &&
-            WalletCurrencyEnum.eur != currency &&
-            WalletCurrencyEnum.usd != currency
-        ) throw new InvalidBallanceException(currency,amount)
+            !WalletCurrencyEnum[currency]
+        ) throw new InvalidBallanceCurrencyException(currency)
         this.currency=currency
         this.amount=amount
     }

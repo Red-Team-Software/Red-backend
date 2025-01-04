@@ -31,7 +31,8 @@ export class FindAllCategoriesApplicationService extends IApplicationService<
         categoryId: category.getId().Value,
         categoryName: category.getName().Value,
         categoryImage: category.getImage().Value,
-        products: category.getProducts().map((productId) => productId.Value),
+        //TODO QUITAR ESTO DE POR MEDIO DE {id:strin}
+        products: category.getProducts().map((productId) => ({id:productId.Value})),
       })
     });
 

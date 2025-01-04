@@ -1,7 +1,7 @@
 export interface ICreateBundle {
     bundleId:           string;
     bundleDescription:  string;
-    bundleCaducityDate: Date;
+    bundleCaducityDate?: Date;
     bundleName:         string;
     bundleStock:        number;
     bundleImages:       string[];

@@ -5,4 +5,5 @@ export interface NewProductPushNotificationApplicationRequestDTO extends IServic
     name:string;
     price:number;
     currency:string
+    productId:string
 }

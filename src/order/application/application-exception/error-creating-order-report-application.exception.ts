@@ -2,6 +2,6 @@ import { ApplicationException } from "src/common/application/application-exeptio
 
 export class ErrorCreatingOrderReportApplicationException extends ApplicationException{
     constructor() {
-        super('Unable to create order report because the order status is not canceled.');
+        super('Unable to create order report because the order status is not cancelled.');
     }
 }

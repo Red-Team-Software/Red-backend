@@ -2,6 +2,6 @@ export interface IOrmModelPromotion{
     id:string,
     description:string,
     name:string,
-    avaleableState:boolean,
+    state:string,
     discount:number
 }

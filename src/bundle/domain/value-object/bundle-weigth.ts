@@ -1,7 +1,7 @@
 import { ValueObject } from "src/common/domain"
 import { InvalidBundleWeigthException } from "../domain-exceptions/invalid-bundle-weigth-exception"
 import { BundleMeasurementEnum } from "./enums/bundle-measurament.enum"
-import { InvalidProductMeasurementException } from "src/product/domain/domain-exceptions/invalid-product-measurement-exception"
+import { InvalidBundleMeasurementException } from "../domain-exceptions/invalid-bundle-measurement-exception"
 
 export class BundleWeigth implements ValueObject<BundleWeigth> {
 
@@ -31,7 +31,7 @@ export class BundleWeigth implements ValueObject<BundleWeigth> {
             BundleMeasurementEnum.g != measure &&
             BundleMeasurementEnum.kg != measure &&
             BundleMeasurementEnum.mg != measure
-        ) throw new InvalidProductMeasurementException()
+        ) throw new InvalidBundleMeasurementException()
 
         this.weigth=weigth
         this.measure=measure

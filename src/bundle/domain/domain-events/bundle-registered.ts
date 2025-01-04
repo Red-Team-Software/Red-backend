@@ -14,7 +14,9 @@ export class BundleRegistered extends DomainEvent {
         let data= {  
             bundleId:this.bundleId.Value,
             bundleDescription:this.bundleDescription.Value,
-            bundleCaducityDate:this.bundleCaducityDate.Value,
+            bundleCaducityDate:this.bundleCaducityDate
+            ? this.bundleCaducityDate.Value
+            : null,
             bundleName:this.bundleName.Value,
             bundleStock:this.bundleStock.Value,
             bundleImages:this.bundleImages.map(image=>image.Value),
@@ -28,36 +30,36 @@ export class BundleRegistered extends DomainEvent {
     static create(
         bundleId:BundleId,
         bundleDescription:BundleDescription,
-        bundleCaducityDate:BundleCaducityDate,
         bundleName:BundleName,
         bundleStock:BundleStock,
         bundleImages:BundleImage[],
         bundlePrice:BundlePrice,
         bundleWeigth:BundleWeigth,
-        productId:ProductID[]
+        productId:ProductID[],
+        bundleCaducityDate?:BundleCaducityDate,
     ){
         return new BundleRegistered(
             bundleId,
             bundleDescription,
-            bundleCaducityDate,
             bundleName,
             bundleStock,
             bundleImages,
             bundlePrice,
             bundleWeigth,
-            productId
+            productId,
+            bundleCaducityDate
         )
     }
     constructor(
         public bundleId:BundleId,
         public bundleDescription:BundleDescription,
-        public bundleCaducityDate:BundleCaducityDate,
         public bundleName:BundleName,
         public bundleStock:BundleStock,
         public bundleImages:BundleImage[],
         public bundlePrice:BundlePrice,
         public bundleWeigth:BundleWeigth,
-        public productId:ProductID[]
+        public productId:ProductID[],
+        public bundleCaducityDate?:BundleCaducityDate
     ){
         super()
     }

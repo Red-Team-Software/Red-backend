@@ -7,9 +7,9 @@ import { OrmCourierEntity } from "src/courier/infraestructure/entities/orm-couri
 export class OrmOrderCourierEntity {
 
     @ManyToOne(() => OrmCourierEntity, (courier) => courier.order_couriers)
-    @JoinColumn({ name: 'product_id' })
+    @JoinColumn({ name: 'courier_id' })
     courier: OrmCourierEntity;
-    
+
     @PrimaryColumn('uuid')
     order_id: string;
 

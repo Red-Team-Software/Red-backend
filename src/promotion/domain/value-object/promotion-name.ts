@@ -1,4 +1,5 @@
 import { ValueObject } from "src/common/domain"
+import { InvalidPromotionNameException } from "../domain-exceptions/invalid-promotion-name-exception"
 
 export class PromotionName implements ValueObject<PromotionName> {
 
@@ -16,6 +17,8 @@ export class PromotionName implements ValueObject<PromotionName> {
     }
 
     private constructor(name:string){
+        if (name.length<5) 
+            throw new InvalidPromotionNameException(name)
         this.name=name
     }
 

@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Get, Inject, Logger, ParseFilePipe, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
+import { Body, Controller, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
 import { FilesInterceptor } from "@nestjs/platform-express/multer"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
@@ -33,6 +33,13 @@ import { PerformanceDecorator } from "src/common/application/aspects/performance
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler"
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
 import { ICommandBundleRepository } from "src/bundle/domain/repository/bundle.command.repository.interface"
+import { OrmProductQueryRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-query-repository"
+import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository"
+import { ByIdDTO } from "src/common/infraestructure/dto/entry/by-id.dto"
+import { UpdateBundleInfraestructureRequestDTO } from "../dto-request/update-bundle-infraestructure-request-dto"
+import { SecurityDecorator } from "src/common/application/aspects/security-decorator/security-decorator"
+import { UserRoles } from "src/user/domain/value-object/enum/user.roles"
+import { UpdateBundleApplicationService } from "src/bundle/application/services/command/update-bundle-application.service"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -42,6 +49,7 @@ export class BundleController {
 
   private readonly ormBundleCommandRepo:ICommandBundleRepository
   private readonly ormQueryBundletRepo:IQueryBundleRepository
+  private readonly ormQueryProductRepo:IQueryProductRepository
   private readonly idGen: IIdGen<string> 
   private readonly auditRepository: IAuditRepository
   
@@ -52,6 +60,7 @@ export class BundleController {
     this.idGen= new UuidGen()
     this.ormQueryBundletRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
+    this.ormQueryProductRepo=new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
   }
 
   @Post('create')
@@ -75,6 +84,7 @@ export class BundleController {
               new RabbitMQPublisher(this.channel),
               this.ormQueryBundletRepo,
               this.ormBundleCommandRepo,
+              this.ormQueryProductRepo,
               this.idGen,
               new CloudinaryService()
             ),new NestTimer(),new NestLogger(new Logger())
@@ -116,7 +126,7 @@ export class BundleController {
   return response.getValue
   }
 
-  @Get('all')
+  @Get('many')
   async getAllBundles(
     @GetCredential() credential:ICredential,
     @Query() entry:FindAllBundlesInfraestructureRequestDTO
@@ -142,10 +152,10 @@ export class BundleController {
     return response.getValue
   }
 
-  @Get('')
+  @Get('/:id')
   async getBundleById(
     @GetCredential() credential:ICredential,
-    @Query() entry:FindBundleByIdInfraestructureRequestDTO
+    @Param() entry:FindBundleByIdInfraestructureRequestDTO
   ){
 
     let service= new ExceptionDecorator(
@@ -160,4 +170,45 @@ export class BundleController {
     let response= await service.execute({userId:credential.account.idUser,...entry})
     return response.getValue
   }
+
+    @UseGuards(JwtAuthGuard)
+    @Patch('update/:id')
+    @UseInterceptors(FilesInterceptor('images'))  
+    async updateProduct(
+      @GetCredential() credential:ICredential,
+      @Param() entryId:ByIdDTO,
+      @Body() entry:UpdateBundleInfraestructureRequestDTO,
+      @UploadedFiles(
+        new ParseFilePipe({
+          validators: [
+            new FileTypeValidator({
+              fileType:/(jpeg|.jpg|.png)$/
+            }),
+          ],
+          fileIsRequired:false
+        }),
+      ) images?: Express.Multer.File[]
+    ){
+      let service= new ExceptionDecorator(
+        new SecurityDecorator(
+            new PerformanceDecorator(
+              new UpdateBundleApplicationService(
+                new RabbitMQPublisher(this.channel),
+                this.ormQueryBundletRepo,
+                this.ormBundleCommandRepo,
+                this.ormQueryProductRepo,
+                this.idGen,
+                new CloudinaryService()
+              ),new NestTimer(),new NestLogger(new Logger())
+          ),credential,[UserRoles.ADMIN])
+        )
+      let buffers=images ? images.map(image=>image.buffer) : null
+  
+      let response= await service.execute({
+        ...entry,
+        userId:credential.account.idUser,
+        bundleId:entryId.id,
+        images:buffers})
+      return response.getValue
+    }
 }

@@ -113,7 +113,6 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
             return Result.success(category);
         } catch (error) {
             console.log("error en el repo es", error);
-
             return Result.fail(new PersistenceException('Create category unsuccessfully'));
         }
     }
