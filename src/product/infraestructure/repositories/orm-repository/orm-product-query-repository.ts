@@ -23,6 +23,33 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
         this.mapper=new OrmProductMapper(new UuidGen())
     }
 
+    private trasnformtoDataModel(ormProduct:OrmProductEntity):IProductModel{
+        return {
+            id:ormProduct.id,
+            description:ormProduct.desciption,
+            caducityDate:
+            ormProduct.caducityDate
+            ? ormProduct.caducityDate
+            : null,	
+            name:ormProduct.name,
+            stock:ormProduct.stock,
+            images:ormProduct.images.map(image=>image.image),
+            price:Number(ormProduct.price),
+            currency:ormProduct.currency,
+            weigth:ormProduct.weigth,
+            measurement:ormProduct.measurament,
+            categories: [],
+            promotion:
+            ormProduct.promotions
+            ? ormProduct.promotions.map(promotion=>({
+                id:promotion.id,
+                name:promotion.name,
+                discount:Number(promotion.discount)
+            }))
+            : []
+        }
+    }
+
     async findProductWithMoreDetailById(id: ProductID): Promise<Result<IProductModel>> {
         try{
 
@@ -93,26 +120,44 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
         }
     }
 
-    async findAllProducts(criteria:FindAllProductsApplicationRequestDTO ): Promise<Result<Product[]>>
+    async findAllProducts(criteria:FindAllProductsApplicationRequestDTO ): Promise<Result<IProductModel[]>>
     {
         try{
-            const ormProducts=await this.find({
-                take:criteria.perPage,
-                skip:criteria.page,
-                where:{
-                    stock:MoreThan(0)
-                }
-            })
+            const query = this.createQueryBuilder('product')
+            .where('product.stock > :stock', { stock: 0 })
+            .leftJoinAndSelect('product.images', 'product_image')
+            .leftJoinAndSelect('product.promotions', 'promotion')
+            .leftJoinAndSelect('product.categories', 'category')
+            .take(criteria.perPage)
+            .skip(criteria.page)
+          
+          if (criteria.discount && criteria.discount > 0) 
+            query.andWhere('promotion.discount = :discount', { discount: criteria.discount })
+        
+          if (criteria.category && criteria.category.length > 0) 
+            query.andWhere('category.id IN (:...categories)', { categories: criteria.category })
 
-            // if(ormProducts.length===0)
-            //     return Result.fail( new NotFoundException('products empty please try again'))
+        if (criteria.popular) {
+            query.addSelect(subQuery => {
+              return subQuery
+                .select('COALESCE(SUM(order_product.quantity), 0)', 'total_quantity')
+                .from('order_product', 'order_product')
+                .where('order_product.product_id = product.id');
+            }, 'total_quantity')
+            .orderBy('total_quantity', 'DESC');
+          }     
+          
 
-            const products:Product[]=[]
-            for (const product of ormProducts){
-                products.push(await this.mapper.fromPersistencetoDomain(product))
-            }
-            return Result.success(products)
+          const ormProducts = await query.getMany();
+
+            return Result.success(
+                ormProducts
+                ? ormProducts.map(product=>this.trasnformtoDataModel(product))
+                : []
+            )
+            
         }catch(e){
+            console.log(e)
             return Result.fail( new NotFoundException('products empty please try again'))
         }
     }
@@ -133,8 +178,6 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
     async findProductByName(productName: ProductName): Promise<Result<Product[]>> {
         try{
             const product = await this.findBy({name:productName.Value})
-            if(product.length==0) 
-                return Result.fail( new NotFoundException('Find product by name unsucssessfully they are 0 registered'))
             let domain=product.map(async infraestrcuture=>await this.mapper.fromPersistencetoDomain(infraestrcuture))
             return Result.success(await Promise.all(domain))
         }

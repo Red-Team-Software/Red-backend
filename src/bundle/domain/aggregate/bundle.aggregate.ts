@@ -20,6 +20,7 @@ import { BundleUpdatedWeigth } from "../domain-events/bundle-updated-weigth";
 import { BundleUpdatedProducts } from "../domain-events/bundle-updated-products";
 import { BundleUpdatedCaducityDate } from "../domain-events/bundle-updated-caducity-date";
 import { InvalidBundleProductsException } from "../domain-exceptions/invalid-bundle-products-exception";
+import { BundleDeleted } from "../domain-events/bundle-deleted";
 
 export class Bundle extends AggregateRoot <BundleId>{
     protected when(event: DomainEvent): void {
@@ -174,6 +175,23 @@ export class Bundle extends AggregateRoot <BundleId>{
             BundleUpdatedCaducityDate.create(
                 this.getId(),
                 bundleCaducityDate
+            )
+        )
+    }
+
+    delete():void{
+        this.apply(
+            BundleDeleted.create(
+                this.getId()
+            )
+        )
+    }
+
+    reduceQuantiy(quantity:number){
+        this.apply(
+            BundleUpdatedStock.create(
+                this.getId(),
+                this.bundleStock.reduceStock(quantity)
             )
         )
     }

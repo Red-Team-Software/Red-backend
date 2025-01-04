@@ -5,17 +5,17 @@ import { IDateHandler } from "src/common/application/date-handler/date-handler.i
 import { IEncryptor } from "src/common/application/encryptor/encryptor.interface";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { IJwtGenerator } from "src/common/application/jwt-generator/jwt-generator.interface";
-import { InvalidPasswordApplicationException } from "../../application-exeption/invalid-password-application-exception";
+import { InvalidPasswordApplicationException } from "../../application-exception/invalid-password-application-exception";
 import { IQueryAccountRepository } from "../../repository/query-account-repository.interface";
 import { ISession } from "../../model/session.interface";
 import { LogInUserApplicationRequestDTO } from "../../dto/request/log-in-user-application-request-dto";
 import { LogInUserApplicationResponseDTO } from "../../dto/response/log-in-user-application-response-dto";
 import { Result } from "src/common/utils/result-handler/result";
-import { UserNotFoundApplicationException } from "../../application-exeption/user-not-found-application-exception";
+import { UserNotFoundApplicationException } from "../../application-exception/user-not-found-application-exception";
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
-import { ErrorRegisteringSessionApplicationException } from "../../application-exeption/error-registering-session-application-exception";
+import { ErrorRegisteringSessionApplicationException } from "../../application-exception/error-registering-session-application-exception";
 
 export class LogInUserApplicationService extends IApplicationService 
 <LogInUserApplicationRequestDTO,LogInUserApplicationResponseDTO> {

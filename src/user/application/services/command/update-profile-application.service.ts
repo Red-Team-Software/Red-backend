@@ -1,4 +1,4 @@
-import { UserNotFoundApplicationException } from "src/auth/application/application-exeption/user-not-found-application-exception";
+import { UserNotFoundApplicationException } from "src/auth/application/application-exception/user-not-found-application-exception";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface";
 import { IApplicationService } from "src/common/application/services";

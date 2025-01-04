@@ -14,7 +14,8 @@ export class OrmPromotionEntity implements IOrmModelPromotion{
     @Column( { type: 'enum', enum: PromotionStateEnum }) state: string
     @Column( 'numeric' ) discount: number
 
-    @ManyToMany(() => OrmProductEntity, product => product.promotions,{eager:true, onDelete:'CASCADE'})   
+    @ManyToMany(() => OrmProductEntity, product => product.promotions,
+    {eager:true, onDelete:'CASCADE', onUpdate:'CASCADE'})   
     @JoinTable({
         name: "promotion_product",
         joinColumn: {
@@ -28,7 +29,8 @@ export class OrmPromotionEntity implements IOrmModelPromotion{
     })
     products?: OrmProductEntity[]
 
-    @ManyToMany(() => OrmBundleEntity, bundle => bundle.promotions,{eager:true, onDelete:'CASCADE'})   
+    @ManyToMany(() => OrmBundleEntity, bundle => bundle.promotions,
+    {eager:true, onDelete:'CASCADE' , onUpdate:'CASCADE'})   
     @JoinTable({
         name: "promotion_bundle",
         joinColumn: {

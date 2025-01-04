@@ -31,7 +31,7 @@ export class DeleteProductApplicationService extends IApplicationService
 
         const product=search.getValue
 
-        product.delete(product.getId())
+        product.delete()
 
         for(const image of product.ProductImages){
             

@@ -1,6 +1,5 @@
 // src/category/application/services/create-category-application.ts
 
-import { Injectable } from "@nestjs/common";
 import { CreateCategoryApplicationRequestDTO } from "../../dto/request/create-category-application-request.dto";
 import { CreateCategoryApplicationResponseDTO } from "../../dto/response/create-category-application-response.dto";
 import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
@@ -18,6 +17,11 @@ import { ErrorCreatingCategoryApplicationException } from "../../application-exc
 import { TypeFile } from "src/common/application/file-uploader/enums/type-file.enum";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { ProductID } from "src/product/domain/value-object/product-id";
+import { Product } from "src/product/domain/aggregate/product.aggregate";
+import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
+import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate";
+import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository";
+import { BundleId } from "src/bundle/domain/value-object/bundle-id";
 
 export class CreateCategoryApplication extends IApplicationService<
     CreateCategoryApplicationRequestDTO,
@@ -26,6 +30,8 @@ export class CreateCategoryApplication extends IApplicationService<
     constructor(
         private readonly eventPublisher: IEventPublisher,
         private readonly categoryRepository: ICategoryRepository,
+        private readonly productQueryRepository: IQueryProductRepository,
+        private readonly bundleQueryRepository: IQueryBundleRepository,
         private readonly idGen: IIdGen<string>,
         private readonly fileUploader: IFileUploader,
     ) {
@@ -36,10 +42,32 @@ export class CreateCategoryApplication extends IApplicationService<
         // Check if category name already exists
         const existingCategory = await this.categoryRepository.verifyCategoryExistenceByName(
             CategoryName.create(command.name)
-        );
-        if (!existingCategory) {
+        )
+
+        if (!existingCategory.isSuccess())
+            return Result.fail(new ErrorCreatingCategoryApplicationException())
+
+        if (existingCategory.getValue) 
             return Result.fail(new ErrorNameAlreadyApplicationException());
+
+        const products:Product[]=[]
+
+        const bundles:Bundle[]=[]
+
+        for (const productId of command.products) {
+            const productResult = await this.productQueryRepository.findProductById(ProductID.create(productId));
+            if (!productResult.isSuccess()) 
+                return Result.fail(productResult.getError)
+            products.push(productResult.getValue)
         }
+
+        for (const bundleId of command.bundles) {
+            const bundleResult=await this.bundleQueryRepository.findBundleById(BundleId.create(bundleId))
+            if(!bundleResult.isSuccess())
+                return Result.fail(bundleResult.getError)
+            bundles.push(bundleResult.getValue)
+        }
+
 
         // Handle image upload
         let uploadedImageUrl = null;
@@ -55,13 +83,19 @@ export class CreateCategoryApplication extends IApplicationService<
             uploadedImageUrl = imageUploadResult.getValue.url;
         }
 
+        const category=Category.create(
+            CategoryID.create(await this.idGen.genId()),
+            CategoryName.create(command.name),
+            CategoryImage.create(uploadedImageUrl),
+            products
+            ? products.map(product=>ProductID.create(product.getId().Value))
+            : [],
+            bundles
+            ? bundles.map(bundle=>BundleId.create(bundle.getId().Value))
+            : []
+        )
 
-        // Create the Category aggregate
-        const categoryId = CategoryID.create(await this.idGen.genId());
-        const categoryName = CategoryName.create(command.name);
-        const categoryImage = uploadedImageUrl ? CategoryImage.create(uploadedImageUrl) : null;
-        const products= command.products.map((productId) => ProductID.create(productId))
-        const category = Category.create(categoryId, categoryName,categoryImage,products);
+
 
         // Save category to repository
         const saveResult = await this.categoryRepository.createCategory(category);

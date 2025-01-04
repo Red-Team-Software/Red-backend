@@ -69,7 +69,18 @@ export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> im
                     description:product.desciption,
                     price:Number(product.price)
                 }))
+                : [],
+                bundles: 
+                ormCategory.bundles
+                ? ormCategory.bundles.map(bundle=>({
+                    id:bundle.id,
+                    name:bundle.name,
+                    images:bundle.images.map(image=>image.image),
+                    description:bundle.desciption,
+                    price:Number(bundle.price)
+                }))
                 : []
+
             })
         }catch(e){
             return Result.fail( new NotFoundException('Find category unsucssessfully'))

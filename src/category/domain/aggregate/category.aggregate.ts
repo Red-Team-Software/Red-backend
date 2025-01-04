@@ -67,8 +67,8 @@ export class Category extends AggregateRoot<CategoryID> {
                 const categoryCreatedEvent = event as CategoryCreated;
                 this.categoryName = categoryCreatedEvent.categoryName;
                 this.categoryImage = categoryCreatedEvent.categoryImage;
-                this.products = categoryCreatedEvent.products.map(id => ProductID.create(id.Value)); 
-                this.bundles = categoryCreatedEvent.bundles.map(id => BundleId.create(id.Value)); 
+                this.products = categoryCreatedEvent.products 
+                this.bundles = categoryCreatedEvent.bundles
         }
     }
 

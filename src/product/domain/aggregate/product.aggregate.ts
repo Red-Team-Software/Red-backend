@@ -76,9 +76,9 @@ export class Product extends AggregateRoot <ProductID>{
         super(productId)
     }
 
-    delete(id:ProductID):void{
+    delete():void{
         this.apply(
-            ProductDeleted.create(id)
+            ProductDeleted.create(this.getId())
         )
     }
 
@@ -141,6 +141,15 @@ export class Product extends AggregateRoot <ProductID>{
             ProductUpdatedCaducityDate.create(
                 this.getId(),
                 caducityDate
+            )
+        )
+    }
+
+    reduceQuantiy(quantity:number):void{
+        this.apply(
+            ProductUpdatedStock.create(
+                this.getId(),
+                this.productStock.reduceQuantity(quantity)
             )
         )
     }

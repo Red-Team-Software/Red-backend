@@ -11,7 +11,7 @@ import { CategoryImage } from 'src/category/domain/value-object/category-image';
 import { ProductID } from 'src/product/domain/value-object/product-id';
 import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
 import { NotFoundCategoryApplicationException } from '../../application-exception/not-found-category-application-exception';
-import { ErrorDTOUpdatingCategoryApplicationException } from 'src/product/application/application-exepction/error-dto-update-category-application-exception';
+import { ErrorDTOUpdatingCategoryApplicationException } from 'src/category/application/application-exception/error-dto-update-category-application-exception';
 import { IFileUploader } from 'src/common/application/file-uploader/file-uploader.interface';
 import { TypeFile } from 'src/common/application/file-uploader/enums/type-file.enum';
 import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';

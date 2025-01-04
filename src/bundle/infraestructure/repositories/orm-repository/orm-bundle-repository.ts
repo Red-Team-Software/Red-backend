@@ -35,7 +35,11 @@ export class OrmBundleRepository extends Repository<OrmBundleEntity> implements 
         }    }
     async deleteBundleById(id: BundleId): Promise<Result<BundleId>> {
         try {
-            const result = this.delete({ id: id.Value })   
+            const result =await this.delete({ id: id.Value }) 
+
+            if(result.affected!==1)
+                return Result.fail(new PersistenceException('Delete product unsucssessfully'))
+
             return Result.success(id) 
         } catch (e) {
             return Result.fail(new PersistenceException('Delete bundle unsucssessfully'))

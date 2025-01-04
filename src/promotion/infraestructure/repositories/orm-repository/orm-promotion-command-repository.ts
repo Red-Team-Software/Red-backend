@@ -5,7 +5,6 @@ import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { ICommandPromotionRepository } from "src/promotion/domain/repository/promotion.command.repository.interface";
 import { Promotion } from "src/promotion/domain/aggregate/promotion.aggregate";
 import { OrmPromotionMapper } from "../../mapper/orm-mapper/orm-promotion-mapper";
-import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
 import { OrmPromotionEntity } from "../../entities/orm-entities/orm-promotion-entity";
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 
@@ -37,36 +36,8 @@ export class OrmPromotionCommandRepository extends Repository<OrmPromotionEntity
         const persis = await this.mapper.fromDomaintoPersistence(promotion)
         try {
 
-            await this.createQueryBuilder()
-            .delete()
-            .from('promotion_product')
-            .where('promotion_id = :promotionId', { promotionId: persis.id })
-            .execute();
-    
-          await this.createQueryBuilder()
-            .delete()
-            .from('promotion_bundle')
-            .where('promotion_id = :promotionId', { promotionId: persis.id })
-            .execute();
-
-            const result = await this.upsert(persis,['id'])
-            
-            for (const product of persis.products) {
-                await this.createQueryBuilder()
-                  .insert()
-                  .into('promotion_product')
-                  .values({ promotion_id: persis.id, product_id: product.id })
-                  .execute();
-              }  
-            
-            for (const bundle of persis.bundles) {
-                await this.createQueryBuilder()
-                  .insert()
-                  .into('promotion_bundle')
-                  .values({ promotion_id: persis.id, bundle_id:bundle.id })
-                  .execute();
-              } 
-              
+            const result = await this.save(persis)
+                          
             return Result.success(promotion)
         
         } catch (e) {

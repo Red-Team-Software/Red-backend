@@ -20,10 +20,12 @@ export class OrmBundleEntity implements IBundle{
     @Column( 'integer' ) weigth: number;
     @Column( 'varchar' ) measurament: string;
 
-    @ManyToMany(() => OrmPromotionEntity, promotion => promotion.bundles)   
+    @ManyToMany(() => OrmPromotionEntity, promotion => promotion.bundles, 
+    {onDelete:'CASCADE' , onUpdate:'CASCADE'} 
+    )   
     promotions?: OrmPromotionEntity[]
 
-    @ManyToMany(()=>OrmProductEntity, {eager:true})
+    @ManyToMany(()=>OrmProductEntity, {eager:true, onDelete: 'CASCADE', onUpdate: 'CASCADE'})
     @JoinTable({
         name: "bundle_product",
         joinColumn: {
@@ -37,21 +39,16 @@ export class OrmBundleEntity implements IBundle{
     })
     products: OrmProductEntity[];
 
-    @ManyToMany(() => OrmCategoryEntity, category => category.bundles, { eager: true })
-    @JoinTable({
-        name: "category_bundle",
-        joinColumn: {
-            name: "bundle_id",
-            referencedColumnName: "id"
-        },
-        inverseJoinColumn: {
-            name: "category_id",
-            referencedColumnName: "id"
-        }
+    @ManyToMany(() => OrmCategoryEntity, category => category.bundles,{
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
     })
-    categories: OrmCategoryEntity[];
+    categories?: OrmCategoryEntity[];
 
-    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.bundle)
+    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.bundle, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+    })
     order_bundles?: OrmOrderBundleEntity[]
 
     static create ( 
