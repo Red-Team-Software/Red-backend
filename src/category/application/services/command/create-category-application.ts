@@ -1,8 +1,8 @@
 // src/category/application/services/create-category-application.ts
 
 import { Injectable } from "@nestjs/common";
-import { CreateCategoryApplicationRequestDTO } from "../dto/request/create-category-application-request.dto";
-import { CreateCategoryApplicationResponseDTO } from "../dto/response/create-category-application-response.dto";
+import { CreateCategoryApplicationRequestDTO } from "../../dto/request/create-category-application-request.dto";
+import { CreateCategoryApplicationResponseDTO } from "../../dto/response/create-category-application-response.dto";
 import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
 import { Category } from "src/category/domain/aggregate/category.aggregate";
 import { CategoryID } from "src/category/domain/value-object/category-id";
@@ -12,9 +12,9 @@ import { Result } from "src/common/utils/result-handler/result";
 import { IApplicationService } from "src/common/application/services/application.service.interface";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface";
-import { ErrorNameAlreadyApplicationException } from "../application-exception/error-name-already-application-exception";
-import { ErrorUploadingImagesApplicationException } from "../application-exception/error-uploading-images-application-exception";
-import { ErrorCreatingCategoryApplicationException } from "../application-exception/error-creating-category-application-exception";
+import { ErrorNameAlreadyApplicationException } from "../../application-exception/error-name-already-application-exception";
+import { ErrorUploadingImagesApplicationException } from "../../application-exception/error-uploading-images-application-exception";
+import { ErrorCreatingCategoryApplicationException } from "../../application-exception/error-creating-category-application-exception";
 import { TypeFile } from "src/common/application/file-uploader/enums/type-file.enum";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { ProductID } from "src/product/domain/value-object/product-id";
@@ -74,7 +74,7 @@ export class CreateCategoryApplication extends IApplicationService<
         // Prepare response
         const response: CreateCategoryApplicationResponseDTO = {
             ...command,
-            image:category.getImage().Value,
+            image:category.Image.Value,
             id: category.getId().Value
         };
 

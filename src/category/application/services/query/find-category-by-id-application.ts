@@ -3,7 +3,7 @@ import { FindCategoryByIdApplicationRequestDTO } from "src/category/application/
 import { FindCategoryByIdApplicationResponseDTO } from "src/category/application/dto/response/find-category-by-id-application-response.dto";
 import { IQueryCategoryRepository } from "src/category/application/query-repository/query-category-repository";
 import { Result } from "src/common/utils/result-handler/result";
-import { NotFoundCategoryApplicationException } from "../application-exception/not-found-category-application-exception";
+import { NotFoundCategoryApplicationException } from "../../application-exception/not-found-category-application-exception";
 export class FindCategoryByIdApplicationService extends IApplicationService<
   FindCategoryByIdApplicationRequestDTO,
   FindCategoryByIdApplicationResponseDTO

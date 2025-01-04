@@ -1,9 +1,10 @@
+
 import { IApplicationService } from "src/common/application/services/application.service.interface";
-import { FindCategoryByProductIdApplicationRequestDTO } from "../dto/request/find-category-by-productid-application-request.dto";
-import { FindCategoryByProductIdApplicationResponseDTO } from "../dto/response/find-category-by-productid-application-response.dto";
+import { FindCategoryByProductIdApplicationRequestDTO } from "../../dto/request/find-category-by-productid-application-request.dto";
+import { FindCategoryByProductIdApplicationResponseDTO } from "../../dto/response/find-category-by-productid-application-response.dto";
 import { IQueryCategoryRepository } from "src/category/application/query-repository/query-category-repository";
 import { Result } from "src/common/utils/result-handler/result";
-import { NotFoundCategoryApplicationException } from "../application-exception/not-found-category-application-exception";
+import { NotFoundCategoryApplicationException } from "../../application-exception/not-found-category-application-exception";
 
 export class FindCategoryByProductIdApplicationService extends IApplicationService<
   FindCategoryByProductIdApplicationRequestDTO,
@@ -26,9 +27,9 @@ export class FindCategoryByProductIdApplicationService extends IApplicationServi
     const categories = response.getValue;
     const responseDto: FindCategoryByProductIdApplicationResponseDTO[] = categories.map((category) => ({
       id: category.getId().Value,
-      name: category.getName().Value,
-      image: category.getImage().Value,
-      products: category.getProducts().map((productId) => productId.Value),
+      name: category.Name.Value,
+      image: category.Image.Value,
+      products: category.Products.map((productId) => productId.Value),
     }));
 
     return Result.success(responseDto);
