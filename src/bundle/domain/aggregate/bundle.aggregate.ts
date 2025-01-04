@@ -187,6 +187,15 @@ export class Bundle extends AggregateRoot <BundleId>{
         )
     }
 
+    reduceQuantiy(quantity:number){
+        this.apply(
+            BundleUpdatedStock.create(
+                this.getId(),
+                this.bundleStock.reduceStock(quantity)
+            )
+        )
+    }
+
 
     static Registerbundle(
         bundleId:BundleId,

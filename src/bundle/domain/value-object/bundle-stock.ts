@@ -21,4 +21,8 @@ export class BundleStock implements ValueObject<BundleStock> {
         this.stock=stock
     }
 
+    reduceStock(quantity:number){
+        return new BundleStock(this.stock-quantity)
+    }
+
 }

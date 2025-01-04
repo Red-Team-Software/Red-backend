@@ -65,8 +65,6 @@ export class ProductController {
   private readonly ormBundleQueryRepo:IQueryBundleRepository
   private readonly auditRepository: IAuditRepository
   private readonly subscriber: RabbitMQSubscriber
-  private readonly accountQueryRepo:IQueryAccountRepository<IAccount>
-  private readonly sessionRepository: IQueryTokenSessionRepository<ISession>
 
 
   private initializeQueues():void{        
@@ -96,8 +94,7 @@ export class ProductController {
     this.ormBundleQueryRepo= new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
     this.subscriber= new RabbitMQSubscriber(this.channel)
-    this.accountQueryRepo= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance())
-    this.sessionRepository= new OrmTokenQueryRepository(PgDatabaseSingleton.getInstance())
+    
     this.initializeQueues()
 
 
@@ -111,6 +108,9 @@ export class ProductController {
   }
 
   async reduceProductStock (data:ICreateOrder){
+
+    if(data.products.length==0)
+      return
 
     let service= new ExceptionDecorator(
       new AuditDecorator(

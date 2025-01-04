@@ -1,3 +1,3 @@
 export const ProductQueues = [
-    { name: 'OrderReduce/OrderRegistered', pattern: 'OrderRegistered' }
+    { name: 'ProductReduce/OrderRegistered', pattern: 'OrderRegistered' }
   ]

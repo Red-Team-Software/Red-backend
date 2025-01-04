@@ -42,6 +42,10 @@ import { UserRoles } from "src/user/domain/value-object/enum/user.roles"
 import { UpdateBundleApplicationService } from "src/bundle/application/services/command/update-bundle-application.service"
 import { DeleteBundleByIdInfraestructureRequestDTO } from "../dto-request/delete-bundle-by-id-infraestructure-request-dto"
 import { DeleteBundleApplicationService } from "src/bundle/application/services/command/delete-bundle-application.service"
+import { ProductQueues } from "../queues/bundle.queues"
+import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber"
+import { ICreateOrder } from "../interfaces/create-order.interface"
+import { AdjustBundleStockApplicationService } from "src/bundle/application/services/command/adjust-bundle-stock-application.service"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -54,6 +58,27 @@ export class BundleController {
   private readonly ormQueryProductRepo:IQueryProductRepository
   private readonly idGen: IIdGen<string> 
   private readonly auditRepository: IAuditRepository
+  private readonly subscriber: RabbitMQSubscriber
+
+
+  
+  private initializeQueues():void{        
+    ProductQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+  }
+  
+  private buildQueue(name: string, pattern: string) {
+      this.subscriber.buildQueue({
+            name,
+            pattern,
+            exchange: {
+              name: 'DomainEvent',
+              type: 'direct',
+              options: {
+                durable: false,
+              },
+       },
+    })
+  }
   
   constructor(
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -63,7 +88,37 @@ export class BundleController {
     this.ormQueryBundletRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryProductRepo=new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
+    this.subscriber= new RabbitMQSubscriber(this.channel)
+
+    this.initializeQueues()
+
+    this.subscriber.consume<ICreateOrder>(
+        { name: 'BundleReduce/OrderRegistered'}, 
+        (data):Promise<void>=>{
+          this.reduceBundleStock(data)
+          return
+        }
+    )
   }
+
+  async reduceBundleStock(data:ICreateOrder){
+    if (data.bundles.length==0)
+      return
+
+    let service= new ExceptionDecorator(
+      new AuditDecorator(
+          new PerformanceDecorator(
+            new AdjustBundleStockApplicationService(
+              new RabbitMQPublisher(this.channel),
+              this.ormBundleCommandRepo,
+              this.ormQueryBundletRepo
+            ),new NestTimer(),new NestLogger(new Logger())
+        ),this.auditRepository,new DateHandler()
+      )
+    )
+    await service.execute({userId:data.orderUserId,bundles:data.bundles})
+  }
+  
 
   @Post('create')
   @UseInterceptors(FilesInterceptor('images'))  

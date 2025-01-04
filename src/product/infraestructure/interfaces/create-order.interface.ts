@@ -6,14 +6,14 @@ export interface ICreateOrder {
     orderDirection:    OrderDirection;
     orderCourier:      OrderCourier;
     orderUserId:       string;
-    products:          Bundle[];
-    bundles:           Bundle[];
+    products:          Details[];
+    bundles:           Details[];
     orderReceivedDate: null;
     orderReport:       null;
     orderPayment:      OrderPayment;
 }
 
-export interface Bundle {
+export interface Details {
     id:       string;
     quantity: number;
 }
