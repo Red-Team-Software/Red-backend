@@ -100,7 +100,7 @@ export class ProductController {
 
 
     this.subscriber.consume<ICreateOrder>(
-        { name: 'OrderReduce/OrderRegistered'}, 
+        { name: 'ProductReduce/OrderRegistered'}, 
         (data):Promise<void>=>{
           this.reduceProductStock(data)
           return
