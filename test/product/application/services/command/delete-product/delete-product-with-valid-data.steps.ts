@@ -13,11 +13,11 @@ import { When, Then } from "@cucumber/cucumber"
 import * as assert from 'assert';
 import { ProductQueryRepositoryMock } from "test/product/infraestructure/mocks/repositories/product-query-repository.mock"
 import { DeleteProductApplicationService } from "src/product/application/services/command/delete-product-application.service"
-import { NotFoundException } from "src/common/infraestructure/infraestructure-exception"
 
 let caughtError:any
 
-When('Trying to delete a product with id {string} that is registered', async (id:string) => {
+When('Trying to delete a product with id {string} that is registered',
+   async (id:string) => {
 
   const products: Product[] = [
     Product.initializeAggregate(
@@ -48,8 +48,10 @@ When('Trying to delete a product with id {string} that is registered', async (id
     if(response.isFailure())
       caughtError=response.getError
   } catch (error) {
+    caughtError=error
   }
 })
+
 
 Then('The product should be deleted because the id {string} is registered', async (name:string) => {
     assert.strictEqual(caughtError, undefined, `Expected no error but got ${caughtError}`);
