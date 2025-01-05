@@ -24,24 +24,31 @@ IApplicationService<FindAllProductsApplicationRequestDTO,FindAllProductsApplicat
 
         return Result.success( 
             products
-            ?   products.map(product=>({
-                id:product.id,
-                name:product.name,
-                images:product.images,
-                price:product.price,
-                currency:product.currency,
-                weight:product.weigth,
-                measurement:product.measurement,
-                stock:product.stock,
-                discount:product.promotion.map(p=>({
-                    id:p.id,
-                    percentage:p.discount
+            ?   products.map(p=>({
+                id: p.id,
+                name:p.name,
+                image: p.images,
+                price: p.price,
+                currency:p.currency,
+                weight: p.weigth,
+                measurement: p.measurement,
+                stock:p.stock,
+                discount:p.promotion
+                ? p.promotion.map(pr=>({
+                    id:pr.id,
+                    percentage:pr.discount,
+                    name:pr.name
                 }))
+                : [],
+                category:p.categories
+                ? p.categories.map(c=>({
+                    id: c.id,
+                    name:c.name
+                }))
+                : []
             }))
             : []
-    )
-    
-        
+        )   
     }
     
 }

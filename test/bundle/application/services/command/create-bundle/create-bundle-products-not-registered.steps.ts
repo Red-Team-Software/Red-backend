@@ -1,7 +1,4 @@
 import { ProductID } from "src/product/domain/value-object/product-id"
-import { EventPublisherMock } from "test/common/infraestructure/mocks/event-publisher.mock"
-import { IdGeneratorMock } from "test/common/infraestructure/mocks/id-generator.mock"
-import { FileUploaderMock } from "test/common/infraestructure/mocks/file-uploader.mock"
 import { When, Then } from "@cucumber/cucumber"
 import * as assert from 'assert';
 import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate"
@@ -24,6 +21,9 @@ import { ProductStock } from "src/product/domain/value-object/product-stock";
 import { ProductWeigth } from "src/product/domain/value-object/product-weigth";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { BundleQueryRepositoryMock } from "test/bundle/infraestructure/mocks/repositories/bundle-query-repository.mock"
+import { EventPublisherMock } from "test/common/mocks/infraestructure/event-publisher.mock";
+import { FileUploaderMock } from "test/common/mocks/infraestructure/file-uploader.mock";
+import { IdGeneratorMock } from "test/common/mocks/infraestructure/id-generator.mock";
 
 let caughtError:any
 

@@ -104,14 +104,11 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
     async createCategory(category: Category): Promise<Result<Category>> {
         try {
             const entry = await this.mapper.fromDomaintoPersistence(category);
-
-            console.log("entry es", entry);
             
             const response = await this.save(entry);
     
             return Result.success(category);
         } catch (error) {
-            console.log("error en el repo es", error);
             return Result.fail(new PersistenceException('Create category unsuccessfully'));
         }
     }

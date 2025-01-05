@@ -18,6 +18,9 @@ export class FindAllProductsInfraestructureRequestDTO extends PaginationDto{
     name:string
 
     @ApiProperty( { required: false })
+    @Transform(({ value }) => {
+        return Number(value);
+    })
     @IsNumber()
     @IsOptional()
     price:number

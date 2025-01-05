@@ -38,7 +38,12 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             currency:ormProduct.currency,
             weigth:ormProduct.weigth,
             measurement:ormProduct.measurament,
-            categories: [],
+            categories: ormProduct.categories
+            ? ormProduct.categories.map(c=>({
+                id:c.id,
+                name:c.name
+            }))
+            : [],
             promotion:
             ormProduct.promotions
             ? ormProduct.promotions.map(promotion=>({
@@ -63,32 +68,7 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             if(!ormProduct)
                 return Result.fail( new NotFoundException('Find product unsucssessfully'))
 
-            return Result.success(
-                {
-                    id:ormProduct.id,
-                    description:ormProduct.desciption,
-                    caducityDate:
-                    ormProduct.caducityDate
-                    ? ormProduct.caducityDate
-                    : null,	
-                    name:ormProduct.name,
-                    stock:ormProduct.stock,
-                    images:ormProduct.images.map(image=>image.image),
-                    price:Number(ormProduct.price),
-                    currency:ormProduct.currency,
-                    weigth:ormProduct.weigth,
-                    measurement:ormProduct.measurament,
-                    categories: [],
-                    promotion:
-                    ormProduct.promotions
-                    ? ormProduct.promotions.map(promotion=>({
-                        id:promotion.id,
-                        name:promotion.name,
-                        discount:Number(promotion.discount)
-                    }))
-                    : []
-                }
-            )
+            return Result.success(this.trasnformtoDataModel(ormProduct))
 
         }catch(e){
             return Result.fail( new NotFoundException('Find product unsucssessfully'))
@@ -130,12 +110,15 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             .leftJoinAndSelect('product.categories', 'category')
             .take(criteria.perPage)
             .skip(criteria.page)
-          
-          if (criteria.discount && criteria.discount > 0) 
-            query.andWhere('promotion.discount = :discount', { discount: criteria.discount })
-        
-          if (criteria.category && criteria.category.length > 0) 
+
+        if (criteria.category && criteria.category.length > 0) 
             query.andWhere('category.id IN (:...categories)', { categories: criteria.category })
+          
+        if (criteria.name) 
+            query.andWhere('LOWER(product.name) LIKE :name', { name: `%${criteria.name.toLowerCase().trim()}%` })
+          
+        if (criteria.price) 
+            query.andWhere('product.price = :price', { price: criteria.price })
 
         if (criteria.popular) {
             query.addSelect(subQuery => {
@@ -146,9 +129,15 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             }, 'total_quantity')
             .orderBy('total_quantity', 'DESC');
           }     
+
+        if (criteria.discount ) 
+            query.andWhere('promotion.discount = :discount', { discount: criteria.discount })
           
 
-          const ormProducts = await query.getMany();
+        const ormProducts = await query.getMany();
+
+        //? To see total quantity details
+        // console.log(await query.getRawMany())
 
             return Result.success(
                 ormProducts
@@ -157,7 +146,6 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             )
             
         }catch(e){
-            console.log(e)
             return Result.fail( new NotFoundException('products empty please try again'))
         }
     }

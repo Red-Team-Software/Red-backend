@@ -1,6 +1,6 @@
 import { Then, When } from '@cucumber/cucumber';
 import * as assert from 'assert';
-import { UserCommandRepositoryMock } from '../../infraestructure/mocks/repositories/user-command-repository.mock';
+import { UserCommandRepositoryMock } from '../../../infraestructure/mocks/repositories/user-command-repository.mock';
 import { User } from 'src/user/domain/aggregate/user.aggregate';
 import { UserId } from 'src/user/domain/value-object/user-id';
 import { UserQueryRepositoryMock } from 'test/user/infraestructure/mocks/repositories/user-query-repository.mock';
@@ -11,10 +11,10 @@ import { Wallet } from 'src/user/domain/entities/wallet/wallet.entity';
 import { WalletId } from 'src/user/domain/entities/wallet/value-objects/wallet-id';
 import { Ballance } from 'src/user/domain/entities/wallet/value-objects/balance';
 import { AddUserDirectionApplicationService } from 'src/user/application/services/command/add-user-direction-application.service';
-import { EventPublisherMock } from 'test/common/infraestructure/mocks/event-publisher.mock';
 import { UserDirection } from 'src/user/domain/value-object/user-direction';
 import { InvalidUserDirectionQuantityException } from 'src/user/domain/domain-exceptions/invalid-user-direction-quantity-exception';
-import { IdGeneratorMock } from 'test/common/infraestructure/mocks/id-generator.mock';
+import { IdGeneratorMock } from 'test/common/mocks/infraestructure/id-generator.mock';
+import { EventPublisherMock } from 'test/common/mocks/infraestructure/event-publisher.mock';
 
 let idGen = new IdGeneratorMock()
 
@@ -47,7 +47,7 @@ let service= new AddUserDirectionApplicationService(
 
 let caughtError:any
 
-When('Trying to create a User with one more direction', async () => {
+When('Trying to create a User with one more direction, when he already has the 6 directions', async () => {
   try {
     await service.execute({
       userId: 'e09771db-2657-45fb-ad39-ae6604422919',

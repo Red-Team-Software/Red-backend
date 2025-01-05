@@ -193,7 +193,12 @@ export class BundleController {
     if(!entry.perPage)
       entry.perPage=10
 
-    const pagination:PaginationRequestDTO={userId:credential.account.idUser,page:entry.page, perPage:entry.perPage}
+    const pagination:FindAllBundlesbyNameApplicationRequestDTO={
+      userId:credential.account.idUser,
+      page:entry.page, 
+      perPage:entry.perPage,
+      ...entry
+    }
 
     let service= new ExceptionDecorator(
       new LoggerDecorator(

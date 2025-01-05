@@ -7,7 +7,7 @@ import { BundleName } from "src/bundle/domain/value-object/bundle-name";
 import { IBundleModel } from "../model/bundle.model.interface";
 
 export interface IQueryBundleRepository{
-    findAllBundles(criteria:FindAllBundlesApplicationRequestDTO):Promise<Result<Bundle[]>> 
+    findAllBundles(criteria:FindAllBundlesApplicationRequestDTO):Promise<Result<IBundleModel[]>> 
     findAllBundlesByName(criteria:FindAllBundlesbyNameApplicationRequestDTO):Promise<Result<Bundle[]>>
     findBundleById( id: BundleId ): Promise<Result<Bundle>>
     findBundleWithMoreDetailById( id: BundleId ): Promise<Result<IBundleModel>>

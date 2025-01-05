@@ -1,4 +1,20 @@
-import { IProductModel } from "../../model/product.model.interface";
 
-export interface FindProductbyIdApplicationResponseDTO extends IProductModel {
+export interface FindProductbyIdApplicationResponseDTO {
+    name: string
+    description: string
+    images:string []
+    price: number
+    currency: string 
+    weight: number
+    measurement: string 
+    stock: number
+    caducityDate?:Date
+    discount:{
+        id:string,
+        percentage:number 
+    }[]
+    category: {
+        id: string
+        name:string
+    }[]
 }

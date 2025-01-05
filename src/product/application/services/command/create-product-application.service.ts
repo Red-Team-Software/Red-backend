@@ -66,7 +66,9 @@ export class CreateProductApplicationService extends IApplicationService
             uploaded.map((image)=>ProductImage.create(image.url)),
             ProductPrice.create(command.price,command.currency),
             ProductWeigth.create(command.weigth,command.measurement),
-            ProductCaducityDate.create(command.caducityDate)
+            command.caducityDate
+            ? ProductCaducityDate.create(command.caducityDate)
+            : null
         )
         let result=await this.commandProductRepository.createProduct(product)
         if (!result.isSuccess()) 

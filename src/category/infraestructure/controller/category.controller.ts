@@ -102,7 +102,7 @@ export class CategoryController {
     return response.getValue
   }
 
-  @Get('all')
+  @Get('many')
   async getAllCategories(
     @GetCredential() credential:ICredential,
     @Query() entry: FindAllCategoriesInfraestructureRequestDTO) {
