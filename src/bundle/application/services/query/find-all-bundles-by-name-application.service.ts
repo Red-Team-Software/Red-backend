@@ -23,7 +23,7 @@ IApplicationService<FindAllBundlesbyNameApplicationRequestDTO,FindAllBundlesbyNa
             return Result.fail(new NotFoundBundleApplicationException())
         let bundles=response.getValue
 
-        let responseDto:FindAllBundlesApplicationResponseDTO[]=[]
+        let responseDto:FindAllBundlesbyNameApplicationResponseDTO[]=[]
 
         bundles.forEach((bundle)=>{
             responseDto.push({

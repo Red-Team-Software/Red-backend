@@ -23,7 +23,37 @@ IApplicationService<FindBundleByIdApplicationRequestDTO,FindBundleByIdApplicatio
 
         let bundle=response.getValue
 
-        return Result.success(bundle)
+        return Result.success({
+            name: bundle.name,
+            description: bundle.description,
+            images:bundle.images,
+            price: bundle.price,
+            currency: bundle.currency,
+            weight: bundle.weigth,
+            measurement: bundle.measurement,
+            stock: bundle.stock,
+            caducityDate: bundle.caducityDate
+            ? bundle.caducityDate
+            : null,
+            discount:bundle.promotion
+            ? bundle.promotion.map(b=>({
+                id:b.id,
+                percentage:b.discount 
+            }))
+            : [],
+            category: bundle.categories
+            ? bundle.categories.map(c=>({
+                id: c.id,
+                name:c.name
+            }))
+            : [],
+            products: bundle.products
+            ? bundle.products.map(p=>({
+                id:p.id,
+                name:p.name
+            }))
+            : []
+        })
     }
     
 }

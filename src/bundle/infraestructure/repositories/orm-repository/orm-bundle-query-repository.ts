@@ -19,30 +19,92 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
 
     private mapper:IMapper <Bundle,OrmBundleEntity>
 
+    private trasnformtoDataModel(ormBundle:OrmBundleEntity):IBundleModel{
+        return {
+            id:ormBundle.id,
+            description:ormBundle.desciption,
+            caducityDate:
+            ormBundle.caducityDate
+            ? ormBundle.caducityDate
+            : null,
+            name:ormBundle.name,
+            stock:ormBundle.stock,
+            images:ormBundle.images.map(image=>image.image),
+            price:Number(ormBundle.price),
+            currency:ormBundle.currency,
+            weigth:ormBundle.weigth,
+            measurement:ormBundle.measurament,
+            categories:ormBundle.categories
+            ? ormBundle.categories.map(category=>({
+                id:category.id,
+                name:category.name
+            }))
+            : [],
+            promotion:ormBundle.promotions
+            ? ormBundle.promotions.map(promotion=>({
+                id:promotion.id,
+                name:promotion.name,
+                discount:Number(promotion.discount)
+            }))
+            : [],
+            products:ormBundle.products
+            ? ormBundle.products.map(product=>({
+                id:product.id,
+                name:product.name
+            }))
+            : []
+        }
+    }
+
 
     constructor(dataSource:DataSource){
         super( OrmBundleEntity, dataSource.createEntityManager() )
         this.mapper=new OrmBundleMapper(dataSource,new UuidGen())
     }
-    async findAllBundles(criteria: FindAllBundlesApplicationRequestDTO): Promise<Result<Bundle[]>> {
+    async findAllBundles(criteria: FindAllBundlesApplicationRequestDTO): Promise<Result<IBundleModel[]>> {
         {
             try{
-                const ormBundle=await this.find({
-                    take:criteria.perPage,
-                    skip:criteria.page,
-                    where:{
-                        stock:MoreThan(0)
-                    }
-                })
-    
-                // if(ormBundle.length==0)
-                //     return Result.fail( new NotFoundException('bundles empty please try again'))
-    
-                const bundles:Bundle[]=[]
-                for (const bundle of ormBundle){
-                    bundles.push(await this.mapper.fromPersistencetoDomain(bundle))
-                }
-                return Result.success(bundles)
+
+                const query = this.createQueryBuilder('bundle')
+                .leftJoinAndSelect('bundle.images', 'bundle_image')
+                .leftJoinAndSelect('bundle.promotions','promotion')
+                .leftJoinAndSelect('bundle.products','products')
+                .leftJoinAndSelect('bundle.categories','categories')
+
+                if (criteria.category) 
+                    query.andWhere('categories.id IN (:...categories)', { categories: criteria.category })
+                  
+                if (criteria.name) 
+                    query.andWhere('LOWER(bundle.name) LIKE :name', { name: `%${criteria.name.toLowerCase().trim()}%` })
+                  
+                if (criteria.price) 
+                    query.andWhere('bundle.price = :price', { price: criteria.price })
+        
+                if (criteria.popular) {
+                    query.addSelect(subQuery => {
+                      return subQuery
+                        .select('COALESCE(SUM(order_bundle.quantity), 0)', 'total_quantity')
+                        .from('order_bundle', 'order_bundle')
+                        .where('order_bundle.bundle_id = bundle.id');
+                    }, 'total_quantity')
+                    .orderBy('total_quantity', 'DESC');
+                  }     
+        
+                if (criteria.discount ) 
+                    query.andWhere('promotion.discount = :discount', { discount: criteria.discount })
+                  
+        
+                const ormBundle = await query.getMany();
+                
+                if(!ormBundle)
+                    return Result.fail( new NotFoundException('Find bundle unsucssessfully'))
+
+                return Result.success(
+                    ormBundle
+                    ? ormBundle.map(b=>this.trasnformtoDataModel(b))
+                    : []
+                )
+
             }catch(e){
                 return Result.fail( new NotFoundException('bundles empty please try again'))
             }
@@ -105,40 +167,7 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
             if(!ormBundle)
                 return Result.fail( new NotFoundException('Find bundle unsucssessfully'))
 
-            return Result.success({
-                id:ormBundle.id,
-                description:ormBundle.desciption,
-                caducityDate:
-                ormBundle.caducityDate
-                ? ormBundle.caducityDate
-                : null,
-                name:ormBundle.name,
-                stock:ormBundle.stock,
-                images:ormBundle.images.map(image=>image.image),
-                price:Number(ormBundle.price),
-                currency:ormBundle.currency,
-                weigth:ormBundle.weigth,
-                measurement:ormBundle.measurament,
-                categories:ormBundle.categories
-                ? ormBundle.categories.map(category=>({
-                    id:category.id,
-                    name:category.name
-                }))
-                : [],
-                promotion:ormBundle.promotions
-                ? ormBundle.promotions.map(promotion=>({
-                    id:promotion.id,
-                    name:promotion.name,
-                    discount:Number(promotion.discount)
-                }))
-                : [],
-                products:ormBundle.products
-                ? ormBundle.products.map(product=>({
-                    id:product.id,
-                    name:product.name
-                }))
-                : []
-            })
+            return Result.success(this.trasnformtoDataModel(ormBundle))
         }catch(e){
             return Result.fail( new NotFoundException('Find promotion unsucssessfully'))
         }  

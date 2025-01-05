@@ -6,15 +6,15 @@ import { ProductName } from "src/product/domain/value-object/product-name"
 import { ProductPrice } from "src/product/domain/value-object/product-price"
 import { ProductStock } from "src/product/domain/value-object/product-stock"
 import { ProductWeigth } from "src/product/domain/value-object/product-weigth"
-import { EventPublisherMock } from "test/common/infraestructure/mocks/event-publisher.mock"
 import { ProductCommadRepositoryMock } from "test/product/infraestructure/mocks/repositories/product-command-repository.mock"
-import { FileUploaderMock } from "test/common/infraestructure/mocks/file-uploader.mock"
 import { When, Then } from "@cucumber/cucumber"
 import * as assert from 'assert';
 import { ProductQueryRepositoryMock } from "test/product/infraestructure/mocks/repositories/product-query-repository.mock"
 import { UpdateProductApplicationService } from "src/product/application/services/command/update-product-application.service"
-import { IdGeneratorMock } from "test/common/infraestructure/mocks/id-generator.mock"
 import { ErrorProductNameAlreadyExistApplicationException } from "src/product/application/application-exepction/error-product-name-already-exist-application-exception"
+import { EventPublisherMock } from "test/common/mocks/infraestructure/event-publisher.mock"
+import { FileUploaderMock } from "test/common/mocks/infraestructure/file-uploader.mock"
+import { IdGeneratorMock } from "test/common/mocks/infraestructure/id-generator.mock"
 
 let caughtError:any
 

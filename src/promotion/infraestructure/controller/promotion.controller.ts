@@ -102,7 +102,7 @@ export class PromotionController {
     description: 'find all promotions',
     type: FindAllPromotionInfraestructureResponseDTO,
   })
-  @Get('all')
+  @Get('many')
   async getAllProducts(
     @GetCredential() credential:ICredential,
     @Query() entry:FindAllPromotionInfraestructureRequestDTO
