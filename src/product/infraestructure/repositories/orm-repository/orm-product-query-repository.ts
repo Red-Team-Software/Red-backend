@@ -130,7 +130,7 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             .orderBy('total_quantity', 'DESC');
           }     
 
-        if (criteria.discount && criteria.discount > 0 && criteria.discount < 1 ) 
+        if (criteria.discount ) 
             query.andWhere('promotion.discount = :discount', { discount: criteria.discount })
           
 
