@@ -1,7 +1,4 @@
 import { ProductID } from "src/product/domain/value-object/product-id"
-import { EventPublisherMock } from "test/common/infraestructure/mocks/event-publisher.mock"
-import { IdGeneratorMock } from "test/common/infraestructure/mocks/id-generator.mock"
-import { FileUploaderMock } from "test/common/infraestructure/mocks/file-uploader.mock"
 import { When, Then } from "@cucumber/cucumber"
 import * as assert from 'assert'
 import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate"
@@ -26,6 +23,9 @@ import { Optional } from "src/common/utils/optional/optional"
 import { CreateBundleApplicationResponseDTO } from "src/bundle/application/dto/response/create-bundles-application-response-dto"
 import { UpdateBundleApplicationService } from "src/bundle/application/services/command/update-bundle-application.service"
 import { UpdateBundleApplicationResponseDTO } from "src/bundle/application/dto/response/update-bundle-application-response-dto"
+import { EventPublisherMock } from "test/common/mocks/infraestructure/event-publisher.mock"
+import { IdGeneratorMock } from "test/common/mocks/infraestructure/id-generator.mock"
+import { FileUploaderMock } from "test/common/mocks/infraestructure/file-uploader.mock"
 
 
 let caughtError:any

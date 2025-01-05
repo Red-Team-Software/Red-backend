@@ -1,6 +1,4 @@
 import { ProductID } from "src/product/domain/value-object/product-id"
-import { EventPublisherMock } from "test/common/infraestructure/mocks/event-publisher.mock"
-import { FileUploaderMock } from "test/common/infraestructure/mocks/file-uploader.mock"
 import { When, Then } from "@cucumber/cucumber"
 import * as assert from 'assert'
 import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate"
@@ -21,7 +19,8 @@ import { ProductStock } from "src/product/domain/value-object/product-stock"
 import { ProductWeigth } from "src/product/domain/value-object/product-weigth"
 import { BundleQueryRepositoryMock } from "test/bundle/infraestructure/mocks/repositories/bundle-query-repository.mock"
 import { DeleteBundleApplicationService } from "src/bundle/application/services/command/delete-bundle-application.service"
-import { NotFoundException } from "src/common/infraestructure/infraestructure-exception"
+import { EventPublisherMock } from "test/common/mocks/infraestructure/event-publisher.mock"
+import { FileUploaderMock } from "test/common/mocks/infraestructure/file-uploader.mock"
 
 
 let caughtError:any
