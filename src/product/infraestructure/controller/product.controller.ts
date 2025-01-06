@@ -53,6 +53,9 @@ import { OrmTokenQueryRepository } from 'src/auth/infraestructure/repositories/o
 import { OrmAccountQueryRepository } from 'src/auth/infraestructure/repositories/orm-repository/orm-account-query-repository';
 import { AdjustProductStockApplicationService } from 'src/product/application/services/command/adjust-product-stock-application.service';
 import { FindAllProductsApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-application-request-dto';
+import { OdmProductQueryRepository } from '../repositories/odm-repository/odm-product-query-repository';
+import { Mongoose } from 'mongoose';
+import { OdmProductCommandRepository } from '../repositories/odm-repository/odm-product-command-repository';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -66,6 +69,8 @@ export class ProductController {
   private readonly ormBundleQueryRepo:IQueryBundleRepository
   private readonly auditRepository: IAuditRepository
   private readonly subscriber: RabbitMQSubscriber
+  private readonly odmProductQueryRepo:IQueryProductRepository
+  private readonly odmCommandProductRepo:ICommandProductRepository
 
 
   private initializeQueues():void{        
@@ -87,7 +92,9 @@ export class ProductController {
   }
   
   constructor(
-    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+    @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose,
+
   ) {
     this.idGen= new UuidGen()
     this.ormCommandProductRepo= new OrmProductRepository(PgDatabaseSingleton.getInstance())
@@ -95,6 +102,9 @@ export class ProductController {
     this.ormBundleQueryRepo= new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
     this.subscriber= new RabbitMQSubscriber(this.channel)
+
+    this.odmProductQueryRepo= new OdmProductQueryRepository(mongoose)
+    this.odmCommandProductRepo=new OdmProductCommandRepository(mongoose)
     
     this.initializeQueues()
 

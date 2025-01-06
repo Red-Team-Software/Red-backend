@@ -14,6 +14,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PaymentMethodController } from './payment-methods/infraestructure/controller/payment-method.controller';
 import { CuponController } from './cupon/infraestructure/controller/cupon.controller';
 import { PromotionController } from './promotion/infraestructure/controller/promotion.controller';
+import { MongoDatabaseSingleton } from './common/infraestructure/database/mongo-database.singleton';
 
 @Module({
   imports: [
@@ -39,6 +40,14 @@ import { PromotionController } from './promotion/infraestructure/controller/prom
     CuponController,
     PromotionController
   ],
-  providers:[CloudinaryProvider]
+  providers:[
+    CloudinaryProvider,
+    {
+      provide: 'MONGO_CONNECTION',
+      useFactory: async () => {
+        return await MongoDatabaseSingleton.getInstance();
+      },
+    }
+  ]
 })
 export class AppModule {}
