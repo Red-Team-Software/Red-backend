@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Patch, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ICategoryRepository } from 'src/category/domain/repository/category-repository.interface';
-import { OrmCategoryRepository } from '../repositories/category-typeorm-repository';
+import { ICategoryCommandRepository } from 'src/category/domain/repository/category-command-repository.interface';
+import { OrmCategoryCommandRepository } from '../repositories/category-typeorm-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateCategoryInfrastructureRequestDTO } from '../dto-request/create-category-infrastructure-request.dto';
 import { ExceptionDecorator } from 'src/common/application/aspects/exeption-decorator/exception-decorator';
@@ -35,7 +35,7 @@ import { FindCategoryByBundleIdApplicationService } from 'src/category/applicati
 import { FindCategoryByBundleIdInfraestructureRequestDTO } from '../dto-request/find-category-by-bundle-id-infrastructure-request.dto';
 import { SecurityDecorator } from 'src/common/application/aspects/security-decorator/security-decorator';
 import { UserRoles } from 'src/user/domain/value-object/enum/user.roles';
-import { DeleteCategoryByIdInfraestructureRequestDTO } from '../dto-request/delte-category-infraestructure-request-dto';
+import { DeleteCategoryByIdInfraestructureRequestDTO } from '../dto-request/delete-category-infraestructure-request-dto';
 import { UpdateCategoryApplicationService } from 'src/category/application/services/command/update-category-application';
 import { ByIdDTO } from 'src/common/infraestructure/dto/entry/by-id.dto';
 import { UpdateCategoryInfraestructureRequestDTO } from '../dto-request/update-category-infraestructure-request-dto';
@@ -50,7 +50,7 @@ import { OrmProductQueryRepository } from 'src/product/infraestructure/repositor
 @ApiTags("Category")
 export class CategoryController {
 
-  private readonly ormCategoryRepo: ICategoryRepository
+  private readonly ormCategoryCommandRepo: ICategoryCommandRepository
   private readonly idGen: IIdGen<string>
   private readonly ormCategoryQueryRepo: IQueryCategoryRepository
   private readonly ormQueryCategoryRepo: IQueryCategoryRepository
@@ -61,10 +61,11 @@ export class CategoryController {
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
   ) {
     this.idGen = new UuidGen();
-    this.ormCategoryRepo = new OrmCategoryRepository(PgDatabaseSingleton.getInstance())
+    this.ormCategoryCommandRepo = new OrmCategoryCommandRepository(PgDatabaseSingleton.getInstance())
     this.ormCategoryQueryRepo = new OrmCategoryQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryBundleRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryProductRepo=new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
+    
   }
 
   @Post('create')
@@ -89,7 +90,8 @@ export class CategoryController {
     let service = new ExceptionDecorator(
       new CreateCategoryApplication(
         new RabbitMQPublisher(this.channel),
-        this.ormCategoryRepo,
+        this.ormCategoryCommandRepo,
+        this.ormCategoryQueryRepo,
         this.ormQueryProductRepo,
         this.ormQueryBundleRepo,
         this.idGen,
@@ -190,7 +192,7 @@ export class CategoryController {
       new SecurityDecorator(
         new LoggerDecorator(
           new PerformanceDecorator(
-            new DeleteCategoryApplication(this.ormCategoryRepo,new RabbitMQPublisher(this.channel),new CloudinaryService()),
+            new DeleteCategoryApplication(this.ormCategoryCommandRepo,new RabbitMQPublisher(this.channel),new CloudinaryService()),
             new NestTimer(),new NestLogger(new Logger())
           ),new NestLogger(new Logger())
         ),credential,[UserRoles.ADMIN])
@@ -223,7 +225,7 @@ export class CategoryController {
         new PerformanceDecorator(
           new UpdateCategoryApplicationService(
             new RabbitMQPublisher(this.channel),
-            this.ormCategoryRepo,
+            this.ormCategoryCommandRepo,
             this.ormQueryCategoryRepo,
             new CloudinaryService(),
             new UuidGen(),

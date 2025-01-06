@@ -14,5 +14,5 @@ export interface IQueryCategoryRepository{
     findCategoryByIdMoreDetail(criteria:FindCategoryByIdApplicationRequestDTO):Promise<Result<ICategory>>;
     findCategoryByProductId(criteria:FindCategoryByProductIdApplicationRequestDTO):Promise<Result<Category[]>>;
     findCategoryByBundleId(criteria:FindCategoryByBundleIdApplicationRequestDTO):Promise<Result<Category[]>>;
-    verifyCategoryExistenceByName(categoryName:CategoryName):Promise<Result<boolean>>
+    findCategoryByName(categoryName:CategoryName):Promise<Result<boolean>>
 }

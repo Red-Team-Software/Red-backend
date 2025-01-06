@@ -1,4 +1,4 @@
-import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
+import { ICategoryCommandRepository } from "src/category/domain/repository/category-command-repository.interface";
 import { DataSource, Repository } from "typeorm";
 import { OrmCategoryEntity } from "../entities/orm-entities/orm-category-entity";
 import { Category } from "src/category/domain/aggregate/category.aggregate";
@@ -17,7 +17,7 @@ import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate";
 
-export class OrmCategoryRepository extends Repository<OrmCategoryEntity> implements ICategoryRepository {
+export class OrmCategoryCommandRepository extends Repository<OrmCategoryEntity> implements ICategoryCommandRepository {
     private mapper: IMapper<Category, OrmCategoryEntity>;
     private readonly ormCategoryImageRepository: Repository<OrmCategoryImage>;
 

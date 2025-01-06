@@ -1,7 +1,7 @@
 import { IApplicationService } from 'src/common/application/services';
 import { IEventPublisher } from 'src/common/application/events/event-publisher/event-publisher.abstract';
 import { Result } from 'src/common/utils/result-handler/result';
-import { ICategoryRepository } from 'src/category/domain/repository/category-repository.interface';
+import { ICategoryCommandRepository } from 'src/category/domain/repository/category-command-repository.interface';
 import { IQueryCategoryRepository } from 'src/category/application/query-repository/query-category-repository';
 import { UpdateCategoryApplicationRequestDTO } from '../../dto/request/update-category-application-request-dto';
 import { UpdateCategoryApplicationResponseDTO } from '../../dto/response/update-category-application-response-dt';
@@ -23,7 +23,7 @@ export class UpdateCategoryApplicationService extends IApplicationService<
 > {
     constructor(
         private readonly eventPublisher: IEventPublisher,
-        private readonly commandCategoryRepository: ICategoryRepository,
+        private readonly commandCategoryRepository: ICategoryCommandRepository,
         private readonly queryCategoryRepository: IQueryCategoryRepository,
         private readonly fileUpdater:IFileUploader,
         private readonly idGen:IIdGen<string>
