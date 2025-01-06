@@ -122,4 +122,8 @@ export class Category extends AggregateRoot<CategoryID> {
     get Bundles(): BundleId[] {
         return this.bundles;
     }
+
+    get Id(): CategoryID {
+        return this.getId();
+    }
 }
