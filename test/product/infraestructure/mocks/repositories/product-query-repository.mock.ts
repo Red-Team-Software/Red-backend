@@ -12,9 +12,29 @@ export class ProductQueryRepositoryMock implements IQueryProductRepository{
 
     constructor(private products: Product[] = []){}
 
-    async findAllProducts(criteria: FindAllProductsApplicationRequestDTO): Promise<Result<Product[]>> {
+        private trasnformtoDataModel(ormProduct:Product):IProductModel{
+            return {
+                id:ormProduct.getId().Value,
+                description:ormProduct.ProductDescription.Value,
+                caducityDate:
+                ormProduct.ProductCaducityDate
+                ? ormProduct.ProductCaducityDate.Value
+                : null,	
+                name:ormProduct.ProductName.Value,
+                stock:ormProduct.ProductStock.Value,
+                images:ormProduct.ProductImages.map(image=>image.Value),
+                price:Number(ormProduct.ProductPrice.Price),
+                currency:ormProduct.ProductPrice.Currency,
+                weigth:ormProduct.ProductWeigth.Weigth,
+                measurement:ormProduct.ProductWeigth.Measure,
+                categories: [],
+                promotion:[]
+            }
+        }
+
+    async findAllProducts(criteria: FindAllProductsApplicationRequestDTO): Promise<Result<IProductModel[]>> {
         let products= this.products.slice(criteria.page,criteria.perPage)
-        return Result.success(products)
+        return Result.success(products.map((p) => this.trasnformtoDataModel(p)))
     }
 
     async findAllProductsByName(criteria: FindAllProductsbyNameApplicationRequestDTO): Promise<Result<Product[]>> {
@@ -30,9 +50,11 @@ export class ProductQueryRepositoryMock implements IQueryProductRepository{
         return Result.success(product)
     }
 
-    findProductWithMoreDetailById(id: ProductID): Promise<Result<IProductModel>> {
-        throw new Error("Method not implemented.");
-    }
+    async findProductWithMoreDetailById(id: ProductID): Promise<Result<IProductModel>> {
+        let product=this.products.find((p) => p.getId().equals(id))
+        if (!product)
+            return Result.fail(new NotFoundException('Find product by id unsucssessfully'))
+        return Result.success(this.trasnformtoDataModel(product))    }
     
     async findProductByName(productName: ProductName): Promise<Result<Product[]>> {
         let product=this.products.filter((p) => p.ProductName.equals(productName))

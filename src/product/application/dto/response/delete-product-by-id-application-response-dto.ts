@@ -1,5 +1,4 @@
-import { IServiceRequestDto } from "src/common/application/services"
 
-export interface DeleteProductsbyIdApplicationResponseDTO extends IServiceRequestDto {
+export interface DeleteProductsbyIdApplicationResponseDTO {
     id:string
 }

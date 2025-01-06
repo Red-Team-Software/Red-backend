@@ -3,7 +3,7 @@ import { FindAllBundlesApplicationRequestDTO } from "../../dto/request/find-all-
 import { FindAllBundlesApplicationResponseDTO } from "../../dto/response/find-all-bundles-application-response-dto"
 import { IQueryBundleRepository } from "../../query-repository/query-bundle-repository"
 import { Result } from "src/common/utils/result-handler/result"
-import { NotFoundBundleApplicationException } from "../../application-exeption/not-found-bundle-application-exception"
+import { NotFoundBundleApplicationException } from "../../application-exception/not-found-bundle-application-exception"
 
 export class FindAllBundlesApplicationService extends 
 IApplicationService<FindAllBundlesApplicationRequestDTO,FindAllBundlesApplicationResponseDTO[]>{
@@ -17,23 +17,38 @@ IApplicationService<FindAllBundlesApplicationRequestDTO,FindAllBundlesApplicatio
         data.page = data.page * data.perPage - data.perPage
 
         let response=await this.querybundleRepository.findAllBundles(data)
+
         if(!response.isSuccess())
             return Result.fail(new NotFoundBundleApplicationException())
+        
         let bundles=response.getValue
 
-        let responseDto:FindAllBundlesApplicationResponseDTO[]=[]
-
-        bundles.forEach((bundle)=>{
-            responseDto.push({
-                id:bundle.getId().Value,
-                description:bundle.BundleDescription.Value,
-                name:bundle.BundleName.Value,
-                images:bundle.BundleImages.map(image=>image.Value),
-                price:bundle.BundlePrice.Price,
-                currency:bundle.BundlePrice.Currency,
-            })
-        })
-        return Result.success(responseDto)
+        return Result.success(
+            bundles
+            ? bundles.map(b=>({
+                id: b.id,
+                name: b.name,
+                image: b.images,
+                price: b.price,
+                currency: b.currency,
+                weight: b.weigth,
+                measurement: b.measurement,
+                stock:b.stock,
+                discount: b.promotion
+                ? b.promotion.map(p=>({
+                    id:p.id,
+                    percentage:p.discount 
+                }))
+                : [],
+                category: b.categories
+                ? b.categories.map(c=>({
+                    id:c.id,
+                    name:c.name
+                }))
+                : []
+            }))
+            :[]
+        )
     }
     
 }

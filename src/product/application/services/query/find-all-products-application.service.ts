@@ -22,19 +22,33 @@ IApplicationService<FindAllProductsApplicationRequestDTO,FindAllProductsApplicat
             return Result.fail(new NotFoundProductApplicationException())
         let products=response.getValue
 
-        let responseDto:FindAllProductsApplicationResponseDTO[]=[]
-
-        products.forEach((product)=>{
-            responseDto.push({
-                id:product.getId().Value,
-                description:product.ProductDescription.Value,
-                name:product.ProductName.Value,
-                images:product.ProductImages.map(image=>image.Value),
-                price:product.ProductPrice.Price,
-                currency:product.ProductPrice.Currency,
-            })
-        })
-        return Result.success(responseDto)
+        return Result.success( 
+            products
+            ?   products.map(p=>({
+                id: p.id,
+                name:p.name,
+                image: p.images,
+                price: p.price,
+                currency:p.currency,
+                weight: p.weigth,
+                measurement: p.measurement,
+                stock:p.stock,
+                discount:p.promotion
+                ? p.promotion.map(pr=>({
+                    id:pr.id,
+                    percentage:pr.discount,
+                    name:pr.name
+                }))
+                : [],
+                category:p.categories
+                ? p.categories.map(c=>({
+                    id: c.id,
+                    name:c.name
+                }))
+                : []
+            }))
+            : []
+        )   
     }
     
 }

@@ -1,7 +1,7 @@
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { Result } from "src/common/utils/result-handler/result";
 import { Order } from "src/order/domain/aggregate/order";
-import { IPaymentMethodService } from "src/order/domain/domain-services/payment-method-interface";
+import { IPaymentMethodService } from "src/order/domain/domain-services/interfaces/payment-method-interface";
 import { OrderPayment } from "src/order/domain/entities/payment/order-payment-entity";
 import { PaymentAmount } from "src/order/domain/entities/payment/value-object/payment-amount";
 import { PaymentCurrency } from "src/order/domain/entities/payment/value-object/payment-currency";

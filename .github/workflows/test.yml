@@ -16,11 +16,16 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Install dependencies and run tests
-      run: |
-        echo "Starting the API test process..."
-        echo "Installing dependencies using pnpm..."
-        pnpm install
-        echo "Running tests..."
-        pnpm test
-        echo "API test process completed."
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.11.1'
+
+    - name: Install pnpm
+      run: npm install -g pnpm
+
+    - name: Install dependencies
+      run: pnpm install
+
+    - name: Run tests
+      run: pnpm test

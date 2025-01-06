@@ -17,19 +17,15 @@ extends IServiceDecorator <I,O>{
 
     async execute ( input: I ): Promise<Result<O>> {
         try{
-            console.log('empezo')
             await this.transactionHandler.startTransaction()
             let result = await this.decoratee.execute(input)
             if(result.isSuccess()) 
                 await this.transactionHandler.commitTransaction()
             else{
-                console.log('fallo')
                 await this.transactionHandler.rollbackTransaction()
             }
-            console.log('termino')
             return result
         }catch(e){
-            console.log('fallo',e)
             await this.transactionHandler.rollbackTransaction()
             throw e
         }

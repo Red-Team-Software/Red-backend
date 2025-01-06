@@ -1,7 +1,4 @@
 import { ProductID } from "src/product/domain/value-object/product-id"
-import { EventPublisherMock } from "test/common/infraestructure/mocks/event-publisher.mock"
-import { IdGeneratorMock } from "test/common/infraestructure/mocks/id-generator.mock"
-import { FileUploaderMock } from "test/common/infraestructure/mocks/file-uploader.mock"
 import { When, Then } from "@cucumber/cucumber"
 import * as assert from 'assert';
 import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate"
@@ -14,7 +11,7 @@ import { BundlePrice } from "src/bundle/domain/value-object/bundle-price"
 import { BundleWeigth } from "src/bundle/domain/value-object/bundle-weigth"
 import { CreateBundleApplicationService } from "src/bundle/application/services/command/create-bundle-application.service"
 import { BundleCommadRepositoryMock } from "test/bundle/infraestructure/mocks/repositories/bundle-command-repository.mock"
-import { ErrorBundleNameAlreadyApplicationException } from "src/bundle/application/application-exeption/error-bundle-name-already-exist-application-exception";
+import { ErrorBundleNameAlreadyApplicationException } from "src/bundle/application/application-exception/error-bundle-name-already-exist-application-exception";
 import { ProductQueryRepositoryMock } from "test/product/infraestructure/mocks/repositories/product-query-repository.mock";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { ProductDescription } from "src/product/domain/value-object/product-description";
@@ -24,6 +21,9 @@ import { ProductPrice } from "src/product/domain/value-object/product-price";
 import { ProductStock } from "src/product/domain/value-object/product-stock";
 import { ProductWeigth } from "src/product/domain/value-object/product-weigth";
 import { BundleQueryRepositoryMock } from "test/bundle/infraestructure/mocks/repositories/bundle-query-repository.mock"
+import { EventPublisherMock } from "test/common/mocks/infraestructure/event-publisher.mock";
+import { FileUploaderMock } from "test/common/mocks/infraestructure/file-uploader.mock";
+import { IdGeneratorMock } from "test/common/mocks/infraestructure/id-generator.mock";
 
 let caughtError:any
 

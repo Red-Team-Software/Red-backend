@@ -1,6 +1,6 @@
 import { Result } from "src/common/utils/result-handler/result";
 import { Order } from "src/order/domain/aggregate/order";
-import { IRefundPaymentService } from "src/order/domain/domain-services/refund-amount.interface";
+import { IRefundPaymentService } from "src/order/domain/domain-services/interfaces/refund-amount.interface";
 import { OrderStripePaymentIntent } from "src/order/domain/value_objects/order-stripe-payment-intent";
 import { StripeSingelton } from "src/common/infraestructure/stripe/stripe-singelton";
 

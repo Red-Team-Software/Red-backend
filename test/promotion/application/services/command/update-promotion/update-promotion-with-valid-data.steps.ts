@@ -6,15 +6,9 @@ import { ProductName } from "src/product/domain/value-object/product-name"
 import { ProductPrice } from "src/product/domain/value-object/product-price"
 import { ProductStock } from "src/product/domain/value-object/product-stock"
 import { ProductWeigth } from "src/product/domain/value-object/product-weigth"
-import { EventPublisherMock } from "test/common/infraestructure/mocks/event-publisher.mock"
-import { ProductCommadRepositoryMock } from "test/product/infraestructure/mocks/repositories/product-command-repository.mock"
-import { FileUploaderMock } from "test/common/infraestructure/mocks/file-uploader.mock"
 import { When, Then } from "@cucumber/cucumber"
 import * as assert from 'assert';
 import { ProductQueryRepositoryMock } from "test/product/infraestructure/mocks/repositories/product-query-repository.mock"
-import { UpdateProductApplicationService } from "src/product/application/services/command/update-product-application.service"
-import { IdGeneratorMock } from "test/common/infraestructure/mocks/id-generator.mock"
-import { ErrorProductNameAlreadyExistApplicationException } from "src/product/application/application-exepction/error-product-name-already-exist-application-exception"
 import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate"
 import { BundleId } from "src/bundle/domain/value-object/bundle-id"
 import { BundleDescription } from "src/bundle/domain/value-object/bundle-description"
@@ -33,6 +27,7 @@ import { PromotionDescription } from "src/promotion/domain/value-object/promotio
 import { PromotionName } from "src/promotion/domain/value-object/promotion-name"
 import { PromotionState } from "src/promotion/domain/value-object/promotion-state"
 import { PromotionDiscount } from "src/promotion/domain/value-object/promotion-discount"
+import { EventPublisherMock } from "test/common/mocks/infraestructure/event-publisher.mock"
 
 let caughtError:any
 
@@ -154,6 +149,5 @@ Then('The promotion should be updated of the id {string}',
 async (
   id:string
 ) => {
-  console.log(caughtError)
   assert.strictEqual(caughtError, undefined, `Expected no error but got ${caughtError}`);
 })

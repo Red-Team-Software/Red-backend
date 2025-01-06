@@ -17,7 +17,7 @@ export class UserId implements ValueObject<UserId> {
     }
 
     private constructor(id:string){
-        const regex = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
+        const regex = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
         if (!regex.test(id)) { throw new InvalidUserIdException() }
         this.id=id
     }

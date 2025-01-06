@@ -10,43 +10,50 @@ import { OrmCategoryImage } from "../entities/orm-entities/orm-category-image.en
 import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
 import { DataSource, Repository } from "typeorm";
 import { ProductID } from "src/product/domain/value-object/product-id";
+import { OrmBundleEntity } from "src/bundle/infraestructure/entities/orm-entities/orm-bundle-entity";
 
 export class OrmCategoryMapper implements IMapper<Category, OrmCategoryEntity> {
     private readonly ormProductRepository:Repository<OrmProductEntity>
+    private readonly ormBundleRepository:Repository<OrmBundleEntity>
+
     constructor(private readonly idGen: IIdGen<string>,dataSource:DataSource) {
         this.ormProductRepository=dataSource.getRepository(OrmProductEntity)
+        this.ormBundleRepository=dataSource.getRepository(OrmBundleEntity)
     }
 
     async fromDomaintoPersistence(domainEntity: Category): Promise<OrmCategoryEntity> {
-        // Crear la entidad de imagen de persistencia si existe en el dominio
+
         let ormProducts:OrmProductEntity[]=[]
-        try {
-            for (const product of domainEntity.getProducts()){
+        let ormBundle:OrmBundleEntity[]=[]
+            for (const product of domainEntity.Products){
                 let response=await this.ormProductRepository.findOneBy({id:product.Value})
-                if (response) ormProducts.push(response)
+                if (response) 
+                    ormProducts.push(response)
             }
-            const ormImage = domainEntity.getImage()
+            const ormImage = domainEntity.Image
             ? OrmCategoryImage.create(
                 await this.idGen.genId(), 
-                domainEntity.getImage().Value, 
+                domainEntity.Image.Value, 
                 domainEntity.getId().Value,
 
             )
             : null;
 
-        // Construir la entidad de persistencia `OrmCategoryEntity`
+            for (const bundle of domainEntity.Bundles){
+                let response=await this.ormBundleRepository.findOneBy({id:bundle.Value})
+                if (response) 
+                    ormBundle.push(response)
+            }
+
         const data= OrmCategoryEntity.create(
             domainEntity.getId().Value,
-            domainEntity.getName().Value,
+            domainEntity.Name.Value,
             ormImage,
-            ormProducts
-        );
+            ormProducts,
+            ormBundle
+        )
 
-        return data;
-        } catch (error) {
-            
-        }
-        
+        return data;        
     }
 
     async fromPersistencetoDomain(infraEntity: OrmCategoryEntity): Promise<Category> {

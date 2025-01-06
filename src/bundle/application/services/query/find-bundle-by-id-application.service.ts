@@ -1,6 +1,6 @@
 import { IApplicationService } from "src/common/application/services"
 import { Result } from "src/common/utils/result-handler/result"
-import { NotFoundBundleApplicationException } from "../../application-exeption/not-found-bundle-application-exception"
+import { NotFoundBundleApplicationException } from "../../application-exception/not-found-bundle-application-exception"
 import { FindBundleByIdApplicationRequestDTO } from "../../dto/request/find-bundle-by-id-application-request-dto"
 import { FindBundleByIdApplicationResponseDTO } from "../../dto/response/find-bundle-by-id-application-response-dto"
 import { BundleId } from "src/bundle/domain/value-object/bundle-id"
@@ -23,7 +23,37 @@ IApplicationService<FindBundleByIdApplicationRequestDTO,FindBundleByIdApplicatio
 
         let bundle=response.getValue
 
-        return Result.success(bundle)
+        return Result.success({
+            name: bundle.name,
+            description: bundle.description,
+            images:bundle.images,
+            price: bundle.price,
+            currency: bundle.currency,
+            weight: bundle.weigth,
+            measurement: bundle.measurement,
+            stock: bundle.stock,
+            caducityDate: bundle.caducityDate
+            ? bundle.caducityDate
+            : null,
+            discount:bundle.promotion
+            ? bundle.promotion.map(b=>({
+                id:b.id,
+                percentage:b.discount 
+            }))
+            : [],
+            category: bundle.categories
+            ? bundle.categories.map(c=>({
+                id: c.id,
+                name:c.name
+            }))
+            : [],
+            products: bundle.products
+            ? bundle.products.map(p=>({
+                id:p.id,
+                name:p.name
+            }))
+            : []
+        })
     }
     
 }

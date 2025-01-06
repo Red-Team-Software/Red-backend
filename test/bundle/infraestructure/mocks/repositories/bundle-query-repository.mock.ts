@@ -12,9 +12,36 @@ export class BundleQueryRepositoryMock implements IQueryBundleRepository{
 
     constructor(private bundles: Bundle[] = []){}
 
-    async findAllBundles(criteria: FindAllBundlesApplicationRequestDTO): Promise<Result<Bundle[]>> {
+    private transformtodatamodel(b:Bundle):IBundleModel{
+        return{
+            id:b.getId().Value,
+            description:b.BundleDescription.Value,
+            caducityDate:b.BundleCaducityDate
+            ? b.BundleCaducityDate.Value
+            : null,
+            name:b.BundleName.Value,
+            stock:b.BundleStock.Value,
+            images:b.BundleImages.map(i=>i.Value),
+            price:b.BundlePrice.Price,
+            currency:b.BundlePrice.Currency,
+            weigth:b.BundleWeigth.Weigth,
+            measurement:b.BundleWeigth.Measure,
+            categories:[],
+            promotion:[],
+            products:b.ProductId.map(i=>({
+                id:i.Value,
+                name:''
+            }))        
+        }
+    }
+
+    async findAllBundles(criteria: FindAllBundlesApplicationRequestDTO): Promise<Result<IBundleModel[]>> {
         let bundles= this.bundles.slice(criteria.page,criteria.perPage)
-        return Result.success(bundles)    
+        return Result.success(
+            bundles
+            ? bundles.map(b=>this.transformtodatamodel(b))
+            : []
+        )    
     }
     async findAllBundlesByName(criteria: FindAllBundlesbyNameApplicationRequestDTO):
     Promise<Result<Bundle[]>> {

@@ -4,4 +4,5 @@ export interface CreateCategoryApplicationRequestDTO extends IServiceRequestDto 
     name: string;
     image: Buffer;
     products: string[];
+    bundles:string[]
 }
