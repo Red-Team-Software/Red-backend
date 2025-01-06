@@ -3,5 +3,6 @@ import { ConvertAmount } from "../value_objects/vo-domain-services/convert-amoun
 
 
 export interface IConversionService {
-    convertAmount(amount: ConvertAmount): Promise<Result<ConvertAmount>>;
+    convertAmountUSDtoVES(amount: ConvertAmount): Promise<Result<ConvertAmount>>;
+    convertAmountVEStoUSD(amount: ConvertAmount): Promise<Result<ConvertAmount>>;
 }

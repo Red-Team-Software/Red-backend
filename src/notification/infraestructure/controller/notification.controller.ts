@@ -52,6 +52,9 @@ import { NestTimer } from "src/common/infraestructure/timer/nets-timer";
 import { IDeliveringOrder } from "../interfaces/delivering-order.interface";
 import { OrderDeliveringPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/order-delivering-push-notification-application-request-dto";
 import { NewBundlePushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-bundle-push-notification-application-request-dto";
+import { IUserWalletBalanceUpdated } from "../interfaces/user-wallet-balance-updated";
+import { UpdateUserWalletBalancePushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/update-user-wallet-balance-push-notification-application-request-dto";
+import { UpdateUserWalletBalancePushNotificationApplicationService } from "src/notification/application/services/command/update-user-wallet-balance-push-notification-application.service";
 
 @ApiTags('Notification')
 @Controller('notification')
@@ -159,6 +162,26 @@ export class NotificationController {
             }
         })
 
+        this.subscriber.buildQueue({
+            name:'UserEvents',
+            pattern: 'UserBalanceAmountUpdated',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        })
+
+        this.subscriber.consume<IUserWalletBalanceUpdated>(
+            { name: 'ProductEvents'}, 
+            (data):Promise<void>=>{
+                this.sendPushUserWalletBalanceUpdated(data)
+                return
+            }
+        );
+
         this.subscriber.consume<ICreateProduct>(
             { name: 'ProductEvents'}, 
             (data):Promise<void>=>{
@@ -247,6 +270,30 @@ export class NotificationController {
         );
 
     }
+
+    async sendPushUserWalletBalanceUpdated(entry:IUserWalletBalanceUpdated){
+        
+        let service= new ExceptionDecorator(
+            new LoggerDecorator(
+                new UpdateUserWalletBalancePushNotificationApplicationService(
+                    this.pushsender
+                ),
+            new NestLogger(new Logger())
+            )
+        );
+
+        const tokensResponse = await this.querySessionRepository.findSessionById(entry.userId);
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
+        
+        let data:UpdateUserWalletBalancePushNotificationApplicationRequestDTO={
+            userId: entry.userId,
+            tokens:[tokensResponse.getValue.push_token],
+            userWallet:entry.userWallet
+        };
+        service.execute(data);
+    };
 
     async sendPushOrderDelivering(entry:IDeliveringOrder){
         let service= new ExceptionDecorator(

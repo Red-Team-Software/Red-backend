@@ -16,6 +16,7 @@ import { UserPhoneUpdated } from "../domain-events/user-phone-updated";
 import { UserDirectionUpdated } from "../domain-events/user-direction-updated";
 import { Wallet } from "../entities/wallet/wallet.entity";
 import { InvalidUserDirectionQuantityException } from "../domain-exceptions/invalid-user-direction-quantity-exception";
+import { UserBalanceAmountUpdated } from "../domain-events/user-balance-amount-updated";
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -160,6 +161,15 @@ export class User extends AggregateRoot <UserId>{
             )
         )
     }
+
+    updateWallet(wallet:Wallet):void{
+        this.apply(
+            UserBalanceAmountUpdated.create(
+                this.getId(),
+                wallet
+            )
+        );
+    };
 
     updateName(userName:UserName){
         this.apply(

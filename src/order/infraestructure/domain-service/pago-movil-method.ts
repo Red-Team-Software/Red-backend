@@ -23,12 +23,9 @@ export class PagoMovilPaymentMethod implements IPaymentMethodService {
     ) {}
 
     async createPayment(order: Order): Promise<Result<Order>> {
-        console.log("llegue aqui");
-        let change = ConvertAmount.create(order.TotalAmount.OrderAmount, order.TotalAmount.OrderCurrency)
+        let change = ConvertAmount.create(order.TotalAmount.OrderAmount, order.TotalAmount.OrderCurrency);
 
-        let newChange = await this.exchangeRate.convertAmount(change)
-        
-        console.log(newChange);
+        let newChange = await this.exchangeRate.convertAmountUSDtoVES(change);
 
         let newOrder = Order.registerOrder(
             order.getId(),
@@ -48,7 +45,7 @@ export class PagoMovilPaymentMethod implements IPaymentMethodService {
                 PaymentAmount.create(newChange.getValue.Amount),
                 PaymentCurrency.create(newChange.getValue.Currency)
             )
-        )
-        return Result.success(newOrder)
+        );
+        return Result.success(newOrder);
     }
 }
