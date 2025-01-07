@@ -23,6 +23,7 @@ export class AddBalanceToWalletZelleApplicationService extends IApplicationServi
     }
 
     async execute(data: AddBalanceZelleApplicationRequestDTO): Promise<Result<AddBalanceZelleApplicationResponseDTO>> {
+        
         let userResponse= await this.queryUserRepository.findUserById(UserId.create(data.userId));
         
         if (!userResponse.isSuccess())
@@ -36,7 +37,7 @@ export class AddBalanceToWalletZelleApplicationService extends IApplicationServi
 
         user.updateWallet(newWallet);
 
-        let userRes= await this.commandUserRepository.updateUser(user);
+        let userRes= await this.commandUserRepository.saveUser(user);
 
         if (!userRes.isSuccess())
             return Result.fail(new ErrorUpdatingBalanceWalletApplicationException());

@@ -31,7 +31,8 @@ export class OrmAccountEntity implements IAccount{
         password: string,
         created_at: Date,
         isConfirmed:boolean,
-        idUser:string
+        idUser:string,
+        idStripe:string,
     ): OrmAccountEntity
     {
         const account = new OrmAccountEntity()
@@ -42,6 +43,7 @@ export class OrmAccountEntity implements IAccount{
         account.created_at=created_at
         account.isConfirmed=isConfirmed
         account.idUser=idUser
+        account.idStripe=idStripe
         return account
     }
 }

@@ -24,8 +24,8 @@ export class UpdateWalletBalancePagoMovilInfraestructureRequestDTO{
     @IsString()
     reference: string;
 
-    @ApiProperty( { required: false, default: '22/03/2025' })
-    @IsDate()
-    @IsOptional()
-    date?: Date;
+    // @ApiProperty( { required: false, default: '22/03/2025' })
+    // @IsDate()
+    // @IsOptional()
+    // date?: Date;
 }

@@ -11,11 +11,11 @@ export class UpdateWalletBalanceZelleInfraestructureRequestDTO{
     @IsString()
     cedula: string;
 
-    @ApiProperty( { required: true, default: 'alfredo' })
+    @ApiProperty( { required: true, default: 'bank of america' })
     @IsString()
     bank: string;
 
-    @ApiProperty( { required: true, default: '30000' })
+    @ApiProperty( { required: true, default: '50' })
     @IsNumber()
     @IsPositive()
     amount: number;
@@ -24,8 +24,8 @@ export class UpdateWalletBalanceZelleInfraestructureRequestDTO{
     @IsString()
     reference: string;
 
-    @ApiProperty( { required: false, default: '22/03/2025' })
-    @IsDate()
-    @IsOptional()
-    date?: Date;
+    // @ApiProperty( { required: false, default: '22/03/2025' })
+    // @IsDate()
+    // @IsOptional()
+    // date?: Date;
 }

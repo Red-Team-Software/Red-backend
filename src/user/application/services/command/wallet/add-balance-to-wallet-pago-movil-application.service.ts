@@ -28,6 +28,7 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
     
 
     async execute(data: AddBalancePagoMovilApplicationRequestDTO): Promise<Result<AddBalanceZelleApplicationResponseDTO>> {
+        
         let userResponse= await this.queryUserRepository.findUserById(UserId.create(data.userId));
         
         if (!userResponse.isSuccess())
@@ -35,9 +36,9 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
         
         const user = userResponse.getValue;
 
-        let change = ConvertAmount.create(user.Wallet.Ballance.Amount, user.Wallet.Ballance.Currency);
+        let change = ConvertAmount.create(data.amount, user.Wallet.Ballance.Currency);
 
-        let newChange = await this.exchangeRate.convertAmountUSDtoVES(change);
+        let newChange = await this.exchangeRate.convertAmountVEStoUSD(change);
 
         if (!newChange.isSuccess())
             return Result.fail(new ErrorChangeCurrencyApplicationException());
@@ -45,11 +46,12 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
         let newBalance = Ballance.create(newChange.getValue.Amount, user.Wallet.Ballance.Currency);
 
         let newWallet = Wallet.create(user.Wallet.getId(), newBalance);
+        console.log(newWallet)
 
         user.updateWallet(newWallet);
 
-        let userRes= await this.commandUserRepository.updateUser(user)
-                
+        let userRes= await this.commandUserRepository.saveUser(user);
+
         if (!userRes.isSuccess())
             return Result.fail(new ErrorUpdatingBalanceWalletApplicationException());
 

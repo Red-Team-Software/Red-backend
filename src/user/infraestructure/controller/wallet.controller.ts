@@ -99,7 +99,7 @@ export class PaymentWalletController {
             bank: entry.bank,
             amount: entry.amount,
             reference: entry.reference,
-            date: entry.date
+            date: new Date()
         }
 
         return await service.execute(data);
@@ -132,7 +132,7 @@ export class PaymentWalletController {
             bank: entry.bank,
             amount: entry.amount,
             reference: entry.reference,
-            date: entry.date
+            date: new Date()
         }
 
         return await service.execute(data);

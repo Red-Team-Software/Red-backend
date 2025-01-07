@@ -59,6 +59,11 @@ export class User extends AggregateRoot <UserId>{
                 this.userPhone=userPhoneUpdated.userPhone
                 break;
             }
+            case 'UserBalanceAmountUpdated':{
+                const userBalanceAmountUpdated: UserBalanceAmountUpdated = event as UserBalanceAmountUpdated
+                this.wallet= userBalanceAmountUpdated.userWallet
+                break;
+            }
             default: { throw new DomainExceptionNotHandled(JSON.stringify(event)) }
         }
     }
