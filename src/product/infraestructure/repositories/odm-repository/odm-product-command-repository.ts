@@ -5,48 +5,43 @@ import { ICommandProductRepository } from "src/product/domain/repository/product
 import { ProductID } from "src/product/domain/value-object/product-id";
 import { OdmProduct, OdmProductSchema } from "../../entities/odm-entities/odm-product-entity";
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
-import { IOdmProduct } from "../../model-entity/odm-model-entity/odm-product-interface";
+import { OdmProductMapper } from "../../mapper/odm-mapper/odm-product-mapper";
 
 export class OdmProductCommandRepository implements ICommandProductRepository {
 
     private readonly model: Model<OdmProduct>;
-
-    trasformToDataModel(p:Product):IOdmProduct{
-        return {
-              id: p.getId().Value,
-              name: p.ProductName.Value,
-              description: p.ProductDescription.Value,
-              image: p.ProductImages
-              ? p.ProductImages.map(i=>i.Value)
-              : [],
-              caducityDate: p.ProductCaducityDate
-              ? p.ProductCaducityDate.Value
-              : null,
-              stock: p.ProductStock.Value,
-              price: p.ProductPrice.Price,
-              currency: p.ProductPrice.Currency,
-              weigth: p.ProductWeigth.Weigth,
-              measurament: p.ProductWeigth.Measure,
-              category: [] 
-        }
-    }
+    private readonly odmMapper:OdmProductMapper
 
     constructor( mongoose: Mongoose ) { 
         this.model = mongoose.model<OdmProduct>('OdmProduct', OdmProductSchema)
+        this.odmMapper=new OdmProductMapper()
     }
     async createProduct(product: Product): Promise<Result<Product>> {
         try{
-            const odm = new this.model(this.trasformToDataModel(product))
-            await this.model.create( odm )
+            const odm = new this.model(await this.odmMapper.fromDomaintoPersistence(product))
+            let e=await this.model.create( odm )
+            console.log(e)
             return Result.success(product)
         }catch(e){
+            console.log(e)
             return Result.fail( new PersistenceException('Create product unsucssessfully') )
         }
     }
-    deleteProductById(id: ProductID): Promise<Result<ProductID>> {
-        throw new Error("Method not implemented.");
+    async deleteProductById(id: ProductID): Promise<Result<ProductID>> {
+        try{
+            const result = await this.model.findOneAndDelete( { id: id.Value } )
+            return Result.success(id)
+        } catch (e) {
+            return Result.fail(new PersistenceException('Delete product unsucssessfully'))
+        }    
     }
-    updateProduct(product: Product): Promise<Result<Product>> {
-        throw new Error("Method not implemented.");
+    async updateProduct(product: Product): Promise<Result<Product>> {
+        try{
+            const odm = new this.model(await this.odmMapper.fromDomaintoPersistence(product))
+            const result = await this.model.updateOne({id:odm.id},odm)
+            return Result.success(product)
+        } catch (e) {
+            return Result.fail(new PersistenceException('Update product unsucssessfully'))
+        }    
     }
 }

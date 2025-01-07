@@ -56,6 +56,20 @@ import { FindAllProductsApplicationRequestDTO } from 'src/product/application/dt
 import { OdmProductQueryRepository } from '../repositories/odm-repository/odm-product-query-repository';
 import { Mongoose } from 'mongoose';
 import { OdmProductCommandRepository } from '../repositories/odm-repository/odm-product-command-repository';
+import { ICreateProduct } from '../interfaces/create-product.interface';
+import { ProductRegisteredSyncroniceService } from '../services/syncronice/product-registered-syncronice.service';
+import { IProductUpdatedCaducityDate } from '../interfaces/product-updated-caducity-date.interface';
+import { IProductUpdatedDescription } from '../interfaces/product-updated-description.interface';
+import { IProductUpdatedImages } from '../interfaces/product-updated-images.interface';
+import { IProductUpdatedName } from '../interfaces/product-updated-name.interface';
+import { IProductUpdatedPrice } from '../interfaces/product-updated-price.interface';
+import { IProductUpdatedStock } from '../interfaces/product-updated-stock.interface';
+import { IProductUpdatedWeigth } from '../interfaces/product-updated-weigth.interface';
+import { ProductUpdatedInfraestructureRequestDTO } from '../services/dto/request/product-updated-infraestructure-request-dto';
+import { ProductUpdatedSyncroniceService } from '../services/syncronice/product-updated-syncronice.service';
+import { IProductDeleted } from '../interfaces/product-deleted.interface';
+import { ProductDeleted } from 'src/product/domain/domain-events/product-deleted';
+import { ProductDeletedSyncroniceService } from '../services/syncronice/product-deleted-syncronice.service';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -116,6 +130,90 @@ export class ProductController {
           return
         }
     )
+
+    this.subscriber.consume<ICreateProduct>(
+      { name: 'ProductSync/ProductRegistered'}, 
+      (data):Promise<void>=>{
+        this.syncProductRegistered(data)
+        return
+      }
+  )
+
+    this.subscriber.consume<IProductUpdatedCaducityDate>(
+      { name: 'ProductSync/ProductUpdatedCaducityDate'}, 
+      (data):Promise<void>=>{
+        this.syncProductUpdated({
+          ...data,
+          productCaducityDate:new Date(data.productCaducityDate)})
+        return
+      }
+    )
+
+    this.subscriber.consume<IProductUpdatedCaducityDate>(
+      { name: 'ProductSync/ProductUpdatedCaducityDate'}, 
+      (data):Promise<void>=>{
+        this.syncProductUpdated({
+          ...data,
+          productCaducityDate:new Date(data.productCaducityDate)})
+        return
+      }
+    )
+
+    this.subscriber.consume<IProductUpdatedDescription>(
+      { name: 'ProductSync/ProductUpdatedDescription'}, 
+      (data):Promise<void>=>{
+        this.syncProductUpdated({...data})
+        return
+      }
+    )
+
+    this.subscriber.consume<IProductUpdatedImages>(
+      { name: 'ProductSync/ProductUpdatedImages'}, 
+      (data):Promise<void>=>{
+        this.syncProductUpdated(data)
+        return
+      }
+    )
+    
+    this.subscriber.consume<IProductUpdatedName>(
+      { name: 'ProductSync/ProductUpdatedName'}, 
+      (data):Promise<void>=>{
+        this.syncProductUpdated(data)
+        return
+      }
+    )
+    
+    this.subscriber.consume<IProductUpdatedPrice>(
+      { name: 'ProductSync/ProductUpdatedPrice'}, 
+      (data):Promise<void>=>{
+        this.syncProductUpdated(data)
+        return
+      }
+    )
+    
+    this.subscriber.consume<IProductUpdatedStock>(
+      { name: 'ProductSync/ProductUpdatedStock'}, 
+      (data):Promise<void>=>{
+        this.syncProductUpdated(data)
+        return
+      }
+    )
+    
+    this.subscriber.consume<IProductUpdatedWeigth>(
+      { name: 'ProductSync/ProductUpdatedWeigth'}, 
+      (data):Promise<void>=>{
+        this.syncProductUpdated(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IProductUpdatedWeigth>(
+      { name: 'ProductSync/ProductDeleted'}, 
+      (data):Promise<void>=>{
+        this.syncProductDeleted(data)
+        return
+      }
+    )
   }
 
   async reduceProductStock (data:ICreateOrder){
@@ -135,6 +233,21 @@ export class ProductController {
       )
     )
     await service.execute({userId:data.orderUserId,products:data.products})
+  }
+
+  async syncProductRegistered(data:ICreateProduct){
+    let service= new ProductRegisteredSyncroniceService(this.mongoose)
+    await service.execute(data)
+  }
+
+  async syncProductDeleted(data:IProductDeleted){
+    let service= new ProductDeletedSyncroniceService(this.mongoose)
+    await service.execute(data)
+  }
+
+  async syncProductUpdated(data:ProductUpdatedInfraestructureRequestDTO){
+    let service= new ProductUpdatedSyncroniceService(this.mongoose)
+    await service.execute({...data})
   }
 
   @UseGuards(JwtAuthGuard)

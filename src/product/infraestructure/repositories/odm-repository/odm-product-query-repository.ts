@@ -9,36 +9,17 @@ import { ProductName } from 'src/product/domain/value-object/product-name';
 import { OdmProduct, OdmProductSchema } from '../../entities/odm-entities/odm-product-entity';
 import { Product } from 'src/product/domain/aggregate/product.aggregate';
 import { NotFoundException } from 'src/common/infraestructure/infraestructure-exception';
-import { ProductDescription } from 'src/product/domain/value-object/product-description';
-import { ProductStock } from 'src/product/domain/value-object/product-stock';
-import { ProductImage } from 'src/product/domain/value-object/product-image';
-import { ProductPrice } from 'src/product/domain/value-object/product-price';
-import { ProductWeigth } from 'src/product/domain/value-object/product-weigth';
-import { ProductCaducityDate } from 'src/product/domain/value-object/product-caducity-date';
+import { OdmProductMapper } from '../../mapper/odm-mapper/odm-product-mapper';
 
 export class OdmProductQueryRepository implements IQueryProductRepository {
 
     private readonly model: Model<OdmProduct>;
+    private readonly odmMapper:OdmProductMapper
+
 
     constructor( mongoose: Mongoose ) { 
         this.model = mongoose.model<OdmProduct>('OdmProduct', OdmProductSchema)
-    }
-
-    transfromToDomain(p:OdmProduct):Product{
-        return Product.initializeAggregate(
-            ProductID.create(p.id),
-            ProductDescription.create(p.description),
-            ProductName.create(p.name),
-            ProductStock.create(p.stock),
-            p.image
-            ? p.image.map(i=>ProductImage.create(i))
-            : [],
-            ProductPrice.create(p.price,p.currency),
-            ProductWeigth.create(p.weigth,p.measurament),
-            p.caducityDate
-            ? ProductCaducityDate.create(p.caducityDate)
-            : null
-        )
+        this.odmMapper=new OdmProductMapper()
     }
 
     findAllProducts(criteria: FindAllProductsApplicationRequestDTO): Promise<Result<IProductModel[]>> {
@@ -52,7 +33,7 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
             let product=await this.model.findById(id.Value)
             if(!product)
                 return Result.fail( new NotFoundException('Find product unsucssessfully'))
-            return Result.success(this.transfromToDomain(product))
+            return Result.success(await this.odmMapper.fromPersistencetoDomain(product))
         }
         catch(e){
             return Result.fail( new NotFoundException('Find product unsucssessfully'))
