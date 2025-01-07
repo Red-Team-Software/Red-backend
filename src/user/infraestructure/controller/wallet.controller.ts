@@ -51,10 +51,8 @@ import { UserCardsApplicationRequestDTO } from "src/user/application/dto/request
 @Controller('pay')
 export class PaymentWalletController {
 
-    private readonly idGen: IIdGen<string> ;
     private readonly ormUserQueryRepo:IQueryUserRepository;
     private readonly ormUserCommandRepo:ICommandUserRepository;
-    private readonly ormAccountCommandRepo:ICommandAccountRepository<IAccount>;
     private readonly ormAccountQueryRepo:IQueryAccountRepository<IAccount>;
     private readonly auditRepository: IAuditRepository;
     private readonly userExternalSite: IUserExternalAccountService;
@@ -62,11 +60,9 @@ export class PaymentWalletController {
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
     ) {
-        this.idGen= new UuidGen()
         this.ormUserQueryRepo=new OrmUserQueryRepository(PgDatabaseSingleton.getInstance())
         this.ormUserCommandRepo=new OrmUserCommandRepository(PgDatabaseSingleton.getInstance())
         this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
-        this.ormAccountCommandRepo= new OrmAccountCommandRepository(PgDatabaseSingleton.getInstance())
         this.ormAccountQueryRepo= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance())
         this.userExternalSite = new UserStripeAccount(StripeSingelton.getInstance())
     }

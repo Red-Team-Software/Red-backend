@@ -89,6 +89,7 @@ import { IExchangeRateResponse } from "../interfaces/exchange-rate-response.inte
 import { ExchangeRateSingelton } from "src/common/infraestructure/exchange-rate/exchange-rate-singleton";
 import { ConvertCurrencyExchangeRate } from "../domain-service/conversion-currency-exchange-rate";
 import { PaymentEntryDto } from "../dto/payment-entry-dto";
+import { WalletPaymentMethod } from "../domain-service/wallet-method";
 
 
 @ApiBearerAuth()
@@ -279,18 +280,16 @@ export class OrderController {
             )
         );
 
-        
-
-
         let response = await payOrderService.execute(payment);
         
         return response.getValue;
     }
 
-    @Post('/pay/pagomovil')
-    async realizePaymentZelle(
+
+    @Post('/pay/wallet')
+    async realizePaymentWallet(
         @GetCredential() credential:ICredential,
-        @Body() data: PagoMovilPaymentEntryDto
+        @Body() data: PaymentEntryDto
     ) {
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: credential.account.idUser,
@@ -308,11 +307,9 @@ export class OrderController {
                     this.rabbitMq,
                     this.calculateShipping,
                     this.calculateTax,
-                    new PagoMovilPaymentMethod(
-                        this.idGen,
-                        {...data},
-                        new ConvertCurrencyExchangeRate(this.exchangeRateSingelton)
-                    ),
+                    new WalletPaymentMethod(
+                        this.idGen, 
+                        this.ormUserQueryRepository),
                     this.orderRepository,
                     this.idGen,
                     this.geocodificationAddress,
@@ -326,9 +323,6 @@ export class OrderController {
                 new NestLogger(new Logger())
             )
         );
-
-        
-
 
         let response = await payOrderService.execute(payment);
         

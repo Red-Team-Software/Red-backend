@@ -144,7 +144,7 @@ export class ProductController {
 
     let service=
     new ExceptionDecorator(
-      new SecurityDecorator(
+      //new SecurityDecorator(
         new AuditDecorator(
           new PerformanceDecorator(
             new CreateProductApplicationService(
@@ -155,7 +155,8 @@ export class ProductController {
               new CloudinaryService()
             ),new NestTimer(),new NestLogger(new Logger())
           ),this.auditRepository,new DateHandler()
-        ),credential,[UserRoles.ADMIN])
+        ),
+        //credential,[UserRoles.ADMIN])
       )
       let buffers=images.map(image=>image.buffer)
     let response= await service.execute({userId:credential.account.idUser,...entry,images:buffers})
