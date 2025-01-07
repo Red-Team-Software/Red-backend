@@ -1,4 +1,3 @@
-import { UserNotFoundApplicationException } from "src/auth/application/application-exeption/user-not-found-application-exception";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IApplicationService } from "src/common/application/services"
 import { Result } from "src/common/utils/result-handler/result"
@@ -8,8 +7,9 @@ import { ICommandUserRepository } from "src/user/domain/repository/user.command.
 import { UserId } from "src/user/domain/value-object/user-id";
 import { ErrorUpdatingBalanceWalletApplicationException } from "src/user/application/application-exeption/error-updating-wallet-balance-application-exception";
 import { Wallet } from "src/user/domain/entities/wallet/wallet.entity";
-import { AddBalanceZelleApplicationRequestDTO } from "src/user/application/dto/request/add-balance-to-wallet-zelle-application-resquest-dto";
-import { AddBalanceZelleApplicationResponseDTO } from "src/user/application/dto/response/add-balance-to-wallet-pago-movil-direction-application-response-dto";
+import { AddBalanceZelleApplicationRequestDTO } from "src/user/application/dto/request/wallet/add-balance-to-wallet-zelle-application-resquest-dto";
+import { AddBalanceZelleApplicationResponseDTO } from "src/user/application/dto/response/wallet/add-balance-to-wallet-pago-movil-direction-application-response-dto";
+import { UserNotFoundApplicationException } from "src/auth/application/application-exception/user-not-found-application-exception";
 
 
 export class AddBalanceToWalletZelleApplicationService extends IApplicationService<AddBalanceZelleApplicationRequestDTO, AddBalanceZelleApplicationResponseDTO> {

@@ -15,6 +15,7 @@ export class OrmAccountEntity implements IAccount{
     @Column( 'varchar' ) idUser: string;
     @Column( 'varchar' ,{nullable:true}) code: string;
     @Column( 'timestamp', { nullable:true } )  code_created_at: Date;
+    @Column( 'varchar' ) idStripe: string;
 
 
     @OneToMany( () => OrmSessionEntity, session => session.account,{ eager: true })  

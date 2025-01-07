@@ -9,7 +9,7 @@ import { PaymentId } from "src/order/domain/entities/payment/value-object/paymen
 import { PaymentMethod } from "src/order/domain/entities/payment/value-object/payment-method";
 import { OrderState } from "src/order/domain/value_objects/order-state";
 import { PagoMovilDTO } from "../dto/pago-movil-dto-entry.dto";
-import { IConversionService } from "src/order/domain/domain-services/conversion-currency-interface";
+import { IConversionService } from "src/order/domain/domain-services/interfaces/conversion-currency-interface";
 import { ConvertAmount } from "src/order/domain/value_objects/vo-domain-services/convert-amount";
 
 

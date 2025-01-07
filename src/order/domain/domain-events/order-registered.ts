@@ -28,14 +28,14 @@ export class OrderRegistered extends DomainEvent {
             orderUserId: this.orderUserId.userId,
             products: this.products
             ? this.products.map(p=>({
-                id:p.OrderProductId.OrderProductId,
+                id:p.ProductDetailId.productDetailId,
                 quantity:p.Quantity.Quantity
             }))
             : [],
             bundles: this.bundles 
             ? this.bundles.map(b=>({
-                id:b.OrderBundleId.OrderBundleId,
-                quantity:b.Quantity.OrderBundleQuantity
+                id:b.BundleDetailId.BundleDetailId,
+                quantity:b.Quantity.Quantity
             }))
             :[],
             orderReceivedDate: this.orderReceivedDate

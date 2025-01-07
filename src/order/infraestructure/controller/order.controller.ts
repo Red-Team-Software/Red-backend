@@ -1,7 +1,6 @@
 import { Body, Controller, Get, Inject, Logger, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { StripeSingelton } from "src/common/infraestructure/stripe/stripe-singelton";
-import { StripePaymentEntryDto } from "../dto/stripe-payment-entry-dto";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { ExceptionDecorator } from "src/common/application/aspects/exeption-decorator/exception-decorator";
@@ -89,6 +88,7 @@ import { PagoMovilPaymentMethod } from "../domain-service/pago-movil-method";
 import { IExchangeRateResponse } from "../interfaces/exchange-rate-response.interface";
 import { ExchangeRateSingelton } from "src/common/infraestructure/exchange-rate/exchange-rate-singleton";
 import { ConvertCurrencyExchangeRate } from "../domain-service/conversion-currency-exchange-rate";
+import { PaymentEntryDto } from "../dto/payment-entry-dto";
 
 
 @ApiBearerAuth()
@@ -246,7 +246,7 @@ export class OrderController {
     @Post('/pay/stripe')
     async realizePayment(
         @GetCredential() credential:ICredential,
-        @Body() data: StripePaymentEntryDto
+        @Body() data: PaymentEntryDto
     ) {
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: credential.account.idUser,

@@ -49,4 +49,10 @@ export class PaymentEntryDto {
     id: string,
     quantity: number
   }[];
+
+  @ApiProperty({
+    required: true, default: 'pm_card_threeDSecureOptional' 
+  })
+  @IsString()
+  stripePaymentMethod: string;
 }

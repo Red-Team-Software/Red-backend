@@ -1,17 +1,17 @@
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IApplicationService } from "src/common/application/services"
 import { Result } from "src/common/utils/result-handler/result"
-import { IConversionService } from "src/order/domain/domain-services/conversion-currency-interface";
+import { IConversionService } from "src/order/domain/domain-services/interfaces/conversion-currency-interface";
 import { ConvertAmount } from "src/order/domain/value_objects/vo-domain-services/convert-amount";
 import { ErrorChangeCurrencyApplicationException } from "src/order/application/application-exception/error-change-currency-application-exception";
-import { AddBalancePagoMovilApplicationRequestDTO } from "src/user/application/dto/request/add-balance-to-wallet-pago-movil-application-resquest-dto"
+import { AddBalancePagoMovilApplicationRequestDTO } from "src/user/application/dto/request/wallet/add-balance-to-wallet-pago-movil-application-resquest-dto"
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { Ballance } from "src/user/domain/entities/wallet/value-objects/balance";
 import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { ErrorUpdatingBalanceWalletApplicationException } from "src/user/application/application-exeption/error-updating-wallet-balance-application-exception";
 import { Wallet } from "src/user/domain/entities/wallet/wallet.entity";
-import { AddBalanceZelleApplicationResponseDTO } from "src/user/application/dto/response/add-balance-to-wallet-pago-movil-direction-application-response-dto";
+import { AddBalanceZelleApplicationResponseDTO } from "src/user/application/dto/response/wallet/add-balance-to-wallet-pago-movil-direction-application-response-dto";
 import { UserNotFoundApplicationException } from "src/auth/application/application-exception/user-not-found-application-exception";
 
 

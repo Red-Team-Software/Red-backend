@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { IsString, IsOptional, IsNumber, IsPositive, IsDate } from "class-validator"
 
-export class UpdateWalletBalancePagoMovilInfraestructureRequestDTO{
+export class UpdateWalletBalanceZelleInfraestructureRequestDTO{
     
     @ApiProperty( { required: true, default: '04121234567' })
     @IsString()

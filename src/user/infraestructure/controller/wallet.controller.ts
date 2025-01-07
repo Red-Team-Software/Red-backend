@@ -30,9 +30,20 @@ import { AddBalanceToWalletPagoMovilApplicationService } from "src/user/applicat
 import { ConvertCurrencyExchangeRate } from "src/order/infraestructure/domain-service/conversion-currency-exchange-rate"
 import { ExchangeRateSingelton } from "src/common/infraestructure/exchange-rate/exchange-rate-singleton"
 import { UpdateWalletBalancePagoMovilInfraestructureRequestDTO } from "../dto/request/wallet/update-wallet-balance-pago-movil-infraestructure-request-dto"
-import { AddBalancePagoMovilApplicationRequestDTO } from "src/user/application/dto/request/add-balance-to-wallet-pago-movil-application-resquest-dto"
+import { AddBalancePagoMovilApplicationRequestDTO } from "src/user/application/dto/request/wallet/add-balance-to-wallet-pago-movil-application-resquest-dto"
 import { AddBalanceToWalletZelleApplicationService } from "src/user/application/services/command/wallet/add-balance-to-wallet-zelle-application.service"
-import { AddBalanceZelleApplicationRequestDTO } from "src/user/application/dto/request/add-balance-to-wallet-zelle-application-resquest-dto"
+import { AddBalanceZelleApplicationRequestDTO } from "src/user/application/dto/request/wallet/add-balance-to-wallet-zelle-application-resquest-dto"
+import { UpdateWalletBalanceZelleInfraestructureRequestDTO } from "../dto/request/wallet/update-wallet-balance-zelle-infraestructure-request-dto"
+import { SaveCardApplicationRequestDTO } from "src/user/application/dto/request/wallet/save-card-application-request-dto"
+import { SaveCardInfraestructureRequestDTO } from "../dto/request/wallet/save-card-infraestructure-request-dto"
+import { SaveCardToUserApplicationService } from "src/user/application/services/command/wallet/save-card-to-user-application.service"
+import { IUserExternalAccountService } from "src/auth/application/interfaces/user-external-account-interface"
+import { UserStripeAccount } from "src/auth/infraestructure/services/user-stripe-account"
+import { StripeSingelton } from "src/common/infraestructure/stripe/stripe-singelton"
+import { GetWalletAmountApplicationService } from "src/user/application/services/query/wallet/get-wallet-amount-application.service"
+import { WalletAmountApplicationRequestDTO } from "src/user/application/dto/request/wallet/get-wallet-amount-application-request-dto"
+import { GetUserCardsApplicationService } from "src/user/application/services/query/wallet/get-user-cards-application.service"
+import { UserCardsApplicationRequestDTO } from "src/user/application/dto/request/wallet/get-user-cards-application-request-dto"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -46,6 +57,7 @@ export class PaymentWalletController {
     private readonly ormAccountCommandRepo:ICommandAccountRepository<IAccount>;
     private readonly ormAccountQueryRepo:IQueryAccountRepository<IAccount>;
     private readonly auditRepository: IAuditRepository;
+    private readonly userExternalSite: IUserExternalAccountService;
 
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -56,7 +68,7 @@ export class PaymentWalletController {
         this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
         this.ormAccountCommandRepo= new OrmAccountCommandRepository(PgDatabaseSingleton.getInstance())
         this.ormAccountQueryRepo= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance())
-
+        this.userExternalSite = new UserStripeAccount(StripeSingelton.getInstance())
     }
 
 
@@ -97,7 +109,7 @@ export class PaymentWalletController {
     @Post('zelle')
     async CreatePaymentZelle(
         @GetCredential() credential:ICredential, 
-        @Body() entry: UpdateWalletBalancePagoMovilInfraestructureRequestDTO
+        @Body() entry: UpdateWalletBalanceZelleInfraestructureRequestDTO
     ){
         let service= new ExceptionDecorator(
             new AuditDecorator(
@@ -127,4 +139,81 @@ export class PaymentWalletController {
 
     }
 
+    @Post('card')
+    async CreatePaymentStripe(
+        @GetCredential() credential:ICredential, 
+        @Body() entry: SaveCardInfraestructureRequestDTO
+    ){
+        let service= new ExceptionDecorator(
+            new AuditDecorator(
+                new LoggerDecorator(
+                    new PerformanceDecorator(
+                        new SaveCardToUserApplicationService (
+                            this.ormUserQueryRepo,
+                            this.ormAccountQueryRepo,
+                            this.userExternalSite
+                        ), new NestTimer(), new NestLogger(new Logger())
+                    ), new NestLogger(new Logger())
+                ),this.auditRepository, new DateHandler()
+            )
+        );
+
+        let data: SaveCardApplicationRequestDTO = {
+            userId: credential.account.idUser,
+            cardId: entry.id
+        }
+
+        return await service.execute(data);
+
+    }
+
+    @Get('wallet-amount')
+    async GetWalletAmount(
+        @GetCredential() credential:ICredential
+    ){
+        let service= new ExceptionDecorator(
+                new LoggerDecorator(
+                    new PerformanceDecorator(
+                        new GetWalletAmountApplicationService (
+                            this.ormUserQueryRepo,
+                        ), 
+                        new NestTimer(), 
+                        new NestLogger(new Logger())
+                ), new NestLogger(new Logger())
+            )
+        );
+
+        let data: WalletAmountApplicationRequestDTO = {
+            userId: credential.account.idUser
+        }
+
+        return await service.execute(data);
+
+    }
+
+    @Get('card')
+    async GetCards(
+        @GetCredential() credential:ICredential
+    ){
+        let service= new ExceptionDecorator(
+                new LoggerDecorator(
+                    new PerformanceDecorator(
+                        new GetUserCardsApplicationService (
+                            this.ormUserQueryRepo,
+                            this.ormAccountQueryRepo,
+                            this.userExternalSite
+                        ), 
+                        new NestTimer(), 
+                        new NestLogger(new Logger())
+                ), new NestLogger(new Logger())
+            )
+        );
+
+        let data: UserCardsApplicationRequestDTO = {
+            userId: credential.account.idUser
+        }
+
+        return await service.execute(data);
+
+    }
 }
