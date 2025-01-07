@@ -1,6 +1,6 @@
 import { IServiceRequestDto } from "src/common/application/services"
 
-export interface UpdateUserWalletBalancePushNotificationApplicationRequestDTO extends IServiceRequestDto {
+export interface UserWalletBalanceAddedPushNotificationApplicationRequestDTO extends IServiceRequestDto {
     tokens:string[];
     userId: string;
     userWallet:{

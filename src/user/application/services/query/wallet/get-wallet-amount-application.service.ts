@@ -22,6 +22,8 @@ export class GetWalletAmountApplicationService extends IApplicationService<Walle
         
         const user = userResponse.getValue;
 
-        return Result.success({ amount: user.Wallet.Ballance.Amount, currency: user.Wallet.Ballance.Currency });
+        let amount = parseFloat(Number(user.Wallet.Ballance.Amount).toFixed(2))
+
+        return Result.success({ amount: amount, currency: user.Wallet.Ballance.Currency });
     }
 }

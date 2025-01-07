@@ -2,7 +2,7 @@ import { DomainEvent } from "src/common/domain"
 import { Wallet } from "../entities/wallet/wallet.entity"
 import { UserId } from "../value-object/user-id"
 
-export class UserBalanceAmountUpdated extends DomainEvent {
+export class UserBalanceAmountDecremented extends DomainEvent {
     serialize(): string {
         let data= {  
             userId:this.userId.Value,
@@ -17,7 +17,7 @@ export class UserBalanceAmountUpdated extends DomainEvent {
         userId:UserId,
         userWallet:Wallet
     ){
-        return new UserBalanceAmountUpdated(
+        return new UserBalanceAmountDecremented(
             userId,
             userWallet
         )

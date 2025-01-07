@@ -1,4 +1,4 @@
-export interface IUserWalletBalanceUpdated {
+export interface IUserWalletBalanceAdded {
     userId: string;
     userWallet:{
         amount: number;

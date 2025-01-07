@@ -53,6 +53,7 @@ import { ProductDetailQuantity } from 'src/order/domain/entities/product-detail/
 import { ProductDetailPrice } from 'src/order/domain/entities/product-detail/value_object/product-detail-price';
 import { BundleDetailPrice } from 'src/order/domain/entities/bundle-detail/value_object/bundle-detail-price';
 import { CalculateAmountService } from 'src/order/domain/domain-services/services/calculate-amount.service';
+import { ICommandUserRepository } from 'src/user/domain/repository/user.command.repository.interface';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -72,8 +73,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly ormCourierQueryRepository: ICourierQueryRepository,
         private readonly dateHandler: IDateHandler,
         private readonly queryPromotionRepositoy: IQueryPromotionRepository,
-        private readonly paymentQueryRepository:IPaymentMethodQueryRepository
-        
+        private readonly paymentQueryRepository:IPaymentMethodQueryRepository,
     ){
         super()
     }
@@ -245,11 +245,12 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let response = await this.payOrder.createPayment(order);
 
-            if (response.isFailure()) return Result.fail(new ErrorCreatingPaymentApplicationException());
+            if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException());
+
             
             let responseDB = await this.orderRepository.saveOrder(response.getValue); 
 
-            if (responseDB.isFailure()) 
+            if (!responseDB.isSuccess()) 
                 return Result.fail(new ErrorCreatingOrderApplicationException());
 
             await this.eventPublisher.publish(response.getValue.pullDomainEvents());
@@ -274,7 +275,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 images:string[]
             }[]=[];
 
-
+            if(data.products)
             products.forEach(product=>{
                 productsresponse.push({
                     id: product.getId().Value,
@@ -289,6 +290,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 })
             });
 
+            if(data.bundles)
             bundles.forEach(bundle=>{
                 bundlesresponse.push({
                     id: bundle.getId().Value,
@@ -311,7 +313,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 orderState: response.getValue.OrderState.orderState,
                 orderCreatedDate: response.getValue.OrderCreatedDate.OrderCreatedDate,
                 orderTimeCreated: response.getValue.OrderCreatedDate.OrderCreatedDate.toTimeString().split(' ')[0],
-                totalAmount: response.getValue.TotalAmount.OrderAmount,
+                totalAmount: parseFloat(response.getValue.TotalAmount.OrderAmount.toFixed(2)),
                 currency: response.getValue.TotalAmount.OrderCurrency,
                 orderDirection: {
                     lat: response.getValue.OrderDirection.Latitude,

@@ -6,7 +6,7 @@ export class CourierImage implements ValueObject<CourierImage> {
     private readonly image: string
 
     private constructor(image:string){
-        const regex=new RegExp(/https?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp)/)
+        const regex=new RegExp(/http?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp|webp)/)
 
         if(!regex.test(image)) throw new InvalidCourierImageException()
         this.image=image

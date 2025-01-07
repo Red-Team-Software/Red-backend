@@ -55,8 +55,8 @@ import { NewBundlePushNotificationApplicationRequestDTO } from "src/notification
 import { NotificationQueues } from "../queues/notification.queues";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { OrderDeliveringPushNotificationApplicationService } from "src/notification/application/services/command/order-delivering-push-notification-application.service";
-import { IUserWalletBalanceUpdated } from "../interfaces/user-wallet-balance-updated";
-import { UpdateUserWalletBalancePushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/update-user-wallet-balance-push-notification-application-request-dto";
+import { IUserWalletBalanceAdded } from "../interfaces/user-wallet-balance-updated";
+import { UserWalletBalanceAddedPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/user-wallet-balance-added-push-notification-application-request-dto";
 import { UpdateUserWalletBalancePushNotificationApplicationService } from "src/notification/application/services/command/update-user-wallet-balance-push-notification-application.service";
 
 @ApiTags('Notification')
@@ -184,7 +184,7 @@ export class NotificationController {
 
         this.subscriber.buildQueue({
             name:'UserEvents',
-            pattern: 'UserBalanceAmountUpdated',
+            pattern: 'UserBalanceAmountAdded',
             exchange:{
                 name:'DomainEvent',
                 type:'direct',
@@ -194,10 +194,10 @@ export class NotificationController {
             }
         })
 
-        this.subscriber.consume<IUserWalletBalanceUpdated>(
-            { name: 'ProductEvents'}, 
+        this.subscriber.consume<IUserWalletBalanceAdded>(
+            { name: 'UserEvents'}, 
             (data):Promise<void>=>{
-                this.sendPushUserWalletBalanceUpdated(data)
+                this.sendPushUserWalletBalanceAdded(data)
                 return
             }
         );
@@ -319,7 +319,7 @@ export class NotificationController {
 
     }
 
-    async sendPushUserWalletBalanceUpdated(entry:IUserWalletBalanceUpdated){
+    async sendPushUserWalletBalanceAdded(entry:IUserWalletBalanceAdded){
         
         let service= new ExceptionDecorator(
             new LoggerDecorator(
@@ -335,7 +335,7 @@ export class NotificationController {
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;
         
-        let data:UpdateUserWalletBalancePushNotificationApplicationRequestDTO={
+        let data:UserWalletBalanceAddedPushNotificationApplicationRequestDTO={
             userId: entry.userId,
             tokens:[tokensResponse.getValue.push_token],
             userWallet:entry.userWallet

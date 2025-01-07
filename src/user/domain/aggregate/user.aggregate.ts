@@ -16,7 +16,8 @@ import { UserPhoneUpdated } from "../domain-events/user-phone-updated";
 import { UserDirectionUpdated } from "../domain-events/user-direction-updated";
 import { Wallet } from "../entities/wallet/wallet.entity";
 import { InvalidUserDirectionQuantityException } from "../domain-exceptions/invalid-user-direction-quantity-exception";
-import { UserBalanceAmountUpdated } from "../domain-events/user-balance-amount-updated";
+import { UserBalanceAmountAdded } from "../domain-events/user-balance-amount-added";
+import { UserBalanceAmountDecremented } from "../domain-events/user-balance-amount-decremented";
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -59,9 +60,14 @@ export class User extends AggregateRoot <UserId>{
                 this.userPhone=userPhoneUpdated.userPhone
                 break;
             }
-            case 'UserBalanceAmountUpdated':{
-                const userBalanceAmountUpdated: UserBalanceAmountUpdated = event as UserBalanceAmountUpdated
-                this.wallet= userBalanceAmountUpdated.userWallet
+            case 'UserBalanceAmountAdded':{
+                const userBalanceAmountAdded: UserBalanceAmountAdded = event as UserBalanceAmountAdded
+                this.wallet= userBalanceAmountAdded.userWallet
+                break;
+            }
+            case 'UserBalanceAmountDecremented':{                    
+                const userBalanceAmountDecremented: UserBalanceAmountDecremented = event as UserBalanceAmountDecremented
+                this.wallet= userBalanceAmountDecremented.userWallet
                 break;
             }
             default: { throw new DomainExceptionNotHandled(JSON.stringify(event)) }
@@ -167,9 +173,18 @@ export class User extends AggregateRoot <UserId>{
         )
     }
 
-    updateWallet(wallet:Wallet):void{
+    addWalletBalance(wallet:Wallet):void{
         this.apply(
-            UserBalanceAmountUpdated.create(
+            UserBalanceAmountAdded.create(
+                this.getId(),
+                wallet
+            )
+        );
+    };
+
+    decreaseWalletBalance(wallet:Wallet):void{
+        this.apply(
+            UserBalanceAmountDecremented.create(
                 this.getId(),
                 wallet
             )

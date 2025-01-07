@@ -90,6 +90,8 @@ import { ExchangeRateSingelton } from "src/common/infraestructure/exchange-rate/
 import { ConvertCurrencyExchangeRate } from "../domain-service/conversion-currency-exchange-rate";
 import { PaymentEntryDto } from "../dto/payment-entry-dto";
 import { WalletPaymentMethod } from "../domain-service/wallet-method";
+import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface";
+import { OrmUserCommandRepository } from "src/user/infraestructure/repositories/orm-repository/orm-user-command-repository";
 
 
 @ApiBearerAuth()
@@ -104,7 +106,6 @@ export class OrderController {
     //*Singeltons
     private readonly stripeSingleton: StripeSingelton;
     private readonly hereMapsSingelton: HereMapsSingelton;
-    private readonly exchangeRateSingelton: ExchangeRateSingelton;
     
     //*Domain services
     private readonly calculateShipping: ICalculateShippingFee;
@@ -124,6 +125,7 @@ export class OrderController {
     private readonly ormBundleRepository: IQueryBundleRepository;
     private readonly ormCourierRepository: ICourierRepository;
     private readonly ormCourierQueryRepository: ICourierQueryRepository;
+    private readonly ormUserCommandRepo:ICommandUserRepository;
     private readonly ormUserQueryRepository: IQueryUserRepository;
     private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
 
@@ -143,7 +145,6 @@ export class OrderController {
         //*implementations of singeltons
         this.stripeSingleton = StripeSingelton.getInstance();
         this.hereMapsSingelton = HereMapsSingelton.getInstance();
-        this.exchangeRateSingelton = ExchangeRateSingelton.getInstance();
 
         //*RabbitMQ
         this.rabbitMq = new RabbitMQPublisher(this.channel);
@@ -171,6 +172,7 @@ export class OrderController {
             PgDatabaseSingleton.getInstance(),
             new OrmPaymentMethodMapper()
         )
+        this.ormUserCommandRepo=new OrmUserCommandRepository(PgDatabaseSingleton.getInstance())
 
         //*Mappers
         this.orderMapper = new OrmOrderMapper(
@@ -221,7 +223,9 @@ export class OrderController {
                     this.orderQueryRepository,
                     this.orderRepository,
                     this.rabbitMq,
-                    new RefundPaymentStripeConnection(this.stripeSingleton)
+                    new RefundPaymentStripeConnection(this.stripeSingleton),
+                    this.ormUserCommandRepo,
+                    this.ormUserQueryRepository
                 ),
                 new NestLogger(new Logger())
             )
@@ -309,7 +313,8 @@ export class OrderController {
                     this.calculateTax,
                     new WalletPaymentMethod(
                         this.idGen, 
-                        this.ormUserQueryRepository),
+                        this.ormUserQueryRepository,
+                        this.ormUserCommandRepo),
                     this.orderRepository,
                     this.idGen,
                     this.geocodificationAddress,
@@ -318,7 +323,7 @@ export class OrderController {
                     this.ormCourierQueryRepository,
                     new DateHandler(),
                     new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                    this.paymentMethodQueryRepository
+                    this.paymentMethodQueryRepository,
                 ),
                 new NestLogger(new Logger())
             )

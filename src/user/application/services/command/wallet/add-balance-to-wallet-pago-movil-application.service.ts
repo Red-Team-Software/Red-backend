@@ -46,9 +46,8 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
         let newBalance = Ballance.create(newChange.getValue.Amount, user.Wallet.Ballance.Currency);
 
         let newWallet = Wallet.create(user.Wallet.getId(), newBalance);
-        console.log(newWallet)
 
-        user.updateWallet(newWallet);
+        user.addWalletBalance(newWallet);
 
         let userRes= await this.commandUserRepository.saveUser(user);
 
