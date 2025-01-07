@@ -2,18 +2,22 @@ import { Result } from 'src/common/utils/result-handler/result';
 import { ISycnchronizeService } from 'src/common/infraestructure/synchronize-service/synchronize.service.interface';
 import { ProductUpdatedInfraestructureRequestDTO } from '../dto/request/product-updated-infraestructure-request-dto';
 import { OdmProduct, OdmProductSchema } from '../../entities/odm-entities/odm-product-entity';
-import { Model, Mongoose } from 'mongoose';
+import { Mongoose, Model } from 'mongoose';
+import { OdmBundle, OdmBundleSchema } from 'src/bundle/infraestructure/entities/odm-entities/odm-bundle-entity';
 
 export class ProductUpdatedSyncroniceService 
 implements ISycnchronizeService<ProductUpdatedInfraestructureRequestDTO,void>{
     
-    private readonly model: Model<OdmProduct>
+    private readonly productModel: Model<OdmProduct>
+    private readonly bundleModel: Model<OdmBundle>
+
 
     constructor( mongoose: Mongoose ) { 
-        this.model = mongoose.model<OdmProduct>('OdmProduct', OdmProductSchema)
+        this.productModel = mongoose.model<OdmProduct>('OdmProduct', OdmProductSchema)
+        this.bundleModel = mongoose.model<OdmBundle>('OdmBundle', OdmBundleSchema)
     }
     async execute(event: ProductUpdatedInfraestructureRequestDTO): Promise<Result<void>> {
-        let product= await this.model.findOne({id:event.productId})
+        let product= await this.productModel.findOne({id:event.productId})
         if (event.productCaducityDate)
             product.caducityDate=event.productCaducityDate
         if (event.productDescription)
@@ -33,7 +37,13 @@ implements ISycnchronizeService<ProductUpdatedInfraestructureRequestDTO,void>{
             product.weigth=event.productWeigth.weigth
             product.measurament=event.productWeigth.measure
         }
-        await this.model.updateOne({id:product.id},product)
+        await this.productModel.updateOne({id:product.id},product)
+
+        await this.bundleModel.updateMany(
+            { products: product.id },
+            { $set: { 'products.$': product } }
+          )
+
         return Result.success(undefined)
     }   
 }

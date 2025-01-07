@@ -101,8 +101,8 @@ export class NotificationController {
         this.subscriber.consume<ICreateProduct>(
             { name: 'ProductEvents/ProductRegistered'}, 
             (data):Promise<void>=>{
-                // this.sendEmailToCreateProduct(data)
-                // this.sendPushToCreatedProduct(data)
+                this.sendEmailToCreateProduct(data)
+                this.sendPushToCreatedProduct(data)
                 return
             }
         );
@@ -110,8 +110,8 @@ export class NotificationController {
         this.subscriber.consume<ICreateBundle>(
             { name: 'BundleEvents/BundleRegistered'}, 
             (data):Promise<void>=>{
-                // this.sendPushToCreatedBundle(data)
-                // this.sendEmailToCreateBundle(data)
+                this.sendPushToCreatedBundle(data)
+                this.sendEmailToCreateBundle(data)
                 return
             }
         );
@@ -119,8 +119,8 @@ export class NotificationController {
         this.subscriber.consume<ICreateOrder>(
             { name: 'OrderEvents/OrderRegistered'}, 
             (data):Promise<void>=>{
-                // this.sendPushOrderCreated(data)
-                // this.sendEmailOrderCreated(data)
+                this.sendPushOrderCreated(data)
+                this.sendEmailOrderCreated(data)
                 return
             }
         )
@@ -128,7 +128,7 @@ export class NotificationController {
         this.subscriber.consume<ICreateCupon>(
             { name: 'CuponEvents/Createcupon'}, 
             (data):Promise<void>=>{
-                // this.sendPushCuponCreated(data)
+                this.sendPushCuponCreated(data)
                 return
             }
         )
@@ -136,8 +136,8 @@ export class NotificationController {
         this.subscriber.consume<ICancelOrder>(
             { name: 'OrderEvents/CancelOrder'}, 
             (data):Promise<void>=>{
-                // this.sendPushOrderCancelled(data)
-                // this.sendEmailOrderCancelled(data)
+                this.sendPushOrderCancelled(data)
+                this.sendEmailOrderCancelled(data)
                 return
             }
         );
@@ -145,7 +145,7 @@ export class NotificationController {
         this.subscriber.consume<IDeliveringOrder>(
             { name: 'OrderEvents/OrderStatusDelivered'}, 
             (data):Promise<void>=>{
-                // this.sendPushOrderDelivered(data)
+                this.sendPushOrderDelivered(data)
                 return
             }
         );
@@ -153,7 +153,7 @@ export class NotificationController {
         this.subscriber.consume<IDeliveringOrder>(
             { name: 'OrderEvents/OrderStatusDelivering'}, 
             (data):Promise<void>=>{
-                // this.sendPushOrderDelivering(data)
+                this.sendPushOrderDelivering(data)
                 return
             }
         );

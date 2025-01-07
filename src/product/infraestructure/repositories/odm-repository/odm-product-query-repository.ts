@@ -16,6 +16,38 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
     private readonly model: Model<OdmProduct>;
     private readonly odmMapper:OdmProductMapper
 
+        private trasnformtoDataModel(ormProduct:OdmProduct):IProductModel{
+            return {
+                id:ormProduct.id,
+                description:ormProduct.description,
+                caducityDate:
+                ormProduct.caducityDate
+                ? ormProduct.caducityDate
+                : null,	
+                name:ormProduct.name,
+                stock:ormProduct.stock,
+                images:ormProduct.image,
+                price:Number(ormProduct.price),
+                currency:ormProduct.currency,
+                weigth:ormProduct.weigth,
+                measurement:ormProduct.measurament,
+                categories: ormProduct.category
+                ? ormProduct.category.map(c=>({
+                    id:c.id,
+                    name:c.name
+                }))
+                : [],
+                promotion: []
+                // ormProduct.promotions
+                // ? ormProduct.promotions.map(promotion=>({
+                //     id:promotion.id,
+                //     name:promotion.name,
+                //     discount:Number(promotion.discount)
+                // }))
+                // : []
+            }
+        }
+
 
     constructor( mongoose: Mongoose ) { 
         this.model = mongoose.model<OdmProduct>('OdmProduct', OdmProductSchema)
@@ -30,7 +62,7 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
     }
     async findProductById(id: ProductID): Promise<Result<Product>> {
         try{
-            let product=await this.model.findById(id.Value)
+            let product=await this.model.findById({id:id.Value})
             if(!product)
                 return Result.fail( new NotFoundException('Find product unsucssessfully'))
             return Result.success(await this.odmMapper.fromPersistencetoDomain(product))

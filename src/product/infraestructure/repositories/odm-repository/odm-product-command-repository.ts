@@ -20,10 +20,8 @@ export class OdmProductCommandRepository implements ICommandProductRepository {
         try{
             const odm = new this.model(await this.odmMapper.fromDomaintoPersistence(product))
             let e=await this.model.create( odm )
-            console.log(e)
             return Result.success(product)
         }catch(e){
-            console.log(e)
             return Result.fail( new PersistenceException('Create product unsucssessfully') )
         }
     }
