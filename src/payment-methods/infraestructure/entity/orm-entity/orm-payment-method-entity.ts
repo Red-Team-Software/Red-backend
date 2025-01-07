@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 import { IPaymentMethod } from "../../model-entity/orm-model-entity/orm-payment-method-interface";
 
-@Entity('payment-method')
+@Entity('payment_method')
 export class PaymentMethodEntity implements IPaymentMethod {
     @PrimaryGeneratedColumn('uuid')
     id: string;
