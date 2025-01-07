@@ -53,7 +53,6 @@ import { ProductDetailQuantity } from 'src/order/domain/entities/product-detail/
 import { ProductDetailPrice } from 'src/order/domain/entities/product-detail/value_object/product-detail-price';
 import { BundleDetailPrice } from 'src/order/domain/entities/bundle-detail/value_object/bundle-detail-price';
 import { CalculateAmountService } from 'src/order/domain/domain-services/services/calculate-amount.service';
-import { ICommandUserRepository } from 'src/user/domain/repository/user.command.repository.interface';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
