@@ -1,10 +1,10 @@
 import { CreateCourierApplicationService } from "src/courier/application/services/create-courier-application.service"
 import { When, Then } from "@cucumber/cucumber"
-import { EventPublisherMock } from "test/common/infraestructure/mocks/event-publisher.mock"
 import { CourierRepositoryMock } from "test/courier/infraestructure/mock/repositories/courier-command-repository.mock"
-import { IdGeneratorMock } from "test/common/infraestructure/mocks/id-generator.mock"
-import { FileUploaderMock } from "test/common/infraestructure/mocks/file-uploader.mock"
 import * as assert from 'assert';
+import { EventPublisherMock } from "test/common/mocks/infraestructure/event-publisher.mock";
+import { IdGeneratorMock } from "test/common/mocks/infraestructure/id-generator.mock";
+import { FileUploaderMock } from "test/common/mocks/infraestructure/file-uploader.mock";
 
 let caughtError:any
 

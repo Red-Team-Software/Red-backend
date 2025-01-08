@@ -13,6 +13,8 @@ import { ErrorUpdatingBalanceWalletApplicationException } from "src/user/applica
 import { Wallet } from "src/user/domain/entities/wallet/wallet.entity";
 import { AddBalanceZelleApplicationResponseDTO } from "src/user/application/dto/response/wallet/add-balance-to-wallet-pago-movil-direction-application-response-dto";
 import { UserNotFoundApplicationException } from "src/auth/application/application-exception/user-not-found-application-exception";
+import { ICommandTransactionRepository } from "src/user/application/repository/wallet-transaction/transaction.command.repository.interface";
+import { ITransaction } from "src/user/application/model/transaction-interface";
 
 
 export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationService<AddBalancePagoMovilApplicationRequestDTO, AddBalanceZelleApplicationResponseDTO> {
@@ -21,7 +23,8 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
         private readonly commandUserRepository:ICommandUserRepository,
         private readonly queryUserRepository:IQueryUserRepository,
         private readonly eventPublisher: IEventPublisher,
-        private readonly exchangeRate: IConversionService
+        private readonly exchangeRate: IConversionService,
+        private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>
     ) {
         super();
     }

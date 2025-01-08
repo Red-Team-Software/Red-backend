@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Logger, Post, UseGuards } from "@nestjs/common"
+import { Body, Controller, Get, Inject, Logger, Post, Query, UseGuards } from "@nestjs/common"
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
 import { Channel } from "amqplib"
 import { IAccount } from "src/auth/application/model/account.interface"
@@ -41,6 +41,20 @@ import { GetWalletAmountApplicationService } from "src/user/application/services
 import { WalletAmountApplicationRequestDTO } from "src/user/application/dto/request/wallet/get-wallet-amount-application-request-dto"
 import { GetUserCardsApplicationService } from "src/user/application/services/query/wallet/get-user-cards-application.service"
 import { UserCardsApplicationRequestDTO } from "src/user/application/dto/request/wallet/get-user-cards-application-request-dto"
+import { FindAllTransactionsByWalletInfraestructureEntryDto } from "../dto/request/wallet/find-all-transactions-by-wallet-infraestructure-request-dto"
+import { GetAllTransactionsApplicationRequestDTO } from "src/user/application/dto/request/wallet/get-all-transactions-application-request-dto"
+import { IQueryTransactionRepository } from "src/user/application/repository/wallet-transaction/transaction-query-repository.interface"
+import { ITransaction } from "src/user/application/model/transaction-interface"
+import { OrmTransactionQueryRepository } from "../repositories/orm-repository/orm-transaction-query-repository"
+import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface"
+import { OrmPaymentMethodQueryRepository } from "src/payment-methods/infraestructure/repository/orm-repository/orm-payment-method-query-repository"
+import { OrmPaymentMethodMapper } from "src/payment-methods/infraestructure/mapper/orm-mapper/orm-payment-method-mapper"
+import { ICommandTransactionRepository } from "src/user/application/repository/wallet-transaction/transaction.command.repository.interface"
+import { OrmTransactionCommandRepository } from "../repositories/orm-repository/orm-transaction-command-repository"
+import { FindAllTransactionsByUserApplicationService } from "src/user/application/services/query/wallet/get-all-transactions-application.service"
+import { FindTransactionByIdApplicationService } from "src/user/application/services/query/wallet/get-transaction-by-id-application.service"
+import { GetTransactionByIdApplicationRequestDTO } from "src/user/application/dto/request/wallet/get-transaction-by-id-application-request-dto"
+import { FindTransactionByIdEntryDTO } from "../dto/request/wallet/find-transaction-by-id-entry.dto"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -53,15 +67,24 @@ export class PaymentWalletController {
     private readonly ormAccountQueryRepo:IQueryAccountRepository<IAccount>;
     private readonly auditRepository: IAuditRepository;
     private readonly userExternalSite: IUserExternalAccountService;
+    private readonly transactionQueryRepository: IQueryTransactionRepository<ITransaction>;
+    private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
+    private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>
 
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
     ) {
-        this.ormUserQueryRepo=new OrmUserQueryRepository(PgDatabaseSingleton.getInstance())
-        this.ormUserCommandRepo=new OrmUserCommandRepository(PgDatabaseSingleton.getInstance())
-        this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
-        this.ormAccountQueryRepo= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance())
-        this.userExternalSite = new UserStripeAccount(StripeSingelton.getInstance())
+        this.ormUserQueryRepo=new OrmUserQueryRepository(PgDatabaseSingleton.getInstance());
+        this.ormUserCommandRepo=new OrmUserCommandRepository(PgDatabaseSingleton.getInstance());
+        this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance());
+        this.ormAccountQueryRepo= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance());
+        this.userExternalSite = new UserStripeAccount(StripeSingelton.getInstance());
+        this.transactionQueryRepository = new OrmTransactionQueryRepository(PgDatabaseSingleton.getInstance());
+        this.paymentMethodQueryRepository = new OrmPaymentMethodQueryRepository(
+                    PgDatabaseSingleton.getInstance(),
+                    new OrmPaymentMethodMapper()
+                );
+        this.TransactionCommandRepository = new OrmTransactionCommandRepository(PgDatabaseSingleton.getInstance());
     }
 
     @Post('pago-movil')
@@ -77,7 +100,8 @@ export class PaymentWalletController {
                             this.ormUserCommandRepo,
                             this.ormUserQueryRepo,
                             new RabbitMQPublisher(this.channel),
-                            new ConvertCurrencyExchangeRate(ExchangeRateSingelton.getInstance())
+                            new ConvertCurrencyExchangeRate(ExchangeRateSingelton.getInstance()),
+                            this.TransactionCommandRepository
                         ), new NestTimer(), new NestLogger(new Logger())
                     ), new NestLogger(new Logger())
                 ),this.auditRepository, new DateHandler()
@@ -110,7 +134,8 @@ export class PaymentWalletController {
                         new AddBalanceToWalletZelleApplicationService (
                             this.ormUserCommandRepo,
                             this.ormUserQueryRepo,
-                            new RabbitMQPublisher(this.channel)
+                            new RabbitMQPublisher(this.channel),
+                            this.TransactionCommandRepository
                         ), new NestTimer(), new NestLogger(new Logger())
                     ), new NestLogger(new Logger())
                 ),this.auditRepository, new DateHandler()
@@ -204,5 +229,64 @@ export class PaymentWalletController {
 
         return await service.execute(data);
 
+    }
+
+    @Get('transaction/many')
+    async findAllTransactionsByUser(
+        @GetCredential() credential:ICredential,
+        @Query() data: FindAllTransactionsByWalletInfraestructureEntryDto
+    ) {
+        let values: GetAllTransactionsApplicationRequestDTO = {
+            userId: credential.account.idUser,
+            page: data.page,
+            perPage: data.perPage
+        };
+    
+        if(!data.page)
+            values.page=1;
+        if(!data.perPage)
+            values.perPage=10;
+        
+        let service=
+            new ExceptionDecorator(
+                new LoggerDecorator(
+                    new PerformanceDecorator(
+                        new FindAllTransactionsByUserApplicationService(
+                            this.transactionQueryRepository,
+                            this.ormUserQueryRepo,
+                            this.paymentMethodQueryRepository
+                        ), new NestTimer(), new NestLogger(new Logger())
+                    ),new NestLogger(new Logger())
+                )
+            );
+            
+        let response = await service.execute(values)
+        return response.getValue;
+    }
+
+    @Get('transaction/:transactionId')
+    async findTransactionById(
+        @GetCredential() credential:ICredential,
+        @Query() data: FindTransactionByIdEntryDTO
+    ) {
+        let values: GetTransactionByIdApplicationRequestDTO = {
+            userId: credential.account.idUser,
+            transactionId: data.transactionId
+        };
+        
+        let service=
+            new ExceptionDecorator(
+                new LoggerDecorator(
+                    new PerformanceDecorator(
+                        new FindTransactionByIdApplicationService(
+                            this.transactionQueryRepository,
+                            this.paymentMethodQueryRepository
+                        ), new NestTimer(), new NestLogger(new Logger())
+                    ),new NestLogger(new Logger())
+                )
+            );
+            
+        let response = await service.execute(values)
+        return response.getValue;
     }
 }
