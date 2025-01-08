@@ -37,8 +37,6 @@ import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/
 import { IGeocodification } from "src/order/domain/domain-services/interfaces/geocodification-interface";
 import { GeocodificationHereMapsDomainService } from "../domain-service/geocodification-here-maps-domain-service";
 import { OrmProductQueryRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-query-repository";
-import { OrmProductRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-repository";
-import { OrmBundleRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-repository";
 import { CancelOrderApplicationServiceRequestDto } from "src/order/application/dto/request/cancel-order-request-dto";
 import { CancelOrderApplicationServiceResponseDto } from "src/order/application/dto/response/cancel-order-response-dto";
 import { CancelOderApplicationService } from "src/order/application/service/cancel-order-application.service";
@@ -63,7 +61,6 @@ import { DateHandler } from "src/common/infraestructure/date-handler/date-handle
 import { ModifyCourierLocationApplicationService } from "src/order/application/service/modify-courier-location-application.service";
 import { ModifyCourierLocationEntryDto } from "../dto/modify-order-courier-location-entry.dto";
 import { ModifyCourierLocationRequestDto } from "src/order/application/dto/request/modify-courier-location-request.dto";
-import { FindOrderByIdEntryDto } from "../dto/find-order-by-id-entry.dto";
 import { FindOrderByIdRequestDto } from "src/order/application/dto/request/find-order-by-id-request-dto";
 import { FindOrderByIdApplicationService } from "src/order/application/service/find-order-by-id-application.service";
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
@@ -83,11 +80,6 @@ import { DeliveredOrderDto } from "../dto/delivered-order-entry.dto";
 import { DeliveringOrderDto } from "../dto/delivering-order-entry.dto";
 import { DeliveringOderApplicationService } from "src/order/application/service/delivering-order-application.service";
 import { DeliveredOderApplicationService } from "src/order/application/service/delivered-order-application.service";
-import { PagoMovilPaymentEntryDto } from "../dto/pago-movil-payment-entry-dto";
-import { PagoMovilPaymentMethod } from "../domain-service/pago-movil-method";
-import { IExchangeRateResponse } from "../interfaces/exchange-rate-response.interface";
-import { ExchangeRateSingelton } from "src/common/infraestructure/exchange-rate/exchange-rate-singleton";
-import { ConvertCurrencyExchangeRate } from "../domain-service/conversion-currency-exchange-rate";
 import { PaymentEntryDto } from "../dto/payment-entry-dto";
 import { WalletPaymentMethod } from "../domain-service/wallet-method";
 import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface";

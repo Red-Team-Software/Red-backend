@@ -9,12 +9,11 @@ import { UuidGen } from 'src/common/infraestructure/id-gen/uuid-gen';
 import { LoggerDecorator } from 'src/common/application/aspects/logger-decorator/logger-decorator';
 import { NestLogger } from 'src/common/infraestructure/logger/nest-logger';
 import { CloudinaryService } from 'src/common/infraestructure/file-uploader/cloudinary-uploader';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
 import { OrmProductQueryRepository } from '../repositories/orm-repository/orm-product-query-repository';
 import { FindAllProductsApplicationService } from 'src/product/application/services/query/find-all-products-application.service';
 import { FindAllProductsInfraestructureRequestDTO } from '../dto-request/find-all-products-infraestructure-request-dto';
-import { PaginationRequestDTO } from 'src/common/application/services/dto/request/pagination-request-dto';
 import { Channel } from 'amqplib';
 import { FindAllProductsAndBundlesInfraestructureRequestDTO } from '../dto-request/find-all-products-and-bundles-infraestructure-request-dto';
 import { FindAllProductsAndComboApplicationService } from 'src/product/application/services/query/find-all-product-and-combo-by-name-application.service';
@@ -45,12 +44,6 @@ import { UpdateProductApplicationService } from 'src/product/application/service
 import { RabbitMQSubscriber } from 'src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber';
 import { ProductQueues } from '../queues/product.queues';
 import { ICreateOrder } from '../interfaces/create-order.interface';
-import { IQueryAccountRepository } from 'src/auth/application/repository/query-account-repository.interface';
-import { IAccount } from 'src/auth/application/model/account.interface';
-import { ISession } from 'src/auth/application/model/session.interface';
-import { IQueryTokenSessionRepository } from 'src/auth/application/repository/query-token-session-repository.interface';
-import { OrmTokenQueryRepository } from 'src/auth/infraestructure/repositories/orm-repository/orm-token-query-session-repository';
-import { OrmAccountQueryRepository } from 'src/auth/infraestructure/repositories/orm-repository/orm-account-query-repository';
 import { AdjustProductStockApplicationService } from 'src/product/application/services/command/adjust-product-stock-application.service';
 import { FindAllProductsApplicationRequestDTO } from 'src/product/application/dto/request/find-all-products-application-request-dto';
 
