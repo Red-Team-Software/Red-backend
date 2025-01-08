@@ -24,8 +24,6 @@ import { PromotionId } from "src/promotion/domain/value-object/promotion-id";
 import { PromotionName } from "src/promotion/domain/value-object/promotion-name";
 import { PromotionState } from "src/promotion/domain/value-object/promotion-state";
 import { BundleQueryRepositoryMock } from "test/bundle/infraestructure/mocks/repositories/bundle-query-repository.mock";
-import { EventPublisherMock } from 'test/common/infraestructure/mocks/event-publisher.mock';
-import { IdGeneratorMock } from "test/common/infraestructure/mocks/id-generator.mock";
 import { CalculateShippingFeeMock } from "test/order/infraestructure/mock/domain-services/calculate-shipping-fee-mock";
 import { CalculateTaxesFeeMock } from "test/order/infraestructure/mock/domain-services/calculate-tax-fee-mock";
 import { OrderCommandRepositoryMock } from "test/order/infraestructure/mock/repositories/order-command-repository.mock";
@@ -45,6 +43,8 @@ import { Courier } from "src/courier/domain/aggregate/courier";
 import { CourierId } from "src/courier/domain/value-objects/courier-id";
 import { CourierName } from "src/courier/domain/value-objects/courier-name";
 import { CourierImage } from "src/courier/domain/value-objects/courier-image";
+import { EventPublisherMock } from "test/common/mocks/infraestructure/event-publisher.mock";
+import { IdGeneratorMock } from "test/common/mocks/infraestructure/id-generator.mock";
 
 let caughtError:any;
 

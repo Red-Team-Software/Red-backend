@@ -257,8 +257,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             let productsresponse:{
                 id: string,
                 quantity: number
-                nombre:string 
-                descripcion:string
+                name:string 
+                description:string
                 price:number 
                 images:string[]
                 currency:string
@@ -267,8 +267,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             let bundlesresponse:{
                 id: string,
                 quantity: number
-                nombre:string 
-                descripcion:string
+                name:string 
+                description:string
                 price:number 
                 currency:string
                 images:string[]
@@ -281,8 +281,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                     quantity: order.Products.find(
                         orderproduct=>product.getId().equals(ProductID.create(orderproduct.ProductDetailId.productDetailId))
                     ).Quantity.Quantity,
-                    nombre:product.ProductName.Value,
-                    descripcion:product.ProductDescription.Value,
+                    name:product.ProductName.Value,
+                    description:product.ProductDescription.Value,
                     price:product.ProductPrice.Price,
                     currency:product.ProductPrice.Currency,
                     images:product.ProductImages.map(image=>image.Value)
@@ -296,8 +296,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                     quantity: order.Bundles.find(
                         orderBundle=>bundle.getId().equals(BundleId.create(orderBundle.BundleDetailId.BundleDetailId))
                     ).Quantity.Quantity,
-                    nombre:bundle.BundleName.Value ,
-                    descripcion:bundle.BundleDescription.Value,
+                    name:bundle.BundleName.Value ,
+                    description:bundle.BundleDescription.Value,
                     price:bundle.BundlePrice.Price,
                     currency:bundle.BundlePrice.Currency,
                     images:bundle.BundleImages.map(image=>image.Value)                

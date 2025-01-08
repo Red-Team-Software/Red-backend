@@ -62,7 +62,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
                     domainProducts.push({
                         id: domain.getValue.getId().Value,
                         nombre: domain.getValue.ProductName.Value,
-                        descripcion: domain.getValue.ProductDescription.Value,
+                        description: domain.getValue.ProductDescription.Value,
                         quantity: prod.Quantity.Quantity,
                         price: prod.Price.Price,
                         images: domain.getValue.ProductImages.map((image)=>image.Value),
@@ -84,7 +84,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
                     domainBundles.push({
                         id: domain.getValue.getId().Value,
                         nombre: domain.getValue.BundleName.Value,
-                        descripcion: domain.getValue.BundleDescription.Value,
+                        description: domain.getValue.BundleDescription.Value,
                         quantity: bund.Quantity.Quantity,
                         price: bund.Price.Price,
                         images: domain.getValue.BundleImages.map((image)=>image.Value),

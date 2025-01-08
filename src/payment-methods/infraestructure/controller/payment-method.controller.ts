@@ -105,7 +105,7 @@ export class PaymentMethodController {
         return response.getValue;
     }
 
-    @Get('/all')
+    @Get('/many')
     async findAllPaymentMethods(
         @GetCredential() credential:ICredential,
         @Query() data: FindAllPaymentMethodEntryDto

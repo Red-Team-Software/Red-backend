@@ -67,7 +67,6 @@ export class PaymentWalletController {
         this.userExternalSite = new UserStripeAccount(StripeSingelton.getInstance())
     }
 
-
     @Post('pago-movil')
     async CreatePaymentPagoMovil(
         @GetCredential() credential:ICredential, 
@@ -135,7 +134,7 @@ export class PaymentWalletController {
 
     }
 
-    @Post('card')
+    @Post('card/create')
     async CreatePaymentStripe(
         @GetCredential() credential:ICredential, 
         @Body() entry: SaveCardInfraestructureRequestDTO
@@ -187,7 +186,7 @@ export class PaymentWalletController {
 
     }
 
-    @Get('card')
+    @Get('card/many')
     async GetCards(
         @GetCredential() credential:ICredential
     ){

@@ -352,7 +352,7 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Get('/all')
+    @Get('/many')
     async findAllOrders(
         @GetCredential() credential:ICredential,
         @Query() data: FindAllOrdersEntryDto
@@ -372,7 +372,7 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Get('/user/all')
+    @Get('/user/many')
     async findAllByUserOrders(
         @GetCredential() credential:ICredential,
         @Query() data: FindAllOrdersByUserInfraestructureEntryDto
@@ -516,7 +516,7 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Get('/one/:id')
+    @Get('/:id')
     async findOrderById(
         @GetCredential() credential:ICredential,
         @Param('id') id: string

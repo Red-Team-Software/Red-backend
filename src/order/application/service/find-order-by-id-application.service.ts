@@ -64,7 +64,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
                     domainProducts.push({
                         id: domain.getValue.getId().Value,
                         name: domain.getValue.ProductName.Value,
-                        descripcion: domain.getValue.ProductDescription.Value,
+                        description: domain.getValue.ProductDescription.Value,
                         quantity: prod.Quantity.Quantity,
                         price: prod.Price.Price,
                         images: domain.getValue.ProductImages.map((image)=>image.Value),
@@ -86,7 +86,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
                     domainBundles.push({
                         id: domain.getValue.getId().Value,
                         name: domain.getValue.BundleName.Value,
-                        descripcion: domain.getValue.BundleDescription.Value,
+                        description: domain.getValue.BundleDescription.Value,
                         quantity: bund.Quantity.Quantity,
                         price: bund.Price.Price,
                         images: domain.getValue.BundleImages.map((image)=>image.Value),
