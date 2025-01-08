@@ -22,7 +22,7 @@ export class OrmCategoryMapper implements IMapper<Category, OrmCategoryEntity> {
     }
 
     async fromDomaintoPersistence(domainEntity: Category): Promise<OrmCategoryEntity> {
-
+        let ormImage:OrmCategoryImage;
         let ormProducts:OrmProductEntity[]=[]
         let ormBundle:OrmBundleEntity[]=[]
             for (const product of domainEntity.Products){
@@ -30,15 +30,15 @@ export class OrmCategoryMapper implements IMapper<Category, OrmCategoryEntity> {
                 if (response) 
                     ormProducts.push(response)
             }
+            /*
             const ormImage = domainEntity.Image
             ? OrmCategoryImage.create(
                 await this.idGen.genId(), 
                 domainEntity.Image.Value, 
                 domainEntity.getId().Value,
-
             )
             : null;
-
+            */
             for (const bundle of domainEntity.Bundles){
                 let response=await this.ormBundleRepository.findOneBy({id:bundle.Value})
                 if (response) 

@@ -33,7 +33,7 @@ export class UpdateCategoryApplicationService extends IApplicationService<
 
     async execute(command: UpdateCategoryApplicationRequestDTO): Promise<Result<UpdateCategoryApplicationResponseDTO>> {
         if (!command.name && !command.image && !command.products && !command.bundles) {
-            return Result.fail(new ErrorDTOUpdatingCategoryApplicationException);
+            return Result.fail(new ErrorDTOUpdatingCategoryApplicationException());
         }
 
         const categoryResult = await this.queryCategoryRepository.findCategoryById(
@@ -43,18 +43,18 @@ export class UpdateCategoryApplicationService extends IApplicationService<
         if (!categoryResult.isSuccess()) {
             return Result.fail(new NotFoundCategoryApplicationException());
         }
-
+        
         const category = categoryResult.getValue;
 
         if (command.name) {
             category.updateName(CategoryName.create(command.name));
         }
-
+        
         if (command.image) {
             let categoryImage:CategoryImage
             let fileResponse=await this.fileUpdater.uploadFile( command.image,TypeFile.image,await this.idGen.genId())
             if(!fileResponse.isSuccess){
-                return Result.fail(new ErrorUploadingImagesApplicationException)
+                return Result.fail(new ErrorUploadingImagesApplicationException())
             }
             
 
@@ -66,7 +66,7 @@ export class UpdateCategoryApplicationService extends IApplicationService<
             category.updateImage(CategoryImage.create(fileResponse.getValue.url));
 
         }
-
+       
         if (command.products) {
             const productIds = command.products.map(id => ProductID.create(id));
             category.updateProducts(productIds);
@@ -76,13 +76,13 @@ export class UpdateCategoryApplicationService extends IApplicationService<
             const bundleIds = command.bundles.map(id => BundleId.create(id));
             category.updateBundles(bundleIds);
         }
-
+        
         const updateResult = await this.commandCategoryRepository.updateCategory(category);
-
+        
         if (!updateResult.isSuccess()) {
             return Result.fail(updateResult.getError);
         }
-
+        
         await this.eventPublisher.publish(category.pullDomainEvents());
 
         return Result.success({

@@ -2,9 +2,10 @@ import { Category } from 'src/category/domain/aggregate/category.aggregate';
 import { CategoryID } from 'src/category/domain/value-object/category-id';
 import { CategoryName } from 'src/category/domain/value-object/category-name';
 import { CategoryImage } from 'src/category/domain/value-object/category-image';
-import { CategoryCommandRepository } from 'src/category/infraestructure/repositories/category-command.repository';
-import { ApplicationService } from 'src/common/application/application-service.interface';
-import { EventPublisher } from 'src/common/domain/event-publisher.interface';
+import { OrmCategoryCommandRepository } from 'src/category/infraestructure/repositories/category-typeorm-repository';
+
+import { EventPublisherMock } from 'test/common/mocks/infraestructure/event-publisher.mock';
+import { IApplicationService } from 'src/common/application/services';
 
 interface CreateCategoryCommand {
   categoryId: string;
@@ -14,11 +15,11 @@ interface CreateCategoryCommand {
   bundleIds: string[];
 }
 
-export class CreateCategoryApplicationService implements ApplicationService {
+export class CreateCategoryApplicationService implements IApplicationService {
   private eventPublisher: EventPublisher;
-  private repository: CategoryCommandRepository;
+  private repository: OrmCategoryCommandRepository;
 
-  constructor(eventPublisher: EventPublisher, repository: CategoryCommandRepository) {
+  constructor(eventPublisher: EventPublisher, repository: OrmCategoryCommandRepository) {
     this.eventPublisher = eventPublisher;
     this.repository = repository;
   }

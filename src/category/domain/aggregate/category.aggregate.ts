@@ -11,7 +11,7 @@ import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
 import { CategoryDeleted } from '../domain-events/category-deleted';
 import { CategoryUpdatedName } from '../domain-events/update-category-name';
 import { CategoryUpdatedImage } from '../domain-events/update-category-image';
-import { CategoryUpdatedProducts } from '../domain-events/update-category-products';
+import { CategoryUpdatedProductsDomainEvent } from '../domain-events/update-category-products';
 import { CategoryUpdatedBundles } from '../domain-events/category-update-bundles';
 
 export class Category extends AggregateRoot<CategoryID> {
@@ -79,9 +79,9 @@ export class Category extends AggregateRoot<CategoryID> {
         }
     }
 
-    delete(id:CategoryID):void{
+    delete():void{
         this.apply(
-            CategoryDeleted.create(id)
+            CategoryDeleted.create(this.Id)
         )
     }
 
@@ -98,7 +98,7 @@ export class Category extends AggregateRoot<CategoryID> {
 
     public updateProducts(products: ProductID[]): void {
         this.products = products;
-        this.apply(CategoryUpdatedProducts.create(this.getId(), products));
+        this.apply(CategoryUpdatedProductsDomainEvent.create(this.getId(), products));
     }
 
     public updateBundles(bundles: BundleId[]): void {
@@ -106,6 +106,21 @@ export class Category extends AggregateRoot<CategoryID> {
         this.apply(CategoryUpdatedBundles.create(this.getId(), bundles));
     }
 
+    public addProduct(product: ProductID): void {
+        if (!this.products.some(existingProduct => existingProduct.Value === product.Value)) {
+            this.products.push(product);
+            
+            this.apply(CategoryUpdatedProductsDomainEvent.create(this.getId(), this.products));
+        }
+    }
+
+    public addBundle(bundle: BundleId): void {
+        if (!this.bundles.some(existingBundle => existingBundle.Value === bundle.Value)) {
+            this.bundles.push(bundle);
+            this.apply(CategoryUpdatedBundles.create(this.getId(), this.bundles));
+        }
+    }
+    
     // Métodos `get` para acceder a los campos de la categoría
     get Name(): CategoryName {
         return this.categoryName;

@@ -7,5 +7,8 @@ export interface FindAllCategoriesApplicationResponseDTO extends IServiceRespons
     products:{
         id:string
     }[]
+    bundles:{
+        id:string
+    }[]
 }
 

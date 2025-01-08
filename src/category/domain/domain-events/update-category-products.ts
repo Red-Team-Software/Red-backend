@@ -2,7 +2,7 @@ import { DomainEvent } from '../../../common/domain/domain-event/domain-event';
 import { CategoryID } from '../value-object/category-id';
 import { ProductID } from '../../../product/domain/value-object/product-id';
 
-export class CategoryUpdatedProducts extends DomainEvent {
+export class CategoryUpdatedProductsDomainEvent extends DomainEvent {
     serialize(): string {
         let data = {  
             categoryId: this.categoryId.Value,
@@ -14,8 +14,8 @@ export class CategoryUpdatedProducts extends DomainEvent {
     static create(
         categoryId: CategoryID,
         products: ProductID[]
-    ): CategoryUpdatedProducts {
-        return new CategoryUpdatedProducts(
+    ): CategoryUpdatedProductsDomainEvent {
+        return new CategoryUpdatedProductsDomainEvent(
             categoryId,
             products
         );
