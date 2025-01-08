@@ -18,6 +18,9 @@ import { UserId } from "src/user/domain/value-object/user-id";
 import { ErrorUpdatingBalanceWalletApplicationException } from "src/user/application/application-exeption/error-updating-wallet-balance-application-exception";
 import { Ballance } from "src/user/domain/entities/wallet/value-objects/balance";
 import { Wallet } from "src/user/domain/entities/wallet/wallet.entity";
+import { ICommandTransactionRepository } from "src/user/application/repository/wallet-transaction/transaction.command.repository.interface";
+import { ITransaction } from "src/user/application/model/transaction-interface";
+import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 
 
 
@@ -29,7 +32,9 @@ export class CancelOderApplicationService extends IApplicationService<CancelOrde
         private readonly eventPublisher: IEventPublisher,
         private readonly refundPayment: IRefundPaymentService,
         private readonly commandUserRepository: ICommandUserRepository,
-        private readonly queryUserRepository: IQueryUserRepository
+        private readonly queryUserRepository: IQueryUserRepository,
+        private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>,
+        private readonly idGen: IIdGen<string>
     ){
         super()
     }
@@ -75,6 +80,17 @@ export class CancelOderApplicationService extends IApplicationService<CancelOrde
 
         if (!responseCommand.isSuccess()) 
             return Result.fail(new ErrorModifiyingOrderStateApplicationException());
+
+        let transaction: ITransaction = {
+            id: await this.idGen.genId(),
+            currency: user.Wallet.Ballance.Currency,
+            price: -newOrder.TotalAmount.OrderAmount,
+            wallet_id: user.Wallet.getId().Value,
+            payment_method_id: '',
+            date: new Date()
+        }
+
+        let trans = await this.TransactionCommandRepository.saveTransaction(transaction);
 
         await this.eventPublisher.publish(newOrder.pullDomainEvents())
 

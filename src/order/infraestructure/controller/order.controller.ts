@@ -84,6 +84,10 @@ import { PaymentEntryDto } from "../dto/payment-entry-dto";
 import { WalletPaymentMethod } from "../domain-service/wallet-method";
 import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface";
 import { OrmUserCommandRepository } from "src/user/infraestructure/repositories/orm-repository/orm-user-command-repository";
+import { OrmTransactionCommandRepository } from "src/user/infraestructure/repositories/orm-repository/orm-transaction-command-repository";
+import { ICommandTransactionRepository } from "src/user/application/repository/wallet-transaction/transaction.command.repository.interface";
+import { ITransaction } from "src/user/application/model/transaction-interface";
+import { WalletPaymentEntryDto } from "../dto/wallet-payment-entry-dto";
 
 
 @ApiBearerAuth()
@@ -120,6 +124,7 @@ export class OrderController {
     private readonly ormUserCommandRepo:ICommandUserRepository;
     private readonly ormUserQueryRepository: IQueryUserRepository;
     private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
+    private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>;
 
     //*IdGen
     private readonly idGen: IIdGen<string>;
@@ -147,6 +152,7 @@ export class OrderController {
         this.geocodificationAddress = new GeocodificationHereMapsDomainService(this.hereMapsSingelton);
         
         //*Repositories
+        this.TransactionCommandRepository = new OrmTransactionCommandRepository(PgDatabaseSingleton.getInstance());
         this.ormProductRepository = new OrmProductQueryRepository(PgDatabaseSingleton.getInstance());
         this.ormBundleRepository = new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance());
         this.ormCourierRepository = new CourierRepository(
@@ -217,7 +223,9 @@ export class OrderController {
                     this.rabbitMq,
                     new RefundPaymentStripeConnection(this.stripeSingleton),
                     this.ormUserCommandRepo,
-                    this.ormUserQueryRepository
+                    this.ormUserQueryRepository,
+                    this.TransactionCommandRepository,
+                    this.idGen
                 ),
                 new NestLogger(new Logger())
             )
@@ -285,7 +293,7 @@ export class OrderController {
     @Post('/pay/wallet')
     async realizePaymentWallet(
         @GetCredential() credential:ICredential,
-        @Body() data: PaymentEntryDto
+        @Body() data: WalletPaymentEntryDto
     ) {
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: credential.account.idUser,
@@ -306,7 +314,9 @@ export class OrderController {
                     new WalletPaymentMethod(
                         this.idGen, 
                         this.ormUserQueryRepository,
-                        this.ormUserCommandRepo),
+                        this.ormUserCommandRepo,
+                        this.TransactionCommandRepository
+                    ),
                     this.orderRepository,
                     this.idGen,
                     this.geocodificationAddress,

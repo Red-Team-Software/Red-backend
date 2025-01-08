@@ -41,7 +41,7 @@ export class RegisterUserApplicationService extends IApplicationService
         private readonly encryptor:IEncryptor,
         private readonly dateHandler:IDateHandler,
         private readonly eventPublisher:IEventPublisher,
-        private readonly userStripe: IUserExternalAccountService
+        private readonly userExternalSite: IUserExternalAccountService
     ){
         super()
     }
@@ -84,9 +84,9 @@ export class RegisterUserApplicationService extends IApplicationService
             )
         )
 
-        let stripeId = await this.userStripe.saveUser(user.getId(), data.email);
+        let externalId = await this.userExternalSite.saveUser(user.getId(), data.email);
 
-        if(!stripeId.isSuccess()) return Result.fail(new ErrorRegisteringAccountExternalSiteApplicationException())
+        if(!externalId.isSuccess()) return Result.fail(new ErrorRegisteringAccountExternalSiteApplicationException())
 
         let account:IAccount={
             sessions: [] ,
@@ -96,7 +96,7 @@ export class RegisterUserApplicationService extends IApplicationService
             created_at: this.dateHandler.currentDate(),
             isConfirmed:false,
             idUser:user.getId().Value,
-            idStripe: stripeId.getValue
+            idStripe: externalId.getValue
         }
 
         let userResponse=await this.commandUserRepository.saveUser(user)

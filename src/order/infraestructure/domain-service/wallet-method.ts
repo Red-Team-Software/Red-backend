@@ -14,6 +14,8 @@ import { InsufficientFundsInWalletException } from "src/order/domain/exception/d
 import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface";
 import { Ballance } from "src/user/domain/entities/wallet/value-objects/balance";
 import { Wallet } from "src/user/domain/entities/wallet/wallet.entity";
+import { ICommandTransactionRepository } from "src/user/application/repository/wallet-transaction/transaction.command.repository.interface";
+import { ITransaction } from "src/user/application/model/transaction-interface";
 
 
 
@@ -22,7 +24,8 @@ export class WalletPaymentMethod implements IPaymentMethodService {
     constructor(
         private readonly idGen: IIdGen<string>,
         private readonly queryUserRepository:IQueryUserRepository,
-        private readonly ormUserCommandRepo:ICommandUserRepository
+        private readonly ormUserCommandRepo:ICommandUserRepository,
+        private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>
     ) {}
 
     async createPayment(order: Order): Promise<Result<Order>> {
@@ -40,9 +43,22 @@ export class WalletPaymentMethod implements IPaymentMethodService {
 
         user.decreaseWalletBalance(newWallet);
 
-        let userRes = await this.ormUserCommandRepo.saveUser(user);
+        await this.ormUserCommandRepo.saveUser(user);
 
-        console.log(userRes);
+        let transaction: ITransaction = {
+            id: await this.idGen.genId(),
+            currency: user.Wallet.Ballance.Currency,
+            price: order.TotalAmount.OrderAmount,
+            wallet_id: user.Wallet.getId().Value,
+            payment_method_id: '',
+            date: new Date()
+        }
+
+        let trans = await this.TransactionCommandRepository.saveTransaction(transaction);
+
+        //TODO: CREAR LA EXCEPCION
+
+        if (!trans.isSuccess()) return Result.fail(new InsufficientFundsInWalletException());
 
         let newOrder = Order.registerOrder(
             order.getId(),

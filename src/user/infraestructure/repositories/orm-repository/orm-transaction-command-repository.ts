@@ -15,16 +15,21 @@ export class OrmTransactionCommandRepository extends Repository<OrmTransactionEn
     
     async saveTransaction(entry: ITransaction): Promise<Result<ITransaction>> {
         try{
+
+            if (!entry.payment_method_id) {
+                entry.payment_method_id = null; // Asignar null si no hay valor (si la base de datos permite nulos)
+            }
+
             let ormTransaction = OrmTransactionEntity.create(
                 entry.id,
                 entry.currency,
                 entry.price,
                 entry.wallet_id,
+                entry.date,
                 entry.payment_method_id
             )
 
             this.save(ormTransaction);
-
 
             return Result.success(entry);
         }catch(e){

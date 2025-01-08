@@ -16,7 +16,8 @@ export class PaymentMethodEntity implements IPaymentMethod {
     @Column()
     imageUrl: string;
 
-    @OneToMany(() => OrmTransactionEntity, transaction => transaction)
+    @OneToMany(() => OrmTransactionEntity, transaction => transaction, {nullable: true})
+    method: OrmTransactionEntity[];
 
     static create(
         id: string,

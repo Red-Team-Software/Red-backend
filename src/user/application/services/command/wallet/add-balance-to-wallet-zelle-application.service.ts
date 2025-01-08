@@ -12,6 +12,13 @@ import { AddBalanceZelleApplicationResponseDTO } from "src/user/application/dto/
 import { UserNotFoundApplicationException } from "src/auth/application/application-exception/user-not-found-application-exception";
 import { ICommandTransactionRepository } from "src/user/application/repository/wallet-transaction/transaction.command.repository.interface";
 import { ITransaction } from "src/user/application/model/transaction-interface";
+import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
+import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
+import { ErrorSaveTransactionApplicationException } from "src/user/application/application-exeption/error-save-transaction-application-exception";
+import { PaymentMethodId } from '../../../../../payment-methods/domain/value-objects/payment-method-id';
+import { NotFoundPaymentMethodApplicationException } from "src/payment-methods/application/application-exception/not-found-payment-method-application.exception";
+import { PaymentMethodState } from "src/payment-methods/domain/value-objects/payment-method-state";
+import { ErrorPaymentMethodInactiveApplicationException } from "src/payment-methods/application/application-exception/error-payment-method-inactive-application.exception";
 
 
 export class AddBalanceToWalletZelleApplicationService extends IApplicationService<AddBalanceZelleApplicationRequestDTO, AddBalanceZelleApplicationResponseDTO> {
@@ -20,13 +27,23 @@ export class AddBalanceToWalletZelleApplicationService extends IApplicationServi
         private readonly commandUserRepository:ICommandUserRepository,
         private readonly queryUserRepository:IQueryUserRepository,
         private readonly eventPublisher: IEventPublisher,
-        private readonly TransactionCommandRepository: ICommandTransactionRepository<ITransaction>
+        private readonly TransactionCommandRepository: ICommandTransactionRepository<ITransaction>,
+        private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository,
+        private readonly idGen: IIdGen<string>,
     ) {
         super();
     }
 
     async execute(data: AddBalanceZelleApplicationRequestDTO): Promise<Result<AddBalanceZelleApplicationResponseDTO>> {
         
+        let paymentMethod = await this.paymentMethodQueryRepository.findMethodById(PaymentMethodId.create(data.paymentId));
+
+        if (!paymentMethod.isSuccess())
+            return Result.fail(new NotFoundPaymentMethodApplicationException());
+
+        if ( !paymentMethod.getValue.state.equals(PaymentMethodState.create('active')) )
+            return Result.fail(new ErrorPaymentMethodInactiveApplicationException());
+
         let userResponse= await this.queryUserRepository.findUserById(UserId.create(data.userId));
         
         if (!userResponse.isSuccess())
@@ -34,7 +51,9 @@ export class AddBalanceToWalletZelleApplicationService extends IApplicationServi
         
         const user = userResponse.getValue;
 
-        let newBalance = Ballance.create(data.amount, user.Wallet.Ballance.Currency);
+        let newBalance = Ballance.create(
+            Number(data.amount) + Number(user.Wallet.Ballance.Amount), 
+            user.Wallet.Ballance.Currency);
 
         let newWallet = Wallet.create(user.Wallet.getId(), newBalance);
 
@@ -45,8 +64,22 @@ export class AddBalanceToWalletZelleApplicationService extends IApplicationServi
         if (!userRes.isSuccess())
             return Result.fail(new ErrorUpdatingBalanceWalletApplicationException());
 
+        let trans: ITransaction = {
+            id: await this.idGen.genId(),
+            currency: user.Wallet.Ballance.Currency,
+            price: data.amount,
+            wallet_id: user.Wallet.getId().Value,
+            payment_method_id: data.paymentId,
+            date: data.date,
+        }
+
+        let transaction = await this.TransactionCommandRepository.saveTransaction(trans);
+
+        if (!transaction.isSuccess())
+            return Result.fail(new ErrorSaveTransactionApplicationException());
+
         this.eventPublisher.publish(user.pullDomainEvents())
 
-        return Result.success({ success: true, message: `Amount ${newBalance.Amount} has been added to the Wallet` });
+        return Result.success({ success: true, message: `Amount ${data.amount} has been added to the Wallet` });
     }
 }

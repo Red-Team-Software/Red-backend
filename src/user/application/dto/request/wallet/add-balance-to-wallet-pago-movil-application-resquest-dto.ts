@@ -8,4 +8,5 @@ export interface AddBalancePagoMovilApplicationRequestDTO extends IServiceReques
     amount:number;
     reference:string;
     date?:Date;
+    paymentId:string;
 }

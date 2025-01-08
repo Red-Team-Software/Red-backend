@@ -55,6 +55,8 @@ import { FindAllTransactionsByUserApplicationService } from "src/user/applicatio
 import { FindTransactionByIdApplicationService } from "src/user/application/services/query/wallet/get-transaction-by-id-application.service"
 import { GetTransactionByIdApplicationRequestDTO } from "src/user/application/dto/request/wallet/get-transaction-by-id-application-request-dto"
 import { FindTransactionByIdEntryDTO } from "../dto/request/wallet/find-transaction-by-id-entry.dto"
+import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
+import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -62,6 +64,7 @@ import { FindTransactionByIdEntryDTO } from "../dto/request/wallet/find-transact
 @Controller('pay')
 export class PaymentWalletController {
 
+    private readonly idGen: IIdGen<string> 
     private readonly ormUserQueryRepo:IQueryUserRepository;
     private readonly ormUserCommandRepo:ICommandUserRepository;
     private readonly ormAccountQueryRepo:IQueryAccountRepository<IAccount>;
@@ -74,6 +77,7 @@ export class PaymentWalletController {
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
     ) {
+        this.idGen= new UuidGen();
         this.ormUserQueryRepo=new OrmUserQueryRepository(PgDatabaseSingleton.getInstance());
         this.ormUserCommandRepo=new OrmUserCommandRepository(PgDatabaseSingleton.getInstance());
         this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance());
@@ -101,7 +105,8 @@ export class PaymentWalletController {
                             this.ormUserQueryRepo,
                             new RabbitMQPublisher(this.channel),
                             new ConvertCurrencyExchangeRate(ExchangeRateSingelton.getInstance()),
-                            this.TransactionCommandRepository
+                            this.TransactionCommandRepository,
+                            this.idGen
                         ), new NestTimer(), new NestLogger(new Logger())
                     ), new NestLogger(new Logger())
                 ),this.auditRepository, new DateHandler()
@@ -115,10 +120,13 @@ export class PaymentWalletController {
             bank: entry.bank,
             amount: entry.amount,
             reference: entry.reference,
-            date: new Date()
+            date: new Date(),
+            paymentId: entry.paymentId
         }
 
-        return await service.execute(data);
+        let response = await service.execute(data);
+
+        return response.getValue;
 
     }
 
@@ -135,7 +143,9 @@ export class PaymentWalletController {
                             this.ormUserCommandRepo,
                             this.ormUserQueryRepo,
                             new RabbitMQPublisher(this.channel),
-                            this.TransactionCommandRepository
+                            this.TransactionCommandRepository,
+                            this.paymentMethodQueryRepository,
+                            this.idGen
                         ), new NestTimer(), new NestLogger(new Logger())
                     ), new NestLogger(new Logger())
                 ),this.auditRepository, new DateHandler()
@@ -146,10 +156,13 @@ export class PaymentWalletController {
             userId: credential.account.idUser,
             amount: entry.amount,
             reference: entry.reference,
-            date: new Date()
+            date: new Date(),
+            paymentId: entry.paymentId
         }
 
-        return await service.execute(data);
+        let response = await service.execute(data);
+
+        return response.getValue;
 
     }
 
@@ -177,7 +190,9 @@ export class PaymentWalletController {
             cardId: entry.idCard
         }
 
-        return await service.execute(data);
+        let response = await service.execute(data);
+
+        return response.getValue;
 
     }
 
@@ -201,7 +216,9 @@ export class PaymentWalletController {
             userId: credential.account.idUser
         }
 
-        return await service.execute(data);
+        let response = await service.execute(data);
+
+        return response.getValue;
 
     }
 
@@ -227,7 +244,9 @@ export class PaymentWalletController {
             userId: credential.account.idUser
         }
 
-        return await service.execute(data);
+        let response = await service.execute(data);
+
+        return response.getValue;
 
     }
 

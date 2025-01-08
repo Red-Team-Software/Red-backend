@@ -18,15 +18,15 @@ export class OrmTransactionEntity implements ITransaction{
     @JoinColumn({name: 'wallet_id'})
     wallet: OrmWalletEntity;
     
-    @ManyToOne(() => PaymentMethodEntity, method => method)
+    @ManyToOne(() => PaymentMethodEntity, method => method, { nullable: true })
     @JoinColumn({name: 'payment_method_id'})
-    payment_method: PaymentMethodEntity;
+    payment_method?: PaymentMethodEntity|null;
     
-    @Column()
+    @Column('varchar')
     wallet_id: string;
 
-    @Column()
-    payment_method_id: string;
+    @Column({ type: 'uuid', nullable: true })
+    payment_method_id?: string | null;
 
     @Column("date")
     date: Date;
@@ -36,7 +36,8 @@ export class OrmTransactionEntity implements ITransaction{
         currency:string,
         price: number,
         wallet_id: string,
-        payment_method_id: string
+        date: Date,
+        payment_method_id?: string,
     ): OrmTransactionEntity
     {
         const wallet = new OrmTransactionEntity()
@@ -45,6 +46,7 @@ export class OrmTransactionEntity implements ITransaction{
         wallet.price=price
         wallet.wallet_id = wallet_id
         wallet.payment_method_id = payment_method_id
+        wallet.date = date
         return wallet
     }
 }

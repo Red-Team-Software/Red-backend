@@ -28,4 +28,11 @@ export class UpdateWalletBalancePagoMovilInfraestructureRequestDTO{
     // @IsDate()
     // @IsOptional()
     // date: Date;
+
+    @ApiProperty({
+        example: '2cc214ab-1e1e-4a22-9547-185b4a09df0a',
+        description: 'The payment Method Id to know if it is active or inactive',
+    })
+    @IsString()
+    paymentId: string;
 }

@@ -329,8 +329,10 @@ export class NotificationController {
             new NestLogger(new Logger())
             )
         );
-
-        const tokensResponse = await this.querySessionRepository.findSessionById(entry.userId);
+        
+        const tokensResponse = await this.querySessionRepository.findSessionLastSessionByUserId(
+            UserId.create(entry.userId)
+        );
 
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;

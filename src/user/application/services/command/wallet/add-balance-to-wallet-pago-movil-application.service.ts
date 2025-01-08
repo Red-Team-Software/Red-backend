@@ -15,6 +15,8 @@ import { AddBalanceZelleApplicationResponseDTO } from "src/user/application/dto/
 import { UserNotFoundApplicationException } from "src/auth/application/application-exception/user-not-found-application-exception";
 import { ICommandTransactionRepository } from "src/user/application/repository/wallet-transaction/transaction.command.repository.interface";
 import { ITransaction } from "src/user/application/model/transaction-interface";
+import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
+import { ErrorSaveTransactionApplicationException } from "src/user/application/application-exeption/error-save-transaction-application-exception";
 
 
 export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationService<AddBalancePagoMovilApplicationRequestDTO, AddBalanceZelleApplicationResponseDTO> {
@@ -24,7 +26,8 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
         private readonly queryUserRepository:IQueryUserRepository,
         private readonly eventPublisher: IEventPublisher,
         private readonly exchangeRate: IConversionService,
-        private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>
+        private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>,
+        private readonly idGen: IIdGen<string>
     ) {
         super();
     }
@@ -46,7 +49,9 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
         if (!newChange.isSuccess())
             return Result.fail(new ErrorChangeCurrencyApplicationException());
 
-        let newBalance = Ballance.create(newChange.getValue.Amount, user.Wallet.Ballance.Currency);
+        let newBalance = Ballance.create(
+            Number(newChange.getValue.Amount) + Number(user.Wallet.Ballance.Amount)
+            , user.Wallet.Ballance.Currency);
 
         let newWallet = Wallet.create(user.Wallet.getId(), newBalance);
 
@@ -57,8 +62,22 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
         if (!userRes.isSuccess())
             return Result.fail(new ErrorUpdatingBalanceWalletApplicationException());
 
+        let trans: ITransaction = {
+            id: await this.idGen.genId(),
+            currency: user.Wallet.Ballance.Currency,
+            price: newChange.getValue.Amount,
+            wallet_id: user.Wallet.getId().Value,
+            payment_method_id: data.paymentId,
+            date: data.date,
+        }
+        
+        let transaction = await this.TransactionCommandRepository.saveTransaction(trans);
+        
+        if (!transaction.isSuccess())
+            return Result.fail(new ErrorSaveTransactionApplicationException());
+
         this.eventPublisher.publish(user.pullDomainEvents())
 
-        return Result.success({ success: true, message: `Amount ${newBalance.Amount} has been added to the Wallet` });
+        return Result.success({ success: true, message: `Amount ${newChange.getValue.Amount} has been added to the Wallet` });
     }
 }
