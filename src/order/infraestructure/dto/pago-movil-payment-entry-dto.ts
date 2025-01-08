@@ -20,12 +20,12 @@ export class PagoMovilPaymentEntryDto extends PaymentEntryDto{
   @IsString()
   refNumber: string;
 
-  @ApiProperty({
-    example: '0025519197010',
-    description: 'The reference of the moment of the payment',
-  })
-  @IsDateString()
-  sendDate: Date;
+  // @ApiProperty({
+  //   example: '0025519197010',
+  //   description: 'The reference of the moment of the payment',
+  // })
+  // @IsDateString()
+  // sendDate: Date;
 
   @ApiProperty({ example: 'V-29123456', description: 'The method of payment used' })
   @IsString()

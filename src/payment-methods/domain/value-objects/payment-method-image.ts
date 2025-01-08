@@ -6,7 +6,9 @@ export class PaymentMethodImage implements ValueObject<PaymentMethodImage> {
     private readonly image: string
 
     private constructor(image:string){
-        if (image.length<5) throw new InvalidPaymentMethodImageException()
+        const regex=new RegExp(/http?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp|webp)/)
+
+        if(!regex.test(image)) throw new InvalidPaymentMethodImageException()
         this.image=image
     }
     equals(valueObject: PaymentMethodImage): boolean {

@@ -55,6 +55,9 @@ import { NewBundlePushNotificationApplicationRequestDTO } from "src/notification
 import { NotificationQueues } from "../queues/notification.queues";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { OrderDeliveringPushNotificationApplicationService } from "src/notification/application/services/command/order-delivering-push-notification-application.service";
+import { IUserWalletBalanceAdded } from "../interfaces/user-wallet-balance-updated";
+import { UserWalletBalanceAddedPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/user-wallet-balance-added-push-notification-application-request-dto";
+import { UpdateUserWalletBalancePushNotificationApplicationService } from "src/notification/application/services/command/update-user-wallet-balance-push-notification-application.service";
 
 @ApiTags('Notification')
 @Controller('notification')
@@ -95,6 +98,109 @@ export class NotificationController {
         this.querySessionRepository= new OrmTokenQueryRepository(PgDatabaseSingleton.getInstance());
         this.auditRepository=new OrmAuditRepository(PgDatabaseSingleton.getInstance())
 
+        this.subscriber.buildQueue({
+            name:'ProductEvents',
+            pattern: 'ProductRegistered',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        });
+
+        this.subscriber.buildQueue({
+            name:'BundleEvents',
+            pattern: 'BundleRegistered',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        });
+
+        this.subscriber.buildQueue({
+            name:'OrderEvents',
+            pattern: 'OrderRegistered',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        });
+
+        this.subscriber.buildQueue({
+            name:'OrderEvents/CancelOrder',
+            pattern: 'OrderStatusCancelled',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        });
+
+        this.subscriber.buildQueue({
+            name:'OrderEvents/OrderStatusDelivering',
+            pattern: 'OrderStatusDelivering',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        });
+
+        this.subscriber.buildQueue({
+            name:'OrderEvents/OrderStatusDelivered',
+            pattern: 'OrderStatusDelivered',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        });
+
+        this.subscriber.buildQueue({
+            name:'CuponEvents',
+            pattern: 'CuponRegistered',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        })
+
+        this.subscriber.buildQueue({
+            name:'UserEvents',
+            pattern: 'UserBalanceAmountAdded',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        })
+
+        this.subscriber.consume<IUserWalletBalanceAdded>(
+            { name: 'UserEvents'}, 
+            (data):Promise<void>=>{
+                this.sendPushUserWalletBalanceAdded(data)
+                return
+            }
+        );
 
         this.initializeQueues()
 
@@ -186,7 +292,56 @@ export class NotificationController {
         }
         service.execute(data)
 
+        this.subscriber.consume<ICancelOrder>(
+            { name: 'OrderEvents/CancelOrder'}, 
+            (data):Promise<void>=>{
+                this.sendPushOrderCancelled(data)
+                this.sendEmailOrderCancelled(data)
+                return
+            }
+        );
+
+        this.subscriber.consume<IDeliveredOrder>(
+            { name: 'OrderEvents/OrderStatusDelivered'}, 
+            (data):Promise<void>=>{
+                this.sendPushOrderDelivered(data)
+                return
+            }
+        );
+
+        this.subscriber.consume<IDeliveringOrder>(
+            { name: 'OrderEvents/OrderStatusDelivering'}, 
+            (data):Promise<void>=>{
+                this.sendPushOrderDelivering(data)
+                return
+            }
+        );
+
     }
+
+    async sendPushUserWalletBalanceAdded(entry:IUserWalletBalanceAdded){
+        
+        let service= new ExceptionDecorator(
+            new LoggerDecorator(
+                new UpdateUserWalletBalancePushNotificationApplicationService(
+                    this.pushsender
+                ),
+            new NestLogger(new Logger())
+            )
+        );
+
+        const tokensResponse = await this.querySessionRepository.findSessionById(entry.userId);
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
+        
+        let data:UserWalletBalanceAddedPushNotificationApplicationRequestDTO={
+            userId: entry.userId,
+            tokens:[tokensResponse.getValue.push_token],
+            userWallet:entry.userWallet
+        };
+        service.execute(data);
+    };
 
     async sendPushOrderDelivering(entry:IDeliveringOrder){
         let service= new ExceptionDecorator(

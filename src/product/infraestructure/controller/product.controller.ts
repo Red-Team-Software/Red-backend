@@ -116,7 +116,7 @@ export class ProductController {
 
 
     this.subscriber.consume<ICreateOrder>(
-        { name: 'OrderReduce/OrderRegistered'}, 
+        { name: 'ProductReduce/OrderRegistered'}, 
         (data):Promise<void>=>{
           this.reduceProductStock(data)
           return
@@ -260,7 +260,8 @@ export class ProductController {
               new CloudinaryService()
             ),new NestTimer(),new NestLogger(new Logger())
           ),this.auditRepository,new DateHandler()
-        ),credential,[UserRoles.ADMIN])
+        ),
+        credential,[UserRoles.ADMIN])
       )
       let buffers=images.map(image=>image.buffer)
     let response= await service.execute({userId:credential.account.idUser,...entry,images:buffers})
