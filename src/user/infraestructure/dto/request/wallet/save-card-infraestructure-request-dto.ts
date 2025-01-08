@@ -5,6 +5,6 @@ export class SaveCardInfraestructureRequestDTO{
     
     @ApiProperty( { required: true, default: 'pm_card_threeDSecureOptional' })
     @IsString()
-    id: string;
+    idCard: string;
 
 }

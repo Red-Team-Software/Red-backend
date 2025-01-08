@@ -122,9 +122,6 @@ export class PaymentWalletController {
 
         let data: AddBalanceZelleApplicationRequestDTO = {
             userId: credential.account.idUser,
-            phone: entry.phone,
-            cedula: entry.cedula,
-            bank: entry.bank,
             amount: entry.amount,
             reference: entry.reference,
             date: new Date()
@@ -155,7 +152,7 @@ export class PaymentWalletController {
 
         let data: SaveCardApplicationRequestDTO = {
             userId: credential.account.idUser,
-            cardId: entry.id
+            cardId: entry.idCard
         }
 
         return await service.execute(data);

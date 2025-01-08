@@ -11,7 +11,7 @@ export class UpdateWalletBalancePagoMovilInfraestructureRequestDTO{
     @IsString()
     cedula: string;
 
-    @ApiProperty( { required: true, default: 'alfredo' })
+    @ApiProperty( { required: true, default: 'mercantil' })
     @IsString()
     bank: string;
 
@@ -27,5 +27,5 @@ export class UpdateWalletBalancePagoMovilInfraestructureRequestDTO{
     // @ApiProperty( { required: false, default: '22/03/2025' })
     // @IsDate()
     // @IsOptional()
-    // date?: Date;
+    // date: Date;
 }
