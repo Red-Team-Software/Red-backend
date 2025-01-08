@@ -17,6 +17,8 @@ import { TypeFile } from 'src/common/application/file-uploader/enums/type-file.e
 import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
 import { ErrorDeletingImagesApplicationException } from 'src/product/application/application-exepction/error-deleting-images-application-exception';
 import { ErrorUploadingImagesApplicationException } from '../../application-exception/error-uploading-images-application-exception';
+import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
+import { NotFoundProductApplicationException } from 'src/product/application/application-exepction/not-found-product-application-exception';
 export class UpdateCategoryApplicationService extends IApplicationService<
     UpdateCategoryApplicationRequestDTO,
     UpdateCategoryApplicationResponseDTO
@@ -25,6 +27,7 @@ export class UpdateCategoryApplicationService extends IApplicationService<
         private readonly eventPublisher: IEventPublisher,
         private readonly commandCategoryRepository: ICategoryCommandRepository,
         private readonly queryCategoryRepository: IQueryCategoryRepository,
+        private readonly queryProductRepository: IQueryProductRepository,
         private readonly fileUpdater:IFileUploader,
         private readonly idGen:IIdGen<string>
     ) {
@@ -66,9 +69,17 @@ export class UpdateCategoryApplicationService extends IApplicationService<
             category.updateImage(CategoryImage.create(fileResponse.getValue.url));
 
         }
-       
+        
         if (command.products) {
             const productIds = command.products.map(id => ProductID.create(id));
+            productIds.forEach(async product => {
+                let productResult= await this.queryProductRepository.findProductById(product)
+                if(!productResult.isSuccess()){
+                    return Result.fail(new NotFoundProductApplicationException())
+                }
+            }); 
+
+            
             category.updateProducts(productIds);
         }
 

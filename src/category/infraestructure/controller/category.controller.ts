@@ -216,12 +216,12 @@ export class CategoryController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('update/:id')
-  @UseInterceptors(FilesInterceptor('images'))  
+  @UseInterceptors(FileInterceptor('image'))  
   async updateCategory(
     @GetCredential() credential: ICredential,
     @Param() entryId: ByIdDTO,
     @Body() entry: UpdateCategoryInfraestructureRequestDTO,
-    @UploadedFiles(
+    @UploadedFile(
       new ParseFilePipe({
         validators: [
           new FileTypeValidator({
@@ -239,6 +239,7 @@ export class CategoryController {
             new RabbitMQPublisher(this.channel),
             this.ormCategoryCommandRepo,
             this.ormCategoryQueryRepo,
+            this.ormQueryProductRepo,
             new CloudinaryService(),
             new UuidGen()
           ),
@@ -256,7 +257,7 @@ export class CategoryController {
       ...entry,
       userId: credential.account.idUser,
       categoryId: entryId.id,
-      image: buffer,
+      image: buffer
     });
     
     return response.getValue;
