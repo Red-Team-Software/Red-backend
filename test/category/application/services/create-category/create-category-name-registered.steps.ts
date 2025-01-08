@@ -11,39 +11,45 @@ import { FileUploaderMock } from "test/common/mocks/infraestructure/file-uploade
 import { CategoryCommandRepositoryMock } from "test/category/infraestructure/mocks/repositories/category-command-repository.mock";
 import { CategoryQueryRepositoryMock } from "test/category/infraestructure/mocks/repositories/category-query-repository.mock";
 import { ErrorNameAlreadyApplicationException } from "src/category/application/application-exception/error-name-already-application-exception";
+import { BundleQueryRepositoryMock } from "test/bundle/infraestructure/mocks/repositories/bundle-query-repository.mock";
+import { ProductQueryRepositoryMock } from "test/product/infraestructure/mocks/repositories/product-query-repository.mock";
+import { response } from "express";
 
 let caughtError: any;
 
 When('Trying to create a category with name {string} that is already registered', async (name: string) => {
   const categories: Category[] = [
     Category.create(
-      CategoryID.create('existing-category-id'),
+      CategoryID.create('e09771db-2657-45fb-ad39-ae6604422919'),
       CategoryName.create(name),
-      CategoryImage.create('http://image-category.jpg'),
-      [],
-      []
+      CategoryImage.create('http://example.com/electronics.jpg')
+      
     )
   ];
 
   const service = new CreateCategoryApplication(
     new EventPublisherMock(),
-    new CategoryCommandRepositoryMock(),
+    new CategoryCommandRepositoryMock(categories),
     new CategoryQueryRepositoryMock(categories),
-    null, // Mock del repositorio de productos
-    null, // Mock del repositorio de bundles
+    new ProductQueryRepositoryMock(),
+    new BundleQueryRepositoryMock(),
     new IdGeneratorMock(),
     new FileUploaderMock()
   );
 
   try {
-    await service.execute({
+    let response= await service.execute({
+      userId: 'e09771db-2657-45fb-ad39-ae6604422919',
       name,
-      image: Buffer.from(''),
+      image: Buffer.from('image-data'),
       products: [],
-      bundles: []
+      bundles: [],
     });
-  } catch (error) {
-    caughtError = error;
+    if(!response.isSuccess()){
+      caughtError = response.getError
+    }  
+} catch (error) {
+    
   }
 });
 

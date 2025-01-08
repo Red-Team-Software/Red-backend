@@ -55,20 +55,21 @@ export class CreateCategoryApplication extends IApplicationService<
         const products:Product[]=[]
 
         const bundles:Bundle[]=[]
-
-        for (const productId of command.products) {
-            const productResult = await this.productQueryRepository.findProductById(ProductID.create(productId));
-            if (!productResult.isSuccess()) 
-                return Result.fail(productResult.getError)
-            products.push(productResult.getValue)
-        }
-
+        if(command.products){
+            for (const productId of command.products) {
+                const productResult = await this.productQueryRepository.findProductById(ProductID.create(productId));
+                if (!productResult.isSuccess()) 
+                    return Result.fail(productResult.getError)
+                products.push(productResult.getValue)
+            }}
+        
+        if(command.bundles){
         for (const bundleId of command.bundles) {
             const bundleResult=await this.bundleQueryRepository.findBundleById(BundleId.create(bundleId))
             if(!bundleResult.isSuccess())
                 return Result.fail(bundleResult.getError)
             bundles.push(bundleResult.getValue)
-        }
+        }}
 
 
         // Handle image upload

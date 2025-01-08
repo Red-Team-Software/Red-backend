@@ -1,4 +1,5 @@
 import { ValueObject } from "src/common/domain"
+import { InvalidCategoryIdException } from "../domain-exceptions/invalid-category-id-exception"
 
 export class CategoryID implements ValueObject<CategoryID> {
 
@@ -15,6 +16,8 @@ export class CategoryID implements ValueObject<CategoryID> {
     }
 
     private constructor(id:string){
+        const regex = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
+        if (!regex.test(id)) { throw new InvalidCategoryIdException() }
         this.id=id
     }
 

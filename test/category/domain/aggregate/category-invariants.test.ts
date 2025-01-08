@@ -40,21 +40,21 @@ describe("Category Aggregate Invariants", () => {
 
   test("should create a valid category with products and bundles", () => {
     const category = Category.initializeAggregate(
-      CategoryID.create('category-123'),
+      CategoryID.create('e09771db-2657-45fb-ad39-ae6604422919'),
       CategoryName.create('Electronics'),
-      CategoryImage.create('image-1'),
+      CategoryImage.create('http://image-123.jpg'),
       [
-        ProductID.create('product-1'),
-        ProductID.create('product-2')
+        ProductID.create('e09771db-2657-45fb-ad39-ae6604422910'),
+        ProductID.create('e09771db-2657-45fb-ad39-ae6604422919')
       ],
       [
-        BundleId.create('bundle-1'),
-        BundleId.create('bundle-2')
+        BundleId.create('e09771db-2657-45fb-ad39-ae6604422918'),
+        BundleId.create('e09771db-2657-45fb-ad39-ae6604422911')
       ]
     );
 
     assert.ok(category);
-    assert.strictEqual(category.Id.Value, 'category-123');
+    assert.strictEqual(category.Id.Value, 'e09771db-2657-45fb-ad39-ae6604422919');
     assert.strictEqual(category.Name.Value, 'Electronics');
     assert.strictEqual(category.Products.length, 2);
     assert.strictEqual(category.Bundles.length, 2);

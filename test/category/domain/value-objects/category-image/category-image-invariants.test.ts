@@ -22,7 +22,7 @@ describe("Category Image Invariants", () => {
   });
 
   test("should create a valid Category image", () => {
-    const validImage = CategoryImage.create('https://example.com/image.jpg');
-    assert.ok(validImage.equals(CategoryImage.create('https://example.com/image.jpg')));
+    const validImage = CategoryImage.create('http://image-123.jpg');
+    assert.ok(validImage.equals(CategoryImage.create('http://image-123.jpg')));
   });
 });

@@ -9,10 +9,8 @@ import { NotFoundCategoryApplicationException } from "src/category/application/a
 import { ErrorCreatingCategoryApplicationException } from "src/category/application/application-exception/error-creating-category-application-exception";
 
 export class CategoryCommandRepositoryMock implements ICategoryCommandRepository {
-    private categories: Category[] = [];
-
-    constructor(categories: Category[] = []) {
-        this.categories = categories;
+    
+    constructor(private categories: Category[] = []) {
     }
 
     async createCategory(category: Category): Promise<Result<Category>> {
@@ -53,7 +51,7 @@ export class CategoryCommandRepositoryMock implements ICategoryCommandRepository
             return Result.fail(new NotFoundCategoryApplicationException());
         }
 
-        const bundleExists = targetCategory.getBundles().some((b) => b.equals(bundle.getId()));
+        const bundleExists = targetCategory.Bundles.some((b) => b.equals(bundle.getId()));
         if (!bundleExists) {
             targetCategory.addBundle(bundle.getId());
         }
@@ -70,20 +68,4 @@ export class CategoryCommandRepositoryMock implements ICategoryCommandRepository
         return Result.success(category);
     }
 
-    async verifyCategoryExistenceByName(name: CategoryName): Promise<Result<boolean>> {
-        const exists = this.categories.some((c) => c.getName().equals(name));
-        return Result.success(exists);
-    }
-
-    async findById(id: CategoryID): Promise<Result<Category>> {
-        const category = this.categories.find((c) => c.getId().equals(id));
-        if (!category) {
-            return Result.fail(new NotFoundCategoryApplicationException());
-        }
-        return Result.success(category);
-    }
-
-    async findAll(): Promise<Result<Category[]>> {
-        return Result.success(this.categories);
-    }
 }

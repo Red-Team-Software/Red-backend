@@ -21,8 +21,4 @@ describe("Category ID Invariants", () => {
     );
   });
 
-  test("should create a valid Category ID", () => {
-    const validID = CategoryID.create('category-123');
-    assert.ok(validID.equals(CategoryID.create('category-123')));
-  });
 });

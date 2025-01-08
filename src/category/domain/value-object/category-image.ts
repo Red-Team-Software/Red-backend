@@ -1,6 +1,7 @@
 // src/category/domain/value-object/category-image.ts
 
 import { ValueObject } from 'src/common/domain/value-object/value-object';
+import { InvalidCategoryImageException } from '../domain-exceptions/invalid-category-image-exception';
 
 export class CategoryImage extends ValueObject<CategoryImage> {
     private readonly image: string
@@ -18,6 +19,9 @@ export class CategoryImage extends ValueObject<CategoryImage> {
 
     private constructor(image:string){
         super()
+        const regex=new RegExp(/http?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp)/)
+        if (!regex.test(image)) 
+            throw new InvalidCategoryImageException()
         this.image=image
     }
 }
