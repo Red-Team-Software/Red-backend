@@ -1,4 +1,4 @@
-import { BaseException } from "../base-exception";
+import { BaseException } from "../base-exception/base-exception";
 
 export class Result<T> {
 	private value?: T;

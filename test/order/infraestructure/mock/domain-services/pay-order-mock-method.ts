@@ -6,14 +6,13 @@ import { PaymentId } from "src/order/domain/entities/payment/value-object/paymen
 import { PaymentMethod } from "src/order/domain/entities/payment/value-object/payment-method";
 import { PaymentAmount } from "src/order/domain/entities/payment/value-object/payment-amount";
 import { PaymentCurrency } from "src/order/domain/entities/payment/value-object/payment-currency";
-import { IPaymentMethodService } from "src/order/domain/domain-services/payment-method-interface";
+import { IPaymentMethodService } from "src/order/domain/domain-services/interfaces/payment-method-interface";
 
 
 export class PayOrderMockMethod implements IPaymentMethodService {    
 
     
-    constructor(
-    ) {}
+    constructor() {}
 
     async createPayment(order: Order): Promise<Result<Order>> {
         try {

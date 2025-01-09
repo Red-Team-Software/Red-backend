@@ -1,4 +1,4 @@
-import { BaseExceptionEnum } from "./enum/base-exception.enum";
+import { BaseExceptionEnum } from "../enum/base-exception.enum";
 
 export abstract class BaseException extends Error {
     protected type:BaseExceptionEnum

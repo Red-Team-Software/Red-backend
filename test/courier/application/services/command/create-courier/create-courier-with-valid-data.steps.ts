@@ -3,8 +3,8 @@ import { When, Then } from "@cucumber/cucumber"
 import { CourierRepositoryMock } from "test/courier/infraestructure/mock/repositories/courier-command-repository.mock"
 import * as assert from 'assert';
 import { EventPublisherMock } from "test/common/mocks/infraestructure/event-publisher.mock";
-import { IdGeneratorMock } from "test/common/mocks/infraestructure/id-generator.mock";
 import { FileUploaderMock } from "test/common/mocks/infraestructure/file-uploader.mock";
+import { IdGeneratorMock } from "test/common/mocks/infraestructure/id-generator.mock";
 
 let caughtError:any
 
