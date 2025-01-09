@@ -14,8 +14,8 @@ export interface OrderPayResponseDto extends IServiceResponseDto {
         products: {
             id: string,
             quantity: number
-            nombre:string 
-            descripcion:string
+            name:string 
+            description:string
             price:number 
             currency:string
             images:string[]
@@ -23,8 +23,8 @@ export interface OrderPayResponseDto extends IServiceResponseDto {
         bundles: {
             id: string,
             quantity: number
-            nombre:string 
-            descripcion:string
+            name:string 
+            description:string
             price:number 
             currency:string
             images:string[]

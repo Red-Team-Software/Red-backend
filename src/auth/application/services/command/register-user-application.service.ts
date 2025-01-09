@@ -25,6 +25,8 @@ import { UserAlreadyExistPhoneNumberApplicationException } from "../../applicati
 import { Wallet } from "src/user/domain/entities/wallet/wallet.entity";
 import { WalletId } from "src/user/domain/entities/wallet/value-objects/wallet-id";
 import { Ballance } from "src/user/domain/entities/wallet/value-objects/balance";
+import { IUserExternalAccountService } from "src/auth/application/interfaces/user-external-account-interface";
+import { ErrorRegisteringAccountExternalSiteApplicationException } from "../../application-exception/error-registering-account-external-site-application-exception";
 
 
 export class RegisterUserApplicationService extends IApplicationService 
@@ -39,6 +41,7 @@ export class RegisterUserApplicationService extends IApplicationService
         private readonly encryptor:IEncryptor,
         private readonly dateHandler:IDateHandler,
         private readonly eventPublisher:IEventPublisher,
+        private readonly userExternalSite: IUserExternalAccountService
     ){
         super()
     }
@@ -81,6 +84,9 @@ export class RegisterUserApplicationService extends IApplicationService
             )
         )
 
+        let externalId = await this.userExternalSite.saveUser(user.getId(), data.email);
+
+        if(!externalId.isSuccess()) return Result.fail(new ErrorRegisteringAccountExternalSiteApplicationException())
 
         let account:IAccount={
             sessions: [] ,
@@ -89,7 +95,8 @@ export class RegisterUserApplicationService extends IApplicationService
             password: password,
             created_at: this.dateHandler.currentDate(),
             isConfirmed:false,
-            idUser:user.getId().Value
+            idUser:user.getId().Value,
+            idStripe: externalId.getValue
         }
 
         let userResponse=await this.commandUserRepository.saveUser(user)

@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { InfraesctructureException } from "../infraestructure-exception";
 import { ExeptionInfraestructureType } from "../infraestructure-exception/enum/exceptions-infraestructure-type.enums";
-import { BaseException } from "src/common/utils/base-exception";
+import { BaseException } from "src/common/utils/base-exception/base-exception";
 import { BaseExceptionEnum } from "src/common/utils/enum/base-exception.enum";
 
 export class ExceptionMapper {

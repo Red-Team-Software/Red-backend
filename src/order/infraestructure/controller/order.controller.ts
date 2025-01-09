@@ -1,7 +1,6 @@
 import { Body, Controller, Get, Inject, Logger, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { StripeSingelton } from "src/payments/infraestructure/stripe-singelton";
-import { StripePaymentEntryDto } from "../dto/stripe-payment-entry-dto";
+import { StripeSingelton } from "src/common/infraestructure/stripe/stripe-singelton";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { ExceptionDecorator } from "src/common/application/aspects/exeption-decorator/exception-decorator";
@@ -15,7 +14,7 @@ import { ICalculateTaxesFee } from "src/order/domain/domain-services/interfaces/
 import { CalculateTaxesFeeImplementation } from "../domain-service/calculate-tax-fee-implementation";
 import { NestLogger } from "src/common/infraestructure/logger/nest-logger";
 import { CalculateShippingFeeHereMaps } from "../domain-service/calculate-shipping-here-maps";
-import { HereMapsSingelton } from '../../../payments/infraestructure/here-maps-singleton';
+import { HereMapsSingelton } from '../../../common/infraestructure/here-maps/here-maps-singleton';
 import { TaxesShippingFeeEntryDto } from "../dto/taxes-shipping-dto";
 import { TaxesShippingFeeApplicationServiceEntryDto } from "src/order/application/dto/request/tax-shipping-fee-request-dto";
 import { CalculateTaxesShippingResponseDto } from "src/order/application/dto/response/calculate-taxes-shipping-fee-response.dto";
@@ -38,8 +37,6 @@ import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/
 import { IGeocodification } from "src/order/domain/domain-services/interfaces/geocodification-interface";
 import { GeocodificationHereMapsDomainService } from "../domain-service/geocodification-here-maps-domain-service";
 import { OrmProductQueryRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-query-repository";
-import { OrmProductRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-repository";
-import { OrmBundleRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-repository";
 import { CancelOrderApplicationServiceRequestDto } from "src/order/application/dto/request/cancel-order-request-dto";
 import { CancelOrderApplicationServiceResponseDto } from "src/order/application/dto/response/cancel-order-response-dto";
 import { CancelOderApplicationService } from "src/order/application/service/cancel-order-application.service";
@@ -64,7 +61,6 @@ import { DateHandler } from "src/common/infraestructure/date-handler/date-handle
 import { ModifyCourierLocationApplicationService } from "src/order/application/service/modify-courier-location-application.service";
 import { ModifyCourierLocationEntryDto } from "../dto/modify-order-courier-location-entry.dto";
 import { ModifyCourierLocationRequestDto } from "src/order/application/dto/request/modify-courier-location-request.dto";
-import { FindOrderByIdEntryDto } from "../dto/find-order-by-id-entry.dto";
 import { FindOrderByIdRequestDto } from "src/order/application/dto/request/find-order-by-id-request-dto";
 import { FindOrderByIdApplicationService } from "src/order/application/service/find-order-by-id-application.service";
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
@@ -84,8 +80,14 @@ import { DeliveredOrderDto } from "../dto/delivered-order-entry.dto";
 import { DeliveringOrderDto } from "../dto/delivering-order-entry.dto";
 import { DeliveringOderApplicationService } from "src/order/application/service/delivering-order-application.service";
 import { DeliveredOderApplicationService } from "src/order/application/service/delivered-order-application.service";
-import { PagoMovilPaymentEntryDto } from "../dto/pago-movil-payment-entry-dto";
-import { PagoMovilPaymentMethod } from "../domain-service/pago-movil-method";
+import { PaymentEntryDto } from "../dto/payment-entry-dto";
+import { WalletPaymentMethod } from "../domain-service/wallet-method";
+import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface";
+import { OrmUserCommandRepository } from "src/user/infraestructure/repositories/orm-repository/orm-user-command-repository";
+import { OrmTransactionCommandRepository } from "src/user/infraestructure/repositories/orm-repository/orm-transaction-command-repository";
+import { ICommandTransactionRepository } from "src/user/application/repository/wallet-transaction/transaction.command.repository.interface";
+import { ITransaction } from "src/user/application/model/transaction-interface";
+import { WalletPaymentEntryDto } from "../dto/wallet-payment-entry-dto";
 
 
 @ApiBearerAuth()
@@ -119,8 +121,10 @@ export class OrderController {
     private readonly ormBundleRepository: IQueryBundleRepository;
     private readonly ormCourierRepository: ICourierRepository;
     private readonly ormCourierQueryRepository: ICourierQueryRepository;
+    private readonly ormUserCommandRepo:ICommandUserRepository;
     private readonly ormUserQueryRepository: IQueryUserRepository;
     private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
+    private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>;
 
     //*IdGen
     private readonly idGen: IIdGen<string>;
@@ -137,7 +141,7 @@ export class OrderController {
 
         //*implementations of singeltons
         this.stripeSingleton = StripeSingelton.getInstance();
-        this.hereMapsSingelton = HereMapsSingelton.getInstance(); 
+        this.hereMapsSingelton = HereMapsSingelton.getInstance();
 
         //*RabbitMQ
         this.rabbitMq = new RabbitMQPublisher(this.channel);
@@ -148,6 +152,7 @@ export class OrderController {
         this.geocodificationAddress = new GeocodificationHereMapsDomainService(this.hereMapsSingelton);
         
         //*Repositories
+        this.TransactionCommandRepository = new OrmTransactionCommandRepository(PgDatabaseSingleton.getInstance());
         this.ormProductRepository = new OrmProductQueryRepository(PgDatabaseSingleton.getInstance());
         this.ormBundleRepository = new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance());
         this.ormCourierRepository = new CourierRepository(
@@ -165,6 +170,7 @@ export class OrderController {
             PgDatabaseSingleton.getInstance(),
             new OrmPaymentMethodMapper()
         )
+        this.ormUserCommandRepo=new OrmUserCommandRepository(PgDatabaseSingleton.getInstance())
 
         //*Mappers
         this.orderMapper = new OrmOrderMapper(
@@ -215,7 +221,11 @@ export class OrderController {
                     this.orderQueryRepository,
                     this.orderRepository,
                     this.rabbitMq,
-                    new RefundPaymentStripeConnection(this.stripeSingleton)
+                    new RefundPaymentStripeConnection(this.stripeSingleton),
+                    this.ormUserCommandRepo,
+                    this.ormUserQueryRepository,
+                    this.TransactionCommandRepository,
+                    this.idGen
                 ),
                 new NestLogger(new Logger())
             )
@@ -241,7 +251,7 @@ export class OrderController {
     @Post('/pay/stripe')
     async realizePayment(
         @GetCredential() credential:ICredential,
-        @Body() data: StripePaymentEntryDto
+        @Body() data: PaymentEntryDto
     ) {
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: credential.account.idUser,
@@ -274,18 +284,16 @@ export class OrderController {
             )
         );
 
-        
-
-
         let response = await payOrderService.execute(payment);
         
         return response.getValue;
     }
 
-    @Post('/pay/pagomovil')
-    async realizePaymentZelle(
+
+    @Post('/pay/wallet')
+    async realizePaymentWallet(
         @GetCredential() credential:ICredential,
-        @Body() data: PagoMovilPaymentEntryDto
+        @Body() data: WalletPaymentEntryDto
     ) {
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: credential.account.idUser,
@@ -303,9 +311,11 @@ export class OrderController {
                     this.rabbitMq,
                     this.calculateShipping,
                     this.calculateTax,
-                    new PagoMovilPaymentMethod(
-                        this.idGen,
-                        {...data}
+                    new WalletPaymentMethod(
+                        this.idGen, 
+                        this.ormUserQueryRepository,
+                        this.ormUserCommandRepo,
+                        this.TransactionCommandRepository
                     ),
                     this.orderRepository,
                     this.idGen,
@@ -315,14 +325,11 @@ export class OrderController {
                     this.ormCourierQueryRepository,
                     new DateHandler(),
                     new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                    this.paymentMethodQueryRepository
+                    this.paymentMethodQueryRepository,
                 ),
                 new NestLogger(new Logger())
             )
         );
-
-        
-
 
         let response = await payOrderService.execute(payment);
         
@@ -347,7 +354,7 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Get('/all')
+    @Get('/many')
     async findAllOrders(
         @GetCredential() credential:ICredential,
         @Query() data: FindAllOrdersEntryDto
@@ -367,7 +374,7 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Get('/user/all')
+    @Get('/user/many')
     async findAllByUserOrders(
         @GetCredential() credential:ICredential,
         @Query() data: FindAllOrdersByUserInfraestructureEntryDto
@@ -400,10 +407,10 @@ export class OrderController {
         return response.getValue
     }
 
-    @Post('/cancel/order')
+    @Get('/cancel/:orderId')
     async cancelOrder(
         @GetCredential() credential:ICredential,
-        @Body() data: CancelOrderDto) {
+        @Param() data: CancelOrderDto) {
         let request: CancelOrderApplicationServiceRequestDto = {
             userId: credential.account.idUser,
             orderId: data.orderId
@@ -511,7 +518,7 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Get('/one/:id')
+    @Get('/:id')
     async findOrderById(
         @GetCredential() credential:ICredential,
         @Param('id') id: string
