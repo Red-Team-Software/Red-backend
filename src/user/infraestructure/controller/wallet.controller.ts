@@ -34,8 +34,8 @@ import { UpdateWalletBalanceZelleInfraestructureRequestDTO } from "../dto/reques
 import { SaveCardApplicationRequestDTO } from "src/user/application/dto/request/wallet/save-card-application-request-dto"
 import { SaveCardInfraestructureRequestDTO } from "../dto/request/wallet/save-card-infraestructure-request-dto"
 import { SaveCardToUserApplicationService } from "src/user/application/services/command/wallet/save-card-to-user-application.service"
-import { IUserExternalAccountService } from "src/auth/application/interfaces/user-external-account-interface"
-import { UserStripeAccount } from "src/auth/infraestructure/services/user-stripe-account"
+import { IUserExternalAccount } from "src/auth/application/interfaces/user-external-account-interface"
+import { UserStripeAccount } from "src/auth/infraestructure/external-account/user-stripe-account"
 import { StripeSingelton } from "src/common/infraestructure/stripe/stripe-singelton"
 import { GetWalletAmountApplicationService } from "src/user/application/services/query/wallet/get-wallet-amount-application.service"
 import { WalletAmountApplicationRequestDTO } from "src/user/application/dto/request/wallet/get-wallet-amount-application-request-dto"
@@ -69,7 +69,7 @@ export class PaymentWalletController {
     private readonly ormUserCommandRepo:ICommandUserRepository;
     private readonly ormAccountQueryRepo:IQueryAccountRepository<IAccount>;
     private readonly auditRepository: IAuditRepository;
-    private readonly userExternalSite: IUserExternalAccountService;
+    private readonly userExternalSite: IUserExternalAccount;
     private readonly transactionQueryRepository: IQueryTransactionRepository<ITransaction>;
     private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
     private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>

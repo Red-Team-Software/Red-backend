@@ -1,5 +1,5 @@
 import { UserNotFoundApplicationException } from "src/auth/application/application-exception/user-not-found-application-exception";
-import { IUserExternalAccountService } from "src/auth/application/interfaces/user-external-account-interface";
+import { IUserExternalAccount } from "src/auth/application/interfaces/user-external-account-interface";
 import { IAccount } from "src/auth/application/model/account.interface";
 import { IQueryAccountRepository } from "src/auth/application/repository/query-account-repository.interface";
 import { IApplicationService } from "src/common/application/services";
@@ -15,7 +15,7 @@ export class GetUserCardsApplicationService extends IApplicationService<UserCard
     constructor(
         private readonly queryUserRepository:IQueryUserRepository,
         private readonly accountRepository:IQueryAccountRepository<IAccount>,
-        private readonly userExternalSite: IUserExternalAccountService
+        private readonly userExternalSite: IUserExternalAccount
     ) {
         super();
     }

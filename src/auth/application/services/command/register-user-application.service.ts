@@ -25,7 +25,7 @@ import { UserAlreadyExistPhoneNumberApplicationException } from "../../applicati
 import { Wallet } from "src/user/domain/entities/wallet/wallet.entity";
 import { WalletId } from "src/user/domain/entities/wallet/value-objects/wallet-id";
 import { Ballance } from "src/user/domain/entities/wallet/value-objects/balance";
-import { IUserExternalAccountService } from "src/auth/application/interfaces/user-external-account-interface";
+import { IUserExternalAccount } from "src/auth/application/interfaces/user-external-account-interface";
 import { ErrorRegisteringAccountExternalSiteApplicationException } from "../../application-exception/error-registering-account-external-site-application-exception";
 
 
@@ -41,7 +41,7 @@ export class RegisterUserApplicationService extends IApplicationService
         private readonly encryptor:IEncryptor,
         private readonly dateHandler:IDateHandler,
         private readonly eventPublisher:IEventPublisher,
-        private readonly userExternalSite: IUserExternalAccountService
+        private readonly userExternalSite: IUserExternalAccount
     ){
         super()
     }
