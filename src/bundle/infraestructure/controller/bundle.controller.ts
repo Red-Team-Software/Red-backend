@@ -110,7 +110,7 @@ export class BundleController {
     this.odmBundleCommandRepo=new OdmBundleCommandRepository(mongoose)
     this.odmQueryBundletRepo=new OdmBundleQueryRepository(mongoose)
 
-    //this.initializeQueues() //TODO: REVISAR EL ERROR Y ACTIVARLO
+    this.initializeQueues() //TODO: REVISAR EL ERROR Y ACTIVARLO
 
     this.subscriber.consume<ICreateOrder>(
         { name: 'BundleReduce/OrderRegistered'}, 

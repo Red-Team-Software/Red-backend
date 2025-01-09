@@ -48,7 +48,7 @@ export class WalletPaymentMethod implements IPaymentMethodService {
         let transaction: ITransaction = {
             id: await this.idGen.genId(),
             currency: user.Wallet.Ballance.Currency,
-            price: order.TotalAmount.OrderAmount,
+            price: -order.TotalAmount.OrderAmount,
             wallet_id: user.Wallet.getId().Value,
             payment_method_id: '',
             date: new Date()
