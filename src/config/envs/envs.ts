@@ -35,6 +35,7 @@ interface EnvVars {
     API_KEY_EMAIL_SENDER:string
     EMAIL_SENDER:string
     JWT_SECRET_KEY:string
+    EXCHANGE_RATE_API_KEY:string
 }
 
 const envsSchema = joi.object({
@@ -70,7 +71,8 @@ const envsSchema = joi.object({
     HERE_MAP_API_KEY:joi.string().required(),
     API_KEY_EMAIL_SENDER:joi.string().required(),
     EMAIL_SENDER:joi.string().required(),
-    JWT_SECRET_KEY:joi.string().required()
+    JWT_SECRET_KEY:joi.string().required(),
+    EXCHANGE_RATE_API_KEY:joi.string().required()
 }).unknown(true);
 
 const {error, value} = envsSchema.validate(process.env);
@@ -112,5 +114,6 @@ export const envs = {
     HERE_MAP_API_KEY:envVars.HERE_MAP_API_KEY,
     API_KEY_EMAIL_SENDER:envVars.API_KEY_EMAIL_SENDER,
     EMAIL_SENDER:envVars.EMAIL_SENDER,
-    JWT_SECRET_KEY:envVars.JWT_SECRET_KEY
+    JWT_SECRET_KEY:envVars.JWT_SECRET_KEY,
+    EXCHANGE_RATE_API_KEY:envVars.EXCHANGE_RATE_API_KEY
 }

@@ -1,12 +1,13 @@
-import { OrderBundle } from "src/order/domain/entities/order-bundle/order-bundle-entity"
-import { OrderProduct } from "src/order/domain/entities/order-product/order-product-entity"
+import { BundleDetail } from "src/order/domain/entities/bundle-detail/bundle-detail-entity"
+import { ProductDetail } from "src/order/domain/entities/product-detail/product-detail-entity"
+
 
 export type productsOrderType = {
-    products: OrderProduct[]
+    products: ProductDetail[]
     orderid: string
 }
 
 export type bundlesOrderType = {
-    bundles: OrderBundle[]
+    bundles: BundleDetail[]
     orderid: string
 }

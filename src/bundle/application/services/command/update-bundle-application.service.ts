@@ -1,5 +1,4 @@
 import { UpdateBundleApplicationRequestDTO } from './../../dto/request/update-bundle-application-request-dto';
-import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate"
 import { BundleCaducityDate } from "src/bundle/domain/value-object/bundle-caducity-date"
 import { BundleDescription } from "src/bundle/domain/value-object/bundle-description"
 import { BundleId } from "src/bundle/domain/value-object/bundle-id"

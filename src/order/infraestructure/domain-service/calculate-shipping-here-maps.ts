@@ -3,7 +3,7 @@ import { Result } from "src/common/utils/result-handler/result";
 import { ICalculateShippingFee } from "src/order/domain/domain-services/interfaces/calculate-shippping-fee.interface";
 import { OrderDirection } from "src/order/domain/value_objects/order-direction";
 import { OrderShippingFee } from "src/order/domain/value_objects/order-shipping-fee";
-import { HereMapsSingelton } from "src/payments/infraestructure/here-maps-singleton";
+import { HereMapsSingelton } from "src/common/infraestructure/here-maps/here-maps-singleton";
 import { IhereMapsResponse } from "../interfaces/here-maps-response.interface";
 
 

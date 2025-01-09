@@ -16,6 +16,8 @@ import { UserPhoneUpdated } from "../domain-events/user-phone-updated";
 import { UserDirectionUpdated } from "../domain-events/user-direction-updated";
 import { Wallet } from "../entities/wallet/wallet.entity";
 import { InvalidUserDirectionQuantityException } from "../domain-exceptions/invalid-user-direction-quantity-exception";
+import { UserBalanceAmountAdded } from "../domain-events/user-balance-amount-added";
+import { UserBalanceAmountDecremented } from "../domain-events/user-balance-amount-decremented";
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -56,6 +58,16 @@ export class User extends AggregateRoot <UserId>{
             case 'UserPhoneUpdated':{
                 const userPhoneUpdated: UserPhoneUpdated = event as UserPhoneUpdated
                 this.userPhone=userPhoneUpdated.userPhone
+                break;
+            }
+            case 'UserBalanceAmountAdded':{
+                const userBalanceAmountAdded: UserBalanceAmountAdded = event as UserBalanceAmountAdded
+                this.wallet= userBalanceAmountAdded.userWallet
+                break;
+            }
+            case 'UserBalanceAmountDecremented':{                    
+                const userBalanceAmountDecremented: UserBalanceAmountDecremented = event as UserBalanceAmountDecremented
+                this.wallet= userBalanceAmountDecremented.userWallet
                 break;
             }
             default: { throw new DomainExceptionNotHandled(JSON.stringify(event)) }
@@ -160,6 +172,24 @@ export class User extends AggregateRoot <UserId>{
             )
         )
     }
+
+    addWalletBalance(wallet:Wallet):void{
+        this.apply(
+            UserBalanceAmountAdded.create(
+                this.getId(),
+                wallet
+            )
+        );
+    };
+
+    decreaseWalletBalance(wallet:Wallet):void{
+        this.apply(
+            UserBalanceAmountDecremented.create(
+                this.getId(),
+                wallet
+            )
+        );
+    };
 
     updateName(userName:UserName){
         this.apply(

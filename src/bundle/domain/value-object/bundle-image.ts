@@ -17,7 +17,7 @@ export class BundleImage implements ValueObject<BundleImage> {
     }
 
     private constructor(image:string){
-        const regex=new RegExp(/http?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp)/)
+        const regex=new RegExp(/http?:\/\/.*\.(?:png|jpg|jpeg|gif|bmp|webp)/)
         if (!regex.test(image))         
             throw new InvalidBundleImageException()
             this.image=image

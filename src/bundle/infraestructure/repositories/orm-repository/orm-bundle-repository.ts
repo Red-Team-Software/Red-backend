@@ -6,9 +6,8 @@ import { DataSource, Repository } from "typeorm"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 import { OrmBundleMapper } from "../../mapper/orm-mapper/orm-bundle-mapper"
 import { BundleId } from "src/bundle/domain/value-object/bundle-id"
-import { BundleName } from "src/bundle/domain/value-object/bundle-name"
 import { Result } from "src/common/utils/result-handler/result"
-import { NotFoundException, PersistenceException } from "src/common/infraestructure/infraestructure-exception"
+import { PersistenceException } from "src/common/infraestructure/infraestructure-exception"
 import { ICommandBundleRepository } from "src/bundle/domain/repository/bundle.command.repository.interface"
 
 export class OrmBundleRepository extends Repository<OrmBundleEntity> implements ICommandBundleRepository{
