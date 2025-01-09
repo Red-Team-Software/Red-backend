@@ -42,7 +42,6 @@ export class WalletPaymentMethod implements IPaymentMethodService {
 
         let userRes = await this.ormUserCommandRepo.saveUser(user);
 
-        console.log(userRes);
 
         let newOrder = Order.registerOrder(
             order.getId(),

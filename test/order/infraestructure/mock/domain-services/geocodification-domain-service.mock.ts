@@ -1,5 +1,5 @@
 import { Result } from "src/common/utils/result-handler/result";
-import { IGeocodification } from "src/order/domain/domain-services/geocodification-interface";
+import { IGeocodification } from "src/order/domain/domain-services/interfaces/geocodification-interface";
 import { OrderDirection } from "src/order/domain/value_objects/order-direction";
 import { OrderAddressStreet } from "src/order/domain/value_objects/order-direction-street";
 

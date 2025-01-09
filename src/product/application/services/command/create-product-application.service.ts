@@ -57,7 +57,6 @@ export class CreateProductApplicationService extends IApplicationService
             uploaded.push(imageuploaded.getValue)
         }
 
-        console.log(uploaded)
 
         let id=await this.idGen.genId()
         let product=Product.RegisterProduct(
