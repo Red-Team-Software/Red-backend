@@ -7,7 +7,8 @@ export class CourierRepositoryMock implements ICourierRepository{
 
     private couriers: Courier[] = [];
 
-    constructor(){
+    constructor(couriers?:Courier[]){
+        this.couriers=couriers
     }
     
     async saveCourier(courier: Courier): Promise<Result<Courier>> {

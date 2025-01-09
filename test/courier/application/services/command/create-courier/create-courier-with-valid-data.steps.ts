@@ -8,7 +8,7 @@ import { IdGeneratorMock } from "test/common/mocks/infraestructure/id-generator.
 
 let caughtError:any
 
-When('Trying to create a Courier with name {string}', async (name:string) => {
+When('Trying to create a courier with name {string}', async (name:string) => {
 
     let service= new CreateCourierApplicationService(
     new EventPublisherMock(),
@@ -29,6 +29,6 @@ When('Trying to create a Courier with name {string}', async (name:string) => {
     }
 })
 
-Then('The courier {string} should be created successfully', async (name:string) => {
+Then('The courier {string} is sucsessfully registered', async (name:string) => {
     assert.strictEqual(caughtError, undefined, `Expected no error but got ${caughtError}`);
 })
