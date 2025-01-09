@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, MinLength } from "class-validator";
+import { IsNumber, IsString, MinLength } from "class-validator";
 
 
 export class CreateCourierEntryDTO{
@@ -8,5 +8,13 @@ export class CreateCourierEntryDTO{
     @IsString()
     @MinLength( 3 )
     name: string
+
+    @ApiProperty( { example: '40.5515412', required: true })
+    @IsNumber()
+    lat: number;
+    
+    @ApiProperty( { example: '-10.5265', required: true })
+    @IsNumber()
+    long: number;
 
 }

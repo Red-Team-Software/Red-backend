@@ -7,26 +7,36 @@ import { OrmOrderCourierEntity } from "src/order/infraestructure/entities/orm-or
 @Entity( 'courier' )
 export class OrmCourierEntity implements ICourierInterface{
     @PrimaryColumn({type:"uuid"}) 
-    id:string
+    id:string;
     @Column( 'varchar', { unique: true }   ) 
-    name: string
+    name: string;
 
     @OneToOne( () => OrmCourierImageEntity,   image => image.courier,{ cascade: true, eager: true } ) 
     @JoinColumn()
-    image: OrmCourierImageEntity   
+    image: OrmCourierImageEntity;
 
     @OneToMany( () => OrmOrderCourierEntity, order_couriers => order_couriers.courier )
-    order_couriers?: OrmOrderCourierEntity[]
+    order_couriers?: OrmOrderCourierEntity[];
+
+    @Column('float')
+    latitude: number;
+
+    @Column('float')
+    longitude: number;
 
     static create ( 
         id:string,
         name: string,
         images:OrmCourierImageEntity,
+        lat: number,
+        long: number
     ): OrmCourierEntity {
-        const courier = new OrmCourierEntity()
-        courier.id = id
-        courier.name = name
-        courier.image = images
-        return courier
+        const courier = new OrmCourierEntity();
+        courier.id = id;
+        courier.name = name;
+        courier.image = images;
+        courier.latitude = lat;
+        courier.longitude = long;
+        return courier;
     }
 }

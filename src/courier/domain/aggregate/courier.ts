@@ -3,15 +3,21 @@ import { CourierId } from "../value-objects/courier-id";
 import { CourierName } from "../value-objects/courier-name";
 import { CourierImage } from "../value-objects/courier-image";
 import { InvalidCourierException } from "../exceptions/invalid-courier-exception";
+import { CourierRegistered } from "../domain-events/courier-registered";
+import { CourierDirection } from '../value-objects/courier-direction';
 
 
 export class Courier extends AggregateRoot<CourierId>{
     
     protected when(event: DomainEvent): void {
-        throw new Error("Method not implemented.");
+        if (event instanceof CourierRegistered) {
+            this.courierName = event.courierName;
+            this.courierImage = event.courierImage;
+            this.courierDirection = event.courierDirection;
+        };
     }
     protected validateState(): void {
-        if(!this.courierName || !this.courierImage){
+        if(!this.courierName || !this.courierImage || !this.courierDirection){
             new InvalidCourierException()
         };
     }
@@ -19,7 +25,8 @@ export class Courier extends AggregateRoot<CourierId>{
     private constructor (
         courierId: CourierId,
         private courierName: CourierName,
-        private courierImage: CourierImage
+        private courierImage: CourierImage,
+        private courierDirection: CourierDirection
     )
     {
         super(courierId)
@@ -29,34 +36,50 @@ export class Courier extends AggregateRoot<CourierId>{
         courierId: CourierId,
         courierName: CourierName,
         courierImage: CourierImage,
+        courierDirection: CourierDirection
     ): Courier {
         const courier = new Courier(
             courierId,
             courierName,
             courierImage,
+            courierDirection
         )
-        courier.validateState()
-        return courier
+        courier.apply(
+            new CourierRegistered(
+                courierId,
+                courierName,
+                courierImage,
+                courierDirection
+            )
+        );
+        return courier;
     }
 
     static initializeAggregate(
         courierId: CourierId,
         courierName: CourierName,
         courierImage: CourierImage,
+        courierDirection: CourierDirection
     ): Courier {
         const courier = new Courier(
             courierId,
             courierName,
             courierImage,
+            courierDirection
         )
-        return courier
+        courier.validateState();
+        return courier;
     }
 
     get CourierName(): CourierName {
-        return this.courierName
+        return this.courierName;
     }
 
     get CourierImage(): CourierImage {
-        return this.courierImage
+        return this.courierImage;
+    }
+
+    get CourierDirection(): CourierDirection{
+        return this.courierDirection;
     }
 }

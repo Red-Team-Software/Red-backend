@@ -9,11 +9,11 @@ export class ModifyCourierLocationEntryDto {
     @IsString()
     orderId: string;
     
-    @ApiProperty( { example: '2128865d-15af-4e61-a6f9-062ff3881e22', required: true })
+    @ApiProperty( { example: '40.5515412', required: true })
     @IsNumber()
     lat: number;
 
-    @ApiProperty( { example: '2128865d-15af-4e61-a6f9-062ff3881e22', required: true })
+    @ApiProperty( { example: '-10.5265', required: true })
     @IsNumber()
     long: number;
 
