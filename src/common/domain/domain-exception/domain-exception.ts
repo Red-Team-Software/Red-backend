@@ -1,4 +1,4 @@
-import { BaseException } from "src/common/utils/base-exception";
+import { BaseException } from "src/common/utils/base-exception/base-exception";
 import { BaseExceptionEnum } from "src/common/utils/enum/base-exception.enum";
 
 export abstract class DomainException extends BaseException {

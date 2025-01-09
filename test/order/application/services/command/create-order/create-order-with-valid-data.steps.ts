@@ -151,7 +151,7 @@ const couriers: Courier[] = [
     try {
         let response= await service.execute({
             userId: 'e09771db-2657-45fb-ad39-ae6604422919',
-            paymentId: "5c84a611-a1dd-4944-a60d-baad170c4593",
+            paymentId: "5c84a611-a1dd-4944-a60d-baad170c1000",
             currency: "usd",
             paymentMethod: "card",
             address: "Avenida Principal Alto Prado, Edificio Alto Prado Plaza",

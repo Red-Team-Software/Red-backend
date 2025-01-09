@@ -45,6 +45,7 @@ import { CourierName } from "src/courier/domain/value-objects/courier-name";
 import { CourierImage } from "src/courier/domain/value-objects/courier-image";
 import { EventPublisherMock } from "test/common/mocks/infraestructure/event-publisher.mock";
 import { IdGeneratorMock } from "test/common/mocks/infraestructure/id-generator.mock";
+import { ErrorCreatingOrderProductNotFoundApplicationException } from "src/order/application/application-exception/error-creating-order-product-not-found-application.exception";
 
 let caughtError:any;
 
@@ -53,7 +54,7 @@ When('Trying to create a order with product {string} that is not registered'
     
     const products: Product[] = [
         Product.initializeAggregate(
-            ProductID.create(productId),
+            ProductID.create("5c84a611-a1dd-4944-a60d-baad170c2000"),
             ProductDescription.create('descripcion de comida china'),
             ProductName.create('comida china'),
             ProductStock.create(10),
@@ -126,5 +127,9 @@ When('Trying to create a order with product {string} that is not registered'
 })
 
 Then('The order should not be created sucsessfully because the product {string} is not registered', async (idProduct:string) => {
-    assert.strictEqual(caughtError, undefined, `Expected no error but got ${caughtError}`);
-})
+      assert.ok(
+          caughtError instanceof ErrorCreatingOrderProductNotFoundApplicationException,
+          `Expected NotFoundException but got ${caughtError}`
+      )
+    }
+)

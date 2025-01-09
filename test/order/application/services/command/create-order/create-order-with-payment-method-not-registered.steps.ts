@@ -45,6 +45,7 @@ import { CourierName } from "src/courier/domain/value-objects/courier-name";
 import { CourierImage } from "src/courier/domain/value-objects/courier-image";
 import { EventPublisherMock } from "test/common/mocks/infraestructure/event-publisher.mock";
 import { IdGeneratorMock } from "test/common/mocks/infraestructure/id-generator.mock";
+import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 
 let caughtError:any;
 
@@ -163,5 +164,8 @@ When('Trying to create a order with payment method {string} that is not register
 })
 
 Then('The order should not be created sucsessfully because the payment method {string} is not registered', async (idPayment:string) => {
-    assert.strictEqual(caughtError, undefined, `Expected no error but got ${caughtError}`);
+      assert.ok(
+          caughtError instanceof NotFoundException,
+          `Expected NotFoundException but got ${caughtError}`
+      )
 })

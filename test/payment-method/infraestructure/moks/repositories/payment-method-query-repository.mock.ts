@@ -1,3 +1,4 @@
+import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { Result } from "src/common/utils/result-handler/result";
 import { FindAllPaymentMethodRequestDto } from "src/payment-methods/application/dto/request/find-all-payment-method-request.dto";
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
@@ -11,29 +12,24 @@ import { PaymentMethodState } from "src/payment-methods/domain/value-objects/pay
 export class PaymentMethodQueryRepositoryMock implements IPaymentMethodQueryRepository{
 
 
-    constructor(private readonly paymentMethod: PaymentMethodAgregate[]){
-
-    }
-
+    constructor(private readonly paymentMethod: PaymentMethodAgregate[]){}
 
     async findMethodById(id: PaymentMethodId): Promise<Result<PaymentMethodAgregate>> {
         let method = this.paymentMethod.find( m => m.getId().equals(id) );
-
+        if (!method)
+            return Result.fail(new NotFoundException('Payment method not found'));
         return Result.success( method );
     }
-    
     
     async findMethodByName(name: PaymentMethodName): Promise<Result<PaymentMethodAgregate>> {
         let method = this.paymentMethod.find( m => m.name.equals(name) );
-
+        if (!method)
+            return Result.fail(new NotFoundException('Payment method not found'));
         return Result.success( method );
     }
-    
     
     async findAllMethods(pagination: FindAllPaymentMethodRequestDto): Promise<Result<PaymentMethodAgregate[]>> {
         let method = this.paymentMethod.slice( pagination.page,pagination.perPage );
-
         return Result.success( method );
     }
-
 }
