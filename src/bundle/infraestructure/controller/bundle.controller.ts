@@ -222,6 +222,7 @@ export class BundleController {
     if (data.bundles.length==0)
       return
 
+    
     let service= new ExceptionDecorator(
       new AuditDecorator(
           new PerformanceDecorator(
@@ -233,6 +234,7 @@ export class BundleController {
         ),this.auditRepository,new DateHandler()
       )
     )
+
     await service.execute({userId:data.orderUserId,bundles:data.bundles})
   }
   

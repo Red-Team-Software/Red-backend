@@ -203,8 +203,6 @@ export class ProductController {
     if(data.products.length==0)
       return
 
-    console.log(data)
-
     let service= new ExceptionDecorator(
       new AuditDecorator(
           new PerformanceDecorator(

@@ -37,19 +37,19 @@ export class OdmBundle extends Document implements IOdmBundle {
     @Prop({ type: String, unique: false, required: true })   
     measurament:string
 
-    // @Prop({ type: [mongoose.Schema.ObjectId], unique: false, required: false })   
-    // category?: OdmCategory[]
-
-
-    // @Prop({ type: [mongoose.Schema.ObjectId], unique: false, required: true })   
-    // products: OdmProduct[]
-
-    @Prop({ type: [Object], unique: false, required: false })   
+    @Prop({ type: [mongoose.Schema.ObjectId], unique: false, required: false })   
     category?: OdmCategory[]
 
 
-    @Prop({ type: [Object], unique: false, required: true })   
+    @Prop({ type: [mongoose.Schema.ObjectId], unique: false, required: true })   
     products: OdmProduct[]
+
+    // @Prop({ type: [Object], unique: false, required: false })   
+    // category?: OdmCategory[]
+
+
+    // @Prop({ type: [Object], unique: false, required: true })   
+    // products: OdmProduct[]
 
 
 }
