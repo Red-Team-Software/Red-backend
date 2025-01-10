@@ -28,7 +28,7 @@ IApplicationService<FindAllBundlesApplicationRequestDTO,FindAllBundlesApplicatio
             ? bundles.map(b=>({
                 id: b.id,
                 name: b.name,
-                image: b.images,
+                images: b.images,
                 price: b.price,
                 currency: b.currency,
                 weight: b.weigth,

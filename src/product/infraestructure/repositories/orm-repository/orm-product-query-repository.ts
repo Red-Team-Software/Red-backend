@@ -118,7 +118,7 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             query.andWhere('LOWER(product.name) LIKE :name', { name: `%${criteria.name.toLowerCase().trim()}%` })
           
         if (criteria.price) 
-            query.andWhere('product.price = :price', { price: criteria.price })
+            query.andWhere('product.price <= :price', { price: criteria.price })
 
         if (criteria.popular) {
             query.addSelect(subQuery => {
