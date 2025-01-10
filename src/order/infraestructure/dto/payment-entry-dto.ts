@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class PaymentEntryDto {
   
   @ApiProperty({
-    example: 'To be decided',
+    example: '2cc214ab-1e1e-4a22-9547-185b4a09df0a',
     description: 'The payment Method Id to know if it is active or inactive',
   })
   @IsString()
@@ -41,7 +41,7 @@ export class PaymentEntryDto {
 
   @ApiProperty({
     description: 'The products with their ids and quantities',
-    example: [{ id: 'b38b2496-1c3e-42a2-9b36-bd1cf21234ab', quantity: 5 }],
+    example: [{ id: 'a08a040d-fa77-4122-84bb-84fa91391cd6', quantity: 5 }],
     required: false,
   })
   @IsArray()
@@ -49,4 +49,10 @@ export class PaymentEntryDto {
     id: string,
     quantity: number
   }[];
+
+  @ApiProperty({
+    required: true, default: 'pm_card_threeDSecureOptional' 
+  })
+  @IsString()
+  stripePaymentMethod: string;
 }

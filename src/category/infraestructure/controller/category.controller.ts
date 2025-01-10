@@ -23,7 +23,6 @@ import { DeleteCategoryApplication } from 'src/category/application/services/com
 import { ICredential } from 'src/auth/application/model/credential.interface';
 import { GetCredential } from 'src/auth/infraestructure/jwt/decorator/get-credential.decorator';
 import { credential } from 'firebase-admin';
-import { FindCategoryByProductIdApplicationRequestDTO } from 'src/category/application/dto/request/find-category-by-productid-application-request.dto';
 import { FindCategoryByProductIdInfraestructureRequestDTO } from '../dto-request/find-category-by-productid-infrastructure-request.dto';
 import { FindCategoryByIdApplicationService } from 'src/category/application/services/query/find-category-by-id-application';
 import { FindCategoryByProductIdApplicationService } from 'src/category/application/services/query/find-category-by-product-id-application';

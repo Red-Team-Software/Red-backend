@@ -23,15 +23,25 @@ export class OrmOrderProductEntity {
     @Column('integer')
     quantity: number; // Cantidad de productos en la orden
 
+    @Column('numeric')
+    price: number
+
+    @Column('varchar')
+    currency: string
+
     static create(
         order: string,
         product: string,
-        quantity: number
+        quantity: number,
+        price: number,
+        currency: string
     ): OrmOrderProductEntity {
         const orderProduct = new OrmOrderProductEntity();
         orderProduct.order_id = order;
         orderProduct.product_id = product;
         orderProduct.quantity = quantity;
+        orderProduct.price = price;
+        orderProduct.currency = currency;
         return orderProduct;
     }
 }

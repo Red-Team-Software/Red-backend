@@ -1,4 +1,4 @@
-import { BaseException } from "src/common/utils/base-exception";
+import { BaseException } from "src/common/utils/base-exception/base-exception";
 import { ExeptionInfraestructureType } from "../enum/exceptions-infraestructure-type.enums";
 import { BaseExceptionEnum } from "src/common/utils/enum/base-exception.enum";
 

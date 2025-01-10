@@ -42,10 +42,27 @@ import { UserRoles } from "src/user/domain/value-object/enum/user.roles"
 import { UpdateBundleApplicationService } from "src/bundle/application/services/command/update-bundle-application.service"
 import { DeleteBundleByIdInfraestructureRequestDTO } from "../dto-request/delete-bundle-by-id-infraestructure-request-dto"
 import { DeleteBundleApplicationService } from "src/bundle/application/services/command/delete-bundle-application.service"
-import { ProductQueues } from "../queues/bundle.queues"
 import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber"
 import { ICreateOrder } from "../interfaces/create-order.interface"
 import { AdjustBundleStockApplicationService } from "src/bundle/application/services/command/adjust-bundle-stock-application.service"
+import { BundleQueues } from "../queues/bundle.queues"
+import { ICreateBundle } from "../interfaces/create-bundle.interface"
+import { IBundleUpdatedCaducityDate } from "../interfaces/bundle-updated-caducity-date.interface"
+import { IBundleUpdatedDescription } from "../interfaces/bundle-updated-description.interface"
+import { IBundleUpdatedImages } from "../interfaces/bundle-updated-images.interface"
+import { IBundleUpdatedName } from "../interfaces/bundle-updated-name.interface"
+import { IBundleUpdatedPrice } from "../interfaces/bundle-updated-price.interface"
+import { IBundleUpdatedStock } from "../interfaces/bundle-updated-stock.interface"
+import { IBundleUpdatedWeigth } from "../interfaces/bundle-updated-weigth.interface"
+import { IBundleDeleted } from "../interfaces/bundle-deleted.interface"
+import { BundleRegisteredSyncroniceService } from "../services/syncronice/bundle-registered-syncronice.service"
+import { Mongoose } from "mongoose"
+import { BundleDeletedSyncroniceService } from "../services/syncronice/bundle-deleted-syncronice.service"
+import { BundleUpdatedInfraestructureRequestDTO } from "../services/dto/request/bundle-updated-infraestructure-request-dto"
+import { BundleUpdatedSyncroniceService } from "../services/syncronice/bundle-updated-syncronice.service"
+import { OdmBundleCommandRepository } from "../repositories/odm-repository/orm-bundle-command-repository"
+import { OdmBundleQueryRepository } from "../repositories/odm-repository/odm-bundle-query-repository"
+import { IBundleUpdatedProducts } from "../interfaces/bundle-updated-products.interface"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -59,11 +76,11 @@ export class BundleController {
   private readonly idGen: IIdGen<string> 
   private readonly auditRepository: IAuditRepository
   private readonly subscriber: RabbitMQSubscriber
-
-
+  private readonly odmBundleCommandRepo:ICommandBundleRepository
+  private readonly odmQueryBundletRepo:IQueryBundleRepository
   
   private initializeQueues():void{        
-    ProductQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+    BundleQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
   }
   
   private buildQueue(name: string, pattern: string) {
@@ -81,7 +98,8 @@ export class BundleController {
   }
   
   constructor(
-    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+    @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose
   ) {
     this.ormBundleCommandRepo=new OrmBundleRepository(PgDatabaseSingleton.getInstance())
     this.idGen= new UuidGen()
@@ -89,8 +107,10 @@ export class BundleController {
     this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryProductRepo=new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
     this.subscriber= new RabbitMQSubscriber(this.channel)
+    this.odmBundleCommandRepo=new OdmBundleCommandRepository(mongoose)
+    this.odmQueryBundletRepo=new OdmBundleQueryRepository(mongoose)
 
-    this.initializeQueues()
+    this.initializeQueues() //TODO: REVISAR EL ERROR Y ACTIVARLO
 
     this.subscriber.consume<ICreateOrder>(
         { name: 'BundleReduce/OrderRegistered'}, 
@@ -99,12 +119,110 @@ export class BundleController {
           return
         }
     )
+
+    this.subscriber.consume<ICreateBundle>(
+      { name: 'BundleSync/BundleRegistered'}, 
+      (data):Promise<void>=>{
+        this.syncBundleRegistered(data)
+        return
+      }
+  )
+
+    this.subscriber.consume<IBundleUpdatedCaducityDate>(
+      { name: 'BundleSync/BundleUpdatedCaducityDate'}, 
+      (data):Promise<void>=>{
+        this.syncBundleUpdated({
+          ...data,
+          bundleCaducityDate:new Date(data.bundleCaducityDate)})
+        return
+      }
+    )
+
+    this.subscriber.consume<IBundleUpdatedDescription>(
+      { name: 'BundleSync/BundleUpdatedDescription'}, 
+      (data):Promise<void>=>{
+        this.syncBundleUpdated({...data})
+        return
+      }
+    )
+
+    this.subscriber.consume<IBundleUpdatedImages>(
+      { name: 'BundleSync/BundleUpdatedImages'}, 
+      (data):Promise<void>=>{
+        this.syncBundleUpdated(data)
+        return
+      }
+    )
+    
+    this.subscriber.consume<IBundleUpdatedName>(
+      { name: 'BundleSync/BundleUpdatedName'}, 
+      (data):Promise<void>=>{
+        this.syncBundleUpdated(data)
+        return
+      }
+    )
+    
+    this.subscriber.consume<IBundleUpdatedPrice>(
+      { name: 'BundleSync/BundleUpdatedPrice'}, 
+      (data):Promise<void>=>{
+        this.syncBundleUpdated(data)
+        return
+      }
+    )
+    
+    this.subscriber.consume<IBundleUpdatedStock>(
+      { name: 'BundleSync/BundleUpdatedStock'}, 
+      (data):Promise<void>=>{
+        this.syncBundleUpdated(data)
+        return
+      }
+    )
+    
+    this.subscriber.consume<IBundleUpdatedWeigth>(
+      { name: 'BundleSync/BundleUpdatedWeigth'}, 
+      (data):Promise<void>=>{
+        this.syncBundleUpdated(data)
+        return
+      }
+    )
+    
+    this.subscriber.consume<IBundleUpdatedProducts>(
+      { name: 'BundleSync/BundleUpdatedProducts'}, 
+      (data):Promise<void>=>{
+        this.syncBundleUpdated(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IBundleDeleted>(
+      { name: 'BundleSync/BundleDeleted'}, 
+      (data):Promise<void>=>{
+        this.syncBundleDeleted(data)
+        return
+      }
+    )
+  }
+
+  async syncBundleRegistered(data:ICreateBundle){
+    let service= new BundleRegisteredSyncroniceService(this.mongoose)
+    await service.execute(data)
+  }
+
+  async syncBundleDeleted(data:IBundleDeleted){
+    let service= new BundleDeletedSyncroniceService(this.mongoose)
+    await service.execute(data)
+  }
+
+  async syncBundleUpdated(data:BundleUpdatedInfraestructureRequestDTO){
+    let service= new BundleUpdatedSyncroniceService(this.mongoose)
+    await service.execute({...data})
   }
 
   async reduceBundleStock(data:ICreateOrder){
     if (data.bundles.length==0)
       return
 
+    
     let service= new ExceptionDecorator(
       new AuditDecorator(
           new PerformanceDecorator(
@@ -116,6 +234,7 @@ export class BundleController {
         ),this.auditRepository,new DateHandler()
       )
     )
+
     await service.execute({userId:data.orderUserId,bundles:data.bundles})
   }
   
