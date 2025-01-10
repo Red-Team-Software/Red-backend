@@ -11,6 +11,7 @@ import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entit
 import { DataSource, Repository } from "typeorm";
 import { ProductID } from "src/product/domain/value-object/product-id";
 import { OrmBundleEntity } from "src/bundle/infraestructure/entities/orm-entities/orm-bundle-entity";
+import { BundleId } from "src/bundle/domain/value-object/bundle-id";
 
 export class OrmCategoryMapper implements IMapper<Category, OrmCategoryEntity> {
     private readonly ormProductRepository:Repository<OrmProductEntity>
@@ -62,7 +63,12 @@ export class OrmCategoryMapper implements IMapper<Category, OrmCategoryEntity> {
             CategoryID.create(infraEntity.id),
             CategoryName.create(infraEntity.name),
             CategoryImage.create(infraEntity.image.image),
-            infraEntity.products.map(id=>ProductID.create(id.id))
+            infraEntity.products
+            ? infraEntity.products.map(id=>ProductID.create(id.id))
+            : [],
+            infraEntity.bundles
+            ? infraEntity.bundles.map(b=>BundleId.create(b.id))
+            : []
         );
 
         return category;

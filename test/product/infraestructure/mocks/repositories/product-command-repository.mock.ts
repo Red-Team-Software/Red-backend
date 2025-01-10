@@ -7,7 +7,7 @@ import { ProductID } from "src/product/domain/value-object/product-id";
 
 export class ProductCommadRepositoryMock implements ICommandProductRepository{
 
-    constructor(private products: Product[] = []){}
+    constructor(private products: Product[]){}
 
     async createProduct(product: Product): Promise<Result<Product>> {
         this.products.push(product)

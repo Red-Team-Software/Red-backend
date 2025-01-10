@@ -1,5 +1,3 @@
-// src/category/domain/value-object/category-image.ts
-
 import { ValueObject } from 'src/common/domain/value-object/value-object';
 import { InvalidCategoryImageException } from '../domain-exceptions/invalid-category-image-exception';
 
