@@ -58,6 +58,7 @@ import { OrderDeliveringPushNotificationApplicationService } from "src/notificat
 import { IUserWalletBalanceAdded } from "../interfaces/user-wallet-balance-updated";
 import { UserWalletBalanceAddedPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/user-wallet-balance-added-push-notification-application-request-dto";
 import { UpdateUserWalletBalancePushNotificationApplicationService } from "src/notification/application/services/command/update-user-wallet-balance-push-notification-application.service";
+import { CourierAssignedToDeliver } from "src/order/domain/domain-events/courier-assigned-to-deliver";
 
 @ApiTags('Notification')
 @Controller('notification')
@@ -147,8 +148,8 @@ export class NotificationController {
         });
 
         this.subscriber.buildQueue({
-            name:'OrderEvents/OrderStatusDelivering',
-            pattern: 'OrderStatusDelivering',
+            name:'OrderEvents/CourierAssignedToDeliver',
+            pattern: 'CourierAssignedToDeliver',
             exchange:{
                 name:'DomainEvent',
                 type:'direct',
@@ -248,7 +249,7 @@ export class NotificationController {
             }
         );
 
-        this.subscriber.consume<IDeliveringOrder>(
+        this.subscriber.consume<IDeliveredOrder>(
             { name: 'OrderEvents/OrderStatusDelivered'}, 
             (data):Promise<void>=>{
                 this.sendPushOrderDelivered(data)
@@ -256,8 +257,8 @@ export class NotificationController {
             }
         );
 
-        this.subscriber.consume<IDeliveringOrder>(
-            { name: 'OrderEvents/OrderStatusDelivering'}, 
+        this.subscriber.consume<CourierAssignedToDeliver>(
+            { name: 'OrderEvents/CourierAssignedToDeliver'}, 
             (data):Promise<void>=>{
                 this.sendPushOrderDelivering(data)
                 return
@@ -309,7 +310,7 @@ export class NotificationController {
             }
         );
 
-        this.subscriber.consume<IDeliveringOrder>(
+        this.subscriber.consume<CourierAssignedToDeliver>(
             { name: 'OrderEvents/OrderStatusDelivering'}, 
             (data):Promise<void>=>{
                 this.sendPushOrderDelivering(data)
@@ -345,7 +346,7 @@ export class NotificationController {
         service.execute(data);
     };
 
-    async sendPushOrderDelivering(entry:IDeliveringOrder){
+    async sendPushOrderDelivering(entry:CourierAssignedToDeliver){
         let service= new ExceptionDecorator(
             new LoggerDecorator(
                 new OrderDeliveringPushNotificationApplicationService(
@@ -356,17 +357,17 @@ export class NotificationController {
         )
         
         const tokensResponse=await this.querySessionRepository.findSessionLastSessionByUserId(
-            UserId.create(entry.orderUserId)
+            UserId.create(entry.orderUserId.userId)
         )
 
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;
 
         let data: OrderDeliveringPushNotificationApplicationRequestDTO={
-            userId:entry.orderUserId,
+            userId:entry.orderUserId.userId,
             tokens:[tokensResponse.getValue.push_token],
-            orderState:entry.orderState,
-            orderId:entry.orderId
+            orderState:entry.orderState.orderState,
+            orderId:entry.orderId.orderId
         }
         service.execute(data);
     }

@@ -8,10 +8,7 @@ import { CourierName } from "src/courier/domain/value-objects/courier-name";
 
 export class CourierQueryRepositoryMock implements ICourierQueryRepository{
     
-    constructor (private readonly couriers: Courier[] ) {
-    
-
-    }
+    constructor (private readonly couriers: Courier[] ) {}
     
     async findCourierById(courierId: CourierId): Promise<Result<Courier>> {
         let courier = this.couriers.find( m => m.getId().equals(courierId) );

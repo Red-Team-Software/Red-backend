@@ -22,6 +22,8 @@ When('Trying to create a courier with name {string}', async (name:string) => {
             userId: 'e09771db-2657-45fb-ad39-ae6604422919',
             name: name,
             image: Buffer.from('prueba'),
+            lat: 45,
+            long: 25,
         })
     if(response.isFailure())
         caughtError=response.getError

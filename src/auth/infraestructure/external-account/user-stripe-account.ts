@@ -1,11 +1,11 @@
 import { StripeSingelton } from "src/common/infraestructure/stripe/stripe-singelton";
 import { Result } from "src/common/utils/result-handler/result";
-import { IUserExternalAccountService } from "src/auth/application/interfaces/user-external-account-interface";
+import { IUserExternalAccount } from "src/auth/application/interfaces/user-external-account-interface";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { UserCard } from "src/user/application/types/user-card-type";
 
 
-export class UserStripeAccount implements IUserExternalAccountService {    
+export class UserStripeAccount implements IUserExternalAccount {    
     private stripe: StripeSingelton;
     
     constructor(

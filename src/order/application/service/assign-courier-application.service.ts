@@ -7,24 +7,29 @@ import { NotFoundOrderApplicationException } from "../application-exception/not-
 import { OrderState } from "src/order/domain/value_objects/order-state";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { ErrorModifiyingOrderStateApplicationException } from "../application-exception/error-modifying-order-status-application.exception";
-import { DeliveringOrderApplicationServiceRequestDto } from "../dto/request/delivering-order-request-dto";
-import { DeliveringOrderApplicationServiceResponseDto } from "../dto/response/delivering-order-response-dto";
-import { ErrorOrderAlreadyDeliveringApplicationException } from "../application-exception/error-orden-already-delivering-application.exception";
 import { ErrorOrderAlreadyCancelledApplicationException } from "../application-exception/error-orden-already-cancelled-application.exception";
+import { AssignCourierApplicationServiceRequestDto } from "../dto/request/assign-courier-request-dto";
+import { AssignCourierApplicationServiceResponseDto } from "../dto/response/assign-courier-response-dto";
+import { ICourierQueryRepository } from "src/courier/application/query-repository/courier-query-repository-interface";
+import { ErrorOrderAlreadyHaveCourierAssignedApplicationException } from "../application-exception/error-orden-already-have-courier-assigned-application.exception";
+import { OrderCourierId } from 'src/order/domain/value_objects/order-courier-id';
+import { CourierId } from '../../../courier/domain/value-objects/courier-id';
+import { NotFoundCourierApplicationException } from "src/courier/application/application-exceptions/not-found-courier-application.exception";
 
 
 
-export class DeliveringOderApplicationService extends IApplicationService<DeliveringOrderApplicationServiceRequestDto,DeliveringOrderApplicationServiceResponseDto>{
+export class AssignCourierApplicationService extends IApplicationService<AssignCourierApplicationServiceRequestDto,AssignCourierApplicationServiceResponseDto>{
 
     constructor(
         private readonly orderQueryRepository: IQueryOrderRepository,
         private readonly orderRepository: ICommandOrderRepository,
         private readonly eventPublisher: IEventPublisher,
+        private readonly ormCourierQueryRepository: ICourierQueryRepository
     ){
         super()
     }
 
-    async execute(data: DeliveringOrderApplicationServiceRequestDto): Promise<Result<DeliveringOrderApplicationServiceResponseDto>> {
+    async execute(data: AssignCourierApplicationServiceRequestDto): Promise<Result<AssignCourierApplicationServiceResponseDto>> {
         
         let response = await this.orderQueryRepository.findOrderById(OrderId.create(data.orderId));
 
@@ -32,15 +37,23 @@ export class DeliveringOderApplicationService extends IApplicationService<Delive
 
         let newOrder = response.getValue;
 
-        if (newOrder.OrderState.orderState === 'delivering') return Result.fail(
-            new ErrorOrderAlreadyDeliveringApplicationException()
+        let courierRes = await this.ormCourierQueryRepository.findCourierById(CourierId.create(data.courierId));
+
+        if (!courierRes.isSuccess()) 
+            return Result.fail(new NotFoundCourierApplicationException());
+
+        if (!newOrder.OrderCourierId) return Result.fail(
+            new ErrorOrderAlreadyHaveCourierAssignedApplicationException()
         );
         
         if (newOrder.OrderState.orderState === 'cancelled') return Result.fail(
-            new ErrorOrderAlreadyCancelledApplicationException('The order cant be delivered because is already cancelled')
+            new ErrorOrderAlreadyCancelledApplicationException(' Cant assign courier to a cancelled order')
         );
 
-        newOrder.orderDelivering(OrderState.create('delivering'));
+        newOrder.assignCourierToDeliver(
+            OrderCourierId.create(data.courierId),
+            OrderState.create('delivering')
+        );
 
         let responseCommand = await this.orderRepository.saveOrder(newOrder);
 
@@ -48,9 +61,10 @@ export class DeliveringOderApplicationService extends IApplicationService<Delive
 
         await this.eventPublisher.publish(newOrder.pullDomainEvents())
 
-        let responseDto: DeliveringOrderApplicationServiceResponseDto = {
+        let responseDto: AssignCourierApplicationServiceResponseDto = {
             orderId: newOrder.getId().orderId,
-            state: newOrder.OrderState.orderState
+            state: newOrder.OrderState.orderState,
+            courierId: newOrder.OrderCourierId.OrderCourierId
         };
 
         return Result.success(responseDto);

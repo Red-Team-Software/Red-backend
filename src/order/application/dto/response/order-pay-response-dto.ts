@@ -34,9 +34,6 @@ export interface OrderPayResponseDto extends IServiceResponseDto {
             currency: string,
             paymentMethod: string
         },
-        orderCourier: {
-            courierName: string,
-            courierImage: string,
-        },
-        orderUserId: string
+        orderCupon?: string,
+        orderUserId: string,
 }

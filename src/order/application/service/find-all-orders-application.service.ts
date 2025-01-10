@@ -109,7 +109,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
             if (domainBundles) associatedBundles = domainBundles.filter((bundle) => bundle.orderid === order.getId().orderId); 
 
             let courier = courierResponse.getValue.find(
-                (courier) => courier.getId().courierId === order.OrderCourier.getId().OrderCourierId
+                (courier) => courier.getId().courierId === order.OrderCourierId.OrderCourierId
             );
 
             let associatedCourier: courierOrderResponse = {
@@ -140,7 +140,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
                     description: order.OrderReport.Description.Value,
                     orderid: order.getId().orderId
                 } : null,
-                orderCourier: associatedCourier
+                orderCourier: associatedCourier ? associatedCourier : null
             });
         });
 

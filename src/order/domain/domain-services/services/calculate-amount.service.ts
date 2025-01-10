@@ -8,6 +8,7 @@ import { ProductDetail } from "../../entities/product-detail/product-detail-enti
 import { BundleDetail } from "../../entities/bundle-detail/bundle-detail-entity";
 import { ProductDetailId } from "../../entities/product-detail/value_object/product-detail-id";
 import { BundleDetailId } from "../../entities/bundle-detail/value_object/bundle-detail-id";
+import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
 
 export class CalculateAmountService {
 
@@ -18,6 +19,7 @@ export class CalculateAmountService {
         bundles: Bundle[],
         orderProducts: ProductDetail[],
         orderBundles: BundleDetail[],
+        cupon: Cupon,
         currency: string
     ): OrderTotalAmount {
         let amount = 0;
@@ -61,6 +63,8 @@ export class CalculateAmountService {
         orderBundles.forEach(orderBundle => {
             amount += orderBundle.Price.Price * orderBundle.Quantity.Quantity;
         });
+
+        if (cupon) amount -= (amount * ( cupon.CuponDiscount.Value ));
 
         return OrderTotalAmount.create(amount, currency);
     }

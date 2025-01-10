@@ -2,14 +2,16 @@ import { DomainEvent } from "src/common/domain";
 import { OrderId } from "../value_objects/order-id";
 import { OrderState } from "../value_objects/order-state";
 import { OrderUserId } from "../value_objects/order-user-id";
+import { OrderCourierId } from "../value_objects/order-courier-id";
 
-export class OrderStatusDelivering extends DomainEvent {
+export class CourierAssignedToDeliver extends DomainEvent {
     
     serialize(): string {
         let data = {
             orderId: this.orderId.orderId,
             orderState: this.orderState.orderState,
             orderUserId: this.orderUserId.userId,
+            orderCourierId: this.orderCourierId
         }
         
         return JSON.stringify(data);
@@ -18,7 +20,8 @@ export class OrderStatusDelivering extends DomainEvent {
     constructor(
         public orderId: OrderId,
         public orderState: OrderState,
-        public orderUserId:OrderUserId
+        public orderUserId:OrderUserId,
+        public orderCourierId: OrderCourierId
     ){
         super();
     }
@@ -26,12 +29,14 @@ export class OrderStatusDelivering extends DomainEvent {
     static create (
         id: OrderId,
         orderState: OrderState,
-        orderUserId:OrderUserId
+        orderUserId:OrderUserId,
+        orderCourierId: OrderCourierId
     ){
-        let order = new OrderStatusDelivering(
+        let order = new CourierAssignedToDeliver(
             id,
             orderState,
-            orderUserId
+            orderUserId,
+            orderCourierId
         );
         return order;
     }

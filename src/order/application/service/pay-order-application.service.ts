@@ -30,12 +30,9 @@ import { Bundle } from 'src/bundle/domain/aggregate/bundle.aggregate';
 import { OrderReport } from 'src/order/domain/entities/report/report-entity';
 import { OrderPayment } from 'src/order/domain/entities/payment/order-payment-entity';
 import { ICourierQueryRepository } from 'src/courier/application/query-repository/courier-query-repository-interface';
-import { OrderCourier } from 'src/order/domain/entities/order-courier/order-courier-entity';
-import { OrderCourierId } from 'src/order/domain/entities/order-courier/value-object/order-courier-id';
-import { OrderCourierDirection } from 'src/order/domain/entities/order-courier/value-object/order-courier-direction';
+import { OrderCourierId } from 'src/order/domain/value_objects/order-courier-id';
 import { OrderUserId } from 'src/order/domain/value_objects/order-user-id';
 import { IDateHandler } from 'src/common/application/date-handler/date-handler.interface';
-import { ErrorCreatingOrderCourierNotFoundApplicationException } from '../application-exception/error-creating-order-courier-not-found-application.exception';
 import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
 import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
 import { IQueryPromotionRepository } from 'src/promotion/application/query-repository/promotion.query.repository.interface';
@@ -53,6 +50,10 @@ import { ProductDetailQuantity } from 'src/order/domain/entities/product-detail/
 import { ProductDetailPrice } from 'src/order/domain/entities/product-detail/value_object/product-detail-price';
 import { BundleDetailPrice } from 'src/order/domain/entities/bundle-detail/value_object/bundle-detail-price';
 import { CalculateAmountService } from 'src/order/domain/domain-services/services/calculate-amount.service';
+import { Cupon } from 'src/cupon/domain/aggregate/cupon.aggregate';
+import { OrderCuponId } from 'src/order/domain/value_objects/order-cupon-id';
+import { IQueryCuponRepository } from 'src/cupon/domain/query-repository/query-cupon-repository';
+import { CuponId } from 'src/cupon/domain/value-object/cupon-id';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -69,10 +70,10 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly geocodificationAddress: IGeocodification,
         private readonly productRepository:IQueryProductRepository,
         private readonly bundleRepository:IQueryBundleRepository,
-        private readonly ormCourierQueryRepository: ICourierQueryRepository,
         private readonly dateHandler: IDateHandler,
         private readonly queryPromotionRepositoy: IQueryPromotionRepository,
         private readonly paymentQueryRepository:IPaymentMethodQueryRepository,
+        private readonly ormCuponQueryRepo: IQueryCuponRepository
     ){
         super()
     }
@@ -84,6 +85,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         let orderproducts: ProductDetail[] = [];
         let orderBundles: BundleDetail[] = [];
         let promotions: Promotion[] = [];
+        let cupon: Cupon;
 
         let paymentResponse=await this.paymentQueryRepository.findMethodById(
             PaymentMethodId.create(data.paymentId)
@@ -91,6 +93,16 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
         if (!paymentResponse.isSuccess())
             return Result.fail(paymentResponse.getError)
+
+        if (data.cuponId){
+
+            let cuponRes = await this.ormCuponQueryRepo.findCuponById(CuponId.create(data.cuponId))
+
+            if (!cuponRes.isSuccess())
+                return Result.fail(cuponRes.getError)
+            cupon = cuponRes.getValue;
+        }
+
 
         let findPromotion: FindAllPromotionApplicationRequestDTO = {
             userId: data.userId,
@@ -113,7 +125,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
                 products.push(domain.getValue)
             }
-            
+            // TODO hacerlo servicio de dominio
             if (data.products){
                 products.forEach(product => {
                     let promotion = promotions.find(promo => {
@@ -137,7 +149,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         }
 
 
-        
+        // TODO hacerlo servicio de dominio
+
         if(data.bundles){
             for (const bundle of data.bundles){
                 let domain=await this.bundleRepository.findBundleById(BundleId.create(bundle.id))
@@ -155,7 +168,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         
                     let bundleTotal = bundle.BundlePrice.Price;
         
-                    if (promotion) bundleTotal -= (bundle.BundlePrice.Price * (promotion.PromotionDiscounts.Value ));
+                    if (promotion) 
+                        bundleTotal -= (bundle.BundlePrice.Price * (promotion.PromotionDiscounts.Value ));
         
                     let bu = BundleDetail.create(
                         BundleDetailId.create(bundle.getId().Value),
@@ -174,6 +188,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             bundles,
             orderproducts,
             orderBundles,
+            cupon,
             data.currency
         );
 
@@ -205,27 +220,12 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             
             let orderPayment: OrderPayment;
 
-            let orderReceivedDate: OrderReceivedDate = null;
-            let orderReport: OrderReport = null;
-
-            let courier = await this.ormCourierQueryRepository.findAllCouriers();
-
-            if (!courier.isSuccess()) return Result.fail(
-                new ErrorCreatingOrderCourierNotFoundApplicationException()
-            )
-
-            if (courier.getValue.length==0) return Result.fail(
-                new ErrorCreatingOrderCourierNotFoundApplicationException()
-            )
-
-            let selectedCourierId = courier.getValue[Math.floor(Math.random() * courier.getValue.length)].getId();
-
-            let orderCourier = OrderCourier.create(
-                OrderCourierId.create(selectedCourierId.courierId),
-                OrderCourierDirection.create(10.4944, -66.8901)
-            );
-
             let orderUserId: OrderUserId = OrderUserId.create(data.userId);
+
+            let orderCupon: OrderCuponId;
+
+            if(data.cuponId && cupon) 
+                orderCupon = OrderCuponId.create(cupon.getId().Value);
 
             let order = Order.initializeAggregate(
                 OrderId.create(await this.idGen.genId()),
@@ -233,18 +233,22 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 OrderCreatedDate.create(this.dateHandler.currentDate()),
                 total,
                 orderDirection,
-                orderCourier,
                 orderUserId,
+                orderCupon
+                ? orderCupon
+                : null,
+                null,
                 orderproducts,
                 orderBundles,
-                orderReceivedDate, 
-                orderReport, 
+                null, 
+                null, 
                 orderPayment
             );
 
             let response = await this.payOrder.createPayment(order);
 
-            if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException());
+            if (!response.isSuccess()) 
+                return Result.fail(new ErrorCreatingPaymentApplicationException());
 
             
             let responseDB = await this.orderRepository.saveOrder(response.getValue); 
@@ -304,8 +308,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 })
             });
 
-            let selectedCourier = courier.getValue.find(c => c.getId().equals(selectedCourierId) );
-
 
             let responsedata: OrderPayResponseDto = {
                 id: response.getValue.getId().orderId,
@@ -325,13 +327,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                     currency: response.getValue.OrderPayment.PaymentCurrency.Value,
                     paymentMethod: response.getValue.OrderPayment.PaymentMethods.Value
                 },
-                orderCourier: {
-                    courierName: selectedCourier.CourierName.courierName,
-                    courierImage: selectedCourier.CourierImage.Value
-                },
                 orderUserId: data.userId
             }
-
 
             return Result.success(responsedata);
     }

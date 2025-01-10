@@ -12,12 +12,12 @@ import { OrderReport } from "../entities/report/report-entity";
 import { OrderStatusCancelled } from "../domain-events/order-state-cancelled";
 import { OrderPayment } from "../entities/payment/order-payment-entity";
 import { OrderStatusDelivered } from "../domain-events/order-state-delivered";
-import { OrderCourier } from "../entities/order-courier/order-courier-entity";
 import { OrderUserId } from '../value_objects/order-user-id';
-import { OrderCourierLocationModified } from "../domain-events/order-courier-location-modified";
-import { OrderStatusDelivering } from "../domain-events/order-state-delivering";
+import { CourierAssignedToDeliver } from "../domain-events/courier-assigned-to-deliver";
 import { ProductDetail } from "../entities/product-detail/product-detail-entity";
 import { BundleDetail } from "../entities/bundle-detail/bundle-detail-entity";
+import { OrderCourierId } from "../value_objects/order-courier-id";
+import { OrderCuponId } from "../value_objects/order-cupon-id";
 
 export class Order extends AggregateRoot<OrderId>{
     
@@ -27,7 +27,7 @@ export class Order extends AggregateRoot<OrderId>{
             this.orderCreatedDate = event.orderCreateDate;
             this.totalAmount = event.totalAmount;
             this.orderDirection = event.orderDirection;
-            this.orderCourier = event.orderCourier;
+            this.orderCourierId = event.orderCourierId;
             this.products = event.products;
             this.bundles = event.bundles;
             this.orderReceivedDate = event.orderReceivedDate;
@@ -43,13 +43,10 @@ export class Order extends AggregateRoot<OrderId>{
         if (event instanceof OrderStatusDelivered) {
             this.orderState = event.orderState;
         }
-
-        if (event instanceof OrderCourierLocationModified) {
-            this.orderCourier = event.orderCourier;
-        }
     
-        if (event instanceof OrderStatusDelivering) {
+        if (event instanceof CourierAssignedToDeliver) {
             this.orderState = event.orderState;
+            this.orderCourierId = event.orderCourierId;
         }
     }
     
@@ -59,7 +56,6 @@ export class Order extends AggregateRoot<OrderId>{
             !this.orderCreatedDate ||
             !this.totalAmount ||
             !this.orderDirection ||
-            !this.orderCourier ||
             !this.orderUserId
         ) {
             throw new MissingOrderAtributes('The order is invalid, information is missing');
@@ -76,8 +72,9 @@ export class Order extends AggregateRoot<OrderId>{
         private orderCreatedDate: OrderCreatedDate,
         private totalAmount: OrderTotalAmount,
         private orderDirection: OrderDirection,
-        private orderCourier: OrderCourier,
         private orderUserId: OrderUserId,
+        public orderCupon?: OrderCuponId,
+        private orderCourierId?: OrderCourierId,
         private products?: ProductDetail[],
         private bundles?: BundleDetail[],
         private orderReceivedDate?: OrderReceivedDate,
@@ -93,8 +90,9 @@ export class Order extends AggregateRoot<OrderId>{
         orderCreatedDate: OrderCreatedDate,
         totalAmount: OrderTotalAmount,
         orderDirection: OrderDirection,
-        orderCourier: OrderCourier,
         orderUserId: OrderUserId,
+        orderCupon?: OrderCuponId,
+        orderCourierId?: OrderCourierId,
         products?: ProductDetail[],
         bundles?: BundleDetail[],
         orderReceivedDate?: OrderReceivedDate,
@@ -107,8 +105,9 @@ export class Order extends AggregateRoot<OrderId>{
             orderCreatedDate,
             totalAmount,
             orderDirection,
-            orderCourier,
             orderUserId,
+            orderCupon,
+            orderCourierId,
             products,
             bundles,
             orderReceivedDate,
@@ -122,8 +121,9 @@ export class Order extends AggregateRoot<OrderId>{
                 orderCreatedDate,
                 totalAmount,
                 orderDirection,
-                orderCourier,
                 orderUserId,
+                orderCupon,
+                orderCourierId,
                 products,
                 bundles,
                 orderReceivedDate,
@@ -140,23 +140,25 @@ export class Order extends AggregateRoot<OrderId>{
         orderCreateDate: OrderCreatedDate,
         totalAmount: OrderTotalAmount,
         orderDirection: OrderDirection,
-        orderCourier: OrderCourier,
         orderUserId: OrderUserId,
+        orderCupon?: OrderCuponId,
+        orderCourierId?: OrderCourierId,
         products?: ProductDetail[],
         bundles?: BundleDetail[],
         orderReceivedDate?: OrderReceivedDate,
         orderReport?: OrderReport,
         orderPayment?: OrderPayment
-
     ): Order {
+        //TODO order payment opcional
         let order = new Order(
             id,
             orderState,
             orderCreateDate,
             totalAmount,
             orderDirection,
-            orderCourier,
             orderUserId,
+            orderCupon,
+            orderCourierId,
             products,
             bundles,
             orderReceivedDate,
@@ -186,22 +188,15 @@ export class Order extends AggregateRoot<OrderId>{
             )
         );
     }
+    
 
-    orderDelivering(orderState: OrderState): void {
+    assignCourierToDeliver(orderCourierId: OrderCourierId,orderState: OrderState): void {
         this.apply(
-            OrderStatusDelivering.create(
+            CourierAssignedToDeliver.create(
                 this.getId(),
                 orderState,
-                this.orderUserId
-            )
-        );
-    }
-
-    modifyCourierLocation(orderCourier: OrderCourier): void {
-        this.apply(
-            OrderCourierLocationModified.create(
-                this.getId(),
-                orderCourier
+                this.orderUserId,
+                orderCourierId
             )
         );
     }
@@ -246,12 +241,16 @@ export class Order extends AggregateRoot<OrderId>{
         return this.orderDirection;
     }
 
-    get OrderCourier(): OrderCourier {
-        return this.orderCourier;
+    get OrderCourierId(): OrderCourierId {
+        return this.orderCourierId;
     }
 
     get OrderUserId(): OrderUserId {
         return this.orderUserId;
+    }
+
+    get OrderCuponId(): OrderCuponId {
+        return this.orderCupon;
     }
 
 }
