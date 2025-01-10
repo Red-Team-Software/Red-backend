@@ -11,10 +11,12 @@ export class ModifyCourierLocationEntryDto {
     
     @ApiProperty( { example: '40.5515412', required: true })
     @IsNumber()
+    @Transform(({ value }) => { return Number(value); })
     lat: number;
 
     @ApiProperty( { example: '-10.5265', required: true })
     @IsNumber()
+    @Transform(({ value }) => { return Number(value); })
     long: number;
 
 

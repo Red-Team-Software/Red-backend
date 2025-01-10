@@ -115,6 +115,8 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
 
         let cupon = infraEstructure.cupon ? OrderCuponId.create(infraEstructure.cupon.id) : null;
 
+        let orderCourier = infraEstructure.order_courier ? OrderCourierId.create(infraEstructure.order_courier.id) : null;
+
 
         let order = Order.initializeAggregate(
             OrderId. create(infraEstructure.id),
@@ -124,7 +126,7 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             OrderDirection.create(infraEstructure.latitude,infraEstructure.longitude),
             OrderUserId.create(infraEstructure.user.id),
             cupon,
-            OrderCourierId.create(infraEstructure.order_courier.id),
+            orderCourier,
             products,
             bundles,
             recievedDate,
@@ -220,8 +222,8 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             domainEntity.OrderDirection.Latitude,
             domainEntity.OrderDirection.Longitude,
             ormUser,
-            domainEntity.OrderCourierId ? domainEntity.OrderCourierId.OrderCourierId : null,
             domainEntity.OrderCuponId ? domainEntity.OrderCuponId.cuponId : null,
+            domainEntity.OrderCourierId ? domainEntity.OrderCourierId.OrderCourierId : null,
             ormOrderPayEntity,
             ormProducts,
             ormBundles,

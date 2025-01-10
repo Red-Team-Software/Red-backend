@@ -1,8 +1,9 @@
 import { IServiceRequestDto } from "src/common/application/services";
 
 
-export interface DeliveringOrderApplicationServiceRequestDto extends IServiceRequestDto {
+export interface AssignCourierApplicationServiceRequestDto extends IServiceRequestDto {
     userId: string;
     
     orderId: string;
+    courierId: string;
 }

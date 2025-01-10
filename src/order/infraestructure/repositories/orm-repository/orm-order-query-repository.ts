@@ -34,7 +34,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
         try {
             const ormOrders = await this.find({
                 relations: 
-                ["pay", "order_products", "order_bundles","order_report","order_courier", "user"],
+                ["pay", "order_products", "order_bundles","order_report", "user"],
                 where:{userId: data.userId},
                 skip:data.page,
                 take:data.perPage
@@ -57,7 +57,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
     async findAllOrders(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>> {
         try {
             const ormOrders = await this.find({
-                relations: ["pay", "order_products", "order_bundles","order_report","order_courier", "user"],
+                relations: ["pay", "order_products", "order_bundles","order_report", "user"],
                 order: { orderCreatedDate: 'DESC' },
                 skip:data.page,
                 take:data.perPage
@@ -82,7 +82,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
         try {
             const ormOrder = await this.findOne({
                 where: { id: orderId.orderId },
-                relations: ["pay", "order_products", "order_bundles","order_report","order_courier", "user"]
+                relations: ["pay", "order_products", "order_bundles","order_report", "user"]
             });
 
             if (!ormOrder) return Result.fail(new NotFoundException('Order not found'));

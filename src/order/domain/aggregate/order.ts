@@ -13,7 +13,7 @@ import { OrderStatusCancelled } from "../domain-events/order-state-cancelled";
 import { OrderPayment } from "../entities/payment/order-payment-entity";
 import { OrderStatusDelivered } from "../domain-events/order-state-delivered";
 import { OrderUserId } from '../value_objects/order-user-id';
-import { OrderStatusDelivering } from "../domain-events/order-state-delivering";
+import { CourierAssignedToDeliver } from "../domain-events/courier-assigned-to-deliver";
 import { ProductDetail } from "../entities/product-detail/product-detail-entity";
 import { BundleDetail } from "../entities/bundle-detail/bundle-detail-entity";
 import { OrderCourierId } from "../value_objects/order-courier-id";
@@ -44,8 +44,9 @@ export class Order extends AggregateRoot<OrderId>{
             this.orderState = event.orderState;
         }
     
-        if (event instanceof OrderStatusDelivering) {
+        if (event instanceof CourierAssignedToDeliver) {
             this.orderState = event.orderState;
+            this.orderCourierId = event.orderCourierId;
         }
     }
     
@@ -187,13 +188,15 @@ export class Order extends AggregateRoot<OrderId>{
             )
         );
     }
+    
 
-    orderDelivering(orderState: OrderState): void {
+    assignCourierToDeliver(orderCourierId: OrderCourierId,orderState: OrderState): void {
         this.apply(
-            OrderStatusDelivering.create(
+            CourierAssignedToDeliver.create(
                 this.getId(),
                 orderState,
-                this.orderUserId
+                this.orderUserId,
+                orderCourierId
             )
         );
     }

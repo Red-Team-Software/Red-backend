@@ -52,6 +52,8 @@ import { BundleDetailPrice } from 'src/order/domain/entities/bundle-detail/value
 import { CalculateAmountService } from 'src/order/domain/domain-services/services/calculate-amount.service';
 import { Cupon } from 'src/cupon/domain/aggregate/cupon.aggregate';
 import { OrderCuponId } from 'src/order/domain/value_objects/order-cupon-id';
+import { IQueryCuponRepository } from 'src/cupon/domain/query-repository/query-cupon-repository';
+import { CuponId } from 'src/cupon/domain/value-object/cupon-id';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -72,6 +74,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly dateHandler: IDateHandler,
         private readonly queryPromotionRepositoy: IQueryPromotionRepository,
         private readonly paymentQueryRepository:IPaymentMethodQueryRepository,
+        private readonly ormCuponQueryRepo: IQueryCuponRepository
     ){
         super()
     }
@@ -91,6 +94,10 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
         if (!paymentResponse.isSuccess())
             return Result.fail(paymentResponse.getError)
+
+        let cuponRes = await this.ormCuponQueryRepo.findCuponById(CuponId.create(data.cuponId));
+
+        if (cuponRes.isSuccess()) cupon = cuponRes.getValue;
 
         let findPromotion: FindAllPromotionApplicationRequestDTO = {
             userId: data.userId,
@@ -174,6 +181,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             bundles,
             orderproducts,
             orderBundles,
+            cupon,
             data.currency
         );
 
@@ -213,8 +221,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let orderCupon: OrderCuponId;
 
-            if(data.cuponId) //!Agregale la validacion de que si fue succes el cupon se agrega a la orden sino no
-                orderCupon = OrderCuponId.create(data.cuponId);
+            if(data.cuponId && cuponRes.isSuccess()) 
+                orderCupon = OrderCuponId.create(cupon.getId().Value);
 
             let order = Order.initializeAggregate(
                 OrderId.create(await this.idGen.genId()),

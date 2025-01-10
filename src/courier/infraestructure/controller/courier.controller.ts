@@ -80,7 +80,7 @@ export class CourierController {
         return response.getValue;
     }
 
-    @Post('/courier/location')
+    @Post('/update-location')
     async modifingCourierLocation(
         @GetCredential() credential:ICredential,
         @Body() data: ModifyCourierLocationEntryDto

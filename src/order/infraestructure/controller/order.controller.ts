@@ -72,10 +72,7 @@ import { IPaymentMethodQueryRepository } from "src/payment-methods/application/q
 import { OrmPaymentMethodMapper } from "src/payment-methods/infraestructure/mapper/orm-mapper/orm-payment-method-mapper";
 import { OrmPaymentMethodQueryRepository } from "src/payment-methods/infraestructure/repository/orm-repository/orm-payment-method-query-repository";
 import { DeliveredOrderApplicationServiceRequestDto } from "src/order/application/dto/request/delivered-order-request-dto";
-import { DeliveringOrderApplicationServiceRequestDto } from "src/order/application/dto/request/delivering-order-request-dto";
 import { DeliveredOrderDto } from "../dto/delivered-order-entry.dto";
-import { DeliveringOrderDto } from "../dto/delivering-order-entry.dto";
-import { DeliveringOderApplicationService } from "src/order/application/service/delivering-order-application.service";
 import { DeliveredOderApplicationService } from "src/order/application/service/delivered-order-application.service";
 import { PaymentEntryDto } from "../dto/payment-entry-dto";
 import { WalletPaymentMethod } from "../domain-service/wallet-method";
@@ -85,6 +82,17 @@ import { OrmTransactionCommandRepository } from "src/user/infraestructure/reposi
 import { ICommandTransactionRepository } from "src/user/application/repository/wallet-transaction/transaction.command.repository.interface";
 import { ITransaction } from "src/user/application/model/transaction-interface";
 import { WalletPaymentEntryDto } from "../dto/wallet-payment-entry-dto";
+import { OrderQueues } from "../queues/order.queues";
+import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber";
+import { ICreateOrder } from "src/product/infraestructure/interfaces/create-order.interface";
+import { ICancelOrder } from "src/notification/infraestructure/interfaces/cancel-order.interface";
+import { RefundPaymentApplicationService } from "src/order/application/service/refund-payment-application.service";
+import { RefundPaymentApplicationServiceRequestDto } from "src/order/application/dto/request/refund-payment-request-dto";
+import { IQueryCuponRepository } from "src/cupon/domain/query-repository/query-cupon-repository";
+import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-cupon-query-repository";
+import { AssignCourierDto } from "../dto/delivering-order-entry.dto";
+import { AssignCourierApplicationServiceRequestDto } from "src/order/application/dto/request/assign-courier-request-dto";
+import { AssignCourierApplicationService } from "src/order/application/service/assign-courier-application.service";
 
 
 @ApiBearerAuth()
@@ -105,12 +113,6 @@ export class OrderController {
     private readonly calculateTax: ICalculateTaxesFee;
     private readonly geocodificationAddress: IGeocodification;
     
-    //*Aplication services
-    private readonly calculateTaxesShippingFee: IApplicationService<TaxesShippingFeeApplicationServiceEntryDto,CalculateTaxesShippingResponseDto>;
-    private readonly getAllOrders: IApplicationService<FindAllOrdersApplicationServiceRequestDto,FindAllOrdersApplicationServiceResponseDto>;
-    private readonly orderCancelled: IApplicationService<CancelOrderApplicationServiceRequestDto,CancelOrderApplicationServiceResponseDto>;
-    private readonly createReport: IApplicationService<CreateOrderReportApplicationServiceRequestDto,CreateOrderReportApplicationServiceResponseDto>;
-
     //*Repositories
     private readonly orderRepository: ICommandOrderRepository;
     private readonly orderQueryRepository: IQueryOrderRepository;
@@ -122,12 +124,34 @@ export class OrderController {
     private readonly ormUserQueryRepository: IQueryUserRepository;
     private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
     private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>;
+    private readonly ormCuponQueryRepo: IQueryCuponRepository;
 
     //*IdGen
     private readonly idGen: IIdGen<string>;
 
     //*RabbitMQ
     private readonly rabbitMq: IEventPublisher;
+    private readonly subscriber: RabbitMQSubscriber;
+
+
+    private initializeQueues():void{        
+        OrderQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+    }
+    
+    private buildQueue(name: string, pattern: string) {
+        this.subscriber.buildQueue({
+            name,
+            pattern,
+            exchange: {
+                name: 'DomainEvent',
+                type: 'direct',
+                options: {
+                    durable: false,
+                },
+            },
+        })
+    }
+
 
 
     constructor(
@@ -142,6 +166,7 @@ export class OrderController {
 
         //*RabbitMQ
         this.rabbitMq = new RabbitMQPublisher(this.channel);
+        this.subscriber= new RabbitMQSubscriber(this.channel)
 
         //*implementations of domain services
         this.calculateShipping = new CalculateShippingFeeHereMaps(this.hereMapsSingelton);
@@ -152,6 +177,7 @@ export class OrderController {
         this.TransactionCommandRepository = new OrmTransactionCommandRepository(PgDatabaseSingleton.getInstance());
         this.ormProductRepository = new OrmProductQueryRepository(PgDatabaseSingleton.getInstance());
         this.ormBundleRepository = new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance());
+        this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
         this.ormCourierRepository = new CourierRepository(
             PgDatabaseSingleton.getInstance(),
             new OrmCourierMapper(this.idGen)
@@ -182,41 +208,29 @@ export class OrderController {
         this.orderQueryRepository = new OrderQueryRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
         this.orderRepository = new OrmOrderRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
 
-        //*Pay Service
-        
+        this.initializeQueues();
 
-        //*Calculate Taxes and Shipping Fee
-        this.calculateTaxesShippingFee = new ExceptionDecorator(
-            new LoggerDecorator(
-                new CalculateTaxShippingFeeAplicationService(
-                    this.calculateShipping,
-                    this.calculateTax,
-                    this.geocodificationAddress,
-                ),
-                new NestLogger(new Logger())
-            )
-        );
+        this.subscriber.consume<ICancelOrder>(
+            { name: 'WalletRefund/OrderStatusCancelled'}, 
+            (data):Promise<void>=>{
+                console.log("hola")
+                this.walletRefund(data)
+                return
+            }
+        )
 
-        //*fins All Orders
-        this.getAllOrders = new ExceptionDecorator(
+    }
+
+    async walletRefund(data:ICancelOrder){
+        let request: RefundPaymentApplicationServiceRequestDto = {
+            userId: data.orderUserId,
+            orderId: data.orderId
+        }
+
+        let refundService = new ExceptionDecorator(
             new LoggerDecorator(
-                new FindAllOdersApplicationService(
+                new RefundPaymentApplicationService(
                     this.orderQueryRepository,
-                    this.ormProductRepository,
-                    this.ormBundleRepository,
-                    this.ormCourierQueryRepository
-                ),
-                new NestLogger(new Logger())
-            )
-        );
-
-        //*order cancelled
-
-        this.orderCancelled = new ExceptionDecorator(
-            new LoggerDecorator(
-                new CancelOderApplicationService(
-                    this.orderQueryRepository,
-                    this.orderRepository,
                     this.rabbitMq,
                     new RefundPaymentStripeConnection(this.stripeSingleton),
                     this.ormUserCommandRepo,
@@ -227,21 +241,10 @@ export class OrderController {
                 new NestLogger(new Logger())
             )
         );
-
-
-        //*Create Report
-        this.createReport = new ExceptionDecorator(
-            new LoggerDecorator(
-                new CreateReportApplicationService(
-                    this.orderQueryRepository,
-                    this.orderRepository,
-                    this.rabbitMq,
-                    this.idGen
-                ),
-                new NestLogger(new Logger())
-            )
-        );
+        
+        await refundService.execute(request);
     }
+
 
 
     //@UseGuards(JwtAuthGuard)
@@ -276,7 +279,8 @@ export class OrderController {
                     this.ormCourierQueryRepository,
                     new DateHandler(),
                     new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                    this.paymentMethodQueryRepository
+                    this.paymentMethodQueryRepository,
+                    this.ormCuponQueryRepo
                 ),
                 new NestLogger(new Logger())
             )
@@ -325,6 +329,7 @@ export class OrderController {
                     new DateHandler(),
                     new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
                     this.paymentMethodQueryRepository,
+                    this.ormCuponQueryRepo
                 ),
                 new NestLogger(new Logger())
             )
@@ -347,8 +352,19 @@ export class OrderController {
             currency: data.currency.toLowerCase(),
             address: data.address,
         }
+
+        let calculateTaxesShippingFee = new ExceptionDecorator(
+            new LoggerDecorator(
+                new CalculateTaxShippingFeeAplicationService(
+                    this.calculateShipping,
+                    this.calculateTax,
+                    this.geocodificationAddress,
+                ),
+                new NestLogger(new Logger())
+            )
+        );
         
-        let response = await this.calculateTaxesShippingFee.execute(payment);
+        let response = await calculateTaxesShippingFee.execute(payment);
         
         return response.getValue;
     }
@@ -363,12 +379,24 @@ export class OrderController {
             ...data
         }
 
+        let getAllOrders = new ExceptionDecorator(
+            new LoggerDecorator(
+                new FindAllOdersApplicationService(
+                    this.orderQueryRepository,
+                    this.ormProductRepository,
+                    this.ormBundleRepository,
+                    this.ormCourierQueryRepository
+                ),
+                new NestLogger(new Logger())
+            )
+        );
+
         if(!data.page)
             values.page=1
           if(!data.perPage)
             values.perPage=10
         
-        let response = await this.getAllOrders.execute(values);
+        let response = await getAllOrders.execute(values);
         
         return response.getValue;
     }
@@ -414,28 +442,41 @@ export class OrderController {
             userId: credential.account.idUser,
             orderId: data.orderId
         }
+
+        let orderCancelled = new ExceptionDecorator(
+            new LoggerDecorator(
+                new CancelOderApplicationService(
+                    this.orderQueryRepository,
+                    this.orderRepository,
+                    this.rabbitMq
+                ),
+                new NestLogger(new Logger())
+            )
+        );
         
-        let response = await this.orderCancelled.execute(request);
+        let response = await orderCancelled.execute(request);
         
         return response.getValue;
     }
 
-    @Post('/delivering/order')
-    async deliveringOrder(
+    @Post('/assign-courier')
+    async assignCourierOrder(
         @GetCredential() credential:ICredential,
-        @Body() data: DeliveringOrderDto) {
+        @Body() data: AssignCourierDto) {
         
-            let request: DeliveringOrderApplicationServiceRequestDto = {
+            let request: AssignCourierApplicationServiceRequestDto = {
             userId: credential.account.idUser,
-            orderId: data.orderId
+            orderId: data.orderId,
+            courierId: data.courierId
         }
 
         let orderDelivering = new ExceptionDecorator(
             new LoggerDecorator(
-                new DeliveringOderApplicationService(
+                new AssignCourierApplicationService(
                     this.orderQueryRepository,
                     this.orderRepository,
-                    this.rabbitMq
+                    this.rabbitMq,
+                    this.ormCourierQueryRepository
                 ),
                 new NestLogger(new Logger())
             )
@@ -482,8 +523,20 @@ export class OrderController {
             orderId: data.orderId,
             description: data.description
         }
+
+        let createReport = new ExceptionDecorator(
+            new LoggerDecorator(
+                new CreateReportApplicationService(
+                    this.orderQueryRepository,
+                    this.orderRepository,
+                    this.rabbitMq,
+                    this.idGen
+                ),
+                new NestLogger(new Logger())
+            )
+        );
         
-        let response = await this.createReport.execute(request);
+        let response = await createReport.execute(request);
         
         return response.getValue;
     }
