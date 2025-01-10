@@ -35,14 +35,14 @@ export class Ballance implements ValueObject<Ballance> {
 
     reduceAmount(b:Ballance):Ballance{
         return new Ballance(
-            Number(this.Amount)-Number(b.Amount),
+            this.Amount-b.Amount,
             this.Currency
         )
     }
 
     addAmount(b:Ballance):Ballance{
         return new Ballance(
-            Number(b.Amount)+Number(this.Amount),
+            b.Amount+this.Amount,
             this.Currency
         )
     }
