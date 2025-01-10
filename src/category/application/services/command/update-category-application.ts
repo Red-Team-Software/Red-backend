@@ -19,6 +19,7 @@ import { ErrorDeletingImagesApplicationException } from 'src/product/application
 import { ErrorUploadingImagesApplicationException } from '../../application-exception/error-uploading-images-application-exception';
 import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
 import { NotFoundProductApplicationException } from 'src/product/application/application-exepction/not-found-product-application-exception';
+import { ErrorNameAlreadyApplicationException } from '../../application-exception/error-name-already-application-exception';
 export class UpdateCategoryApplicationService extends IApplicationService<
     UpdateCategoryApplicationRequestDTO,
     UpdateCategoryApplicationResponseDTO
@@ -50,7 +51,15 @@ export class UpdateCategoryApplicationService extends IApplicationService<
         const category = categoryResult.getValue;
 
         if (command.name) {
-            category.updateName(CategoryName.create(command.name));
+            const newName= CategoryName.create(command.name)
+            let response=await this.queryCategoryRepository.findCategoryByName(newName)
+            if(!response.isSuccess()){
+                return Result.fail(new ErrorNameAlreadyApplicationException())
+            }
+            if(response.getValue){
+                return Result.fail(new ErrorNameAlreadyApplicationException())
+            }
+            category.updateName(newName);
         }
         
         if (command.image) {
