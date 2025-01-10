@@ -28,6 +28,12 @@ import { CourierQueryRepository } from "../repository/orm-repository/orm-courier
 import { ModifyCourierLocationEntryDto } from "../dto/modify-order-courier-location-entry.dto"
 import { ModifyCourierLocationRequestDto } from "src/courier/application/dto/request/modify-courier-location-request.dto"
 import { ModifyCourierLocationApplicationService } from "src/courier/application/services/modify-courier-location-application.service"
+import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
+import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator"
+import { AuditDecorator } from "src/common/application/aspects/audit-decorator/audit-decorator"
+import { DateHandler } from "src/common/infraestructure/date-handler/date-handler"
+import { IAuditRepository } from "src/common/application/repositories/audit.repository"
+import { OrmAuditRepository } from "src/common/infraestructure/repository/orm-repository/orm-audit.repository"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -38,6 +44,7 @@ export class CourierController {
         private readonly courierRepository:ICourierRepository;
         private readonly courierQueryRepository: ICourierQueryRepository;
         private readonly idGen:IIdGen<string>;
+        private readonly auditRepository: IAuditRepository;
 
         private readonly ormMapper: IMapper<Courier,OrmCourierEntity>;
 
@@ -48,6 +55,7 @@ export class CourierController {
         this.ormMapper = new OrmCourierMapper(this.idGen);
         this.courierRepository= new CourierRepository( PgDatabaseSingleton.getInstance(),this.ormMapper );
         this.courierQueryRepository= new CourierQueryRepository( PgDatabaseSingleton.getInstance(),this.ormMapper );
+        this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
     }
 
     @Post('create')
@@ -64,14 +72,13 @@ export class CourierController {
     ) image: Express.Multer.File) {
 
         let service= new ExceptionDecorator(
-            new LoggerDecorator(
+            new AuditDecorator(
                 new CreateCourierApplicationService(
                     new RabbitMQPublisher(this.channel),
                     this.courierRepository,
                     this.idGen,
                     new CloudinaryService()
-                ),
-                new NestLogger(new Logger())
+                ),this.auditRepository,new DateHandler()
             )
         );
 
@@ -92,13 +99,13 @@ export class CourierController {
             long: data.long
         }
         let modifyCourierLocation = new ExceptionDecorator(
-            new LoggerDecorator(
+            new PerformanceDecorator(
                 new ModifyCourierLocationApplicationService(
                     this.courierRepository,
                     this.courierQueryRepository,
                     new RabbitMQPublisher(this.channel)
                 ),
-                new NestLogger(new Logger())
+                new NestTimer(),new NestLogger(new Logger())
             )
         );
             
@@ -106,7 +113,5 @@ export class CourierController {
             
         return response.getValue;
     }
-
-    
 
 }

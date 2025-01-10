@@ -93,6 +93,9 @@ import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/or
 import { AssignCourierDto } from "../dto/delivering-order-entry.dto";
 import { AssignCourierApplicationServiceRequestDto } from "src/order/application/dto/request/assign-courier-request-dto";
 import { AssignCourierApplicationService } from "src/order/application/service/assign-courier-application.service";
+import { AuditDecorator } from "src/common/application/aspects/audit-decorator/audit-decorator";
+import { IAuditRepository } from "src/common/application/repositories/audit.repository";
+import { OrmAuditRepository } from "src/common/infraestructure/repository/orm-repository/orm-audit.repository";
 
 
 @ApiBearerAuth()
@@ -125,6 +128,7 @@ export class OrderController {
     private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
     private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>;
     private readonly ormCuponQueryRepo: IQueryCuponRepository;
+    private readonly auditRepository: IAuditRepository
 
     //*IdGen
     private readonly idGen: IIdGen<string>;
@@ -173,6 +177,9 @@ export class OrderController {
         this.calculateTax = new CalculateTaxesFeeImplementation();
         this.geocodificationAddress = new GeocodificationHereMapsDomainService(this.hereMapsSingelton);
         
+        this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
+        
+
         //*Repositories
         this.TransactionCommandRepository = new OrmTransactionCommandRepository(PgDatabaseSingleton.getInstance());
         this.ormProductRepository = new OrmProductQueryRepository(PgDatabaseSingleton.getInstance());
@@ -229,14 +236,16 @@ export class OrderController {
 
         let refundService = new ExceptionDecorator(
             new LoggerDecorator(
-                new RefundPaymentApplicationService(
-                    this.orderQueryRepository,
-                    this.rabbitMq,
-                    new RefundPaymentStripeConnection(this.stripeSingleton),
-                    this.ormUserCommandRepo,
-                    this.ormUserQueryRepository,
-                    this.TransactionCommandRepository,
-                    this.idGen
+                new PerformanceDecorator(
+                    new RefundPaymentApplicationService(
+                        this.orderQueryRepository,
+                        this.rabbitMq,
+                        new RefundPaymentStripeConnection(this.stripeSingleton),
+                        this.ormUserCommandRepo,
+                        this.ormUserQueryRepository,
+                        this.TransactionCommandRepository,
+                        this.idGen
+                    ),new NestTimer(),new NestLogger(new Logger())
                 ),
                 new NestLogger(new Logger())
             )
@@ -265,24 +274,28 @@ export class OrderController {
         }
 
         let payOrderService = new ExceptionDecorator(
-            new LoggerDecorator(
-                new PayOrderAplicationService(
-                    this.rabbitMq,
-                    this.calculateShipping,
-                    this.calculateTax,
-                    new StripePayOrderMethod(this.stripeSingleton, this.idGen, data.stripePaymentMethod),
-                    this.orderRepository,
-                    this.idGen,
-                    this.geocodificationAddress,
-                    this.ormProductRepository,
-                    this.ormBundleRepository,
-                    this.ormCourierQueryRepository,
-                    new DateHandler(),
-                    new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                    this.paymentMethodQueryRepository,
-                    this.ormCuponQueryRepo
-                ),
-                new NestLogger(new Logger())
+            new AuditDecorator(
+                new LoggerDecorator(
+                    new PerformanceDecorator(
+                        new PayOrderAplicationService(
+                            this.rabbitMq,
+                            this.calculateShipping,
+                            this.calculateTax,
+                            new StripePayOrderMethod(this.stripeSingleton, this.idGen, data.stripePaymentMethod),
+                            this.orderRepository,
+                            this.idGen,
+                            this.geocodificationAddress,
+                            this.ormProductRepository,
+                            this.ormBundleRepository,
+                            this.ormCourierQueryRepository,
+                            new DateHandler(),
+                            new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
+                            this.paymentMethodQueryRepository,
+                            this.ormCuponQueryRepo
+                        ),new NestTimer(),new NestLogger(new Logger())
+                    ),
+                    new NestLogger(new Logger())
+                ),this.auditRepository,new DateHandler()
             )
         );
 
@@ -309,31 +322,37 @@ export class OrderController {
         }
 
         let payOrderService = new ExceptionDecorator(
-            new LoggerDecorator(
-                new PayOrderAplicationService(
-                    this.rabbitMq,
-                    this.calculateShipping,
-                    this.calculateTax,
-                    new WalletPaymentMethod(
-                        this.idGen, 
-                        this.ormUserQueryRepository,
-                        this.ormUserCommandRepo,
-                        this.TransactionCommandRepository
+            new AuditDecorator(
+                new LoggerDecorator(
+                    new PerformanceDecorator(
+                        new PayOrderAplicationService(
+                            this.rabbitMq,
+                            this.calculateShipping,
+                            this.calculateTax,
+                            new WalletPaymentMethod(
+                                this.idGen, 
+                                this.ormUserQueryRepository,
+                                this.ormUserCommandRepo,
+                                this.TransactionCommandRepository
+                            ),
+                            this.orderRepository,
+                            this.idGen,
+                            this.geocodificationAddress,
+                            this.ormProductRepository,
+                            this.ormBundleRepository,
+                            this.ormCourierQueryRepository,
+                            new DateHandler(),
+                            new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
+                            this.paymentMethodQueryRepository,
+                            this.ormCuponQueryRepo
+                        ),new NestTimer(),new NestLogger(new Logger())
                     ),
-                    this.orderRepository,
-                    this.idGen,
-                    this.geocodificationAddress,
-                    this.ormProductRepository,
-                    this.ormBundleRepository,
-                    this.ormCourierQueryRepository,
-                    new DateHandler(),
-                    new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                    this.paymentMethodQueryRepository,
-                    this.ormCuponQueryRepo
-                ),
-                new NestLogger(new Logger())
+                    new NestLogger(new Logger())
+                ),this.auditRepository,new DateHandler()
             )
         );
+
+        
 
         let response = await payOrderService.execute(payment);
         
@@ -355,10 +374,12 @@ export class OrderController {
 
         let calculateTaxesShippingFee = new ExceptionDecorator(
             new LoggerDecorator(
-                new CalculateTaxShippingFeeAplicationService(
-                    this.calculateShipping,
-                    this.calculateTax,
-                    this.geocodificationAddress,
+                new PerformanceDecorator(
+                    new CalculateTaxShippingFeeAplicationService(
+                        this.calculateShipping,
+                        this.calculateTax,
+                        this.geocodificationAddress,
+                    ),new NestTimer(),new NestLogger(new Logger())
                 ),
                 new NestLogger(new Logger())
             )
@@ -381,11 +402,13 @@ export class OrderController {
 
         let getAllOrders = new ExceptionDecorator(
             new LoggerDecorator(
-                new FindAllOdersApplicationService(
-                    this.orderQueryRepository,
-                    this.ormProductRepository,
-                    this.ormBundleRepository,
-                    this.ormCourierQueryRepository
+                new PerformanceDecorator(
+                    new FindAllOdersApplicationService(
+                        this.orderQueryRepository,
+                        this.ormProductRepository,
+                        this.ormBundleRepository,
+                        this.ormCourierQueryRepository
+                    ),new NestTimer(),new NestLogger(new Logger())
                 ),
                 new NestLogger(new Logger())
             )
@@ -413,20 +436,20 @@ export class OrderController {
 
         if(!data.page)
             values.page=1
-          if(!data.perPage)
+        if(!data.perPage)
             values.perPage=10
         
         let service=
         new ExceptionDecorator(
             new LoggerDecorator(
-            new PerformanceDecorator(
-                new FindAllOdersByUserApplicationService(
-                    this.orderQueryRepository,
-                    this.ormProductRepository,
-                    this.ormBundleRepository,
-                    this.ormCourierQueryRepository
-                ), new NestTimer(), new NestLogger(new Logger())
-            ),new NestLogger(new Logger())
+                new PerformanceDecorator(
+                    new FindAllOdersByUserApplicationService(
+                        this.orderQueryRepository,
+                        this.ormProductRepository,
+                        this.ormBundleRepository,
+                        this.ormCourierQueryRepository
+                    ), new NestTimer(), new NestLogger(new Logger())
+                ),new NestLogger(new Logger())
             )
         )
         
@@ -444,13 +467,14 @@ export class OrderController {
         }
 
         let orderCancelled = new ExceptionDecorator(
-            new LoggerDecorator(
-                new CancelOderApplicationService(
-                    this.orderQueryRepository,
-                    this.orderRepository,
-                    this.rabbitMq
-                ),
-                new NestLogger(new Logger())
+            new AuditDecorator(
+                    new PerformanceDecorator(
+                        new CancelOderApplicationService(
+                            this.orderQueryRepository,
+                            this.orderRepository,
+                            this.rabbitMq
+                        ),new NestTimer(),new NestLogger(new Logger())
+                ),this.auditRepository,new DateHandler()
             )
         );
         
@@ -471,14 +495,15 @@ export class OrderController {
         }
 
         let orderDelivering = new ExceptionDecorator(
-            new LoggerDecorator(
-                new AssignCourierApplicationService(
-                    this.orderQueryRepository,
-                    this.orderRepository,
-                    this.rabbitMq,
-                    this.ormCourierQueryRepository
-                ),
-                new NestLogger(new Logger())
+            new AuditDecorator(
+                new PerformanceDecorator(
+                    new AssignCourierApplicationService(
+                        this.orderQueryRepository,
+                        this.orderRepository,
+                        this.rabbitMq,
+                        this.ormCourierQueryRepository
+                    ),new NestTimer(),new NestLogger(new Logger())
+                ),this.auditRepository,new DateHandler()
             )
         );
         
@@ -498,13 +523,14 @@ export class OrderController {
         }
 
         let orderDelivered = new ExceptionDecorator(
-            new LoggerDecorator(
-                new DeliveredOderApplicationService(
-                    this.orderQueryRepository,
-                    this.orderRepository,
-                    this.rabbitMq
-                ),
-                new NestLogger(new Logger())
+            new AuditDecorator(
+                new PerformanceDecorator(
+                    new DeliveredOderApplicationService(
+                        this.orderQueryRepository,
+                        this.orderRepository,
+                        this.rabbitMq
+                    ),new NestTimer(),new NestLogger(new Logger())
+                ),this.auditRepository,new DateHandler()
             )
         );
         
@@ -525,14 +551,15 @@ export class OrderController {
         }
 
         let createReport = new ExceptionDecorator(
-            new LoggerDecorator(
-                new CreateReportApplicationService(
-                    this.orderQueryRepository,
-                    this.orderRepository,
-                    this.rabbitMq,
-                    this.idGen
-                ),
-                new NestLogger(new Logger())
+            new AuditDecorator(
+                new PerformanceDecorator(
+                    new CreateReportApplicationService(
+                        this.orderQueryRepository,
+                        this.orderRepository,
+                        this.rabbitMq,
+                        this.idGen
+                    ),new NestTimer(),new NestLogger(new Logger())
+                ),this.auditRepository,new DateHandler()
             )
         );
         
@@ -553,11 +580,13 @@ export class OrderController {
         
         let findById = new ExceptionDecorator(
             new LoggerDecorator(
-                new FindOrderByIdApplicationService(
-                    this.orderQueryRepository,
-                    this.ormProductRepository,
-                    this.ormBundleRepository,
-                    this.ormCourierQueryRepository
+                new PerformanceDecorator(
+                    new FindOrderByIdApplicationService(
+                        this.orderQueryRepository,
+                        this.ormProductRepository,
+                        this.ormBundleRepository,
+                        this.ormCourierQueryRepository
+                    ),new NestTimer(),new NestLogger(new Logger())
                 ),
                 new NestLogger(new Logger())
             )
