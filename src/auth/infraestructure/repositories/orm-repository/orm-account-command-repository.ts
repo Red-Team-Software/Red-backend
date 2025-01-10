@@ -41,17 +41,16 @@ export class OrmAccountCommandRepository extends Repository<OrmAccountEntity> im
                 entry.idUser,
                 entry.idStripe
             )
-            ormAccount.user=await this.ormUserRepository.findOneBy({id:entry.idUser})
-
-            if(!ormAccount.user)
-                return Result.fail( new PersistenceException('Create account unsucssessfully, the user is not registered') )
+            console.log(ormAccount)
 
             let account =await this.save(ormAccount)
 
             if (!account)
                 return Result.fail( new PersistenceException('Create account unsucssessfully') )
+            
             return Result.success(entry)
         }catch(e){
+            console.log(e)
             return Result.fail( new PersistenceException('Create account unsucssessfully') )
         }
     }

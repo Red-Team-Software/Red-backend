@@ -6,6 +6,7 @@ export interface OrderPayApplicationServiceRequestDto extends IServiceRequestDto
     currency: string;
     paymentMethod: string;
     address: string;
+    cuponId?: string;
     products?: {
         id: string,
         quantity: number

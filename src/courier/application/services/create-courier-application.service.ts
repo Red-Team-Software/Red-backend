@@ -14,6 +14,7 @@ import { CourierId } from 'src/courier/domain/value-objects/courier-id';
 import { CourierName } from 'src/courier/domain/value-objects/courier-name';
 import { CourierImage } from 'src/courier/domain/value-objects/courier-image';
 import { ErrorCreatingCourierApplicationException } from '../application-exceptions/error-creating-courier-application-service-exception';
+import { CourierDirection } from 'src/courier/domain/value-objects/courier-direction';
 
 export class CreateCourierApplicationService extends IApplicationService<CreateCourierApplicationServiceRequestDto,CreateCourierApplicationServiceResponseDto>{
     
@@ -42,7 +43,8 @@ export class CreateCourierApplicationService extends IApplicationService<CreateC
         let courier: Courier = Courier.RegisterCourier(
             CourierId.create(id),
             CourierName.create(data.name),
-            CourierImage.create(uploaded.url)
+            CourierImage.create(uploaded.url),
+            CourierDirection.create(data.lat,data.long)
         );
 
         let result = await this.courierRepository.saveCourier(courier);
@@ -53,6 +55,8 @@ export class CreateCourierApplicationService extends IApplicationService<CreateC
             name: courier.CourierName.courierName,
             image: courier.CourierImage.Value
         }
+
+        this.eventPublisher.publish(courier.pullDomainEvents());
 
         return Result.success(response);
     }

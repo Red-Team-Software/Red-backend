@@ -91,7 +91,7 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
                   }     
         
                 if (criteria.discount ) 
-                    query.andWhere('promotion.discount = :discount', { discount: criteria.discount })
+                    query.andWhere('promotion.discount <= :discount', { discount: criteria.discount })
                   
         
                 const ormBundle = await query.getMany();

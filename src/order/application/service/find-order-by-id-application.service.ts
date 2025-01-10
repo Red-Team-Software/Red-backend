@@ -14,6 +14,7 @@ import { OrderId } from 'src/order/domain/value_objects/order-id';
 import { CourierId } from 'src/courier/domain/value-objects/courier-id';
 import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
 import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
+import { OrderCourierId } from '../../domain/value_objects/order-courier-id';
 
 
 export class FindOrderByIdApplicationService extends IApplicationService<FindOrderByIdRequestDto,FindOrderByIdResponseDto>{
@@ -97,7 +98,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
             };
         };
 
-        let courierResponse = await this.ormCourierQueryRepository.findCourierById(CourierId.create(order.OrderCourier.getId().OrderCourierId));
+        let courierResponse = await this.ormCourierQueryRepository.findCourierById(CourierId.create(order.OrderCourierId.OrderCourierId));
 
         let associatedProducts;
         let associatedBundles;
@@ -111,8 +112,8 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
             courierName: courierResponse.getValue.CourierName.courierName,
             courierImage: courierResponse.getValue.CourierImage.Value,
             location: {
-                lat: order.OrderCourier.CourierDirection.Latitude,
-                long: order.OrderCourier.CourierDirection.Longitude
+                lat: courierResponse.getValue.CourierDirection.Latitude,
+                long: courierResponse.getValue.CourierDirection.Longitude
             }
         };
 
@@ -139,7 +140,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
                 description: order.OrderReport.Description.Value,
                 orderid: order.getId().orderId
             } : null,
-            orderCourier: associatedCourier
+            orderCourier: associatedCourier ? associatedCourier : null
         };
 
         return Result.success(new FindOrderByIdResponseDto(ordersDto));

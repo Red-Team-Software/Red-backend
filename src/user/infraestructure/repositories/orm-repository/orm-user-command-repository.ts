@@ -79,6 +79,7 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
                 return Result.fail( new PersistenceException('Create user unsucssessfully') )
             return Result.success(user)
         }catch(e){
+            console.log(e)
             return Result.fail( new PersistenceException('Create user unsucssessfully') )
         }
     }

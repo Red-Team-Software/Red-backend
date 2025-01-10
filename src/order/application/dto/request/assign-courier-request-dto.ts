@@ -1,10 +1,9 @@
 import { IServiceRequestDto } from "src/common/application/services";
 
 
-export interface ModifyCourierLocationRequestDto extends IServiceRequestDto {
+export interface AssignCourierApplicationServiceRequestDto extends IServiceRequestDto {
     userId: string;
     
     orderId: string;
-    lat: number;
-    long: number;
+    courierId: string;
 }

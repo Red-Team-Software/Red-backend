@@ -4,8 +4,9 @@ import { OrmOrderPayEntity } from "./orm-order-payment";
 import { OrmOrderProductEntity } from "./orm-order-product-entity";
 import { OrmOrderBundleEntity } from "./orm-order-bundle-entity";
 import { OrmOrderReportEntity } from "./orm-order-report-entity";
-import { OrmOrderCourierEntity } from "./orm-order-courier-entity";
 import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-user-entity";
+import { OrmCourierEntity } from "src/courier/infraestructure/entities/orm-courier-entity";
+import { OrmCuponEntity } from "src/cupon/infraestructure/orm-entities/orm-cupon-entity";
 
 @Entity('order')
 export class OrmOrderEntity implements IOrderInterface {
@@ -45,7 +46,7 @@ export class OrmOrderEntity implements IOrderInterface {
     @Column('date', { nullable: true })
     orderReceivedDate?: Date;
 
-    @OneToMany(() => OrmOrderProductEntity, (orderProduct) => orderProduct.order, { cascade: true } )
+    @OneToMany( () => OrmOrderProductEntity, (orderProduct) => orderProduct.order, { cascade: true } )
     order_products?: OrmOrderProductEntity[];
 
     @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.order, { cascade: true } )
@@ -55,10 +56,19 @@ export class OrmOrderEntity implements IOrderInterface {
     @JoinColumn()
     order_report?: OrmOrderReportEntity;
 
-    @OneToOne( () => OrmOrderCourierEntity, (orderCourier) => orderCourier.order_id, { cascade: true })
-    @JoinColumn()
-    order_courier?: OrmOrderCourierEntity;
+    @OneToOne( () => OrmCourierEntity, (courier) => courier.orders, { nullable: true } )
+    @JoinColumn({ name: 'courier_id' })
+    order_courier?: OrmCourierEntity | null;
 
+    @Column( 'uuid', { nullable: true } )
+    courier_id?: string;
+
+    @OneToOne( () => OrmCuponEntity, (cupon) => cupon.order, { nullable: true } )
+    @JoinColumn({ name: 'cupon_id' })
+    cupon?: OrmCuponEntity | null;
+
+    @Column( 'uuid', { nullable: true } )
+    cupon_id?: string;
 
     static create(
         id: string,
@@ -68,8 +78,9 @@ export class OrmOrderEntity implements IOrderInterface {
         currency: string,
         latitude: number,
         longitude: number,
-        orderCourier: OrmOrderCourierEntity,
         orderUser: OrmUserEntity,
+        cuponId?: string,
+        courierId?: string,
         pay?: OrmOrderPayEntity,
         orderProducts?: OrmOrderProductEntity[],
         orderBundles?: OrmOrderBundleEntity[],
@@ -84,7 +95,8 @@ export class OrmOrderEntity implements IOrderInterface {
         order.currency = currency;
         order.latitude = latitude;
         order.longitude = longitude;
-        order.order_courier = orderCourier;
+        order.courier_id = courierId;
+        order.cupon_id = cuponId;
         order.user = orderUser;
         order.pay = pay;
         order.order_products = orderProducts;
