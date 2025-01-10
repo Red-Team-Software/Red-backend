@@ -55,4 +55,11 @@ export class PaymentEntryDto {
   })
   @IsString()
   stripePaymentMethod: string;
+
+  @ApiProperty({
+    example: '2cc214ab-1e1e-4a22-9547-185b4a09df0a',
+    description: 'cupon Id to apply to the payment',
+  })
+  @IsString()
+  cuponId?: string;
 }

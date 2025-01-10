@@ -23,11 +23,8 @@ import { PaymentId } from '../../domain/entities/payment/value-object/payment-id
 import { PaymentMethod } from "src/order/domain/entities/payment/value-object/payment-method";
 import { PaymentAmount } from "src/order/domain/entities/payment/value-object/payment-amount";
 import { PaymentCurrency } from "src/order/domain/entities/payment/value-object/payment-currency";
-import { OrderCourier } from "src/order/domain/entities/order-courier/order-courier-entity";
-import { OrderCourierId } from "src/order/domain/entities/order-courier/value-object/order-courier-id";
-import { OrderCourierDirection } from '../../domain/entities/order-courier/value-object/order-courier-direction';
+import { OrderCourierId } from "src/order/domain/value_objects/order-courier-id";
 import { ICourierRepository } from "src/courier/domain/repositories/courier-repository-interface";
-import { OrmOrderCourierEntity } from "../entities/orm-order-courier-entity";
 import { OrderUserId } from "src/order/domain/value_objects/order-user-id";
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { UserId } from "src/user/domain/value-object/user-id";
@@ -44,6 +41,7 @@ import { BundleDetailId } from "src/order/domain/entities/bundle-detail/value_ob
 import { BundleDetailQuantity } from "src/order/domain/entities/bundle-detail/value_object/bundle-detail-quantity";
 import { ProductDetailPrice } from "src/order/domain/entities/product-detail/value_object/product-detail-price";
 import { BundleDetailPrice } from "src/order/domain/entities/bundle-detail/value_object/bundle-detail-price";
+import { OrderCuponId } from "src/order/domain/value_objects/order-cupon-id";
 
 
 export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
@@ -65,7 +63,6 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
         let recievedDate: OrderReceivedDate;
         let orderReport: OrderReport;
         let orderPayment: OrderPayment;
-        let orderCourier: OrderCourier;
 
         const ormProducts:OrmOrderProductEntity[] = infraEstructure.order_products;
         const ormBundles:OrmOrderBundleEntity[] = infraEstructure.order_bundles;
@@ -116,14 +113,10 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             PaymentCurrency.create(infraEstructure.pay.currency)
         )}
 
-        if(infraEstructure.order_courier)
-        orderCourier = OrderCourier.create(
-            OrderCourierId.create(infraEstructure.order_courier.courier_id),
-            OrderCourierDirection.create(
-                Number(infraEstructure.order_courier.latitude),
-                Number(infraEstructure.order_courier.longitude)
-            )
-        );
+        let cupon = infraEstructure.cupon ? OrderCuponId.create(infraEstructure.cupon.id) : null;
+
+        let orderCourier = infraEstructure.order_courier ? OrderCourierId.create(infraEstructure.order_courier.id) : null;
+
 
         let order = Order.initializeAggregate(
             OrderId. create(infraEstructure.id),
@@ -131,8 +124,9 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             OrderCreatedDate.create(infraEstructure.orderCreatedDate),
             OrderTotalAmount.create(Number(infraEstructure.totalAmount),infraEstructure.currency),
             OrderDirection.create(infraEstructure.latitude,infraEstructure.longitude),
-            orderCourier,
             OrderUserId.create(infraEstructure.user.id),
+            cupon,
+            orderCourier,
             products,
             bundles,
             recievedDate,
@@ -202,13 +196,6 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             )
         }
 
-        let orderCourier = OrmOrderCourierEntity.create(
-            domainEntity.getId().orderId,
-            domainEntity.OrderCourier.getId().OrderCourierId,
-            domainEntity.OrderCourier.CourierDirection.Latitude,
-            domainEntity.OrderCourier.CourierDirection.Longitude
-        )
-
         let orderReceivedDate = domainEntity.OrderReceivedDate ? domainEntity.OrderReceivedDate.OrderReceivedDate : null;
 
         let userDomain = await this.ormUserQueryRepository.findUserById(UserId.create(domainEntity.OrderUserId.userId));
@@ -234,8 +221,9 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
             domainEntity.TotalAmount.OrderCurrency,
             domainEntity.OrderDirection.Latitude,
             domainEntity.OrderDirection.Longitude,
-            orderCourier,
             ormUser,
+            domainEntity.OrderCuponId ? domainEntity.OrderCuponId.cuponId : null,
+            domainEntity.OrderCourierId ? domainEntity.OrderCourierId.OrderCourierId : null,
             ormOrderPayEntity,
             ormProducts,
             ormBundles,

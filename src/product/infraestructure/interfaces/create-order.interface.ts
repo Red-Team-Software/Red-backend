@@ -1,10 +1,12 @@
+
 export interface ICreateOrder {
     orderId:           string;
     orderState:        string;
     orderCreateDate:   Date;
     totalAmount:       TotalAmount;
     orderDirection:    OrderDirection;
-    orderCourier:      OrderCourier;
+    orderCourierId:    string;
+    orderCuponId:      string;
     orderUserId:       string;
     products:          Details[];
     bundles:           Details[];

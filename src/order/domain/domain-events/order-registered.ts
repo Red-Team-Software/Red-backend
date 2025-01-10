@@ -8,9 +8,10 @@ import { OrderDirection } from '../value_objects/order-direction';
 import { ProductDetail } from "../entities/product-detail/product-detail-entity";
 import { OrderReport } from "../entities/report/report-entity";
 import { OrderPayment } from "../entities/payment/order-payment-entity";
-import { OrderCourier } from "../entities/order-courier/order-courier-entity";
 import { OrderUserId } from "../value_objects/order-user-id";
 import { BundleDetail } from "../entities/bundle-detail/bundle-detail-entity";
+import { OrderCourierId } from "../value_objects/order-courier-id";
+import { OrderCuponId } from "../value_objects/order-cupon-id";
 
 
 export class OrderRegistered extends DomainEvent {
@@ -22,9 +23,7 @@ export class OrderRegistered extends DomainEvent {
             orderCreateDate: this.orderCreateDate.OrderCreatedDate,
             totalAmount: this.totalAmount,
             orderDirection: this.orderDirection,
-            orderCourier: {
-                id:this.orderCourier.getId().OrderCourierId,
-            },
+            orderCourierId: this.orderCourierId? this.orderCourierId.OrderCourierId : null,
             orderUserId: this.orderUserId.userId,
             products: this.products
             ? this.products.map(p=>({
@@ -47,7 +46,8 @@ export class OrderRegistered extends DomainEvent {
                 description:this.orderReport.Description
             }
             : null,
-            orderPayment: this.orderPayment
+            orderPayment: this.orderPayment,
+            orderCupon: this.orderCupon
         }
         
         return JSON.stringify(data);
@@ -59,8 +59,9 @@ export class OrderRegistered extends DomainEvent {
         public orderCreateDate: OrderCreatedDate,
         public totalAmount: OrderTotalAmount,
         public orderDirection: OrderDirection,
-        public orderCourier: OrderCourier,
         public orderUserId: OrderUserId,
+        public orderCupon?: OrderCuponId,
+        public orderCourierId?: OrderCourierId,
         public products?: ProductDetail[],
         public bundles?: BundleDetail[],
         public orderReceivedDate?: OrderReceivedDate,
@@ -76,8 +77,9 @@ export class OrderRegistered extends DomainEvent {
         orderCreatedDate: OrderCreatedDate,
         totalAmount: OrderTotalAmount,
         orderDirection: OrderDirection,
-        orderCourier: OrderCourier,
         orderUserId: OrderUserId,
+        orderCupon?: OrderCuponId,
+        orderCourierId?: OrderCourierId,
         products?: ProductDetail[],
         bundles?: BundleDetail[],
         orderReceivedDate?: OrderReceivedDate,
@@ -90,8 +92,9 @@ export class OrderRegistered extends DomainEvent {
             orderCreatedDate,
             totalAmount,
             orderDirection,
-            orderCourier,
             orderUserId,
+            orderCupon,
+            orderCourierId,
             products,
             bundles,
             orderReceivedDate,

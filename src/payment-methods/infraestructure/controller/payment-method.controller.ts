@@ -28,6 +28,12 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { FindAllPaymentMethodEntryDto } from "../dto/find-all-payment-method.dto";
 import { FindAllPaymentMethodRequestDto } from "src/payment-methods/application/dto/request/find-all-payment-method-request.dto";
 import { FindAllPaymentMethodApplicationService } from "src/payment-methods/application/service/find-all-payment-method.application.service";
+import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator";
+import { NestTimer } from "src/common/infraestructure/timer/nets-timer";
+import { OrmAuditRepository } from "src/common/infraestructure/repository/orm-repository/orm-audit.repository";
+import { IAuditRepository } from "src/common/application/repositories/audit.repository";
+import { DateHandler } from "src/common/infraestructure/date-handler/date-handler";
+import { AuditDecorator } from "src/common/application/aspects/audit-decorator/audit-decorator";
 
 
 @ApiBearerAuth()
@@ -35,6 +41,8 @@ import { FindAllPaymentMethodApplicationService } from "src/payment-methods/appl
 @ApiTags('Payment Method')
 @Controller('payment-method')
 export class PaymentMethodController {
+
+    private readonly auditRepository: IAuditRepository;
 
     //*Mappers
     private readonly paymentMethodMapper: IMapper<PaymentMethodAgregate,PaymentMethodEntity>;
@@ -53,6 +61,9 @@ export class PaymentMethodController {
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
     ) {
+
+        this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
+
         //*IdGen
         this.idGen = new UuidGen();
 
@@ -88,14 +99,15 @@ export class PaymentMethodController {
         }
 
         let payOrderService = new ExceptionDecorator(
-            new LoggerDecorator(
-                new CreatePaymentMethodApplicationService(
-                    this.paymentMethodRepository,
-                    this.rabbitMq,
-                    this.idGen,
-                    new CloudinaryService()
-                ),
-                new NestLogger(new Logger())
+            new AuditDecorator(
+                new PerformanceDecorator(
+                    new CreatePaymentMethodApplicationService(
+                        this.paymentMethodRepository,
+                        this.rabbitMq,
+                        this.idGen,
+                        new CloudinaryService()
+                    ),new NestTimer(),new NestLogger(new Logger())
+                ),this.auditRepository,new DateHandler()
             )
         );
 
@@ -117,8 +129,11 @@ export class PaymentMethodController {
         
         let getAllPaymentMethodService = new ExceptionDecorator(
             new LoggerDecorator(
-                new FindAllPaymentMethodApplicationService(
-                    this.paymentMethodQueryRepository
+                new PerformanceDecorator(
+                    new FindAllPaymentMethodApplicationService(
+                        this.paymentMethodQueryRepository
+                    ),
+                    new NestTimer(),new NestLogger(new Logger())
                 ),
                 new NestLogger(new Logger())
             )
