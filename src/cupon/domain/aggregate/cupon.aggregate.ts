@@ -4,7 +4,7 @@ import { CuponName } from "../value-object/cupon-name";
 import { CuponCode } from "../value-object/cupon-code";
 import { CuponDiscount } from "../value-object/cupon-discount";
 import { CuponState } from "../value-object/cupon-state";
-import { CuponRegistered } from "../domain-events/cupon-created";
+import { CuponCreated } from "../domain-events/cupon-created";
 import { CuponDeleted } from "../domain-events/cupon-delete";
 import { CuponStateChanged } from "../domain-events/cupon-state-change";
 import { CuponUser } from "../entities/cuponUser/cuponUser";
@@ -25,7 +25,7 @@ export class Cupon extends AggregateRoot<CuponId> {
     protected when(event: DomainEvent): void {
         switch (event.getEventName) {
             case "CuponCreated":
-                const cuponCreated: CuponRegistered = event as CuponRegistered;
+                const cuponCreated: CuponCreated = event as CuponCreated;
                 this.cuponName = cuponCreated.cuponName;
                 this.cuponCode = cuponCreated.cuponCode;
                 this.cuponDiscount = cuponCreated.cuponDiscount;
@@ -62,7 +62,7 @@ export class Cupon extends AggregateRoot<CuponId> {
     ): Cupon {
         const cupon = new Cupon(cuponId, cuponName, cuponCode, cuponDiscount, cuponState, users);
         cupon.apply(
-            CuponRegistered.create(cuponId, cuponName, cuponCode, cuponDiscount, cuponState, users)
+            CuponCreated.create(cuponId, cuponName, cuponCode, cuponDiscount, cuponState, users)
         );
         return cupon;
     }

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query, Logger, Inject, UseGuards } from '@nestjs/common';
 import { ICuponRepository } from 'src/cupon/domain/repository/cupon.interface.repository';
-import { OrmCuponCommandRepository } from '../repository/orm-cupon-repository';
+import { OrmCuponCommandRepository } from '../repository/orm-cupon-command-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateCuponApplicationService } from 'src/cupon/application/services/command/create-cupon-application-service';
 import { ExceptionDecorator } from 'src/common/application/aspects/exeption-decorator/exception-decorator';
@@ -21,6 +21,10 @@ import { Channel } from 'amqplib';
 import { JwtAuthGuard } from 'src/auth/infraestructure/jwt/guards/jwt-auth.guard';
 import { ICredential } from 'src/auth/application/model/credential.interface';
 import { GetCredential } from 'src/auth/infraestructure/jwt/decorator/get-credential.decorator';
+import { OrmCuponMapper } from '../mapper/orm-cupon-mapper';
+import { IMapper } from 'src/common/application/mappers/mapper.interface';
+import { Cupon } from 'src/cupon/domain/aggregate/cupon.aggregate';
+import { OrmCuponEntity } from '../orm-entities/orm-cupon-entity';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -28,14 +32,14 @@ import { GetCredential } from 'src/auth/infraestructure/jwt/decorator/get-creden
 @Controller('cupon')
 export class CuponController {
 
-  private readonly ormCuponRepo: ICuponRepository;
+  private readonly ormCuponCommandRepo: ICuponRepository;
   private readonly idGen: IIdGen<string>;
   private readonly ormCuponQueryRepo: IQueryCuponRepository;
-
+  private readonly cuponMapper: IMapper<Cupon, OrmCuponEntity>;
   constructor(@Inject("RABBITMQ_CONNECTION") private readonly channel: Channel) {
     this.idGen = new UuidGen();
-    this.ormCuponRepo = new OrmCuponCommandRepository(PgDatabaseSingleton.getInstance());
-    this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
+    this.ormCuponCommandRepo = new OrmCuponCommandRepository(PgDatabaseSingleton.getInstance(),this.cuponMapper);
+    this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance(),this.cuponMapper);
   }
 
   @Post('create')
@@ -46,7 +50,7 @@ export class CuponController {
     let service = new ExceptionDecorator(
       new CreateCuponApplicationService(
         new RabbitMQPublisher(this.channel),
-        this.ormCuponRepo,
+        this.ormCuponCommandRepo,
         this.idGen
       )
     );
@@ -87,7 +91,7 @@ export class CuponController {
       let service = new ExceptionDecorator(
           new LoggerDecorator(
               new FindCuponByIdApplicationService( 
-                  this.ormCuponRepo
+                  this.ormCuponCommandRepo
               ),
               new NestLogger(new Logger()) 
           )

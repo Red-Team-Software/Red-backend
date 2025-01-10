@@ -6,7 +6,7 @@ import { CuponDiscount } from "../value-object/cupon-discount";
 import { CuponState } from "../value-object/cupon-state";
 import { CuponUser } from "../entities/cuponUser/cuponUser";
 
-export class CuponRegistered extends DomainEvent {
+export class CuponCreated extends DomainEvent {
     serialize(): string {
         const data = {
             cuponId: this.cuponId.Value,
@@ -28,7 +28,7 @@ export class CuponRegistered extends DomainEvent {
         cuponState: CuponState,
         users: CuponUser[]
     ) {
-        return new CuponRegistered(
+        return new CuponCreated(
             cuponId,
             cuponName,
             cuponCode,

@@ -5,7 +5,7 @@ import { CuponId } from "../../value-object/cupon-id";
 import { CuponDiscount } from "../../value-object/cupon-discount";
 
 export class CuponUser extends Entity<CuponUserId> {
-    private isUsed: boolean;
+    private isUsed: boolean; //cambiar a entidad
     private userId: UserId;
     private cuponId: CuponId;
     private discount: CuponDiscount;
