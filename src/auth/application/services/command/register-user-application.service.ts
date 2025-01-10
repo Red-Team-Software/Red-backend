@@ -86,7 +86,8 @@ export class RegisterUserApplicationService extends IApplicationService
 
         let externalId = await this.userExternalSite.saveUser(user.getId(), data.email);
 
-        if(!externalId.isSuccess()) return Result.fail(new ErrorRegisteringAccountExternalSiteApplicationException())
+        if(!externalId.isSuccess()) 
+            return Result.fail(new ErrorRegisteringAccountExternalSiteApplicationException())
 
         let account:IAccount={
             sessions: [] ,

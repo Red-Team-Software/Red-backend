@@ -26,10 +26,15 @@ export class Wallet extends Entity<WalletId> {
         return this.balance;
     }
 
-    updateBalance(balance: Ballance): Wallet {
-        this.balance = balance;
+    addAmountToBalance(b:Ballance): Wallet {
+        this.balance=this.balance.addAmount(b)
+        return this
+    }
 
-        return this;
+    
+    reduceAmountToBalance(b:Ballance): Wallet {
+        this.balance = this.balance.reduceAmount(b)
+        return this
     }
     
 }

@@ -52,7 +52,7 @@ export class AddBalanceToWalletZelleApplicationService extends IApplicationServi
         const user = userResponse.getValue;
 
         let newBalance = Ballance.create(
-            Number(data.amount) + Number(user.Wallet.Ballance.Amount), 
+            Number(data.amount), 
             user.Wallet.Ballance.Currency);
 
         user.addWalletBalance(newBalance);

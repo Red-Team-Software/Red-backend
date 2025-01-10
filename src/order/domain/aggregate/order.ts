@@ -148,8 +148,8 @@ export class Order extends AggregateRoot<OrderId>{
         orderReceivedDate?: OrderReceivedDate,
         orderReport?: OrderReport,
         orderPayment?: OrderPayment
-
     ): Order {
+        //TODO order payment opcional
         let order = new Order(
             id,
             orderState,

@@ -52,7 +52,7 @@ export class RefundPaymentApplicationService extends IApplicationService<RefundP
         await this.refundPayment.refundPayment(order);
 
         let newBalance = Ballance.create(
-            Number(user.Wallet.Ballance.Amount) + Number(order.TotalAmount.OrderAmount), 
+            Number(order.TotalAmount.OrderAmount), 
             user.Wallet.Ballance.Currency
         );
         

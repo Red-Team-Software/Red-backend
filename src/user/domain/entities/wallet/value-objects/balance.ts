@@ -25,12 +25,25 @@ export class Ballance implements ValueObject<Ballance> {
     }
 
     private constructor(amount:number,currency:string){
-        if (amount<0) throw new InvalidBallanceAmountException(amount)
-        if ( 
-            !WalletCurrencyEnum[currency]
-        ) throw new InvalidBallanceCurrencyException(currency)
+        if (amount<0) 
+            throw new InvalidBallanceAmountException(amount)
+        if ( !WalletCurrencyEnum[currency]) 
+            throw new InvalidBallanceCurrencyException(currency)
         this.currency=currency
         this.amount=amount
     }
 
+    reduceAmount(b:Ballance):Ballance{
+        return new Ballance(
+            this.Amount-b.Amount,
+            this.Currency
+        )
+    }
+
+    addAmount(b:Ballance):Ballance{
+        return new Ballance(
+            b.Amount+this.Amount,
+            this.Currency
+        )
+    }
 }

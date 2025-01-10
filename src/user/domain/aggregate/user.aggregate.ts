@@ -174,20 +174,20 @@ export class User extends AggregateRoot <UserId>{
         )
     }
 
-    addWalletBalance(balance:Ballance):void{
+    addWalletBalance(ballance:Ballance):void{
         this.apply(
             UserBalanceAmountAdded.create(
                 this.getId(),
-                this.wallet.updateBalance(balance)
+                this.wallet.addAmountToBalance(ballance)
             )
         );
     };
 
-    decreaseWalletBalance(balance:Ballance):void{
+    decreaseWalletBalance(ballance:Ballance):void{
         this.apply(
             UserBalanceAmountDecremented.create(
                 this.getId(),
-                this.wallet.updateBalance(balance)
+                this.wallet.reduceAmountToBalance(ballance)
             )
         );
     };

@@ -70,7 +70,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly geocodificationAddress: IGeocodification,
         private readonly productRepository:IQueryProductRepository,
         private readonly bundleRepository:IQueryBundleRepository,
-        private readonly ormCourierQueryRepository: ICourierQueryRepository,
         private readonly dateHandler: IDateHandler,
         private readonly queryPromotionRepositoy: IQueryPromotionRepository,
         private readonly paymentQueryRepository:IPaymentMethodQueryRepository,
@@ -95,9 +94,15 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         if (!paymentResponse.isSuccess())
             return Result.fail(paymentResponse.getError)
 
-        let cuponRes = await this.ormCuponQueryRepo.findCuponById(CuponId.create(data.cuponId));
+        if (data.cuponId){
 
-        if (cuponRes.isSuccess()) cupon = cuponRes.getValue;
+            let cuponRes = await this.ormCuponQueryRepo.findCuponById(CuponId.create(data.cuponId))
+
+            if (!cuponRes.isSuccess())
+                return Result.fail(cuponRes.getError)
+            cupon = cuponRes.getValue;
+        }
+
 
         let findPromotion: FindAllPromotionApplicationRequestDTO = {
             userId: data.userId,
@@ -120,7 +125,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
                 products.push(domain.getValue)
             }
-            
+            // TODO hacerlo servicio de dominio
             if (data.products){
                 products.forEach(product => {
                     let promotion = promotions.find(promo => {
@@ -144,7 +149,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         }
 
 
-        
+        // TODO hacerlo servicio de dominio
+
         if(data.bundles){
             for (const bundle of data.bundles){
                 let domain=await this.bundleRepository.findBundleById(BundleId.create(bundle.id))
@@ -162,7 +168,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         
                     let bundleTotal = bundle.BundlePrice.Price;
         
-                    if (promotion) bundleTotal -= (bundle.BundlePrice.Price * (promotion.PromotionDiscounts.Value ));
+                    if (promotion) 
+                        bundleTotal -= (bundle.BundlePrice.Price * (promotion.PromotionDiscounts.Value ));
         
                     let bu = BundleDetail.create(
                         BundleDetailId.create(bundle.getId().Value),
@@ -213,15 +220,11 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             
             let orderPayment: OrderPayment;
 
-            let orderReceivedDate: OrderReceivedDate = null;
-            let orderReport: OrderReport = null;
-            let orderCourierId: OrderCourierId;
-
             let orderUserId: OrderUserId = OrderUserId.create(data.userId);
 
             let orderCupon: OrderCuponId;
 
-            if(data.cuponId && cuponRes.isSuccess()) 
+            if(data.cuponId && cupon) 
                 orderCupon = OrderCuponId.create(cupon.getId().Value);
 
             let order = Order.initializeAggregate(
@@ -231,18 +234,21 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 total,
                 orderDirection,
                 orderUserId,
-                orderCupon,
-                orderCourierId,
+                orderCupon
+                ? orderCupon
+                : null,
+                null,
                 orderproducts,
                 orderBundles,
-                orderReceivedDate, 
-                orderReport, 
+                null, 
+                null, 
                 orderPayment
             );
 
             let response = await this.payOrder.createPayment(order);
 
-            if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException());
+            if (!response.isSuccess()) 
+                return Result.fail(new ErrorCreatingPaymentApplicationException());
 
             
             let responseDB = await this.orderRepository.saveOrder(response.getValue); 

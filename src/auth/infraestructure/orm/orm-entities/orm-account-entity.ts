@@ -21,7 +21,7 @@ export class OrmAccountEntity implements IAccount{
     @OneToMany( () => OrmSessionEntity, session => session.account,{ eager: true })  
     sessions: ISession[];
 
-    @ManyToOne( () => OrmUserEntity , user=>user.id) @JoinColumn( { name: 'id' } ) 
+    @ManyToOne( () => OrmUserEntity , user=>user.id) @JoinColumn( { name: 'idUser' } ) 
     user: OrmUserEntity
 
     static create ( 

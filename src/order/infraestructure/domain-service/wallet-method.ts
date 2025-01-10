@@ -37,7 +37,7 @@ export class WalletPaymentMethod implements IPaymentMethodService {
         if (user.Wallet.Ballance.Amount < order.TotalAmount.OrderAmount) 
             return Result.fail(new InsufficientFundsInWalletException());
 
-        let newBalance = Ballance.create(user.Wallet.Ballance.Amount - order.TotalAmount.OrderAmount, user.Wallet.Ballance.Currency);
+        let newBalance = Ballance.create(order.TotalAmount.OrderAmount, user.Wallet.Ballance.Currency);
 
         user.decreaseWalletBalance(newBalance);
 

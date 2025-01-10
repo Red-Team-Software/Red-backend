@@ -50,8 +50,8 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
             return Result.fail(new ErrorChangeCurrencyApplicationException());
 
         let newBalance = Ballance.create(
-            Number(newChange.getValue.Amount) + Number(user.Wallet.Ballance.Amount)
-            , user.Wallet.Ballance.Currency);
+            Number(newChange.getValue.Amount),
+            user.Wallet.Ballance.Currency);
 
         user.addWalletBalance(newBalance);
 
