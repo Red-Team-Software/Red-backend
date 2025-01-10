@@ -28,7 +28,7 @@ export class CancelledOrderPushNotificationApplicationService extends IApplicati
                     te invitamos a generar un reporte para que podamos ayudarte mejor.`,
                 },
                 data:{
-                    route: `/order/:${data.orderId}`
+                    route: `/order/${data.orderId}`
                 }
             })
         })

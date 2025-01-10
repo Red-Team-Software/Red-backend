@@ -4,4 +4,5 @@ import { FileUploaderResponseDTO } from "./dto/response/file-uploader-response-d
 
 export interface IFileUploader {
     uploadFile(buffer:Buffer, typeFile: TypeFile, id:string): Promise<Result<FileUploaderResponseDTO>>
+    deleteFile(id:string):Promise<Result<boolean>>
 }

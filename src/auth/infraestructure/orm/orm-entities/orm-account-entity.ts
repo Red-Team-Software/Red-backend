@@ -15,6 +15,7 @@ export class OrmAccountEntity implements IAccount{
     @Column( 'varchar' ) idUser: string;
     @Column( 'varchar' ,{nullable:true}) code: string;
     @Column( 'timestamp', { nullable:true } )  code_created_at: Date;
+    @Column( 'varchar' ) idStripe: string;
 
 
     @OneToMany( () => OrmSessionEntity, session => session.account,{ eager: true })  
@@ -30,7 +31,8 @@ export class OrmAccountEntity implements IAccount{
         password: string,
         created_at: Date,
         isConfirmed:boolean,
-        idUser:string
+        idUser:string,
+        idStripe:string,
     ): OrmAccountEntity
     {
         const account = new OrmAccountEntity()
@@ -41,6 +43,7 @@ export class OrmAccountEntity implements IAccount{
         account.created_at=created_at
         account.isConfirmed=isConfirmed
         account.idUser=idUser
+        account.idStripe=idStripe
         return account
     }
 }

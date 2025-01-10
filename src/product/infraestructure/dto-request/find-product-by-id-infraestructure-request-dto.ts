@@ -1,9 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger"
-import { IsString, IsUUID } from "class-validator"
+import { ByIdDTO } from "src/common/infraestructure/dto/entry/by-id.dto"
 
-export class FindProductByIdInfraestructureRequestDTO{
-  @ApiProperty( { required: true, default: '94bfc16a-0757-45f5-a326-6dceac87b8fd' })
-  @IsString()
-  @IsUUID()
-  id:string
+export class FindProductByIdInfraestructureRequestDTO extends ByIdDTO{
 }

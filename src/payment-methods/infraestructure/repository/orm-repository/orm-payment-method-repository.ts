@@ -25,7 +25,6 @@ export class OrmPaymentMethodRepository extends Repository<PaymentMethodEntity> 
             await this.save(paymentMethodEntity);
             return Result.success(method);
         } catch (error) {
-            console.log(error);
             return Result.fail( new PersistenceException( 'Create payment method unsucssessfully' ) );
         }
     }

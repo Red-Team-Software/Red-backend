@@ -6,9 +6,8 @@ import { DataSource, Repository } from "typeorm"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 import { OrmBundleMapper } from "../../mapper/orm-mapper/orm-bundle-mapper"
 import { BundleId } from "src/bundle/domain/value-object/bundle-id"
-import { BundleName } from "src/bundle/domain/value-object/bundle-name"
 import { Result } from "src/common/utils/result-handler/result"
-import { NotFoundException, PersistenceException } from "src/common/infraestructure/infraestructure-exception"
+import { PersistenceException } from "src/common/infraestructure/infraestructure-exception"
 import { ICommandBundleRepository } from "src/bundle/domain/repository/bundle.command.repository.interface"
 
 export class OrmBundleRepository extends Repository<OrmBundleEntity> implements ICommandBundleRepository{
@@ -35,7 +34,11 @@ export class OrmBundleRepository extends Repository<OrmBundleEntity> implements 
         }    }
     async deleteBundleById(id: BundleId): Promise<Result<BundleId>> {
         try {
-            const result = this.delete({ id: id.Value })   
+            const result =await this.delete({ id: id.Value }) 
+
+            if(result.affected!==1)
+                return Result.fail(new PersistenceException('Delete product unsucssessfully'))
+
             return Result.success(id) 
         } catch (e) {
             return Result.fail(new PersistenceException('Delete bundle unsucssessfully'))
@@ -45,8 +48,32 @@ export class OrmBundleRepository extends Repository<OrmBundleEntity> implements 
     async updateBundle(bundle: Bundle): Promise<Result<Bundle>> {
         const persis = await this.mapper.fromDomaintoPersistence(bundle)
         try {
-            const result = await this.save(persis)
+
+            await this.createQueryBuilder()
+            .delete()
+            .from('bundle_product')
+            .where('bundle_id = :bundle_id', { bundle_id: persis.id })
+            .execute();
+
+            await this.ormBundleImageRepository.delete({bundle_id:persis.id})
+
+            const result = await this.upsert(persis,['id'])
+
+            for (const image of persis.images) {
+                await this.ormBundleImageRepository.save(image);
+            }
+
+            for (const product of persis.products) {
+                await this.createQueryBuilder()
+                  .insert()
+                  .into('bundle_product')
+                  .values({ product_id: product.id, bundle_id:persis.id })
+                  .execute();
+              } 
+
+            
             return Result.success(bundle)
+
         } catch (e) {
             return Result.fail(new PersistenceException('Update bundle unsucssessfully'))
         }

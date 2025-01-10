@@ -5,12 +5,12 @@ import { OrderTotalAmount } from "../value_objects/order-totalAmount";
 import { OrderId } from "../value_objects/order-id";
 import { OrderState } from "../value_objects/order-state";
 import { OrderDirection } from '../value_objects/order-direction';
-import { OrderProduct } from "../entities/order-product/order-product-entity";
-import { OrderBundle } from "../entities/order-bundle/order-bundle-entity";
+import { ProductDetail } from "../entities/product-detail/product-detail-entity";
 import { OrderReport } from "../entities/report/report-entity";
 import { OrderPayment } from "../entities/payment/order-payment-entity";
 import { OrderCourier } from "../entities/order-courier/order-courier-entity";
 import { OrderUserId } from "../value_objects/order-user-id";
+import { BundleDetail } from "../entities/bundle-detail/bundle-detail-entity";
 
 
 export class OrderRegistered extends DomainEvent {
@@ -22,12 +22,31 @@ export class OrderRegistered extends DomainEvent {
             orderCreateDate: this.orderCreateDate.OrderCreatedDate,
             totalAmount: this.totalAmount,
             orderDirection: this.orderDirection,
-            orderCourier: this.orderCourier,
-            orderUserId: this.orderUserId,
-            products: this.products,
-            bundles: this.bundles,
-            orderReceivedDate: this.orderReceivedDate?.OrderReceivedDate,
-            orderReport: this.orderReport?.getId(),
+            orderCourier: {
+                id:this.orderCourier.getId().OrderCourierId,
+            },
+            orderUserId: this.orderUserId.userId,
+            products: this.products
+            ? this.products.map(p=>({
+                id:p.ProductDetailId.productDetailId,
+                quantity:p.Quantity.Quantity
+            }))
+            : [],
+            bundles: this.bundles 
+            ? this.bundles.map(b=>({
+                id:b.BundleDetailId.BundleDetailId,
+                quantity:b.Quantity.Quantity
+            }))
+            :[],
+            orderReceivedDate: this.orderReceivedDate
+            ? this.orderReceivedDate.OrderReceivedDate
+            : null,
+            orderReport: this.orderReport
+            ? {
+                id:this.orderReport.getId().OrderReportId,
+                description:this.orderReport.Description
+            }
+            : null,
             orderPayment: this.orderPayment
         }
         
@@ -42,8 +61,8 @@ export class OrderRegistered extends DomainEvent {
         public orderDirection: OrderDirection,
         public orderCourier: OrderCourier,
         public orderUserId: OrderUserId,
-        public products?: OrderProduct[],
-        public bundles?: OrderBundle[],
+        public products?: ProductDetail[],
+        public bundles?: BundleDetail[],
         public orderReceivedDate?: OrderReceivedDate,
         public orderReport?: OrderReport,
         public orderPayment?: OrderPayment,
@@ -59,8 +78,8 @@ export class OrderRegistered extends DomainEvent {
         orderDirection: OrderDirection,
         orderCourier: OrderCourier,
         orderUserId: OrderUserId,
-        products?: OrderProduct[],
-        bundles?: OrderBundle[],
+        products?: ProductDetail[],
+        bundles?: BundleDetail[],
         orderReceivedDate?: OrderReceivedDate,
         orderReport?: OrderReport,
         orderPayment?: OrderPayment

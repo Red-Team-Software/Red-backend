@@ -12,10 +12,10 @@ import { IAccount } from "../../model/account.interface";
 import { ICommandAccountRepository } from "../../repository/command-account-repository.interface";
 import { IQueryAccountRepository } from "../../repository/query-account-repository.interface";
 import { UserId } from "src/user/domain/value-object/user-id";
-import { UserNotFoundApplicationException } from "../../application-exeption/user-not-found-application-exception";
-import { CodeExpiredApplicationException } from "../../application-exeption/code-expired-application-exception";
-import { InvalidCodeApplicationException } from "../../application-exeption/invalid-code-application-exception";
-import { ErrorUpdatingUserPasswordApplicationException } from "../../application-exeption/error-updating-user-password-application-exception";
+import { UserNotFoundApplicationException } from "../../application-exception/user-not-found-application-exception";
+import { CodeExpiredApplicationException } from "../../application-exception/code-expired-application-exception";
+import { InvalidCodeApplicationException } from "../../application-exception/invalid-code-application-exception";
+import { ErrorUpdatingUserPasswordApplicationException } from "../../application-exception/error-updating-user-password-application-exception";
 
 export class ChangePasswordApplicationService extends IApplicationService 
 <ChangePasswordApplicationRequestDTO,ChangePasswordApplicationResponseDTO> {

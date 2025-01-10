@@ -5,4 +5,5 @@ export interface CreateCategoryApplicationResponseDTO extends IServiceResponseDt
     name: string;
     image: string;
     products: string[];
+    bundles:string[]
 }

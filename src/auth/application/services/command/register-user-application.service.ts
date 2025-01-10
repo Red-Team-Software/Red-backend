@@ -6,7 +6,7 @@ import { ICommandAccountRepository } from "../../repository/command-account-repo
 import { IAccount } from "../../model/account.interface";
 import { IQueryAccountRepository } from "../../repository/query-account-repository.interface";
 import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
-import { UserAlreadyExistApplicationException } from "../../application-exeption/user-already-exist-application-exception";
+import { UserAlreadyExistApplicationException } from "../../application-exception/user-already-exist-application-exception";
 import { IEncryptor } from 'src/common/application/encryptor/encryptor.interface';
 import { IDateHandler } from "src/common/application/date-handler/date-handler.interface";
 import { User } from "src/user/domain/aggregate/user.aggregate";
@@ -15,16 +15,18 @@ import { UserEmail } from "src/user/domain/value-object/user-email";
 import { UserName } from "src/user/domain/value-object/user-name";
 import { UserPhone } from "src/user/domain/value-object/user-phone";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
-import { ErrorRegisteringAccountApplicationException } from "../../application-exeption/error-registering-account-application-exception";
-import { ErrorRegisteringUserApplicationException } from "../../application-exeption/error-registering-user-application-exception";
+import { ErrorRegisteringAccountApplicationException } from "../../application-exception/error-registering-account-application-exception";
+import { ErrorRegisteringUserApplicationException } from "../../application-exception/error-registering-user-application-exception";
 import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface";
 import { UserRole } from "src/user/domain/value-object/user-role";
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
-import { UserAlreadyExistPhoneNumberApplicationException } from "../../application-exeption/user-already-exist-phone-number-application-exception";
+import { UserAlreadyExistPhoneNumberApplicationException } from "../../application-exception/user-already-exist-phone-number-application-exception";
 import { Wallet } from "src/user/domain/entities/wallet/wallet.entity";
 import { WalletId } from "src/user/domain/entities/wallet/value-objects/wallet-id";
 import { Ballance } from "src/user/domain/entities/wallet/value-objects/balance";
+import { IUserExternalAccountService } from "src/auth/application/interfaces/user-external-account-interface";
+import { ErrorRegisteringAccountExternalSiteApplicationException } from "../../application-exception/error-registering-account-external-site-application-exception";
 
 
 export class RegisterUserApplicationService extends IApplicationService 
@@ -39,6 +41,7 @@ export class RegisterUserApplicationService extends IApplicationService
         private readonly encryptor:IEncryptor,
         private readonly dateHandler:IDateHandler,
         private readonly eventPublisher:IEventPublisher,
+        private readonly userExternalSite: IUserExternalAccountService
     ){
         super()
     }
@@ -81,6 +84,9 @@ export class RegisterUserApplicationService extends IApplicationService
             )
         )
 
+        let externalId = await this.userExternalSite.saveUser(user.getId(), data.email);
+
+        if(!externalId.isSuccess()) return Result.fail(new ErrorRegisteringAccountExternalSiteApplicationException())
 
         let account:IAccount={
             sessions: [] ,
@@ -89,7 +95,8 @@ export class RegisterUserApplicationService extends IApplicationService
             password: password,
             created_at: this.dateHandler.currentDate(),
             isConfirmed:false,
-            idUser:user.getId().Value
+            idUser:user.getId().Value,
+            idStripe: externalId.getValue
         }
 
         let userResponse=await this.commandUserRepository.saveUser(user)

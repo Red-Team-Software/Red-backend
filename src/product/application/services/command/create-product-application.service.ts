@@ -16,7 +16,7 @@ import { IFileUploader } from "src/common/application/file-uploader/file-uploade
 import { TypeFile } from "src/common/application/file-uploader/enums/type-file.enum";
 import { FileUploaderResponseDTO } from "src/common/application/file-uploader/dto/response/file-uploader-response-dto";
 import { ErrorCreatingProductApplicationException } from "../../application-exepction/error-creating-product-application-exception";
-import { ErrorNameAlreadyApplicationException } from "../../application-exepction/error-name-already-exist-application-exception";
+import { ErrorProductNameAlreadyExistApplicationException } from "../../application-exepction/error-product-name-already-exist-application-exception";
 import { ErrorUploadingImagesApplicationException } from "../../application-exepction/error-uploading-images-application-exception";
 import { ProductWeigth } from "src/product/domain/value-object/product-weigth";
 import { IQueryProductRepository } from "../../query-repository/query-product-repository";
@@ -44,7 +44,7 @@ export class CreateProductApplicationService extends IApplicationService
             return Result.fail(new ErrorCreatingProductApplicationException())
 
         if (search.getValue) 
-            return Result.fail(new ErrorNameAlreadyApplicationException())
+            return Result.fail(new ErrorProductNameAlreadyExistApplicationException(command.name))
 
         let uploaded:FileUploaderResponseDTO[]=[]
         for (const image of command.images){
@@ -57,16 +57,19 @@ export class CreateProductApplicationService extends IApplicationService
             uploaded.push(imageuploaded.getValue)
         }
 
+
         let id=await this.idGen.genId()
         let product=Product.RegisterProduct(
             ProductID.create(id),
             ProductDescription.create(command.description),
-            ProductCaducityDate.create(command.caducityDate),
             ProductName.create(command.name),
             ProductStock.create(command.stock),
             uploaded.map((image)=>ProductImage.create(image.url)),
             ProductPrice.create(command.price,command.currency),
-            ProductWeigth.create(command.weigth,command.measurement)
+            ProductWeigth.create(command.weigth,command.measurement),
+            command.caducityDate
+            ? ProductCaducityDate.create(command.caducityDate)
+            : null
         )
         let result=await this.commandProductRepository.createProduct(product)
         if (!result.isSuccess()) 
@@ -74,6 +77,7 @@ export class CreateProductApplicationService extends IApplicationService
         await this.eventPublisher.publish(product.pullDomainEvents())
         let response:CreateProductApplicationResponseDTO={
             ...command,
+            productId:product.getId().Value,
             images:product.ProductImages.map(image=>image.Value)
         }
         return Result.success(response)

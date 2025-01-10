@@ -52,6 +52,12 @@ import { NestTimer } from "src/common/infraestructure/timer/nets-timer";
 import { IDeliveringOrder } from "../interfaces/delivering-order.interface";
 import { OrderDeliveringPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/order-delivering-push-notification-application-request-dto";
 import { NewBundlePushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/new-bundle-push-notification-application-request-dto";
+import { NotificationQueues } from "../queues/notification.queues";
+import { UserId } from "src/user/domain/value-object/user-id";
+import { OrderDeliveringPushNotificationApplicationService } from "src/notification/application/services/command/order-delivering-push-notification-application.service";
+import { IUserWalletBalanceAdded } from "../interfaces/user-wallet-balance-updated";
+import { UserWalletBalanceAddedPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/user-wallet-balance-added-push-notification-application-request-dto";
+import { UpdateUserWalletBalancePushNotificationApplicationService } from "src/notification/application/services/command/update-user-wallet-balance-push-notification-application.service";
 
 @ApiTags('Notification')
 @Controller('notification')
@@ -64,6 +70,23 @@ export class NotificationController {
     private readonly querySessionRepository:IQueryTokenSessionRepository<ISession>;
     private readonly auditRepository: IAuditRepository
 
+    private initializeQueues():void{        
+        NotificationQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+    }
+
+    private buildQueue(name: string, pattern: string) {
+        this.subscriber.buildQueue({
+          name,
+          pattern,
+          exchange: {
+            name: 'DomainEvent',
+            type: 'direct',
+            options: {
+              durable: false,
+            },
+          },
+        })
+    }
 
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -159,8 +182,30 @@ export class NotificationController {
             }
         })
 
+        this.subscriber.buildQueue({
+            name:'UserEvents',
+            pattern: 'UserBalanceAmountAdded',
+            exchange:{
+                name:'DomainEvent',
+                type:'direct',
+                options:{
+                    durable:false,
+                }
+            }
+        })
+
+        this.subscriber.consume<IUserWalletBalanceAdded>(
+            { name: 'UserEvents'}, 
+            (data):Promise<void>=>{
+                this.sendPushUserWalletBalanceAdded(data)
+                return
+            }
+        );
+
+        this.initializeQueues()
+
         this.subscriber.consume<ICreateProduct>(
-            { name: 'ProductEvents'}, 
+            { name: 'ProductEvents/ProductRegistered'}, 
             (data):Promise<void>=>{
                 this.sendEmailToCreateProduct(data)
                 this.sendPushToCreatedProduct(data)
@@ -169,7 +214,7 @@ export class NotificationController {
         );
 
         this.subscriber.consume<ICreateBundle>(
-            { name: 'BundleEvents'}, 
+            { name: 'BundleEvents/BundleRegistered'}, 
             (data):Promise<void>=>{
                 this.sendPushToCreatedBundle(data)
                 this.sendEmailToCreateBundle(data)
@@ -178,7 +223,7 @@ export class NotificationController {
         );
 
         this.subscriber.consume<ICreateOrder>(
-            { name: 'OrderEvents'}, 
+            { name: 'OrderEvents/OrderRegistered'}, 
             (data):Promise<void>=>{
                 this.sendPushOrderCreated(data)
                 this.sendEmailOrderCreated(data)
@@ -187,12 +232,38 @@ export class NotificationController {
         )
         
         this.subscriber.consume<ICreateCupon>(
-            { name: 'CuponEvents'}, 
+            { name: 'CuponEvents/Createcupon'}, 
             (data):Promise<void>=>{
                 this.sendPushCuponCreated(data)
                 return
             }
         )
+
+        this.subscriber.consume<ICancelOrder>(
+            { name: 'OrderEvents/CancelOrder'}, 
+            (data):Promise<void>=>{
+                this.sendPushOrderCancelled(data)
+                this.sendEmailOrderCancelled(data)
+                return
+            }
+        );
+
+        this.subscriber.consume<IDeliveringOrder>(
+            { name: 'OrderEvents/OrderStatusDelivered'}, 
+            (data):Promise<void>=>{
+                this.sendPushOrderDelivered(data)
+                return
+            }
+        );
+
+        this.subscriber.consume<IDeliveringOrder>(
+            { name: 'OrderEvents/OrderStatusDelivering'}, 
+            (data):Promise<void>=>{
+                this.sendPushOrderDelivering(data)
+                return
+            }
+        );
+
     }
 
     
@@ -248,29 +319,57 @@ export class NotificationController {
 
     }
 
-    async sendPushOrderDelivering(entry:IDeliveringOrder){
+    async sendPushUserWalletBalanceAdded(entry:IUserWalletBalanceAdded){
+        
         let service= new ExceptionDecorator(
             new LoggerDecorator(
-                new OrderDeliveredPushNotificationApplicationService(
+                new UpdateUserWalletBalancePushNotificationApplicationService(
                     this.pushsender
                 ),
             new NestLogger(new Logger())
             )
         );
         
-        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+        const tokensResponse = await this.querySessionRepository.findSessionLastSessionByUserId(
+            UserId.create(entry.userId)
+        );
+
+        if (!tokensResponse.isSuccess())
+            throw tokensResponse.getError;
+        
+        let data:UserWalletBalanceAddedPushNotificationApplicationRequestDTO={
+            userId: entry.userId,
+            tokens:[tokensResponse.getValue.push_token],
+            userWallet:entry.userWallet
+        };
+        service.execute(data);
+    };
+
+    async sendPushOrderDelivering(entry:IDeliveringOrder){
+        let service= new ExceptionDecorator(
+            new LoggerDecorator(
+                new OrderDeliveringPushNotificationApplicationService(
+                    this.pushsender
+                ),
+            new NestLogger(new Logger())
+            )
+        )
+        
+        const tokensResponse=await this.querySessionRepository.findSessionLastSessionByUserId(
+            UserId.create(entry.orderUserId)
+        )
 
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;
 
         let data: OrderDeliveringPushNotificationApplicationRequestDTO={
-            userId:'none',
+            userId:entry.orderUserId,
             tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderId:entry.orderId
-        };
+        }
         service.execute(data);
-    };
+    }
 
 
     async sendPushOrderDelivered(entry:IDeliveredOrder){
@@ -281,21 +380,23 @@ export class NotificationController {
                 ),
             new NestLogger(new Logger())
             )
-        );
+        )
         
-        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+        const tokensResponse=await this.querySessionRepository.findSessionLastSessionByUserId(
+            UserId.create(entry.orderUserId)
+        )
 
         if (!tokensResponse.isSuccess())
-            throw tokensResponse.getError;
+            throw tokensResponse.getError
 
         let data: OrderDeliveredPushNotificationApplicationRequestDTO={
-            userId:'none',
+            userId:entry.orderUserId,
             tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderId:entry.orderId
-        };
+        }
         service.execute(data);
-    };
+    }
 
     async sendPushOrderCancelled(entry:ICancelOrder){
         let service= new ExceptionDecorator(
@@ -307,13 +408,15 @@ export class NotificationController {
             )
         );
 
-        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+        const tokensResponse=await this.querySessionRepository.findSessionLastSessionByUserId(
+            UserId.create(entry.orderUserId)
+        )
 
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;
 
         let data: CancelOrderPushNotificationApplicationRequestDTO={
-            userId:'none',
+            userId:entry.orderUserId,
             tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderId:entry.orderId
@@ -334,9 +437,9 @@ export class NotificationController {
         emailsender.setVariablesToSend({
             username:'customer',
             orderid: entry.orderId
-        });
+        })
         await emailsender.sendEmail(accountResponse.getValue.email);
-    };
+    }
 
     async sendPushOrderCreated(entry:ICreateOrder){
         
@@ -349,21 +452,23 @@ export class NotificationController {
             )
         );
 
-        const tokensResponse=await this.querySessionRepository.findSessionById(entry.orderUserId);
+        const tokensResponse=await this.querySessionRepository.findSessionLastSessionByUserId(
+            UserId.create(entry.orderUserId)
+        )
 
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;
         
         let data:NewOrderPushNotificationApplicationRequestDTO={
-            userId:'none',
+            userId:entry.orderUserId,
             tokens:[tokensResponse.getValue.push_token],
             orderState:entry.orderState,
             orderCreateDate:entry.orderCreateDate,
             totalAmount:entry.totalAmount.amount,
             currency:entry.totalAmount.currency
-        };
+        }
         service.execute(data);
-    };
+    }
 
     async sendEmailOrderCreated(entry:ICreateOrder){
 
@@ -491,7 +596,10 @@ export class NotificationController {
                 ),this.auditRepository,new DateHandler()
             )
         )
-        let response=await service.execute({userId:'none',...entry,session:credential.session})
+        let response=await service.execute({
+            userId:credential.account.idUser,
+            ...entry,session:credential.session
+        })
         return response.getValue
     };
 }

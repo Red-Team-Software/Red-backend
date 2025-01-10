@@ -9,13 +9,13 @@ import { IEmailSender } from "src/common/application/email-sender/email-sender.i
 import { IEncryptor } from "src/common/application/encryptor/encryptor.interface";
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { UserId } from "src/user/domain/value-object/user-id";
-import { ErrorRegisteringUserCodeApplicationException } from "../../application-exeption/error-registering-user-code-application-exception";
-import { UserNotFoundApplicationException } from "../../application-exeption/user-not-found-application-exception";
+import { ErrorRegisteringUserCodeApplicationException } from "../../application-exception/error-registering-user-code-application-exception";
+import { UserNotFoundApplicationException } from "../../application-exception/user-not-found-application-exception";
 import { IAccount } from "../../model/account.interface";
 import { ICommandAccountRepository } from "../../repository/command-account-repository.interface";
 import { IQueryAccountRepository } from "../../repository/query-account-repository.interface";
-import { InvalidCodeApplicationException } from "../../application-exeption/invalid-code-application-exception";
-import { CodeExpiredApplicationException } from "../../application-exeption/code-expired-application-exception";
+import { InvalidCodeApplicationException } from "../../application-exception/invalid-code-application-exception";
+import { CodeExpiredApplicationException } from "../../application-exception/code-expired-application-exception";
 
 
 export class CodeValidateApplicationService extends IApplicationService 

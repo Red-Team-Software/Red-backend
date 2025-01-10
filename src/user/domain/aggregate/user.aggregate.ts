@@ -15,6 +15,9 @@ import { UserNameUpdated } from "../domain-events/user-name-updated";
 import { UserPhoneUpdated } from "../domain-events/user-phone-updated";
 import { UserDirectionUpdated } from "../domain-events/user-direction-updated";
 import { Wallet } from "../entities/wallet/wallet.entity";
+import { InvalidUserDirectionQuantityException } from "../domain-exceptions/invalid-user-direction-quantity-exception";
+import { UserBalanceAmountAdded } from "../domain-events/user-balance-amount-added";
+import { UserBalanceAmountDecremented } from "../domain-events/user-balance-amount-decremented";
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -28,6 +31,8 @@ export class User extends AggregateRoot <UserId>{
             case 'UserDirectionAdded':{
                 const userDirectionAdded: UserDirectionAdded = event as UserDirectionAdded
                 this.UserDirections.push(userDirectionAdded.userDirection)
+                if(this.UserDirections.length>6)
+                    throw new InvalidUserDirectionQuantityException(this.userDirections.length)
                 break;
             }
             case 'UserDirectionDeleted':{
@@ -53,6 +58,16 @@ export class User extends AggregateRoot <UserId>{
             case 'UserPhoneUpdated':{
                 const userPhoneUpdated: UserPhoneUpdated = event as UserPhoneUpdated
                 this.userPhone=userPhoneUpdated.userPhone
+                break;
+            }
+            case 'UserBalanceAmountAdded':{
+                const userBalanceAmountAdded: UserBalanceAmountAdded = event as UserBalanceAmountAdded
+                this.wallet= userBalanceAmountAdded.userWallet
+                break;
+            }
+            case 'UserBalanceAmountDecremented':{                    
+                const userBalanceAmountDecremented: UserBalanceAmountDecremented = event as UserBalanceAmountDecremented
+                this.wallet= userBalanceAmountDecremented.userWallet
                 break;
             }
             default: { throw new DomainExceptionNotHandled(JSON.stringify(event)) }
@@ -158,6 +173,24 @@ export class User extends AggregateRoot <UserId>{
         )
     }
 
+    addWalletBalance(wallet:Wallet):void{
+        this.apply(
+            UserBalanceAmountAdded.create(
+                this.getId(),
+                wallet
+            )
+        );
+    };
+
+    decreaseWalletBalance(wallet:Wallet):void{
+        this.apply(
+            UserBalanceAmountDecremented.create(
+                this.getId(),
+                wallet
+            )
+        );
+    };
+
     updateName(userName:UserName){
         this.apply(
             UserNameUpdated.create(
@@ -181,7 +214,8 @@ export class User extends AggregateRoot <UserId>{
                 direction
             )
         )    
-    }    get UserName():UserName {return this.userName}
+    }    
+    get UserName():UserName {return this.userName}
     get UserPhone():UserPhone {return this.userPhone}
     get UserImage():UserImage {return this.userImage}
     get UserDirections():UserDirection[] {return this.userDirections}

@@ -1,6 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, NotFoundException } from "@nestjs/common"
-import { JwtService } from "@nestjs/jwt"
-import { log } from "console"
+
 import { ISession } from "src/auth/application/model/session.interface"
 import { ICommandTokenSessionRepository } from "src/auth/application/repository/command-token-session-repository.interface"
 import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton"
@@ -15,6 +13,10 @@ import { IQueryAccountRepository } from "src/auth/application/repository/query-a
 import { IAccount } from "src/auth/application/model/account.interface"
 import { ICredential } from "src/auth/application/model/credential.interface"
 import { OrmAccountQueryRepository } from "../../repositories/orm-repository/orm-account-query-repository"
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, NotFoundException } from "@nestjs/common"
+import { JwtService } from "@nestjs/jwt"
+import { OrmUserQueryRepository } from "src/user/infraestructure/repositories/orm-repository/orm-user-query-repository"
+import { UserRoles } from "src/user/domain/value-object/enum/user.roles"
 
 
 
@@ -24,12 +26,15 @@ export class JwtAuthGuard implements CanActivate {
 
     private readonly sessionRepository: IQueryTokenSessionRepository<ISession>
     private readonly accountRepository: IQueryAccountRepository<IAccount>
+    private readonly userRepository: IQueryUserRepository
+
 
     constructor(
         private jwtService: JwtService,
     ) {
         this.sessionRepository = new OrmTokenQueryRepository(PgDatabaseSingleton.getInstance())
         this.accountRepository= new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance())
+        this.userRepository=new OrmUserQueryRepository(PgDatabaseSingleton.getInstance())
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -62,10 +67,16 @@ export class JwtAuthGuard implements CanActivate {
         const account = await this.accountRepository.findAccountById(session.getValue.accountId) 
         if ( !account.isSuccess() ) 
             throw new NotFoundException('account id not found')
+
+        const user= await this.userRepository.findUserById(UserId.create(account.getValue.idUser))
+
+        if (!user.isSuccess())
+            throw new NotFoundException('user id not found')
         
         let credential:ICredential={
             account:account.getValue,
-            session:session.getValue
+            session:session.getValue,
+            userRole:user.getValue.UserRole.Value as UserRoles
         }
         return credential
     }

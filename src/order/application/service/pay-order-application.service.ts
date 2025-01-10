@@ -3,10 +3,10 @@ import { Result } from 'src/common/utils/result-handler/result';
 import { OrderPayApplicationServiceRequestDto } from '../dto/request/order-pay-request-dto';
 import { OrderPayResponseDto } from '../dto/response/order-pay-response-dto';
 import { IEventPublisher } from 'src/common/application/events/event-publisher/event-publisher.abstract';
-import { ICalculateShippingFee } from 'src/order/domain/domain-services/calculate-shippping-fee.interfafe';
-import { ICalculateTaxesFee } from 'src/order/domain/domain-services/calculate-taxes-fee.interface';
+import { ICalculateShippingFee } from 'src/order/domain/domain-services/interfaces/calculate-shippping-fee.interface';
+import { ICalculateTaxesFee } from 'src/order/domain/domain-services/interfaces/calculate-taxes-fee.interface';
 import { OrderTotalAmount } from 'src/order/domain/value_objects/order-totalAmount';
-import { IPaymentMethodService } from 'src/order/domain/domain-services/payment-method-interface';
+import { IPaymentMethodService } from 'src/order/domain/domain-services/interfaces/payment-method-interface';
 import { OrderDirection } from 'src/order/domain/value_objects/order-direction';
 import { ErrorCreatingPaymentApplicationException } from '../application-exception/error-creating-payment-application.exception';
 import { ErrorObtainingTaxesApplicationException } from '../application-exception/error-obtaining-taxes.application.exception';
@@ -19,15 +19,9 @@ import { OrderState } from 'src/order/domain/value_objects/order-state';
 import { OrderShippingFee } from 'src/order/domain/value_objects/order-shipping-fee';
 import { OrderReceivedDate } from 'src/order/domain/value_objects/order-received-date';
 import { ErrorCreatingOrderApplicationException } from '../application-exception/error-creating-order-application.exception';
-import { IGeocodification } from 'src/order/domain/domain-services/geocodification-interface';
+import { IGeocodification } from 'src/order/domain/domain-services/interfaces/geocodification-interface';
 import { OrderAddressStreet } from 'src/order/domain/value_objects/order-direction-street';
-import { OrderProduct } from 'src/order/domain/entities/order-product/order-product-entity';
-import { OrderBundle } from 'src/order/domain/entities/order-bundle/order-bundle-entity';
-import { OrderProductId } from 'src/order/domain/entities/order-product/value_object/order-productId';
 import { ProductID } from '../../../product/domain/value-object/product-id';
-import { OrderProductQuantity } from 'src/order/domain/entities/order-product/value_object/order-product-quantity';
-import { OrderBundleId } from 'src/order/domain/entities/order-bundle/value_object/order-bundlesId';
-import { OrderBundleQuantity } from 'src/order/domain/entities/order-bundle/value_object/order-bundle-quantity';
 import { BundleId } from '../../../bundle/domain/value-object/bundle-id';
 import { Product } from 'src/product/domain/aggregate/product.aggregate';
 import { ErrorCreatingOrderProductNotFoundApplicationException } from '../application-exception/error-creating-order-product-not-found-application.exception';
@@ -35,7 +29,6 @@ import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../applica
 import { Bundle } from 'src/bundle/domain/aggregate/bundle.aggregate';
 import { OrderReport } from 'src/order/domain/entities/report/report-entity';
 import { OrderPayment } from 'src/order/domain/entities/payment/order-payment-entity';
-import { CalculateAmount } from 'src/order/domain/domain-services/calculate-amount';
 import { ICourierQueryRepository } from 'src/courier/application/query-repository/courier-query-repository-interface';
 import { OrderCourier } from 'src/order/domain/entities/order-courier/order-courier-entity';
 import { OrderCourierId } from 'src/order/domain/entities/order-courier/value-object/order-courier-id';
@@ -51,19 +44,20 @@ import { FindAllPromotionApplicationRequestDTO } from 'src/promotion/application
 import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
 import { IPaymentMethodQueryRepository } from 'src/payment-methods/application/query-repository/orm-query-repository.interface';
 import { PaymentMethodId } from 'src/payment-methods/domain/value-objects/payment-method-id';
-import { Cupon } from 'src/cupon/domain/aggregate/cupon.aggregate';
-import { IQueryCuponRepository } from 'src/cupon/domain/query-repository/query-cupon-repository';
-import { CuponId } from 'src/cupon/domain/value-object/cupon-id';
-import { ErrorCreatingOrderCuponNotFoundApplicationException } from '../application-exception/error-creating-order-cupon-application.exception';
-import { CuponUser } from 'src/cupon/domain/entities/cuponUser/cuponUser';
-import { CuponUserId } from 'src/cupon/domain/entities/cuponUser/value-objects/cuponUserId';
-import { UseCuponApplicationService } from 'src/cupon/application/services/command/use-cupon-application-service';
-import { UseCuponApplicationRequestDTO } from 'src/cupon/application/dto/request/use-cupon-application-requestdto';
-import { UseCuponApplicationResponseDTO } from 'src/cupon/application/dto/response/use-cupon-application-responsedto';
+import { BundleDetail } from 'src/order/domain/entities/bundle-detail/bundle-detail-entity';
+import { ProductDetail } from 'src/order/domain/entities/product-detail/product-detail-entity';
+import { BundleDetailId } from 'src/order/domain/entities/bundle-detail/value_object/bundle-detail-id';
+import { BundleDetailQuantity } from 'src/order/domain/entities/bundle-detail/value_object/bundle-detail-quantity';
+import { ProductDetailId } from 'src/order/domain/entities/product-detail/value_object/product-detail-id';
+import { ProductDetailQuantity } from 'src/order/domain/entities/product-detail/value_object/product-detail-quantity';
+import { ProductDetailPrice } from 'src/order/domain/entities/product-detail/value_object/product-detail-price';
+import { BundleDetailPrice } from 'src/order/domain/entities/bundle-detail/value_object/bundle-detail-price';
+import { CalculateAmountService } from 'src/order/domain/domain-services/services/calculate-amount.service';
+
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
     
-    private readonly calculateAmount = new CalculateAmount();
+    private readonly calculateAmount = new CalculateAmountService();
 
     constructor(
         private readonly eventPublisher: IEventPublisher,
@@ -78,8 +72,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly ormCourierQueryRepository: ICourierQueryRepository,
         private readonly dateHandler: IDateHandler,
         private readonly queryPromotionRepositoy: IQueryPromotionRepository,
-        private readonly paymentQueryRepository:IPaymentMethodQueryRepository
-        
+        private readonly paymentQueryRepository:IPaymentMethodQueryRepository,
     ){
         super()
     }
@@ -88,53 +81,16 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
         let products:Product[]=[];
         let bundles:Bundle[]=[];
-        let orderproducts: OrderProduct[] = [];
-        let orderBundles: OrderBundle[] = [];
+        let orderproducts: ProductDetail[] = [];
+        let orderBundles: BundleDetail[] = [];
         let promotions: Promotion[] = [];
 
-        let paymentResponse=await this.paymentQueryRepository.findMethodById(PaymentMethodId.create(data.paymentId))
-
-        console.log(paymentResponse)
+        let paymentResponse=await this.paymentQueryRepository.findMethodById(
+            PaymentMethodId.create(data.paymentId)
+        )
 
         if (!paymentResponse.isSuccess())
             return Result.fail(paymentResponse.getError)
-
-
-        if(data.products){
-            for (const product of data.products){
-                let domain=await this.productRepository.findProductById(ProductID.create(product.id))
-
-                if(!domain.isSuccess())
-                    return Result.fail(new ErrorCreatingOrderProductNotFoundApplicationException())
-
-                products.push(domain.getValue)
-            }
-            
-            if (data.products)
-                orderproducts=data.products.map(product=>OrderProduct.create(
-                OrderProductId.create(product.id),
-                OrderProductQuantity.create(product.quantity))
-            )
-        }
-
-        if(data.bundles){
-            for (const bundle of data.bundles){
-                let domain=await this.bundleRepository.findBundleById(BundleId.create(bundle.id))
-
-                if(!domain.isSuccess())
-                    return Result.fail(new ErrorCreatingOrderBundleNotFoundApplicationException())
-                bundles.push(domain.getValue)
-            }
-
-            if (data.bundles)
-                orderBundles=data.bundles.map(bundle=>
-                    OrderBundle.create(
-                        OrderBundleId.create(bundle.id),
-                        OrderBundleQuantity.create(bundle.quantity)
-                    )
-            )
-        }
-
 
         let findPromotion: FindAllPromotionApplicationRequestDTO = {
             userId: data.userId,
@@ -147,12 +103,77 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
         if (promoResponse.isSuccess()) promotions = promoResponse.getValue;
 
+
+        if(data.products){
+            for (const product of data.products){
+                let domain=await this.productRepository.findProductById(ProductID.create(product.id))
+
+                if(!domain.isSuccess())
+                    return Result.fail(new ErrorCreatingOrderProductNotFoundApplicationException())
+
+                products.push(domain.getValue)
+            }
+            
+            if (data.products){
+                products.forEach(product => {
+                    let promotion = promotions.find(promo => {
+                        return promo.Products.some(productId => productId.Value === product.getId().Value);
+                    });
+        
+                    let productTotal = product.ProductPrice.Price;
+        
+                    if (promotion) productTotal -= (product.ProductPrice.Price * (promotion.PromotionDiscounts.Value));
+        
+                    let pr = ProductDetail.create(
+                        ProductDetailId.create(product.getId().Value),
+                        ProductDetailQuantity.create(data.products.find(p=>p.id==product.getId().Value).quantity),
+                        ProductDetailPrice.create(productTotal, product.ProductPrice.Currency)
+                    );
+
+                    orderproducts.push( pr );
+
+                });
+            }
+        }
+
+
+        
+        if(data.bundles){
+            for (const bundle of data.bundles){
+                let domain=await this.bundleRepository.findBundleById(BundleId.create(bundle.id))
+
+                if(!domain.isSuccess())
+                    return Result.fail(new ErrorCreatingOrderBundleNotFoundApplicationException())
+                bundles.push(domain.getValue)
+            }
+
+            if (data.bundles)
+                bundles.forEach(bundle => {
+                    let promotion = promotions.find(promo => {
+                        return promo.Bundles.some(bundleId => bundleId.Value === bundle.getId().Value);
+                    });
+        
+                    let bundleTotal = bundle.BundlePrice.Price;
+        
+                    if (promotion) bundleTotal -= (bundle.BundlePrice.Price * (promotion.PromotionDiscounts.Value ));
+        
+                    let bu = BundleDetail.create(
+                        BundleDetailId.create(bundle.getId().Value),
+                        BundleDetailQuantity.create(data.bundles.find(b=>b.id==bundle.getId().Value).quantity),
+                        BundleDetailPrice.create(bundleTotal, bundle.BundlePrice.Currency)
+                    );
+
+                    orderBundles.push( bu );
+                });
+                
+        
+        }
+
         let amount = this.calculateAmount.calculateAmount(
             products,
             bundles,
             orderproducts,
             orderBundles,
-            promotions,
             data.currency
         );
 
@@ -205,7 +226,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             );
 
             let orderUserId: OrderUserId = OrderUserId.create(data.userId);
-            
+
             let order = Order.initializeAggregate(
                 OrderId.create(await this.idGen.genId()),
                 OrderState.create('waiting'),
@@ -223,20 +244,21 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let response = await this.payOrder.createPayment(order);
 
-            if (response.isFailure()) return Result.fail(new ErrorCreatingPaymentApplicationException());
+            if (!response.isSuccess()) return Result.fail(new ErrorCreatingPaymentApplicationException());
+
             
             let responseDB = await this.orderRepository.saveOrder(response.getValue); 
 
-            if (responseDB.isFailure()) 
+            if (!responseDB.isSuccess()) 
                 return Result.fail(new ErrorCreatingOrderApplicationException());
 
-            await this.eventPublisher.publish(order.pullDomainEvents());
+            await this.eventPublisher.publish(response.getValue.pullDomainEvents());
 
             let productsresponse:{
                 id: string,
                 quantity: number
-                nombre:string 
-                descripcion:string
+                name:string 
+                description:string
                 price:number 
                 images:string[]
                 currency:string
@@ -245,36 +267,37 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             let bundlesresponse:{
                 id: string,
                 quantity: number
-                nombre:string 
-                descripcion:string
+                name:string 
+                description:string
                 price:number 
                 currency:string
                 images:string[]
             }[]=[];
 
-
+            if(data.products)
             products.forEach(product=>{
                 productsresponse.push({
                     id: product.getId().Value,
                     quantity: order.Products.find(
-                        orderproduct=>product.getId().equals(ProductID.create(orderproduct.OrderProductId.OrderProductId))
+                        orderproduct=>product.getId().equals(ProductID.create(orderproduct.ProductDetailId.productDetailId))
                     ).Quantity.Quantity,
-                    nombre:product.ProductName.Value,
-                    descripcion:product.ProductDescription.Value,
+                    name:product.ProductName.Value,
+                    description:product.ProductDescription.Value,
                     price:product.ProductPrice.Price,
                     currency:product.ProductPrice.Currency,
                     images:product.ProductImages.map(image=>image.Value)
                 })
             });
 
+            if(data.bundles)
             bundles.forEach(bundle=>{
                 bundlesresponse.push({
                     id: bundle.getId().Value,
                     quantity: order.Bundles.find(
-                        orderBundle=>bundle.getId().equals(BundleId.create(orderBundle.OrderBundleId.OrderBundleId))
-                    ).Quantity.OrderBundleQuantity,
-                    nombre:bundle.BundleName.Value ,
-                    descripcion:bundle.BundleDescription.Value,
+                        orderBundle=>bundle.getId().equals(BundleId.create(orderBundle.BundleDetailId.BundleDetailId))
+                    ).Quantity.Quantity,
+                    name:bundle.BundleName.Value ,
+                    description:bundle.BundleDescription.Value,
                     price:bundle.BundlePrice.Price,
                     currency:bundle.BundlePrice.Currency,
                     images:bundle.BundleImages.map(image=>image.Value)                
@@ -289,7 +312,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 orderState: response.getValue.OrderState.orderState,
                 orderCreatedDate: response.getValue.OrderCreatedDate.OrderCreatedDate,
                 orderTimeCreated: response.getValue.OrderCreatedDate.OrderCreatedDate.toTimeString().split(' ')[0],
-                totalAmount: response.getValue.TotalAmount.OrderAmount,
+                totalAmount: parseFloat(response.getValue.TotalAmount.OrderAmount.toFixed(2)),
                 currency: response.getValue.TotalAmount.OrderCurrency,
                 orderDirection: {
                     lat: response.getValue.OrderDirection.Latitude,

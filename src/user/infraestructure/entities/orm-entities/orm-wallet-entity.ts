@@ -12,7 +12,7 @@ export class OrmWalletEntity implements IWallet{
     @Column( 'varchar') currency: string;
     @Column( 'numeric') price: number;
 
-    @OneToOne(() => OrmUserEntity, user => user) 
+    @OneToMany(() => OrmUserEntity, user => user) 
 
     static create ( 
         id:string,

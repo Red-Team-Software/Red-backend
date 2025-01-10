@@ -54,7 +54,7 @@ export class CuponController {
     return response.getValue;
   }
 
-  @Get('all')
+  @Get('many')
   async getAllCupons(
     @GetCredential() credential:ICredential,
     @Query() entry: FindAllCuponsInfraestructureRequestDTO) {

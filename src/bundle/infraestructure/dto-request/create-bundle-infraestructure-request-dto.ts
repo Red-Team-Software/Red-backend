@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { Transform } from "class-transformer"
-import { IsArray, IsDateString, IsNumber, IsPositive, IsString, MinLength } from "class-validator"
+import { IsArray, IsDateString, IsNumber, IsOptional, IsPositive, IsString, IsUUID, MinLength } from "class-validator"
 
 export class CreateBundleInfraestructureRequestDTO{
 
@@ -15,8 +15,9 @@ export class CreateBundleInfraestructureRequestDTO{
     @MinLength( 3 )
     description: string
 
-    @ApiProperty( { required: true, default: '2024-11-06' })
+    @ApiProperty( { required: false, default: '2024-11-06' })
     @IsDateString()
+    @IsOptional()
     caducityDate: Date
 
     @ApiProperty( { required: true, default: '50' })
@@ -53,5 +54,6 @@ export class CreateBundleInfraestructureRequestDTO{
     @ApiProperty({required:true})
     @IsArray()
     @IsString({each: true})
+    @IsUUID('4', { each: true })
     productId:string[]
 }

@@ -8,10 +8,10 @@ import { OrmBundleEntity } from "src/bundle/infraestructure/entities/orm-entitie
 import { PromotionId } from "src/promotion/domain/value-object/promotion-id";
 import { PromotionDescription } from "src/promotion/domain/value-object/promotion-description";
 import { PromotionName } from "src/promotion/domain/value-object/promotion-name";
-import { PromotionAvaleableState } from "src/promotion/domain/value-object/promotion-avaleable-state";
 import { PromotionDiscount } from "src/promotion/domain/value-object/promotion-discount";
 import { ProductID } from "src/product/domain/value-object/product-id";
 import { BundleId } from "src/bundle/domain/value-object/bundle-id";
+import { PromotionState } from "src/promotion/domain/value-object/promotion-state";
 
 
 export class OrmPromotionMapper implements IMapper <Promotion,OrmPromotionEntity>{
@@ -32,7 +32,7 @@ export class OrmPromotionMapper implements IMapper <Promotion,OrmPromotionEntity
             PromotionId.create(infraEstructure.id),
             PromotionDescription.create(infraEstructure.description),
             PromotionName.create(infraEstructure.name),
-            PromotionAvaleableState.create(infraEstructure.avaleableState),
+            PromotionState.create(infraEstructure.state),
             PromotionDiscount.create(Number(infraEstructure.discount)),
             infraEstructure.products.map(id=>ProductID.create(id.id)),
             infraEstructure.bundles.map(id=>BundleId.create(id.id)),
@@ -58,7 +58,7 @@ export class OrmPromotionMapper implements IMapper <Promotion,OrmPromotionEntity
             domainEntity.getId().Value,
             domainEntity.PromotionDescription.Value,
             domainEntity.PromotionName.Value,
-            domainEntity.PromotionAvaleableState.Value,
+            domainEntity.PromotionState.Value,
             domainEntity.PromotionDiscounts.Value,
             ormProducts,
             ormBundles

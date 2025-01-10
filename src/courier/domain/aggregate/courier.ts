@@ -2,6 +2,7 @@ import { AggregateRoot, DomainEvent } from "src/common/domain";
 import { CourierId } from "../value-objects/courier-id";
 import { CourierName } from "../value-objects/courier-name";
 import { CourierImage } from "../value-objects/courier-image";
+import { InvalidCourierException } from "../exceptions/invalid-courier-exception";
 
 
 export class Courier extends AggregateRoot<CourierId>{
@@ -10,15 +11,15 @@ export class Courier extends AggregateRoot<CourierId>{
         throw new Error("Method not implemented.");
     }
     protected validateState(): void {
-        throw new Error("Method not implemented.");
+        if(!this.courierName || !this.courierImage){
+            new InvalidCourierException()
+        };
     }
 
     private constructor (
         courierId: CourierId,
         private courierName: CourierName,
-        private courierImage: CourierImage,
-        //private password:
-        //priavte username:
+        private courierImage: CourierImage
     )
     {
         super(courierId)
@@ -34,6 +35,7 @@ export class Courier extends AggregateRoot<CourierId>{
             courierName,
             courierImage,
         )
+        courier.validateState()
         return courier
     }
 

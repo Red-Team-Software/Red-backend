@@ -10,4 +10,5 @@ export interface IAccount {
     code?: string
     code_created_at?:Date
     idUser:string
+    idStripe:string
 }

@@ -19,7 +19,6 @@ export class PaymentMethodAgregate extends AggregateRoot <PaymentMethodId>{
     };
     protected validateState(): void {
         if (!this.paymentMethodName || 
-            !this.paymentMethodName ||
             !this.paymentMethodState ||
             !this.paymentMethodImage
         ) throw new MissingPaymentMethodAtributes();

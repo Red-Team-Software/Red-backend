@@ -38,7 +38,8 @@ export class OrmAccountCommandRepository extends Repository<OrmAccountEntity> im
                 entry.password,
                 entry.created_at,
                 entry.isConfirmed,
-                entry.idUser
+                entry.idUser,
+                entry.idStripe
             )
             ormAccount.user=await this.ormUserRepository.findOneBy({id:entry.idUser})
 

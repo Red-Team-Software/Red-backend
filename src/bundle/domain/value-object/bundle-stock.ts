@@ -17,8 +17,12 @@ export class BundleStock implements ValueObject<BundleStock> {
     }
 
     private constructor(stock:number){
-        if (stock<0) throw new InvalidBundleStockException()
+        if (stock<0) throw new InvalidBundleStockException(stock)
         this.stock=stock
+    }
+
+    reduceStock(quantity:number){
+        return new BundleStock(this.stock-quantity)
     }
 
 }

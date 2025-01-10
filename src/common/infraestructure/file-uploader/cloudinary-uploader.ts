@@ -8,6 +8,24 @@ import { createReadStream } from "streamifier";
 
 export class CloudinaryService implements IFileUploader {
 
+    private extractPublicIdFromUrl(url: string): string {
+        const regex = /\/v\d+\/([^/]+)\.[a-z]+$/;
+        const match = url.match(regex);
+        if (match && match[1]) {
+            return match[1];
+        }
+        throw new Error('Invalid Cloudinary URL');
+    }
+
+    async deleteFile(file: string): Promise<Result<boolean>> {
+        try {
+            let response=await cloudinary.uploader.destroy(this.extractPublicIdFromUrl(file));
+            return Result.success(true);
+        } catch (error) {
+            return Result.fail(error);
+        }
+    }
+
     async uploadFile(buffer: Buffer, fileType: TypeFile, id:string): Promise<Result<FileUploaderResponseDTO>> {
 
         const result = await new Promise<CloudinaryResponse>(
