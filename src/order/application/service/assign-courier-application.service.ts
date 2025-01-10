@@ -13,6 +13,8 @@ import { AssignCourierApplicationServiceResponseDto } from "../dto/response/assi
 import { ICourierQueryRepository } from "src/courier/application/query-repository/courier-query-repository-interface";
 import { ErrorOrderAlreadyHaveCourierAssignedApplicationException } from "../application-exception/error-orden-already-have-courier-assigned-application.exception";
 import { OrderCourierId } from 'src/order/domain/value_objects/order-courier-id';
+import { CourierId } from '../../../courier/domain/value-objects/courier-id';
+import { NotFoundCourierApplicationException } from "src/courier/application/application-exceptions/not-found-courier-application.exception";
 
 
 
@@ -34,6 +36,11 @@ export class AssignCourierApplicationService extends IApplicationService<AssignC
         if (!response.isSuccess()) return Result.fail(new NotFoundOrderApplicationException());
 
         let newOrder = response.getValue;
+
+        let courierRes = await this.ormCourierQueryRepository.findCourierById(CourierId.create(data.courierId));
+
+        if (!courierRes.isSuccess()) 
+            return Result.fail(new NotFoundCourierApplicationException());
 
         if (!newOrder.OrderCourierId) return Result.fail(
             new ErrorOrderAlreadyHaveCourierAssignedApplicationException()
