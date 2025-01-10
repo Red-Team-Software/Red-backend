@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from "typeorm"
 import { OrmCourierImageEntity } from "./orm-courier-image-entity"
 import { ICourierInterface } from "../model-entity/orm-model-entity/courier-interface"
-import { OrmOrderCourierEntity } from "src/order/infraestructure/entities/orm-order-courier-entity"
+import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-order-entity";
 
 
 @Entity( 'courier' )
@@ -15,8 +15,8 @@ export class OrmCourierEntity implements ICourierInterface{
     @JoinColumn()
     image: OrmCourierImageEntity;
 
-    @OneToMany( () => OrmOrderCourierEntity, order_couriers => order_couriers.courier )
-    order_couriers?: OrmOrderCourierEntity[];
+    @OneToMany( () => OrmOrderEntity, orders => orders.order_courier, {nullable: true} )
+    orders?: OrmOrderEntity[];
 
     @Column('float')
     latitude: number;

@@ -30,12 +30,9 @@ import { Bundle } from 'src/bundle/domain/aggregate/bundle.aggregate';
 import { OrderReport } from 'src/order/domain/entities/report/report-entity';
 import { OrderPayment } from 'src/order/domain/entities/payment/order-payment-entity';
 import { ICourierQueryRepository } from 'src/courier/application/query-repository/courier-query-repository-interface';
-import { OrderCourier } from 'src/order/domain/entities/order-courier/order-courier-entity';
-import { OrderCourierId } from 'src/order/domain/entities/order-courier/value-object/order-courier-id';
-import { OrderCourierDirection } from 'src/order/domain/entities/order-courier/value-object/order-courier-direction';
+import { OrderCourierId } from 'src/order/domain/value_objects/order-courier-id';
 import { OrderUserId } from 'src/order/domain/value_objects/order-user-id';
 import { IDateHandler } from 'src/common/application/date-handler/date-handler.interface';
-import { ErrorCreatingOrderCourierNotFoundApplicationException } from '../application-exception/error-creating-order-courier-not-found-application.exception';
 import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
 import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
 import { IQueryPromotionRepository } from 'src/promotion/application/query-repository/promotion.query.repository.interface';
@@ -53,6 +50,8 @@ import { ProductDetailQuantity } from 'src/order/domain/entities/product-detail/
 import { ProductDetailPrice } from 'src/order/domain/entities/product-detail/value_object/product-detail-price';
 import { BundleDetailPrice } from 'src/order/domain/entities/bundle-detail/value_object/bundle-detail-price';
 import { CalculateAmountService } from 'src/order/domain/domain-services/services/calculate-amount.service';
+import { Cupon } from 'src/cupon/domain/aggregate/cupon.aggregate';
+import { OrderCuponId } from 'src/order/domain/value_objects/order-cupon-id';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -84,6 +83,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         let orderproducts: ProductDetail[] = [];
         let orderBundles: BundleDetail[] = [];
         let promotions: Promotion[] = [];
+        let cupon: Cupon;
 
         let paymentResponse=await this.paymentQueryRepository.findMethodById(
             PaymentMethodId.create(data.paymentId)
@@ -207,25 +207,14 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let orderReceivedDate: OrderReceivedDate = null;
             let orderReport: OrderReport = null;
-
-            let courier = await this.ormCourierQueryRepository.findAllCouriers();
-
-            if (!courier.isSuccess()) return Result.fail(
-                new ErrorCreatingOrderCourierNotFoundApplicationException()
-            )
-
-            if (courier.getValue.length==0) return Result.fail(
-                new ErrorCreatingOrderCourierNotFoundApplicationException()
-            )
-
-            let selectedCourierId = courier.getValue[Math.floor(Math.random() * courier.getValue.length)].getId();
-
-            let orderCourier = OrderCourier.create(
-                OrderCourierId.create(selectedCourierId.courierId),
-                OrderCourierDirection.create(10.4944, -66.8901)
-            );
+            let orderCourierId: OrderCourierId;
 
             let orderUserId: OrderUserId = OrderUserId.create(data.userId);
+
+            let orderCupon: OrderCuponId;
+
+            if(data.cuponId) //!Agregale la validacion de que si fue succes el cupon se agrega a la orden sino no
+                orderCupon = OrderCuponId.create(data.cuponId);
 
             let order = Order.initializeAggregate(
                 OrderId.create(await this.idGen.genId()),
@@ -233,8 +222,9 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 OrderCreatedDate.create(this.dateHandler.currentDate()),
                 total,
                 orderDirection,
-                orderCourier,
                 orderUserId,
+                orderCupon,
+                orderCourierId,
                 orderproducts,
                 orderBundles,
                 orderReceivedDate, 
@@ -304,8 +294,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 })
             });
 
-            let selectedCourier = courier.getValue.find(c => c.getId().equals(selectedCourierId) );
-
 
             let responsedata: OrderPayResponseDto = {
                 id: response.getValue.getId().orderId,
@@ -325,13 +313,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                     currency: response.getValue.OrderPayment.PaymentCurrency.Value,
                     paymentMethod: response.getValue.OrderPayment.PaymentMethods.Value
                 },
-                orderCourier: {
-                    courierName: selectedCourier.CourierName.courierName,
-                    courierImage: selectedCourier.CourierImage.Value
-                },
                 orderUserId: data.userId
             }
-
 
             return Result.success(responsedata);
     }

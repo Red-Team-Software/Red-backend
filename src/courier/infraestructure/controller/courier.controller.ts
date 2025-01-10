@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Inject, ParseFilePipe, Post, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
+import { Body, Controller, FileTypeValidator, Inject, Logger, ParseFilePipe, Post, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
 import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express"
 import { Channel } from "amqplib"
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract"
@@ -19,6 +19,15 @@ import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/
 import { CloudinaryService } from "src/common/infraestructure/file-uploader/cloudinary-uploader"
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
 import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard"
+import { GetCredential } from "src/auth/infraestructure/jwt/decorator/get-credential.decorator"
+import { ICredential } from "src/auth/application/model/credential.interface"
+import { LoggerDecorator } from "src/common/application/aspects/logger-decorator/logger-decorator"
+import { NestLogger } from "src/common/infraestructure/logger/nest-logger"
+import { ICourierQueryRepository } from "src/courier/application/query-repository/courier-query-repository-interface"
+import { CourierQueryRepository } from "../repository/orm-repository/orm-courier-query-repository"
+import { ModifyCourierLocationEntryDto } from "../dto/modify-order-courier-location-entry.dto"
+import { ModifyCourierLocationRequestDto } from "src/courier/application/dto/request/modify-courier-location-request.dto"
+import { ModifyCourierLocationApplicationService } from "src/courier/application/services/modify-courier-location-application.service"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -27,6 +36,7 @@ import { JwtAuthGuard } from "src/auth/infraestructure/jwt/guards/jwt-auth.guard
 export class CourierController {
 
         private readonly courierRepository:ICourierRepository;
+        private readonly courierQueryRepository: ICourierQueryRepository;
         private readonly idGen:IIdGen<string>;
 
         private readonly ormMapper: IMapper<Courier,OrmCourierEntity>;
@@ -37,6 +47,7 @@ export class CourierController {
         this.idGen= new UuidGen();
         this.ormMapper = new OrmCourierMapper(this.idGen);
         this.courierRepository= new CourierRepository( PgDatabaseSingleton.getInstance(),this.ormMapper );
+        this.courierQueryRepository= new CourierQueryRepository( PgDatabaseSingleton.getInstance(),this.ormMapper );
     }
 
     @Post('create')
@@ -53,16 +64,49 @@ export class CourierController {
     ) image: Express.Multer.File) {
 
         let service= new ExceptionDecorator(
-            new CreateCourierApplicationService(
-                new RabbitMQPublisher(this.channel),
-                this.courierRepository,
-                this.idGen,
-                new CloudinaryService()
-            ),
+            new LoggerDecorator(
+                new CreateCourierApplicationService(
+                    new RabbitMQPublisher(this.channel),
+                    this.courierRepository,
+                    this.idGen,
+                    new CloudinaryService()
+                ),
+                new NestLogger(new Logger())
+            )
         );
 
         let response= await service.execute({userId:'none',...entry,image:image.buffer});
 
         return response.getValue;
     }
+
+    @Post('/courier/location')
+    async modifingCourierLocation(
+        @GetCredential() credential:ICredential,
+        @Body() data: ModifyCourierLocationEntryDto
+    ) {
+        let request: ModifyCourierLocationRequestDto = {
+            userId: credential.account.idUser,
+            courierId: data.courierId,
+            lat: data.lat,
+            long: data.long
+        }
+        let modifyCourierLocation = new ExceptionDecorator(
+            new LoggerDecorator(
+                new ModifyCourierLocationApplicationService(
+                    this.courierRepository,
+                    this.courierQueryRepository,
+                    new RabbitMQPublisher(this.channel)
+                ),
+                new NestLogger(new Logger())
+            )
+        );
+            
+        let response = await modifyCourierLocation.execute(request);
+            
+        return response.getValue;
+    }
+
+    
+
 }

@@ -55,9 +55,7 @@ export class AddBalanceToWalletZelleApplicationService extends IApplicationServi
             Number(data.amount) + Number(user.Wallet.Ballance.Amount), 
             user.Wallet.Ballance.Currency);
 
-        let newWallet = Wallet.create(user.Wallet.getId(), newBalance);
-
-        user.addWalletBalance(newWallet);
+        user.addWalletBalance(newBalance);
 
         let userRes= await this.commandUserRepository.saveUser(user);
 

@@ -5,6 +5,7 @@ import { CourierImage } from "../value-objects/courier-image";
 import { InvalidCourierException } from "../exceptions/invalid-courier-exception";
 import { CourierRegistered } from "../domain-events/courier-registered";
 import { CourierDirection } from '../value-objects/courier-direction';
+import { CourierDirectionUpdated } from "../domain-events/courier-direction-updated";
 
 
 export class Courier extends AggregateRoot<CourierId>{
@@ -15,6 +16,10 @@ export class Courier extends AggregateRoot<CourierId>{
             this.courierImage = event.courierImage;
             this.courierDirection = event.courierDirection;
         };
+        if (event instanceof CourierDirectionUpdated) {
+            this.courierDirection = event.courierDirection;
+        };
+
     }
     protected validateState(): void {
         if(!this.courierName || !this.courierImage || !this.courierDirection){
@@ -69,6 +74,15 @@ export class Courier extends AggregateRoot<CourierId>{
         )
         courier.validateState();
         return courier;
+    }
+
+    updateLocation(courierDirection: CourierDirection): void {
+        this.apply(
+            new CourierDirectionUpdated(
+                this.getId(),
+                courierDirection
+            )
+        );
     }
 
     get CourierName(): CourierName {

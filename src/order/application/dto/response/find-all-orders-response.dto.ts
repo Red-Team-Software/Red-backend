@@ -53,7 +53,7 @@ export type orderResponse = {
     products?: productsOrderResponse[];
     bundles?: bundlesOrderResponse[];
     orderReport?: reportOrderResponse;
-    orderCourier: courierOrderResponse;
+    orderCourier?: courierOrderResponse;
 }
 
 export class FindAllOrdersApplicationServiceResponseDto implements IServiceResponseDto {

@@ -18,6 +18,7 @@ import { Wallet } from "../entities/wallet/wallet.entity";
 import { InvalidUserDirectionQuantityException } from "../domain-exceptions/invalid-user-direction-quantity-exception";
 import { UserBalanceAmountAdded } from "../domain-events/user-balance-amount-added";
 import { UserBalanceAmountDecremented } from "../domain-events/user-balance-amount-decremented";
+import { Ballance } from "../entities/wallet/value-objects/balance";
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -173,20 +174,20 @@ export class User extends AggregateRoot <UserId>{
         )
     }
 
-    addWalletBalance(wallet:Wallet):void{
+    addWalletBalance(balance:Ballance):void{
         this.apply(
             UserBalanceAmountAdded.create(
                 this.getId(),
-                wallet
+                this.wallet.updateBalance(balance)
             )
         );
     };
 
-    decreaseWalletBalance(wallet:Wallet):void{
+    decreaseWalletBalance(balance:Ballance):void{
         this.apply(
             UserBalanceAmountDecremented.create(
                 this.getId(),
-                wallet
+                this.wallet.updateBalance(balance)
             )
         );
     };

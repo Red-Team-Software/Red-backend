@@ -17,7 +17,7 @@ export interface IOrderModel{
     products?: productsOrderResponse[];
     bundles?: bundlesOrderResponse[];
     orderReport?: reportOrderResponse;
-    orderCourier: courierOrderResponse;
+    orderCourier?: courierOrderResponse;
 }
 
 export interface productsOrderResponse {

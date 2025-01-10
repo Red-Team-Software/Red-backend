@@ -39,9 +39,7 @@ export class WalletPaymentMethod implements IPaymentMethodService {
 
         let newBalance = Ballance.create(user.Wallet.Ballance.Amount - order.TotalAmount.OrderAmount, user.Wallet.Ballance.Currency);
 
-        let newWallet = Wallet.create(user.Wallet.getId(), newBalance);
-
-        user.decreaseWalletBalance(newWallet);
+        user.decreaseWalletBalance(newBalance);
 
         await this.ormUserCommandRepo.saveUser(user);
 
@@ -66,8 +64,9 @@ export class WalletPaymentMethod implements IPaymentMethodService {
             order.OrderCreatedDate,
             order.TotalAmount,
             order.OrderDirection,
-            order.OrderCourier,
             order.OrderUserId,
+            order.OrderCuponId,
+            order.OrderCourierId,
             order.Products,
             order.Bundles,
             order.OrderReceivedDate, 

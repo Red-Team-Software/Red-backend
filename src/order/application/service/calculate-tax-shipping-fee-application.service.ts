@@ -1,6 +1,5 @@
 import { IApplicationService} from 'src/common/application/services';
 import { Result } from 'src/common/utils/result-handler/result';
-import { IEventPublisher } from 'src/common/application/events/event-publisher/event-publisher.abstract';
 import { ICalculateShippingFee } from 'src/order/domain/domain-services/interfaces/calculate-shippping-fee.interface';
 import { ICalculateTaxesFee } from 'src/order/domain/domain-services/interfaces/calculate-taxes-fee.interface';
 import { OrderTotalAmount } from 'src/order/domain/value_objects/order-totalAmount';
