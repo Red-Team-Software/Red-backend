@@ -10,7 +10,7 @@ import { ProductName } from "src/product/domain/value-object/product-name";
 
 export class ProductQueryRepositoryMock implements IQueryProductRepository{
 
-    constructor(private products: Product[] = []){}
+    constructor(private products: Product[]){}
 
         private trasnformtoDataModel(ormProduct:Product):IProductModel{
             return {

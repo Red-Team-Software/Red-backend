@@ -1,5 +1,3 @@
-// src/category/domain/aggregate/category.ts
-
 import { AggregateRoot } from 'src/common/domain/aggregate-root/aggregate-root';
 import { CategoryID } from '../value-object/category-id';
 import { CategoryName } from '../value-object/category-name';
@@ -15,52 +13,7 @@ import { CategoryUpdatedProductsDomainEvent } from '../domain-events/update-cate
 import { CategoryUpdatedBundles } from '../domain-events/category-update-bundles';
 
 export class Category extends AggregateRoot<CategoryID> {
-    private categoryName: CategoryName;
-    private categoryImage: CategoryImage | null; // Opcional para manejar categorías sin imagen
-    private products: ProductID[] = []; // Lista de productos de la categoría
-    private bundles: BundleId[] = []; // Lista de bundles de la categoría
 
-    private constructor(
-        id: CategoryID,
-        name: CategoryName,
-        categoryImage: CategoryImage | null,
-        products?: ProductID[],
-        bundles?: BundleId[]
-    ) {
-        super(id);
-        this.categoryName = name;
-        this.categoryImage = categoryImage || null;
-        this.products = products || []; // Si no se pasa un array de productos, lo inicializa como vacío
-        this.bundles = bundles || []; // Si no se pasa un array de bundles, lo inicializa como vacío
-    }
-
-    // Método de fábrica para crear una nueva categoría y registrar el evento de creación
-    static create(
-        id: CategoryID,
-        name: CategoryName,
-        image: CategoryImage | null,
-        productIds: ProductID[] = [], //
-        bundleIds: BundleId[] = [] 
-    ): Category {
-        const category = new Category(id, name, image, productIds, bundleIds);
-        category.apply(CategoryCreated.create(id, name, image, productIds, bundleIds)); 
-        return category;
-    }
-
-    // Método para inicializar una categoría existente (sin registrar evento)
-    static initializeAggregate(
-        id: CategoryID,
-        name: CategoryName,
-        image: CategoryImage | null,
-        products: ProductID[] = [],
-        bundles: BundleId[] = [] 
-    ): Category {
-        const category = new Category(id, name, image, products, bundles);
-        category.validateState();
-        return category;
-    }
-
-    // Método `when` para manejar los eventos de dominio
     protected when(event: DomainEvent): void {
         switch (event.getEventName) {
             case 'CategoryCreated':
@@ -69,12 +22,73 @@ export class Category extends AggregateRoot<CategoryID> {
                 this.categoryImage = categoryCreatedEvent.categoryImage;
                 this.products = categoryCreatedEvent.products 
                 this.bundles = categoryCreatedEvent.bundles
+                break;
+            case '':
+                
         }
     }
 
-    // Validación del estado de la categoría
+    private constructor(
+        id: CategoryID,
+        private categoryName: CategoryName,
+        private categoryImage: CategoryImage,
+        private products: ProductID[],
+        private bundles:BundleId[]
+    ) {
+        super(id);
+    }
+
+    static create(
+        id: CategoryID,
+        name: CategoryName,
+        image: CategoryImage,
+        productIds: ProductID[],
+        bundleIds: BundleId[] 
+    ): Category {
+        const category = new Category(
+            id,
+            name,
+            image,
+            productIds,
+            bundleIds
+        )
+        category.apply(
+            CategoryCreated.create(
+                id,
+                name,
+                image,
+                productIds,
+                bundleIds
+            )
+        )
+        category.validateState();
+        return category;
+    }
+
+    static initializeAggregate(
+        id: CategoryID,
+        name: CategoryName,
+        image: CategoryImage,
+        productIds: ProductID[],
+        bundleIds: BundleId[] 
+    ): Category {
+        const category = new Category(
+            id,
+            name,
+            image,
+            productIds,
+            bundleIds
+        )
+        category.validateState();
+        return category;
+    }
+
     protected validateState(): void {
-        if (!this.getId() || !this.categoryName) {
+        if (!this.getId() || 
+            !this.categoryName ||
+            !this.Bundles ||
+            !this.products
+        ) {
             throw new Error("Invalid category state: ID and name must be defined");
         }
     }
@@ -85,14 +99,16 @@ export class Category extends AggregateRoot<CategoryID> {
         )
     }
 
-    // Métodos de actualización
     public updateName(name: CategoryName): void {
-        this.categoryName = name;
-        this.apply(CategoryUpdatedName.create(this.getId(), name));
+        this.apply(
+            CategoryUpdatedName.create(
+                this.getId(),
+                name
+            )
+        )
     }
 
-    public updateImage(image: CategoryImage | null): void {
-        this.categoryImage = image;
+    public updateImage(image: CategoryImage): void {
         this.apply(CategoryUpdatedImage.create(this.getId(), image));
     }
 
