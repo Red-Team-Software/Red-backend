@@ -17,15 +17,17 @@ import { ICommandTransactionRepository } from "src/user/application/repository/w
 import { ITransaction } from "src/user/application/model/transaction-interface";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { ErrorSaveTransactionApplicationException } from "src/user/application/application-exeption/error-save-transaction-application-exception";
+import { CalculateAmountService } from "src/order/domain/domain-services/services/calculate-amount.service";
+import { CalculateBallanceService } from "src/user/domain/domain-services/services/calculate-ballance.service";
 
 
-export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationService<AddBalancePagoMovilApplicationRequestDTO, AddBalanceZelleApplicationResponseDTO> {
+export class AddBalanceToWalletApplicationService extends IApplicationService<AddBalancePagoMovilApplicationRequestDTO, AddBalanceZelleApplicationResponseDTO> {
     
     constructor(
         private readonly commandUserRepository:ICommandUserRepository,
         private readonly queryUserRepository:IQueryUserRepository,
         private readonly eventPublisher: IEventPublisher,
-        private readonly exchangeRate: IConversionService,
+        private readonly calculateBallanceService:CalculateBallanceService,
         private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>,
         private readonly idGen: IIdGen<string>
     ) {
@@ -42,16 +44,9 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
         
         const user = userResponse.getValue;
 
-        let change = ConvertAmount.create(data.amount, user.Wallet.Ballance.Currency);
-
-        let newChange = await this.exchangeRate.convertAmountVEStoUSD(change);
-
-        if (!newChange.isSuccess())
-            return Result.fail(new ErrorChangeCurrencyApplicationException());
-
-        let newBalance = Ballance.create(
-            Number(newChange.getValue.Amount),
-            user.Wallet.Ballance.Currency);
+        const newBalance=await this.calculateBallanceService.calculate(
+            Ballance.create(data.amount,data.currency)
+        )
 
         user.addWalletBalance(newBalance);
 
@@ -63,7 +58,7 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
         let trans: ITransaction = {
             id: await this.idGen.genId(),
             currency: user.Wallet.Ballance.Currency,
-            price: newChange.getValue.Amount,
+            price: newBalance.Amount,
             wallet_id: user.Wallet.getId().Value,
             payment_method_id: data.paymentId,
             date: data.date,
@@ -76,6 +71,6 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
 
         this.eventPublisher.publish(user.pullDomainEvents())
 
-        return Result.success({ success: true, message: `Amount ${newChange.getValue.Amount} has been added to the Wallet` });
+        return Result.success({ success: true, message: `Amount ${newBalance.Amount} has been added to the Wallet` });
     }
 }

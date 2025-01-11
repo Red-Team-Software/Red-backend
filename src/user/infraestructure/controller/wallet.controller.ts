@@ -23,7 +23,7 @@ import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
 import { NestLogger } from "src/common/infraestructure/logger/nest-logger"
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler"
-import { AddBalanceToWalletPagoMovilApplicationService } from "src/user/application/services/command/wallet/add-balance-to-wallet-pago-movil-application.service"
+import { AddBalanceToWalletApplicationService } from "src/user/application/services/command/wallet/add-balance-to-wallet-application.service"
 import { ConvertCurrencyExchangeRate } from "src/order/infraestructure/domain-service/conversion-currency-exchange-rate"
 import { ExchangeRateSingelton } from "src/common/infraestructure/exchange-rate/exchange-rate-singleton"
 import { UpdateWalletBalancePagoMovilInfraestructureRequestDTO } from "../dto/request/wallet/update-wallet-balance-pago-movil-infraestructure-request-dto"
@@ -61,6 +61,8 @@ import { DeleteCardInfraestructureRequestDTO } from "../dto/request/wallet/delet
 import { AddBalanceZelleResponseDTO } from "../dto/response/wallet/add-balance-to-wallet-pago-movil-direction-response-dto"
 import { DeleteCardToUserApplicationService } from "src/user/application/services/command/wallet/delete-card-to-user-application.service"
 import { DeleteCardApplicationRequestDTO } from "src/user/application/dto/request/wallet/delete-card-application-request-dto"
+import { CalculateBallanceService } from "src/user/domain/domain-services/services/calculate-ballance.service"
+import { ConvertDollars } from "../domain-services/convert-dollars.service"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -109,11 +111,15 @@ export class PaymentWalletController {
             new AuditDecorator(
                 new LoggerDecorator(
                     new PerformanceDecorator(
-                        new AddBalanceToWalletPagoMovilApplicationService (
+                        new AddBalanceToWalletApplicationService (
                             this.ormUserCommandRepo,
                             this.ormUserQueryRepo,
                             new RabbitMQPublisher(this.channel),
-                            new ConvertCurrencyExchangeRate(ExchangeRateSingelton.getInstance()),
+                            new CalculateBallanceService(
+                                new ConvertDollars(
+                                    new ConvertCurrencyExchangeRate(ExchangeRateSingelton.getInstance())
+                                )
+                            ),
                             this.TransactionCommandRepository,
                             this.idGen
                         ), new NestTimer(), new NestLogger(new Logger())
@@ -122,13 +128,11 @@ export class PaymentWalletController {
             )
         );
 
+
         let data: AddBalancePagoMovilApplicationRequestDTO = {
             userId: credential.account.idUser,
-            phone: entry.phone,
-            cedula: entry.cedula,
-            bank: entry.bank,
             amount: entry.amount,
-            reference: entry.reference,
+            currency: 'bsf',
             date: new Date(),
             paymentId: entry.paymentId
         }
@@ -149,16 +153,21 @@ export class PaymentWalletController {
         @GetCredential() credential:ICredential, 
         @Body() entry: UpdateWalletBalanceZelleInfraestructureRequestDTO
     ){
+
         let service= new ExceptionDecorator(
             new AuditDecorator(
                 new LoggerDecorator(
                     new PerformanceDecorator(
-                        new AddBalanceToWalletZelleApplicationService (
+                        new AddBalanceToWalletApplicationService (
                             this.ormUserCommandRepo,
                             this.ormUserQueryRepo,
                             new RabbitMQPublisher(this.channel),
+                            new CalculateBallanceService(
+                                new ConvertDollars(
+                                    new ConvertCurrencyExchangeRate(ExchangeRateSingelton.getInstance())
+                                )
+                            ),
                             this.TransactionCommandRepository,
-                            this.paymentMethodQueryRepository,
                             this.idGen
                         ), new NestTimer(), new NestLogger(new Logger())
                     ), new NestLogger(new Logger())
@@ -166,10 +175,11 @@ export class PaymentWalletController {
             )
         );
 
-        let data: AddBalanceZelleApplicationRequestDTO = {
+
+        let data: AddBalancePagoMovilApplicationRequestDTO = {
             userId: credential.account.idUser,
             amount: entry.amount,
-            reference: entry.reference,
+            currency: 'usd',
             date: new Date(),
             paymentId: entry.paymentId
         }
