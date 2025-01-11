@@ -67,7 +67,7 @@ import { ConvertDollars } from "../domain-services/convert-dollars.service"
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('Wallet')
-@Controller('payyment/method')
+@Controller('payment/method')
 export class PaymentWalletController {
 
     private readonly idGen: IIdGen<string> 
