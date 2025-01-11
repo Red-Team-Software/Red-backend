@@ -18,13 +18,14 @@ import { ITransaction } from "src/user/application/model/transaction-interface";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { ErrorSaveTransactionApplicationException } from "src/user/application/application-exeption/error-save-transaction-application-exception";
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
-import { NotFoundPaymentMethodApplicationException } from "src/user/application/application-exeption/not-found-payment-method-application.exception";
 import { PaymentMethodId } from "src/payment-methods/domain/value-objects/payment-method-id";
+import { NotFoundPaymentMethodApplicationException } from "src/user/application/application-exeption/not-found-payment-method-application.exception";
 
 
 export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationService<AddBalancePagoMovilApplicationRequestDTO, AddBalanceZelleApplicationResponseDTO> {
     
     constructor(
+        private readonly paymentQueryRepository:IPaymentMethodQueryRepository,
         private readonly commandUserRepository:ICommandUserRepository,
         private readonly queryUserRepository:IQueryUserRepository,
         private readonly eventPublisher: IEventPublisher,
@@ -47,7 +48,14 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
         let userResponse= await this.queryUserRepository.findUserById(UserId.create(data.userId));
         
         if (!userResponse.isSuccess())
-            return Result.fail(new UserNotFoundApplicationException())
+            return Result.fail(new UserNotFoundApplicationException(data.userId))
+
+        let paymentMethodResponse=await this.paymentQueryRepository.findMethodById(
+            PaymentMethodId.create(data.paymentId)
+        )
+
+        if (!paymentMethodResponse.isSuccess())
+            return Result.fail(new NotFoundPaymentMethodApplicationException(data.paymentId))
         
         const user = userResponse.getValue;
 

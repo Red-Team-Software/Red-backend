@@ -45,7 +45,7 @@ export class RefundPaymentApplicationService extends IApplicationService<RefundP
         let userResponse= await this.queryUserRepository.findUserById(UserId.create(data.userId));
                 
         if (!userResponse.isSuccess())
-            return Result.fail(new UserNotFoundApplicationException())
+            return Result.fail(new UserNotFoundApplicationException(data.userId))
                 
         let user = userResponse.getValue;
         
