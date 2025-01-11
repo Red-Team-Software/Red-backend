@@ -88,8 +88,6 @@ import { ICreateOrder } from "src/product/infraestructure/interfaces/create-orde
 import { ICancelOrder } from "src/notification/infraestructure/interfaces/cancel-order.interface";
 import { RefundPaymentApplicationService } from "src/order/application/service/refund-payment-application.service";
 import { RefundPaymentApplicationServiceRequestDto } from "src/order/application/dto/request/refund-payment-request-dto";
-import { IQueryCuponRepository } from "src/cupon/domain/query-repository/query-cupon-repository";
-import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-cupon-query-repository";
 import { AssignCourierDto } from "../dto/delivering-order-entry.dto";
 import { AssignCourierApplicationServiceRequestDto } from "src/order/application/dto/request/assign-courier-request-dto";
 import { AssignCourierApplicationService } from "src/order/application/service/assign-courier-application.service";
@@ -127,7 +125,6 @@ export class OrderController {
     private readonly ormUserQueryRepository: IQueryUserRepository;
     private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
     private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>;
-    private readonly ormCuponQueryRepo: IQueryCuponRepository;
     private readonly auditRepository: IAuditRepository
 
     //*IdGen
@@ -184,7 +181,6 @@ export class OrderController {
         this.TransactionCommandRepository = new OrmTransactionCommandRepository(PgDatabaseSingleton.getInstance());
         this.ormProductRepository = new OrmProductQueryRepository(PgDatabaseSingleton.getInstance());
         this.ormBundleRepository = new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance());
-        this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
         this.ormCourierRepository = new CourierRepository(
             PgDatabaseSingleton.getInstance(),
             new OrmCourierMapper(this.idGen)
@@ -289,8 +285,7 @@ export class OrderController {
                             this.ormBundleRepository,
                             new DateHandler(),
                             new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                            this.paymentMethodQueryRepository,
-                            this.ormCuponQueryRepo
+                            this.paymentMethodQueryRepository
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
                     new NestLogger(new Logger())
@@ -341,8 +336,7 @@ export class OrderController {
                             this.ormBundleRepository,
                             new DateHandler(),
                             new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                            this.paymentMethodQueryRepository,
-                            this.ormCuponQueryRepo
+                            this.paymentMethodQueryRepository
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
                     new NestLogger(new Logger())

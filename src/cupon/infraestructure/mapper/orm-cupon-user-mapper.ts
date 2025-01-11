@@ -1,5 +1,5 @@
 import { IMapper } from "src/common/application/mappers/mapper.interface";
-import { CuponUser } from "src/cupon/domain/entities/cuponUser/cuponUser";
+import { CuponUser } from "src/cupon/domain/entities/cuponUser/cuponUser.entity";
 import { OrmCuponUserEntity } from "../orm-entities/orm-cupon-user-entity";
 import { CuponUserId } from "src/cupon/domain/entities/cuponUser/value-objects/cuponUserId";
 import { CuponId } from "src/cupon/domain/value-object/cupon-id";

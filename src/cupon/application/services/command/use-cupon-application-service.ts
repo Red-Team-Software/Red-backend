@@ -2,20 +2,20 @@ import { IApplicationService } from 'src/common/application/services/application
 import { Result } from 'src/common/utils/result-handler/result';
 import { CuponId } from 'src/cupon/domain/value-object/cupon-id';
 import { UserId } from 'src/user/domain/value-object/user-id';
-import { IQueryCuponRepository } from 'src/cupon/domain/query-repository/query-cupon-repository';
-import { ICuponRepository } from 'src/cupon/domain/repository/cupon.interface.repository';
+import { IQueryCuponRepository } from '../../query-repository/query-cupon-repository';
 import { NotFoundCuponApplicationException } from '../../application-exception/not-found-cupon-application-exception';
 import { CuponAlreadyUsedException } from '../../application-exception/cupon-already-use-application-exception';
 import { UseCuponApplicationRequestDTO } from '../../dto/request/use-cupon-application-requestdto';
 import { UseCuponApplicationResponseDTO } from '../../dto/response/use-cupon-application-responsedto';
 import { CuponCode } from 'src/cupon/domain/value-object/cupon-code';
+import { ICommandCuponRepository } from '../../../domain/repository/command-cupon-repository';
 
 export class UseCuponApplicationService extends IApplicationService<
     UseCuponApplicationRequestDTO,UseCuponApplicationResponseDTO
 > {
     constructor(
         private readonly queryCuponRepository: IQueryCuponRepository,
-        private readonly commandCuponRepository: ICuponRepository
+        private readonly commandCuponRepository: ICommandCuponRepository
     ) {
         super();
     }
@@ -29,7 +29,7 @@ export class UseCuponApplicationService extends IApplicationService<
             return Result.fail(new NotFoundCuponApplicationException())
         }
         // 1. Verificar si el cupon y usuario existen
-        const cuponUserResult = await this.queryCuponRepository.findCuponUserByUserAndCupon(
+        const cuponUserResult = await this.queryCuponRepository.findCuponUserByUserIdAndCuponId(
             UserId.create(userId),
             cupon.getValue.getId()
             );

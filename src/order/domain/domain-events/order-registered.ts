@@ -13,7 +13,6 @@ import { BundleDetail } from "../entities/bundle-detail/bundle-detail-entity";
 import { OrderCourierId } from "../value_objects/order-courier-id";
 import { OrderCuponId } from "../value_objects/order-cupon-id";
 
-
 export class OrderRegistered extends DomainEvent {
     
     serialize(): string {
@@ -46,8 +45,7 @@ export class OrderRegistered extends DomainEvent {
                 description:this.orderReport.Description
             }
             : null,
-            orderPayment: this.orderPayment,
-            orderCupon: this.orderCupon
+            orderPayment: this.orderPayment
         }
         
         return JSON.stringify(data);
@@ -66,7 +64,8 @@ export class OrderRegistered extends DomainEvent {
         public bundles?: BundleDetail[],
         public orderReceivedDate?: OrderReceivedDate,
         public orderReport?: OrderReport,
-        public orderPayment?: OrderPayment,
+        public orderPayment?: OrderPayment
+        
     ){
         super();
     }
@@ -85,6 +84,7 @@ export class OrderRegistered extends DomainEvent {
         orderReceivedDate?: OrderReceivedDate,
         orderReport?: OrderReport,
         orderPayment?: OrderPayment
+        
     ){
         let order = new OrderRegistered(
             id,
@@ -100,6 +100,7 @@ export class OrderRegistered extends DomainEvent {
             orderReceivedDate,
             orderReport,
             orderPayment
+            
         );
         return order;
     }

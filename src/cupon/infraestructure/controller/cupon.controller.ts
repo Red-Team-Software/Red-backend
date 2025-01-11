@@ -1,12 +1,11 @@
 import { Body, Controller, Get, Param, Post, Query, Logger, Inject, UseGuards } from '@nestjs/common';
-import { ICuponRepository } from 'src/cupon/domain/repository/cupon.interface.repository';
 import { OrmCuponCommandRepository } from '../repository/orm-cupon-command-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateCuponApplicationService } from 'src/cupon/application/services/command/create-cupon-application-service';
 import { ExceptionDecorator } from 'src/common/application/aspects/exeption-decorator/exception-decorator';
 import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
 import { UuidGen } from 'src/common/infraestructure/id-gen/uuid-gen';
-import { IQueryCuponRepository } from 'src/cupon/domain/query-repository/query-cupon-repository';
+import { IQueryCuponRepository } from 'src/cupon/application/query-repository/query-cupon-repository';
 import { OrmCuponQueryRepository } from '../repository/orm-cupon-query-repository';
 import { FindCuponByIdApplicationService } from 'src/cupon/application/services/query/find-cupon-by-id-application-service';
 import { FindAllCuponsInfraestructureRequestDTO } from '../dto-request/find-all-cupons-infraestructure-request';
@@ -21,24 +20,29 @@ import { Channel } from 'amqplib';
 import { JwtAuthGuard } from 'src/auth/infraestructure/jwt/guards/jwt-auth.guard';
 import { ICredential } from 'src/auth/application/model/credential.interface';
 import { GetCredential } from 'src/auth/infraestructure/jwt/decorator/get-credential.decorator';
-import { OrmCuponMapper } from '../mapper/orm-cupon-mapper';
 import { IMapper } from 'src/common/application/mappers/mapper.interface';
 import { Cupon } from 'src/cupon/domain/aggregate/cupon.aggregate';
 import { OrmCuponEntity } from '../orm-entities/orm-cupon-entity';
+import { FindCuponByCodeApplicationService } from 'src/cupon/application/services/query/find-cupon-by-code-application-service';
+import { ICommandCuponRepository } from 'src/cupon/domain/repository/command-cupon-repository';
+import { OrmCuponUserEntity } from '../orm-entities/orm-cupon-user-entity';
+import { CuponUser } from 'src/cupon/domain/entities/cuponUser/cuponUser.entity';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('Cupon')
 @Controller('cupon')
+
 export class CuponController {
 
-  private readonly ormCuponCommandRepo: ICuponRepository;
+  private readonly ormCuponCommandRepo: ICommandCuponRepository;
   private readonly idGen: IIdGen<string>;
   private readonly ormCuponQueryRepo: IQueryCuponRepository;
   private readonly cuponMapper: IMapper<Cupon, OrmCuponEntity>;
+  private readonly cuponUserMapper: IMapper<CuponUser, OrmCuponUserEntity>;
   constructor(@Inject("RABBITMQ_CONNECTION") private readonly channel: Channel) {
     this.idGen = new UuidGen();
-    this.ormCuponCommandRepo = new OrmCuponCommandRepository(PgDatabaseSingleton.getInstance(),this.cuponMapper);
+    this.ormCuponCommandRepo = new OrmCuponCommandRepository(PgDatabaseSingleton.getInstance(),this.cuponMapper, this.cuponUserMapper);
     this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance(),this.cuponMapper);
   }
 
@@ -51,6 +55,7 @@ export class CuponController {
       new CreateCuponApplicationService(
         new RabbitMQPublisher(this.channel),
         this.ormCuponCommandRepo,
+        this.ormCuponQueryRepo,
         this.idGen
       )
     );
@@ -91,7 +96,7 @@ export class CuponController {
       let service = new ExceptionDecorator(
           new LoggerDecorator(
               new FindCuponByIdApplicationService( 
-                  this.ormCuponCommandRepo
+                  this.ormCuponQueryRepo
               ),
               new NestLogger(new Logger()) 
           )
@@ -100,5 +105,21 @@ export class CuponController {
       let response = await service.execute({ userId: credential.account.idUser, id: id }); 
       return response.getValue; 
   }
+
+  @Get(':code')
+  async getCuponByCode(
+    @GetCredential() credential:ICredential,
+    @Param('code') code:string
+  ){
+    let service = new ExceptionDecorator(
+      new LoggerDecorator(
+        new FindCuponByCodeApplicationService(this.ormCuponQueryRepo), new NestLogger(new Logger())
+      )
+    );
+
+    let response= service.execute({userId:credential.account.idUser, cuponCode:code})
+    return (await response).getValue
+  }
+
   
 }

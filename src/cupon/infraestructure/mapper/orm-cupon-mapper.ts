@@ -7,12 +7,13 @@ import { CuponName } from "src/cupon/domain/value-object/cupon-name";
 import { CuponCode } from "src/cupon/domain/value-object/cupon-code";
 import { CuponDiscount } from "src/cupon/domain/value-object/cupon-discount";
 import { CuponState } from "src/cupon/domain/value-object/cupon-state";
-import { CuponUser } from "src/cupon/domain/entities/cuponUser/cuponUser";
+import { CuponUser } from "src/cupon/domain/entities/cuponUser/cuponUser.entity";
 import { CuponUserId } from "src/cupon/domain/entities/cuponUser/value-objects/cuponUserId";
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { NotFoundException } from "@nestjs/common";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
+import { CuponUserStateEnum } from "src/cupon/domain/entities/cuponUser/value-objects/cupon-state-enum";
 
 export class OrmCuponMapper implements IMapper<Cupon, OrmCuponEntity> {
     constructor(
@@ -25,14 +26,14 @@ export class OrmCuponMapper implements IMapper<Cupon, OrmCuponEntity> {
 
         const ormUsers: OrmCuponUserEntity[] = infraEntity.cupon_users || [];
 
-        for (let user of ormUsers) {
-            const userId = UserId.create(user.user_id);
-            const cuponId = CuponId.create(user.cupon_id);
+        for (let cuponUser of ormUsers) {
+            const userId = UserId.create(cuponUser.user_id);
+            const cuponId = CuponId.create(cuponUser.cupon_id);
 
             // Validar si el usuario existe en el sistema
             const userResponse = await this.ormUserQueryRepository.findUserById(userId);
             if (!userResponse.isSuccess()) {
-                throw new NotFoundException(`User with ID ${user.user_id} not found`);
+                throw new NotFoundException(`User with ID ${cuponUser.user_id} not found`);
             }
 
             // Crear entidad CuponUser
@@ -41,8 +42,8 @@ export class OrmCuponMapper implements IMapper<Cupon, OrmCuponEntity> {
                     CuponUserId.create(userId.Value, cuponId.Value),
                     userId,
                     cuponId,
-                    CuponDiscount.create(user.discount),
-                    user.isUsed
+                    CuponDiscount.create(cuponUser.discount),
+                    CuponUserStateEnum.create(cuponUser.state)
                 )
             );
         }
@@ -68,7 +69,7 @@ export class OrmCuponMapper implements IMapper<Cupon, OrmCuponEntity> {
                     cuponUser.CuponId.Value,
                     cuponUser.CuponUserId.Value,
                     cuponUser.Discount.Value,
-                    cuponUser.isCuponUsed()
+                    cuponUser.State.Value
                 )
             );
         }

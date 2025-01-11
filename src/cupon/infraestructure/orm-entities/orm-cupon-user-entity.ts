@@ -24,22 +24,22 @@ export class OrmCuponUserEntity {
     @Column('integer')
     discount: number;
 
-    @Column('boolean')
-    isUsed: boolean;
+    @Column('string')
+    state:string;
 
     static create(
         cuponUserId: string,
         userId: string,
         cuponId: string,
         discount: number,
-        isUsed: boolean
+        state:string
     ): OrmCuponUserEntity {
         const cuponUser = new OrmCuponUserEntity();
         cuponUser.cupon_user_id = cuponUserId;
         cuponUser.user_id = userId;
         cuponUser.cupon_id = cuponId;
         cuponUser.discount = discount;
-        cuponUser.isUsed = isUsed;
+        cuponUser.state = state;
         return cuponUser;
     }
 }

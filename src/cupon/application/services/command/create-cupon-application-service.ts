@@ -2,7 +2,7 @@ import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
 import { CreateCuponApplicationRequestDTO } from "../../dto/request/create-cupon-application-requestdto";
 import { CreateCuponApplicationResponseDTO } from "../../dto/response/create-cupon-application-responsedto";
-import { ICuponRepository } from "src/cupon/domain/repository/cupon.interface.repository";
+import { ICommandCuponRepository } from "src/cupon/domain/repository/command-cupon-repository";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
 import { CuponId } from "src/cupon/domain/value-object/cupon-id";
@@ -13,6 +13,7 @@ import { CuponState } from "src/cupon/domain/value-object/cupon-state";
 import { ErrorCreatingCuponApplicationException } from "../../application-exception/error-creating-cupon-application-exception copy";
 import { ErrorNameAlreadyApplicationException } from "../../application-exception/error-name-already-exist-cupon-application-exception";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
+import { IQueryCuponRepository } from "../../query-repository/query-cupon-repository";
 
 export class CreateCuponApplicationService extends IApplicationService<
   CreateCuponApplicationRequestDTO,
@@ -20,7 +21,8 @@ export class CreateCuponApplicationService extends IApplicationService<
 > {
   constructor(
     private readonly eventPublisher: IEventPublisher,
-    private readonly cuponRepository: ICuponRepository,
+    private readonly cuponRepository: ICommandCuponRepository,
+    private readonly queryCuponRepository: IQueryCuponRepository,
     private readonly idGen: IIdGen<string>
   ) {
     super();
@@ -30,7 +32,7 @@ export class CreateCuponApplicationService extends IApplicationService<
     command: CreateCuponApplicationRequestDTO
   ): Promise<Result<CreateCuponApplicationResponseDTO>> {
     // Verifica si el nombre del cupón ya existe
-    let search = await this.cuponRepository.verifyCuponExistenceByName(
+    let search = await this.queryCuponRepository.verifyCuponExistenceByName(
       CuponName.create(command.name)
     );
 

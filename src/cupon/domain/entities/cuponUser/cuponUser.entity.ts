@@ -3,25 +3,27 @@ import { CuponUserId } from "./value-objects/cuponUserId";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { CuponId } from "../../value-object/cupon-id";
 import { CuponDiscount } from "../../value-object/cupon-discount";
+import { CuponUserStateEnum } from "./value-objects/cupon-state-enum";
+import { CuponCode } from "../../value-object/cupon-code";
 
 export class CuponUser extends Entity<CuponUserId> {
-    private isUsed: boolean; //cambiar a entidad
+    private state:CuponUserStateEnum
     private userId: UserId;
     private cuponId: CuponId;
     private discount: CuponDiscount;
 
-    constructor(
+    private constructor(
         private cuponUserId: CuponUserId,
         userId: UserId,
         cuponId: CuponId,
         discount: CuponDiscount,
-        isUsed: boolean = false
+        state:CuponUserStateEnum
     ) {
         super(cuponUserId);
-        this.isUsed = isUsed;
         this.userId = userId;
         this.cuponId = cuponId;
         this.discount = discount;
+        this.state = state;
     }
 
     static create(
@@ -29,17 +31,17 @@ export class CuponUser extends Entity<CuponUserId> {
         userId: UserId,
         cuponId: CuponId,
         discount: CuponDiscount,
-        isUsed: boolean = false
+        state:CuponUserStateEnum
     ): CuponUser {
-        return new CuponUser(cuponUserId, userId, cuponId, discount, isUsed);
+        return new CuponUser(cuponUserId, userId, cuponId, discount, state);
     }
 
     public markAsUsed(): void {
-        this.isUsed = true;
+        this.state = CuponUserStateEnum.create('USED');
     }
 
     public isCuponUsed(): boolean {
-        return this.isUsed;
+        return this.state.equals(CuponUserStateEnum.create('USED'));
     }
 
     get CuponUserId(): CuponUserId {
@@ -56,5 +58,9 @@ export class CuponUser extends Entity<CuponUserId> {
 
     get Discount(): CuponDiscount{
         return this.discount
+    }
+
+    get State(): CuponUserStateEnum{
+        return this.state
     }
 }

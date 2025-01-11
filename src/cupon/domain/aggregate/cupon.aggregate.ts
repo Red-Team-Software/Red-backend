@@ -7,7 +7,7 @@ import { CuponState } from "../value-object/cupon-state";
 import { CuponCreated } from "../domain-events/cupon-created";
 import { CuponDeleted } from "../domain-events/cupon-delete";
 import { CuponStateChanged } from "../domain-events/cupon-state-change";
-import { CuponUser } from "../entities/cuponUser/cuponUser";
+import { CuponUser } from "../entities/cuponUser/cuponUser.entity";
 
 export class Cupon extends AggregateRoot<CuponId> {
 

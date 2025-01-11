@@ -4,7 +4,7 @@ import { CuponCode } from "../value-object/cupon-code";
 import { CuponName } from "../value-object/cupon-name";
 import { CuponDiscount } from "../value-object/cupon-discount";
 import { CuponState } from "../value-object/cupon-state";
-import { CuponUser } from "../entities/cuponUser/cuponUser";
+import { CuponUser } from "../entities/cuponUser/cuponUser.entity";
 
 export class CuponCreated extends DomainEvent {
     serialize(): string {

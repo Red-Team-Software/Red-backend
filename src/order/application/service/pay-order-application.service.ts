@@ -52,7 +52,6 @@ import { BundleDetailPrice } from 'src/order/domain/entities/bundle-detail/value
 import { CalculateAmountService } from 'src/order/domain/domain-services/services/calculate-amount.service';
 import { Cupon } from 'src/cupon/domain/aggregate/cupon.aggregate';
 import { OrderCuponId } from 'src/order/domain/value_objects/order-cupon-id';
-import { IQueryCuponRepository } from 'src/cupon/domain/query-repository/query-cupon-repository';
 import { CuponId } from 'src/cupon/domain/value-object/cupon-id';
 
 
@@ -72,8 +71,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly bundleRepository:IQueryBundleRepository,
         private readonly dateHandler: IDateHandler,
         private readonly queryPromotionRepositoy: IQueryPromotionRepository,
-        private readonly paymentQueryRepository:IPaymentMethodQueryRepository,
-        private readonly ormCuponQueryRepo: IQueryCuponRepository
+        private readonly paymentQueryRepository:IPaymentMethodQueryRepository
     ){
         super()
     }
@@ -93,16 +91,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
         if (!paymentResponse.isSuccess())
             return Result.fail(paymentResponse.getError)
-
-        if (data.cuponId){
-
-            let cuponRes = await this.ormCuponQueryRepo.findCuponById(CuponId.create(data.cuponId))
-
-            if (!cuponRes.isSuccess())
-                return Result.fail(cuponRes.getError)
-            cupon = cuponRes.getValue;
-        }
-
 
         let findPromotion: FindAllPromotionApplicationRequestDTO = {
             userId: data.userId,
