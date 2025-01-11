@@ -33,7 +33,9 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
         let ormWallet=OrmWalletEntity.create(
             domainEntity.Wallet.getId().Value,
             domainEntity.Wallet.Ballance.Currency,
-            Number(domainEntity.Wallet.Ballance.Amount.toFixed(2))
+            domainEntity.Wallet.Ballance.Amount
+            ? Number(domainEntity.Wallet.Ballance.Amount.toFixed(2))
+            : 0
         )
 
         let directionsResponse=await this.userQueryRepository.findDirectionsByLatAndLng(domainEntity.UserDirections)
@@ -94,7 +96,12 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
             : [],
             Wallet.create(
                 WalletId.create(infraEstructure.wallet.id),
-                Ballance.create(Number(infraEstructure.wallet.price.toFixed(2)),infraEstructure.wallet.currency)
+                Ballance.create(
+                    infraEstructure.wallet.price
+                    ? Number(Number(infraEstructure.wallet.price).toFixed(2))
+                    : 0
+                    , infraEstructure.wallet.currency,
+                )
             ),
             infraEstructure.image ? UserImage.create(infraEstructure.image) : undefined
         )

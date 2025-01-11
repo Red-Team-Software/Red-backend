@@ -55,12 +55,12 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
     try {
         let ormModel=await this.mapper.fromDomaintoPersistence(user)
 
-        let resultUpdate = await this.upsert(ormModel,['id'])
+        let resultUpdate = await this.save(ormModel)
         
-        for (const directionUser of ormModel.direcction){
-            await this.ormDirectionRepository.upsert(directionUser.direction,['id'])
-            await this.ormDirectionUserRepository.upsert(directionUser,['direction_id','user_id'])
-        }
+        // for (const directionUser of ormModel.direcction){
+        //     await this.ormDirectionRepository.upsert(directionUser.direction,['id'])
+        //     await this.ormDirectionUserRepository.upsert(directionUser,['direction_id','user_id'])
+        // }
     
         if (!resultUpdate)
             return Result.fail(new PersistenceException('Update user unsucssessfully'))
