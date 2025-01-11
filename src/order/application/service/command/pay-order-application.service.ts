@@ -52,6 +52,7 @@ import { ErrorCreatingPaymentApplicationException } from '../../application-exce
 import { ErrorObtainingShippingFeeApplicationException } from '../../application-exception/error-obtaining-shipping-fee.application.exception';
 import { ErrorObtainingTaxesApplicationException } from '../../application-exception/error-obtaining-taxes.application.exception';
 import { OrderPayResponseDto } from '../../dto/response/order-pay-response-dto';
+import { PayOrderService } from 'src/order/domain/domain-services/services/pay-order.service';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -62,7 +63,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly eventPublisher: IEventPublisher,
         private readonly calculateShippingFee: ICalculateShippingFee,
         private readonly calculateTaxesFee: ICalculateTaxesFee,
-        private readonly payOrder: IPaymentMethodService,
+        private readonly payOrder:PayOrderService ,
         private readonly orderRepository: ICommandOrderRepository,
         private readonly idGen: IIdGen<string>,
         private readonly geocodificationAddress: IGeocodification,
@@ -238,7 +239,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 orderPayment
             );
 
-            let response = await this.payOrder.createPayment(order);
+            let response = await this.payOrder.PayOrder(order);
 
             if (!response.isSuccess()) 
                 return Result.fail(new ErrorCreatingPaymentApplicationException());

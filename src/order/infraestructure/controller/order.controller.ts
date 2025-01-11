@@ -93,6 +93,8 @@ import { DeliveredOderApplicationService } from "src/order/application/service/c
 import { CreateReportApplicationService } from "src/order/application/service/command/create-report-application.service";
 import { FindOrderByIdApplicationService } from "src/order/application/service/query/find-order-by-id-application.service";
 import { PayOrderAplicationService } from "src/order/application/service/command/pay-order-application.service";
+import { PayOrderService } from "src/order/domain/domain-services/services/pay-order.service";
+import { ComplexPayOrderMethod } from "src/order/domain/domain-services/services/complex-pay-order-method.service";
 
 
 @ApiBearerAuth()
@@ -278,7 +280,24 @@ export class OrderController {
                             this.rabbitMq,
                             this.calculateShipping,
                             this.calculateTax,
-                            new StripePayOrderMethod(this.stripeSingleton, this.idGen, data.stripePaymentMethod),
+                            new PayOrderService(
+                                new ComplexPayOrderMethod(
+                                    [
+                                        new StripePayOrderMethod(
+                                            this.stripeSingleton,
+                                            this.idGen,
+                                            data.stripePaymentMethod
+                                        )
+                                        ,
+                                        new WalletPaymentMethod(
+                                            this.idGen, 
+                                            this.ormUserQueryRepository,
+                                            this.ormUserCommandRepo,
+                                            this.TransactionCommandRepository
+                                            )
+                                    ]
+                                )
+                            ),
                             this.orderRepository,
                             this.idGen,
                             this.geocodificationAddress,
@@ -325,11 +344,13 @@ export class OrderController {
                             this.rabbitMq,
                             this.calculateShipping,
                             this.calculateTax,
-                            new WalletPaymentMethod(
+                            new PayOrderService(
+                                new WalletPaymentMethod(
                                 this.idGen, 
                                 this.ormUserQueryRepository,
                                 this.ormUserCommandRepo,
                                 this.TransactionCommandRepository
+                                )
                             ),
                             this.orderRepository,
                             this.idGen,
