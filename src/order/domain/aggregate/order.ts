@@ -183,7 +183,7 @@ export class Order extends AggregateRoot<OrderId>{
         this.apply(
             OrderStatusDelivered.create(
                 this.getId(),
-                orderState,
+                orderState.changeStateDelivered(orderState),
                 this.orderUserId
             )
         );
