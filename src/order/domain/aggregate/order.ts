@@ -184,7 +184,6 @@ export class Order extends AggregateRoot<OrderId>{
         );
     }
 
-    //! Le gane a alfredo, si puedo mandar una fecha desde afuera, recuerda cambiarlo
     orderDelivered(orderReceivedDate: OrderReceivedDate): void {
         this.apply(
             OrderStatusDelivered.create(
