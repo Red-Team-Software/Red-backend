@@ -56,6 +56,8 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
         let ormModel=await this.mapper.fromDomaintoPersistence(user)
 
         let resultUpdate = await this.upsert(ormModel,['id'])
+
+        this.ormWalletRepository.upsert({id:ormModel.wallet.id},['id'])
         
         for (const directionUser of ormModel.direcction){
             await this.ormDirectionRepository.upsert(directionUser.direction,['id'])

@@ -30,10 +30,4 @@ export class OrderState extends ValueObject<OrderState> {
         return new OrderState(state);
     }
 
-
-    public changeStateDelivered():OrderState{
-        if (this.state===OrderStateEnum.cancelled)
-            
-    }
-
 }

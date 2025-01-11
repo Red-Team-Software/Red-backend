@@ -5,7 +5,6 @@ import { PaginationDto } from "src/common/infraestructure/dto/entry/pagination.d
 
 export class FindAllBundlesInfraestructureRequestDTO extends PaginationDto{
         @ApiProperty( { required: false })
-        @IsArray()
         @IsString({ each: true })
         @IsOptional()
         category:string[]
