@@ -16,9 +16,9 @@ import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
 import { ErrorSaveTransactionApplicationException } from "src/user/application/application-exeption/error-save-transaction-application-exception";
 import { PaymentMethodId } from '../../../../../payment-methods/domain/value-objects/payment-method-id';
-import { NotFoundPaymentMethodApplicationException } from "src/payment-methods/application/application-exception/not-found-payment-method-application.exception";
 import { PaymentMethodState } from "src/payment-methods/domain/value-objects/payment-method-state";
 import { ErrorPaymentMethodInactiveApplicationException } from "src/payment-methods/application/application-exception/error-payment-method-inactive-application.exception";
+import { NotFoundPaymentMethodApplicationException } from "src/user/application/application-exeption/not-found-payment-method-application.exception";
 
 
 export class AddBalanceToWalletZelleApplicationService extends IApplicationService<AddBalanceZelleApplicationRequestDTO, AddBalanceZelleApplicationResponseDTO> {
@@ -39,7 +39,7 @@ export class AddBalanceToWalletZelleApplicationService extends IApplicationServi
         let paymentMethod = await this.paymentMethodQueryRepository.findMethodById(PaymentMethodId.create(data.paymentId));
 
         if (!paymentMethod.isSuccess())
-            return Result.fail(new NotFoundPaymentMethodApplicationException());
+            return Result.fail(new NotFoundPaymentMethodApplicationException(data.paymentId));
 
         if ( !paymentMethod.getValue.state.equals(PaymentMethodState.create('active')) )
             return Result.fail(new ErrorPaymentMethodInactiveApplicationException());

@@ -17,6 +17,9 @@ import { ICommandTransactionRepository } from "src/user/application/repository/w
 import { ITransaction } from "src/user/application/model/transaction-interface";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { ErrorSaveTransactionApplicationException } from "src/user/application/application-exeption/error-save-transaction-application-exception";
+import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
+import { NotFoundPaymentMethodApplicationException } from "src/user/application/application-exeption/not-found-payment-method-application.exception";
+import { PaymentMethodId } from "src/payment-methods/domain/value-objects/payment-method-id";
 
 
 export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationService<AddBalancePagoMovilApplicationRequestDTO, AddBalanceZelleApplicationResponseDTO> {
@@ -27,13 +30,19 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
         private readonly eventPublisher: IEventPublisher,
         private readonly exchangeRate: IConversionService,
         private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>,
-        private readonly idGen: IIdGen<string>
+        private readonly idGen: IIdGen<string>,
+        private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository
     ) {
         super();
     }
     
 
     async execute(data: AddBalancePagoMovilApplicationRequestDTO): Promise<Result<AddBalanceZelleApplicationResponseDTO>> {
+        
+        let paymentMethod = await this.paymentMethodQueryRepository.findMethodById(PaymentMethodId.create(data.paymentId));
+        
+        if (!paymentMethod.isSuccess())
+            return Result.fail(new NotFoundPaymentMethodApplicationException(data.paymentId));
         
         let userResponse= await this.queryUserRepository.findUserById(UserId.create(data.userId));
         
