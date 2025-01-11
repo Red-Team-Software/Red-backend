@@ -55,7 +55,7 @@ export class AddBalanceToWalletPagoMovilApplicationService extends IApplicationS
 
         user.addWalletBalance(newBalance);
 
-        let userRes= await this.commandUserRepository.saveUser(user);
+        let userRes= await this.commandUserRepository.updateUser(user);
 
         if (!userRes.isSuccess())
             return Result.fail(new ErrorUpdatingBalanceWalletApplicationException());

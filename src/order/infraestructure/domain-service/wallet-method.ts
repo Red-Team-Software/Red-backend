@@ -41,7 +41,7 @@ export class WalletPaymentMethod implements IPaymentMethodService {
 
         user.decreaseWalletBalance(newBalance);
 
-        await this.ormUserCommandRepo.saveUser(user);
+        await this.ormUserCommandRepo.updateUser(user);
 
         let transaction: ITransaction = {
             id: await this.idGen.genId(),
