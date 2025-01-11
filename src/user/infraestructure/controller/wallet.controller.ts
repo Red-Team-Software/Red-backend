@@ -101,6 +101,7 @@ export class PaymentWalletController {
                 new LoggerDecorator(
                     new PerformanceDecorator(
                         new AddBalanceToWalletPagoMovilApplicationService (
+                            this.paymentMethodQueryRepository,
                             this.ormUserCommandRepo,
                             this.ormUserQueryRepo,
                             new RabbitMQPublisher(this.channel),
