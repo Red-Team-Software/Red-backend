@@ -33,7 +33,7 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
         let ormWallet=OrmWalletEntity.create(
             domainEntity.Wallet.getId().Value,
             domainEntity.Wallet.Ballance.Currency,
-            domainEntity.Wallet.Ballance.Amount
+            Number(domainEntity.Wallet.Ballance.Amount)
         )
 
         let directionsResponse=await this.userQueryRepository.findDirectionsByLatAndLng(domainEntity.UserDirections)
