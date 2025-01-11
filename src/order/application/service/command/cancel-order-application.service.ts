@@ -5,7 +5,6 @@ import { ICommandOrderRepository } from "src/order/domain/command-repository/ord
 import { OrderId } from "src/order/domain/value_objects/order-id";
 import { OrderState } from "src/order/domain/value_objects/order-state";
 import { ErrorModifiyingOrderStateApplicationException } from "../../application-exception/error-modifying-order-status-application.exception";
-import { ErrorOrderAlreadyCancelledApplicationException } from "../../application-exception/error-orden-already-cancelled-application.exception";
 import { NotFoundOrderApplicationException } from "../../application-exception/not-found-order-application.exception";
 import { CancelOrderApplicationServiceRequestDto } from "../../dto/request/cancel-order-request-dto";
 import { CancelOrderApplicationServiceResponseDto } from "../../dto/response/cancel-order-response-dto";
@@ -31,11 +30,7 @@ export class CancelOderApplicationService extends IApplicationService<CancelOrde
 
         let newOrder = response.getValue;
 
-        if (newOrder.OrderState.orderState === 'cancelled') return Result.fail(
-            new ErrorOrderAlreadyCancelledApplicationException('The order is already cancelled')
-        );
-
-        newOrder.cancelOrder(OrderState.create('cancelled'));
+        newOrder.cancelOrder();
 
         let responseCommand = await this.orderRepository.saveOrder(newOrder);
 

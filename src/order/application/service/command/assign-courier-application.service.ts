@@ -9,7 +9,6 @@ import { OrderCourierId } from "src/order/domain/value_objects/order-courier-id"
 import { OrderId } from "src/order/domain/value_objects/order-id";
 import { OrderState } from "src/order/domain/value_objects/order-state";
 import { ErrorModifiyingOrderStateApplicationException } from "../../application-exception/error-modifying-order-status-application.exception";
-import { ErrorOrderAlreadyCancelledApplicationException } from "../../application-exception/error-orden-already-cancelled-application.exception";
 import { ErrorOrderAlreadyHaveCourierAssignedApplicationException } from "../../application-exception/error-orden-already-have-courier-assigned-application.exception";
 import { NotFoundOrderApplicationException } from "../../application-exception/not-found-order-application.exception";
 import { AssignCourierApplicationServiceRequestDto } from "../../dto/request/assign-courier-request-dto";
@@ -47,10 +46,6 @@ export class AssignCourierApplicationService extends IApplicationService<AssignC
             new ErrorOrderAlreadyHaveCourierAssignedApplicationException()
         );
         
-        if (newOrder.OrderState.orderState === 'cancelled') return Result.fail(
-            new ErrorOrderAlreadyCancelledApplicationException(' Cant assign courier to a cancelled order')
-        );
-
         newOrder.assignCourierToDeliver(
             OrderCourierId.create(data.courierId),
             OrderState.create('delivering')

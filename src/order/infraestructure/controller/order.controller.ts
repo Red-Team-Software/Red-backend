@@ -523,7 +523,8 @@ export class OrderController {
                     new DeliveredOderApplicationService(
                         this.orderQueryRepository,
                         this.orderRepository,
-                        this.rabbitMq
+                        this.rabbitMq,
+                        new DateHandler()
                     ),new NestTimer(),new NestLogger(new Logger())
                 ),this.auditRepository,new DateHandler()
             )

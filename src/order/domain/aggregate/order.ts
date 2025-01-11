@@ -169,22 +169,24 @@ export class Order extends AggregateRoot<OrderId>{
         return order;
     }
 
-    cancelOrder(orderState: OrderState): void {
+    cancelOrder(): void {
         this.apply(
             OrderStatusCancelled.create(
                 this.getId(),
-                orderState,
+                this.orderState.changeStateCancelled(),
                 this.orderUserId
             )
         );
     }
 
-    orderDelivered(orderState: OrderState): void {
+    //! Le gane a alfredo, si puedo mandar una fecha desde afuera, recuerda cambiarlo
+    orderDelivered(orderReceivedDate: OrderReceivedDate): void {
         this.apply(
             OrderStatusDelivered.create(
                 this.getId(),
-                orderState,
-                this.orderUserId
+                this.orderState.changeStateDelivered(),
+                this.orderUserId,
+                orderReceivedDate
             )
         );
     }
