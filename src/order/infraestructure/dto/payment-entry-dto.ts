@@ -1,4 +1,4 @@
-import { IsArray, IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PaymentEntryDto {
@@ -61,5 +61,6 @@ export class PaymentEntryDto {
     description: 'cupon Id to apply to the payment',
   })
   @IsString()
+  @IsOptional()
   cuponId?: string;
 }
