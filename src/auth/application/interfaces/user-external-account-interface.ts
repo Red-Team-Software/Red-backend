@@ -7,4 +7,5 @@ export interface IUserExternalAccount {
     saveUser(userId: UserId,email: string): Promise<Result<string>>;
     saveCardtoUser(userId: string, cardId: string): Promise<Result<string>>;
     getUserCards(userId: string): Promise<Result<UserCard[]>>;
+    deleteUserCards(cardId: string): Promise<Result<string>>;
 }

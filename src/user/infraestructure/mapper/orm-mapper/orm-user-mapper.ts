@@ -94,7 +94,7 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
             : [],
             Wallet.create(
                 WalletId.create(infraEstructure.wallet.id),
-                Ballance.create(Number(infraEstructure.wallet.price.toFixed(2)),infraEstructure.wallet.currency)
+                Ballance.create(Number(Number(infraEstructure.wallet.price).toFixed(2)),infraEstructure.wallet.currency)
             ),
             infraEstructure.image ? UserImage.create(infraEstructure.image) : undefined
         )
