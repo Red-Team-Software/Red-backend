@@ -79,20 +79,20 @@ export class PaymentMethodAgregate extends AggregateRoot <PaymentMethodId>{
         );
     }
 
-    avaliablePayment(paymentMethodState: PaymentMethodState):void{
+    avaliablePayment():void{
         this.apply(
             AvailablePayment.create(
                 this.getId(),
-                paymentMethodState
+                this.paymentMethodState.active()
             )
         )
     }
     
-    disablePayment(paymentMethodState: PaymentMethodState):void{
+    disablePayment():void{
         this.apply(
             DisablePayment.create(
                 this.getId(),
-                paymentMethodState
+                this.paymentMethodState.inactive()
             )
         );
     }

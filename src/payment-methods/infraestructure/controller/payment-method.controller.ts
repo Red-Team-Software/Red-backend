@@ -34,6 +34,10 @@ import { OrmAuditRepository } from "src/common/infraestructure/repository/orm-re
 import { IAuditRepository } from "src/common/application/repositories/audit.repository";
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler";
 import { AuditDecorator } from "src/common/application/aspects/audit-decorator/audit-decorator";
+import { DisablePaymentMethodInfraestructureRequestDTO } from "../dto/entry/disable-payment-method-entry.dto";
+import { DisablePaymentMethodRequestDto } from "src/payment-methods/application/dto/request/disable-payment-method-request-dto";
+import { DisablePaymentMethodApplicationService } from "src/payment-methods/application/service/disable-payment-method.application.service";
+import { AvailablePaymentMethodRequestDto } from "src/payment-methods/application/dto/request/aviable-payment-method-request-dto";
 
 
 @ApiBearerAuth()
@@ -140,6 +144,62 @@ export class PaymentMethodController {
         );
 
         let response = await getAllPaymentMethodService.execute(values);
+        
+        return response.getValue;
+    }
+
+    @Post('/disable') 
+    async DisablePaymentMethod(
+        @GetCredential() credential:ICredential,
+        @Body() data: DisablePaymentMethodInfraestructureRequestDTO,
+        ) {
+        let method: DisablePaymentMethodRequestDto = {
+            userId: credential.account.idUser,
+            paymentMethodId: data.id_payment_method
+        }
+
+        let disable = new ExceptionDecorator(
+            new AuditDecorator(
+                new PerformanceDecorator(
+                    new DisablePaymentMethodApplicationService(
+                        this.paymentMethodRepository,
+                        this.paymentMethodQueryRepository,
+                        this.rabbitMq,
+                    ),new NestTimer(),new NestLogger(new Logger())
+                ),this.auditRepository,new DateHandler()
+            )
+        );
+
+
+        let response = await disable.execute(method);
+        
+        return response.getValue;
+    }
+
+    @Post('/aviable') 
+    async AvailablePaymentMethod(
+        @GetCredential() credential:ICredential,
+        @Body() data: DisablePaymentMethodInfraestructureRequestDTO,
+        ) {
+        let method: AvailablePaymentMethodRequestDto = {
+            userId: credential.account.idUser,
+            paymentMethodId: data.id_payment_method
+        }
+
+        let disable = new ExceptionDecorator(
+            new AuditDecorator(
+                new PerformanceDecorator(
+                    new DisablePaymentMethodApplicationService(
+                        this.paymentMethodRepository,
+                        this.paymentMethodQueryRepository,
+                        this.rabbitMq,
+                    ),new NestTimer(),new NestLogger(new Logger())
+                ),this.auditRepository,new DateHandler()
+            )
+        );
+
+
+        let response = await disable.execute(method);
         
         return response.getValue;
     }

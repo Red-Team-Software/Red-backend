@@ -18,6 +18,7 @@ import { ProductDetail } from "../entities/product-detail/product-detail-entity"
 import { BundleDetail } from "../entities/bundle-detail/bundle-detail-entity";
 import { OrderCourierId } from "../value_objects/order-courier-id";
 import { OrderCuponId } from "../value_objects/order-cupon-id";
+import { OrderReported } from "../domain-events/order-reported";
 
 export class Order extends AggregateRoot<OrderId>{
     
@@ -47,6 +48,10 @@ export class Order extends AggregateRoot<OrderId>{
         if (event instanceof CourierAssignedToDeliver) {
             this.orderState = event.orderState;
             this.orderCourierId = event.orderCourierId;
+        }
+        
+        if (event instanceof OrderReported) {
+            this.orderReport = event.orderReport;
         }
     }
     
@@ -204,7 +209,12 @@ export class Order extends AggregateRoot<OrderId>{
     }
 
     addOrderReport(orderReport: OrderReport): void {
-        this.orderReport = orderReport;
+        this.apply(
+            OrderReported.create(
+                this.getId(),
+                orderReport
+            )
+        )
     }
 
     get OrderState(): OrderState {
