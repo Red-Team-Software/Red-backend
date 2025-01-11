@@ -28,8 +28,6 @@ import { ConvertCurrencyExchangeRate } from "src/order/infraestructure/domain-se
 import { ExchangeRateSingelton } from "src/common/infraestructure/exchange-rate/exchange-rate-singleton"
 import { UpdateWalletBalancePagoMovilInfraestructureRequestDTO } from "../dto/request/wallet/update-wallet-balance-pago-movil-infraestructure-request-dto"
 import { AddBalancePagoMovilApplicationRequestDTO } from "src/user/application/dto/request/wallet/add-balance-to-wallet-pago-movil-application-resquest-dto"
-import { AddBalanceToWalletZelleApplicationService } from "src/user/application/services/command/wallet/add-balance-to-wallet-zelle-application.service"
-import { AddBalanceZelleApplicationRequestDTO } from "src/user/application/dto/request/wallet/add-balance-to-wallet-zelle-application-resquest-dto"
 import { UpdateWalletBalanceZelleInfraestructureRequestDTO } from "../dto/request/wallet/update-wallet-balance-zelle-infraestructure-request-dto"
 import { SaveCardApplicationRequestDTO } from "src/user/application/dto/request/wallet/save-card-application-request-dto"
 import { SaveCardInfraestructureRequestDTO } from "../dto/request/wallet/save-card-infraestructure-request-dto"

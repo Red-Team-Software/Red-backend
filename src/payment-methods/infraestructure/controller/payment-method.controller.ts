@@ -107,6 +107,7 @@ export class PaymentMethodController {
                 new PerformanceDecorator(
                     new CreatePaymentMethodApplicationService(
                         this.paymentMethodRepository,
+                        this.paymentMethodQueryRepository,
                         this.rabbitMq,
                         this.idGen,
                         new CloudinaryService()
