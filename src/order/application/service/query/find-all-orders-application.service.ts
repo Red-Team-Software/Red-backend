@@ -103,13 +103,6 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
 
         orders.forEach( (order) => {
 
-            let associatedProducts: productsOrderResponse[];
-            let associatedBundles: bundlesOrderResponse[];
-            
-            if (domainProducts) associatedProducts = domainProducts.filter((product) => product.orderid === order.getId().orderId); 
-            
-            if (domainBundles) associatedBundles = domainBundles.filter((bundle) => bundle.orderid === order.getId().orderId); 
-
             let associatedCourier: courierOrderResponse;
 
             if( order.OrderCourierId){
@@ -143,8 +136,12 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
                     lat: order.OrderDirection.Latitude,
                     long: order.OrderDirection.Longitude
                 },
-                products: associatedProducts,
-                bundles: associatedBundles,
+                products: order.Products 
+                ? domainProducts.filter((product) => product.orderid === order.getId().orderId)
+                : [],
+                bundles: order.Bundles
+                ? domainBundles.filter((bundle) => bundle.orderid === order.getId().orderId)
+                : [],
                 orderReport: order.OrderReport ? {
                     id: order.OrderReport.getId().OrderReportId,
                     description: order.OrderReport.Description.Value,
