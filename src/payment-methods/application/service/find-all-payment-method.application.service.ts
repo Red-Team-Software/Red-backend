@@ -1,5 +1,3 @@
-import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface";
-import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { IApplicationService } from "src/common/application/services";
 import { FindAllPaymentMethodRequestDto } from "../dto/request/find-all-payment-method-request.dto";
 import { FindAllPaymentMethodResponseDTO } from "../dto/response/find-all-payment-method-response.dto";
@@ -18,15 +16,15 @@ export class FindAllPaymentMethodApplicationService extends IApplicationService<
 
     async execute(data: FindAllPaymentMethodRequestDto): Promise<Result<FindAllPaymentMethodResponseDTO[]>> {
         
-        let methods = await this.paymentMethodQueryRepository.findAllMethods(data);
+        let methods = await this.paymentMethodQueryRepository.findAllMethodsDetail(data);
         
         if(methods.isFailure()) return Result.fail( new NotFoundPaymentMethodApplicationException());
 
         let responseDto: FindAllPaymentMethodResponseDTO[] = methods.getValue.map(method => ({
-            id: method.getId().paymentMethodId,
-            name: method.name.paymentMethodName,
-            state: method.state.paymentMethodState,
-            imageUrl: method.image.Value
+            id: method.paymentMethodId,
+            name: method.paymentMethodName,
+            state: method.paymentMethodState,
+            imageUrl: method.paymentMethodImage
         }));
 
         return Result.success(responseDto);

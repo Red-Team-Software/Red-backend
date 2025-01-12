@@ -8,6 +8,8 @@ import { PaymentMethodId } from "src/payment-methods/domain/value-objects/paymen
 import { PaymentMethodName } from "src/payment-methods/domain/value-objects/payment-method-name";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { FindAllPaymentMethodRequestDto } from "src/payment-methods/application/dto/request/find-all-payment-method-request.dto";
+import { Transform } from 'class-transformer';
+import { IPaymentMethodModel } from "src/payment-methods/application/model/payment-method-model";
 
 
 export class OrmPaymentMethodQueryRepository extends Repository<PaymentMethodEntity> implements IPaymentMethodQueryRepository {
@@ -20,6 +22,16 @@ export class OrmPaymentMethodQueryRepository extends Repository<PaymentMethodEnt
     ) {
         super( PaymentMethodEntity, dataSource.createEntityManager());
         this.paymentMethodMapper = paymentMethodMapper;
+    }
+
+    TransformToDataModel(ormPaymentMethod: PaymentMethodEntity): IPaymentMethodModel {
+
+        return {
+            paymentMethodId: ormPaymentMethod.id,
+            paymentMethodName: ormPaymentMethod.name,
+            paymentMethodState: ormPaymentMethod.state,
+            paymentMethodImage: ormPaymentMethod.imageUrl
+        }
     }
 
     async findMethodById(id: PaymentMethodId): Promise<Result<PaymentMethodAgregate>> {
@@ -86,5 +98,58 @@ export class OrmPaymentMethodQueryRepository extends Repository<PaymentMethodEnt
         }catch(e){
             return Result.fail(new NotFoundException('Payment merthods not found'));
         }
+    }
+
+    async findMethodByIdDetail(id: PaymentMethodId): Promise<Result<IPaymentMethodModel>> {
+        try{
+
+            let methodEntity = await this.findOne({
+                where: { id: id.paymentMethodId }
+            });
+            
+            if(!methodEntity) return Result.fail(new NotFoundException('Payment method not found'));
+        
+            let methodModel = this.TransformToDataModel(methodEntity);
+
+            return Result.success(methodModel);
+        
+        }catch(error){
+            return Result.fail(new NotFoundException('Payment method not found'));
+        };
+    }
+    async findMethodByNameDetail(name: PaymentMethodName): Promise<Result<IPaymentMethodModel>> {
+        try{
+
+            let methodEntity = await this.findOne({
+                where: { name: name.paymentMethodName }
+            });
+            
+            if(!methodEntity) return Result.fail(new NotFoundException('Payment method not found'));
+        
+            let methodModel = this.TransformToDataModel(methodEntity);
+
+            return Result.success(methodModel);
+        
+        }catch(error){
+            return Result.fail(new NotFoundException('Payment method not found'));
+        };
+    }
+
+    
+    async findAllMethodsDetail(pagination: FindAllPaymentMethodRequestDto): Promise<Result<IPaymentMethodModel[]>> {
+        try{
+
+            let methodEntitys = await this.find();
+            
+            if(!methodEntitys) return Result.fail(new NotFoundException('Payment methods not found'));
+
+
+            let methodModel = methodEntitys.map((methodEntity) => this.TransformToDataModel(methodEntity));
+
+            return Result.success(methodModel);
+        
+        }catch(error){
+            return Result.fail(new NotFoundException('Payment merthods not found'));
+        };
     }
 }

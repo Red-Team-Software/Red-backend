@@ -1,4 +1,4 @@
-export interface IPaymentMethod{
+export interface IOdmPaymentMethod{
     id:string,
     name:string,
     state:string,

@@ -11,7 +11,6 @@ import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher";
 import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton";
 import { IPaymentMethodRepository } from "src/payment-methods/domain/repository/payment-method-repository.interface";
-import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
 import { OrmPaymentMethodMapper } from "../mapper/orm-mapper/orm-payment-method-mapper";
 import { OrmPaymentMethodQueryRepository } from "../repository/orm-repository/orm-payment-method-query-repository";
 import { OrmPaymentMethodRepository } from "../repository/orm-repository/orm-payment-method-repository";
@@ -41,7 +40,13 @@ import { AvailablePaymentMethodRequestDto } from "src/payment-methods/applicatio
 import { PaymentMethodQueues } from "../queues/payment-method-queues";
 import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber";
 import { IPaymentMethodRegistered } from "../interface/payment-method-registered.interface";
-import { IPaymentMethodStateUpdated } from "../queues/payment-method-state-updated.interface";
+import { IPaymentMethodStateUpdated } from "../interface/payment-method-state-updated.interface";
+import { PaymentMethodRegisteredSyncroniceService } from "../services/syncronice/payment-method-registered-syncronice.service";
+import { Mongoose } from "mongoose";
+import { PaymentMethodRegistredInfraestructureRequestDTO } from "../services/dto/payment-method-registered-infraestructure-request-dto";
+import { PaymentMethodStateUpdatedInfraestructureRequestDTO } from "../services/dto/payment-method-state-updated-infraestructure-request-dto";
+import { PaymentStateUpdatedSyncroniceService } from "../services/syncronice/payment-method-state-updated-syncronice.service";
+import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
 
 
 @ApiBearerAuth()
@@ -85,7 +90,8 @@ export class PaymentMethodController {
     }
 
     constructor(
-        @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+        @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+        @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose,
     ) {
 
         this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
@@ -110,7 +116,7 @@ export class PaymentMethodController {
         this.subscriber.consume<IPaymentMethodRegistered>(
             { name: 'PaymentMethodSync/PaymentMethodRegistered'}, 
             (data):Promise<void>=>{
-                //this.walletRefund(data)
+                this.syncPaymentMethodRegistered(data)
                 return
             }
         )
@@ -118,7 +124,7 @@ export class PaymentMethodController {
         this.subscriber.consume<IPaymentMethodStateUpdated>(
             { name: 'PaymentMethodSync/AvailablePayment'}, 
             (data):Promise<void>=>{
-                //this.walletRefund(data)
+                this.syncPaymentMethodStateUpdated(data)
                 return
             }
         )
@@ -126,12 +132,41 @@ export class PaymentMethodController {
         this.subscriber.consume<IPaymentMethodStateUpdated>(
             { name: 'PaymentMethodSync/DisablePayment'}, 
             (data):Promise<void>=>{
-                //this.walletRefund(data)
+                this.syncPaymentMethodStateUpdated(data)
                 return
             }
         )
     
     }
+
+    async syncPaymentMethodRegistered(data:IPaymentMethodRegistered){
+        let service= new PaymentMethodRegisteredSyncroniceService(this.mongoose)
+        
+        let request: PaymentMethodRegistredInfraestructureRequestDTO = {
+            id: data.paymentMethodId,
+            name: data.paymentMethodName,
+            state: data.paymentMethodState,
+            imageUrl: data.paymentMethodImage
+        }
+        
+        await service.execute(request)
+    }
+
+    async syncPaymentMethodStateUpdated(data:IPaymentMethodStateUpdated){
+        let service= new PaymentStateUpdatedSyncroniceService(this.mongoose)
+        
+        let request: PaymentMethodStateUpdatedInfraestructureRequestDTO = {
+            id: data.paymentMethodId,
+            state: data.paymentMethodState,
+        }
+        
+        await service.execute(request)
+    }
+
+
+
+
+
 
     @Post('/create')
     @UseInterceptors(FileInterceptor('image')) 

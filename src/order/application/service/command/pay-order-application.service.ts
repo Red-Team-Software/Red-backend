@@ -27,7 +27,6 @@ import { IQueryBundleRepository } from 'src/bundle/application/query-repository/
 import { IQueryPromotionRepository } from 'src/promotion/application/query-repository/promotion.query.repository.interface';
 import { Promotion } from 'src/promotion/domain/aggregate/promotion.aggregate';
 import { FindAllPromotionApplicationRequestDTO } from 'src/promotion/application/dto/request/find-all-promotion-application-request-dto';
-import { IPaymentMethodQueryRepository } from 'src/payment-methods/application/query-repository/orm-query-repository.interface';
 import { PaymentMethodId } from 'src/payment-methods/domain/value-objects/payment-method-id';
 import { BundleDetail } from 'src/order/domain/entities/bundle-detail/bundle-detail-entity';
 import { ProductDetail } from 'src/order/domain/entities/product-detail/product-detail-entity';
@@ -53,6 +52,7 @@ import { ErrorObtainingShippingFeeApplicationException } from '../../application
 import { ErrorObtainingTaxesApplicationException } from '../../application-exception/error-obtaining-taxes.application.exception';
 import { OrderPayResponseDto } from '../../dto/response/order-pay-response-dto';
 import { PayOrderService } from 'src/order/domain/domain-services/services/pay-order.service';
+import { IPaymentMethodQueryRepository } from 'src/payment-methods/application/query-repository/orm-query-repository.interface';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{

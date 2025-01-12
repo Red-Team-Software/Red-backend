@@ -4,10 +4,10 @@ import { Result } from "src/common/utils/result-handler/result";
 import { IPaymentMethodRepository } from "src/payment-methods/domain/repository/payment-method-repository.interface";
 import { PaymentMethodId } from "src/payment-methods/domain/value-objects/payment-method-id";
 import { ErrorSavingPaymentMethodApplicationException } from "../application-exception/error-saving-payment-method-application.exception";
-import { IPaymentMethodQueryRepository } from "../query-repository/orm-query-repository.interface";
 import { NotFoundPaymentMethodApplicationException } from "../application-exception/not-found-payment-method-application.exception";
 import { AvailablePaymentMethodRequestDto } from "../dto/request/aviable-payment-method-request-dto";
 import { AvailablePaymentMethodResponseDto } from "../dto/response/available-payment-method-response-dto";
+import { IPaymentMethodQueryRepository } from "../query-repository/orm-query-repository.interface";
 
 
 export class AvailablePaymentMethodApplicationService extends IApplicationService<AvailablePaymentMethodRequestDto,AvailablePaymentMethodResponseDto>{

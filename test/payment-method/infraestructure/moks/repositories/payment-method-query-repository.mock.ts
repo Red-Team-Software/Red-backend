@@ -1,6 +1,7 @@
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { Result } from "src/common/utils/result-handler/result";
 import { FindAllPaymentMethodRequestDto } from "src/payment-methods/application/dto/request/find-all-payment-method-request.dto";
+import { IPaymentMethodModel } from "src/payment-methods/application/model/payment-method-model";
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
 import { PaymentMethodAgregate } from "src/payment-methods/domain/agregate/payment-method-agregate";
 import { PaymentMethodId } from "src/payment-methods/domain/value-objects/payment-method-id";
@@ -13,6 +14,18 @@ export class PaymentMethodQueryRepositoryMock implements IPaymentMethodQueryRepo
 
 
     constructor(private readonly paymentMethod: PaymentMethodAgregate[]){}
+    verifyMethodRegisteredByName(name: PaymentMethodName): Promise<Result<boolean>> {
+        throw new Error("Method not implemented.");
+    }
+    findMethodByIdDetail(id: PaymentMethodId): Promise<Result<IPaymentMethodModel>> {
+        throw new Error("Method not implemented.");
+    }
+    findMethodByNameDetail(name: PaymentMethodName): Promise<Result<IPaymentMethodModel>> {
+        throw new Error("Method not implemented.");
+    }
+    findAllMethodsDetail(pagination: FindAllPaymentMethodRequestDto): Promise<Result<IPaymentMethodModel[]>> {
+        throw new Error("Method not implemented.");
+    }
 
     async findMethodById(id: PaymentMethodId): Promise<Result<PaymentMethodAgregate>> {
         let method = this.paymentMethod.find( m => m.getId().equals(id) );

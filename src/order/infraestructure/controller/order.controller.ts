@@ -59,7 +59,6 @@ import { OrmPromotionQueryRepository } from "src/promotion/infraestructure/repos
 import { FindAllOrdersByUserInfraestructureEntryDto } from "../dto/find-all-orders-by-user-ifraestructure-request-dto";
 import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator";
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer";
-import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
 import { OrmPaymentMethodMapper } from "src/payment-methods/infraestructure/mapper/orm-mapper/orm-payment-method-mapper";
 import { OrmPaymentMethodQueryRepository } from "src/payment-methods/infraestructure/repository/orm-repository/orm-payment-method-query-repository";
 import { DeliveredOrderApplicationServiceRequestDto } from "src/order/application/dto/request/delivered-order-request-dto";
@@ -99,6 +98,7 @@ import { ICreateOrder } from "src/notification/infraestructure/interfaces/create
 import { IDeliveringOrder } from "src/notification/infraestructure/interfaces/delivering-order.interface";
 import { IDeliveredOrder } from "src/notification/infraestructure/interfaces/delivered-order.interface";
 import { IReportedOrder } from "src/notification/infraestructure/interfaces/order-reported.interface";
+import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
 
 
 @ApiBearerAuth()
