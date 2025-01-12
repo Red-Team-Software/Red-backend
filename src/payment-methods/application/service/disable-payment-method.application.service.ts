@@ -25,6 +25,8 @@ export class DisablePaymentMethodApplicationService extends IApplicationService<
         let methodRes = await this.paymentMethodQueryRepository.findMethodById(
             PaymentMethodId.create(data.paymentMethodId));
 
+            console.log(methodRes);
+
         if(!methodRes.isSuccess()) 
             return Result.fail(new NotFoundPaymentMethodApplicationException());
 

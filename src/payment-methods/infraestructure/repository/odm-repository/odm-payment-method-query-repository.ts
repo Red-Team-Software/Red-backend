@@ -10,7 +10,7 @@ import { IPaymentMethodModel } from 'src/payment-methods/application/model/payme
 import { FindAllPaymentMethodRequestDto } from 'src/payment-methods/application/dto/request/find-all-payment-method-request.dto';
 import { OdmPaymentMethodMapper } from '../../mapper/odm-mapper/odm-payment-method-mapper';
 
-export class OdmPaymentMethodRepository implements IPaymentMethodQueryRepository {
+export class OdmPaymentMethodQueryRepository implements IPaymentMethodQueryRepository {
     
     private readonly model: Model<OdmPaymentMethod>
     private readonly odmMapper:OdmPaymentMethodMapper
@@ -32,7 +32,7 @@ export class OdmPaymentMethodRepository implements IPaymentMethodQueryRepository
     
     async findMethodById(id: PaymentMethodId): Promise<Result<PaymentMethodAgregate>> {
         try{
-            let PaymentMethod = await this.model.findById({id: id.paymentMethodId});
+            let PaymentMethod = await this.model.findOne({id: id.paymentMethodId});
             
             if(!PaymentMethod) 
                 return Result.fail(new NotFoundException('Payment method not found'));
@@ -83,7 +83,7 @@ export class OdmPaymentMethodRepository implements IPaymentMethodQueryRepository
         try {
             const paymentMethod = await this.model.findOne({ name: name.paymentMethodName });
             if (!paymentMethod) {
-                return Result.fail(new NotFoundException('Payment method not found'));
+                return Result.success(false);
             }
             return Result.success(true);
         } catch (error) {

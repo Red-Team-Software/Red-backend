@@ -47,6 +47,8 @@ import { PaymentMethodRegistredInfraestructureRequestDTO } from "../services/dto
 import { PaymentMethodStateUpdatedInfraestructureRequestDTO } from "../services/dto/payment-method-state-updated-infraestructure-request-dto";
 import { PaymentStateUpdatedSyncroniceService } from "../services/syncronice/payment-method-state-updated-syncronice.service";
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
+import { OdmPaymentMethodQueryRepository } from "../repository/odm-repository/odm-payment-method-query-repository";
+import { AvailablePaymentMethodApplicationService } from "src/payment-methods/application/service/available-payment-method.application.service";
 
 
 @ApiBearerAuth()
@@ -107,8 +109,10 @@ export class PaymentMethodController {
 
         //*Repositories
         this.paymentMethodRepository = new OrmPaymentMethodRepository(PgDatabaseSingleton.getInstance(),this.paymentMethodMapper);
-        this.paymentMethodQueryRepository = new OrmPaymentMethodQueryRepository(PgDatabaseSingleton.getInstance(),this.paymentMethodMapper);
+        //this.paymentMethodQueryRepository = new OrmPaymentMethodQueryRepository(PgDatabaseSingleton.getInstance(),this.paymentMethodMapper);
     
+        this.paymentMethodQueryRepository = new OdmPaymentMethodQueryRepository(this.mongoose);
+
         this.subscriber= new RabbitMQSubscriber(this.channel);
 
         this.initializeQueues();
@@ -162,10 +166,6 @@ export class PaymentMethodController {
         
         await service.execute(request)
     }
-
-
-
-
 
 
     @Post('/create')
@@ -276,7 +276,7 @@ export class PaymentMethodController {
         let disable = new ExceptionDecorator(
             new AuditDecorator(
                 new PerformanceDecorator(
-                    new DisablePaymentMethodApplicationService(
+                    new AvailablePaymentMethodApplicationService(
                         this.paymentMethodRepository,
                         this.paymentMethodQueryRepository,
                         this.rabbitMq,
