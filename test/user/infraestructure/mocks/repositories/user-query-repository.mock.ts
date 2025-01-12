@@ -5,7 +5,7 @@ import { IDirection } from "src/user/application/model/direction-interface";
 import { IUserDirection } from "src/user/application/model/user.direction.interface";
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { User } from "src/user/domain/aggregate/user.aggregate";
-import { UserDirection } from "src/user/domain/value-object/user-direction";
+import { UserDirection } from "src/user/domain/entities/directions/direction.entity";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { UserPhone } from "src/user/domain/value-object/user-phone";
 
@@ -47,10 +47,10 @@ export class UserQueryRepositoryMock implements IQueryUserRepository{
         for (const direction of user.UserDirections) {
             directions.push({
                 id: await this.idGen.genId(),
-                name: direction.Name,
-                favorite: direction.Favorite,
-                lat: direction.Lat,
-                lng: direction.Lng
+                name: direction.DirectionName.Value,
+                isFavorite: direction.DirectionFavorite.Value,
+                lat: direction.DirectionLat.Value,
+                lng: direction.DirectionLng.Value
             })
         }
 
@@ -74,10 +74,10 @@ export class UserQueryRepositoryMock implements IQueryUserRepository{
         return Result.success(
             [{
                 id: await this.idGen.genId(),
-                name: direction.Name,
-                favorite: direction.Favorite,
-                lat: direction.Lat,
-                lng: direction.Lng
+                name: direction.DirectionName.Value,
+                favorite: direction.DirectionFavorite.Value,
+                lat: direction.DirectionLat.Value,
+                lng: direction.DirectionLng.Value
             }]
         )
     }

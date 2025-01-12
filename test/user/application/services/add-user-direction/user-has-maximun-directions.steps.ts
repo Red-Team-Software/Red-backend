@@ -11,10 +11,15 @@ import { Wallet } from 'src/user/domain/entities/wallet/wallet.entity';
 import { WalletId } from 'src/user/domain/entities/wallet/value-objects/wallet-id';
 import { Ballance } from 'src/user/domain/entities/wallet/value-objects/balance';
 import { AddUserDirectionApplicationService } from 'src/user/application/services/command/add-user-direction-application.service';
-import { UserDirection } from 'src/user/domain/value-object/user-direction';
 import { InvalidUserDirectionQuantityException } from 'src/user/domain/domain-exceptions/invalid-user-direction-quantity-exception';
 import { IdGeneratorMock } from 'test/common/mocks/infraestructure/id-generator.mock';
 import { EventPublisherMock } from 'test/common/mocks/infraestructure/event-publisher.mock';
+import { UserDirection } from 'src/user/domain/entities/directions/direction.entity';
+import { DirectionFavorite } from 'src/user/domain/entities/directions/value-objects/direction-favorite';
+import { DirectionId } from 'src/user/domain/entities/directions/value-objects/Direction-id';
+import { DirectionLat } from 'src/user/domain/entities/directions/value-objects/direction-lat';
+import { DirectionLng } from 'src/user/domain/entities/directions/value-objects/direction-lng';
+import { DirectionName } from 'src/user/domain/entities/directions/value-objects/direction-name';
 
 let idGen = new IdGeneratorMock()
 
@@ -25,12 +30,48 @@ const users: User[] = [
     UserPhone.create('04122345678'),
     UserRole.create('CLIENT'),
     [
-      UserDirection.create('Home',true,10.123456,-66.123456),
-      UserDirection.create('Work',false,10.123456,-66.789456),
-      UserDirection.create('School',false,10.123456,-66.14564),
-      UserDirection.create('Gym',false,10.123456,-66.12465),
-      UserDirection.create('Park',false,10.123456,-78.123456),
-      UserDirection.create('Restaurant',false,10.123456,-45.123456)
+      UserDirection.create(
+        DirectionId.create('e09771db-2657-45fb-ad39-ae6604422918'),
+        DirectionFavorite.create(true),
+        DirectionLat.create(10.123456),
+        DirectionLng.create(-66.123456),
+        DirectionName.create('Home')
+    ),
+    UserDirection.create(
+        DirectionId.create('e09771db-2657-45fb-ad39-ae6604422917'),
+        DirectionFavorite.create(false),
+        DirectionLat.create(10.123456),
+        DirectionLng.create(-66.789456),
+        DirectionName.create('Work')
+    ),
+    UserDirection.create(
+        DirectionId.create('e09771db-2657-45fb-ad39-ae6604422916'),
+        DirectionFavorite.create(false),
+        DirectionLat.create(10.123456),
+        DirectionLng.create(-66.14564),
+        DirectionName.create('School')
+    ),
+    UserDirection.create(
+        DirectionId.create('e09771db-2657-45fb-ad39-ae6604422915'),
+        DirectionFavorite.create(false),
+        DirectionLat.create(10.123456),
+        DirectionLng.create(-66.12465),
+        DirectionName.create('Gym')
+    ),
+    UserDirection.create(
+        DirectionId.create('e09771db-2657-45fb-ad39-ae6604422914'),
+        DirectionFavorite.create(false),
+        DirectionLat.create(10.123456),
+        DirectionLng.create(-78.123456),
+        DirectionName.create('Park')
+    ),
+    UserDirection.create(
+        DirectionId.create('e09771db-2657-45fb-ad39-ae6604422913'),
+        DirectionFavorite.create(false),
+        DirectionLat.create(10.123456),
+        DirectionLng.create(-45.123456),
+        DirectionName.create('Restaurant')
+    )
     ],
     Wallet.create(
       WalletId.create('fd5235de-9533-4660-8b00-67448de3b767'),
@@ -42,7 +83,8 @@ const users: User[] = [
 let service= new AddUserDirectionApplicationService(
   new UserCommandRepositoryMock(users),
   new UserQueryRepositoryMock(users,idGen),
-  new EventPublisherMock()
+  new EventPublisherMock(),
+  new IdGeneratorMock()
 )
 
 let caughtError:any
@@ -56,13 +98,13 @@ When('Trying to create a User with one more direction, when he already has the 6
           name: 'Supermarket',
           favorite: true,
           lat: 24.123456,
-          lng: 10.123456
+          long: 10.123456
         },
         {
           name: 'Pharmacy',
           favorite: false,
           lat: 20.123456,
-          lng: 2.123456
+          long: 2.123456
         }
       ] 
     }
