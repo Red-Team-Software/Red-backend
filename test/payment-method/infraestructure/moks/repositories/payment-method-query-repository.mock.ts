@@ -14,17 +14,33 @@ export class PaymentMethodQueryRepositoryMock implements IPaymentMethodQueryRepo
 
 
     constructor(private readonly paymentMethod: PaymentMethodAgregate[]){}
-    verifyMethodRegisteredByName(name: PaymentMethodName): Promise<Result<boolean>> {
-        throw new Error("Method not implemented.");
+
+       TransformToDataModel(odmPaymentMethod: PaymentMethodAgregate): IPaymentMethodModel {
+        
+            return {
+                paymentMethodId: odmPaymentMethod.getId().paymentMethodId,
+                paymentMethodName: odmPaymentMethod.name.paymentMethodName,
+                paymentMethodState: odmPaymentMethod.state.paymentMethodState,
+                paymentMethodImage: odmPaymentMethod.image.Value
+            }
+        }
+        
+    async verifyMethodRegisteredByName(name: PaymentMethodName): Promise<Result<boolean>> {
+        const methodExists = this.paymentMethod.some(m => m.name.equals(name));
+        return Result.success(methodExists);
     }
-    findMethodByIdDetail(id: PaymentMethodId): Promise<Result<IPaymentMethodModel>> {
-        throw new Error("Method not implemented.");
+    async findMethodByIdDetail(id: PaymentMethodId): Promise<Result<IPaymentMethodModel>> {
+        let method = this.paymentMethod.find( m => m.getId().equals(id) );
+        return Result.success( this.TransformToDataModel(method) );
     }
-    findMethodByNameDetail(name: PaymentMethodName): Promise<Result<IPaymentMethodModel>> {
-        throw new Error("Method not implemented.");
+    async findMethodByNameDetail(name: PaymentMethodName): Promise<Result<IPaymentMethodModel>> {
+        let method = this.paymentMethod.find( m => m.name.equals(name) );
+        return Result.success( this.TransformToDataModel(method) );
     }
-    findAllMethodsDetail(pagination: FindAllPaymentMethodRequestDto): Promise<Result<IPaymentMethodModel[]>> {
-        throw new Error("Method not implemented.");
+    async findAllMethodsDetail(pagination: FindAllPaymentMethodRequestDto): Promise<Result<IPaymentMethodModel[]>> {
+        let method = this.paymentMethod.slice( pagination.page,pagination.perPage );
+        let model = method.map( m => this.TransformToDataModel(m) );
+        return Result.success( model );
     }
 
     async findMethodById(id: PaymentMethodId): Promise<Result<PaymentMethodAgregate>> {
