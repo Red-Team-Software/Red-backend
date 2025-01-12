@@ -95,6 +95,10 @@ import { FindOrderByIdApplicationService } from "src/order/application/service/q
 import { PayOrderAplicationService } from "src/order/application/service/command/pay-order-application.service";
 import { PayOrderService } from "src/order/domain/domain-services/services/pay-order.service";
 import { ComplexPayOrderMethod } from "src/order/domain/domain-services/services/complex-pay-order-method.service";
+import { ICreateOrder } from "src/notification/infraestructure/interfaces/create-order.interface";
+import { IDeliveringOrder } from "src/notification/infraestructure/interfaces/delivering-order.interface";
+import { IDeliveredOrder } from "src/notification/infraestructure/interfaces/delivered-order.interface";
+import { IReportedOrder } from "src/notification/infraestructure/interfaces/order-reported.interface";
 
 
 @ApiBearerAuth()
@@ -169,7 +173,7 @@ export class OrderController {
 
         //*RabbitMQ
         this.rabbitMq = new RabbitMQPublisher(this.channel);
-        this.subscriber= new RabbitMQSubscriber(this.channel)
+        this.subscriber= new RabbitMQSubscriber(this.channel);
 
         //*implementations of domain services
         this.calculateShipping = new CalculateShippingFeeHereMaps(this.hereMapsSingelton);
@@ -220,6 +224,46 @@ export class OrderController {
             { name: 'WalletRefund/OrderStatusCancelled'}, 
             (data):Promise<void>=>{
                 this.walletRefund(data)
+                return
+            }
+        )
+
+        this.subscriber.consume<ICreateOrder>(
+            { name: 'OrderSync/OrderRegistered'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
+                return
+            }
+        )
+
+        this.subscriber.consume<ICancelOrder>(
+            { name: 'OrderSync/OrderStatusCancelled'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
+                return
+            }
+        )
+
+        this.subscriber.consume<IReportedOrder>(
+            { name: 'OrderSync/OrderReported'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
+                return
+            }
+        )
+
+        this.subscriber.consume<IDeliveredOrder>(
+            { name: 'OrderSync/OrderStatusDelivered'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
+                return
+            }
+        )
+
+        this.subscriber.consume<IDeliveringOrder>(
+            { name: 'OrderSync/CourierAssignedToDeliver'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
                 return
             }
         )
