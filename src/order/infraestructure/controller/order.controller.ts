@@ -76,6 +76,8 @@ import { OrderQueues } from "../queues/order.queues";
 import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber";
 import { ICancelOrder } from "src/notification/infraestructure/interfaces/cancel-order.interface";
 import { RefundPaymentApplicationServiceRequestDto } from "src/order/application/dto/request/refund-payment-request-dto";
+import { IQueryCuponRepository } from "src/cupon/application/query-repository/query-cupon-repository";
+import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-cupon-query-repository";
 import { AssignCourierDto } from "../dto/delivering-order-entry.dto";
 import { AssignCourierApplicationServiceRequestDto } from "src/order/application/dto/request/assign-courier-request-dto";
 import { AuditDecorator } from "src/common/application/aspects/audit-decorator/audit-decorator";
@@ -93,6 +95,9 @@ import { FindOrderByIdApplicationService } from "src/order/application/service/q
 import { PayOrderAplicationService } from "src/order/application/service/command/pay-order-application.service";
 import { PayOrderService } from "src/order/domain/domain-services/services/pay-order.service";
 import { ComplexPayOrderMethod } from "src/order/domain/domain-services/services/complex-pay-order-method.service";
+import { OrmCuponEntity } from "src/cupon/infraestructure/orm-entities/orm-cupon-entity";
+import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
+import { OrmCuponMapper } from "src/cupon/infraestructure/mapper/orm-cupon-mapper";
 
 
 @ApiBearerAuth()
@@ -103,6 +108,7 @@ export class OrderController {
 
     //*Mappers
     private readonly orderMapper: IMapper<Order,OrmOrderEntity>;
+    private readonly cuponMapper: IMapper<Cupon,OrmCuponEntity>
 
     //*Singeltons
     private readonly stripeSingleton: StripeSingelton;
@@ -124,6 +130,7 @@ export class OrderController {
     private readonly ormUserQueryRepository: IQueryUserRepository;
     private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
     private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>;
+    private readonly ormCuponQueryRepo: IQueryCuponRepository;
     private readonly auditRepository: IAuditRepository
 
     //*IdGen
@@ -180,6 +187,7 @@ export class OrderController {
         this.TransactionCommandRepository = new OrmTransactionCommandRepository(PgDatabaseSingleton.getInstance());
         this.ormProductRepository = new OrmProductQueryRepository(PgDatabaseSingleton.getInstance());
         this.ormBundleRepository = new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance());
+        
         this.ormCourierRepository = new CourierRepository(
             PgDatabaseSingleton.getInstance(),
             new OrmCourierMapper(this.idGen)
@@ -206,9 +214,12 @@ export class OrderController {
             this.ormUserQueryRepository
         );
 
+        this.cuponMapper=new OrmCuponMapper(this.idGen,this.ormUserQueryRepository)
         //*Repositories
+
         this.orderQueryRepository = new OrderQueryRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
         this.orderRepository = new OrmOrderRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
+        this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance(),this.cuponMapper);
 
         this.initializeQueues();
 
@@ -307,7 +318,8 @@ export class OrderController {
                             this.ormBundleRepository,
                             new DateHandler(),
                             new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                            this.paymentMethodQueryRepository
+                            this.paymentMethodQueryRepository,
+                            this.ormCuponQueryRepo
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
                     new NestLogger(new Logger())
@@ -360,7 +372,8 @@ export class OrderController {
                             this.ormBundleRepository,
                             new DateHandler(),
                             new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                            this.paymentMethodQueryRepository
+                            this.paymentMethodQueryRepository,
+                            this.ormCuponQueryRepo
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
                     new NestLogger(new Logger())
