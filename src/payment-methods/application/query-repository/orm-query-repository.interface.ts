@@ -9,4 +9,5 @@ export interface IPaymentMethodQueryRepository {
     findMethodById(id: PaymentMethodId): Promise<Result<PaymentMethodAgregate>>;
     findMethodByName(name: PaymentMethodName): Promise<Result<PaymentMethodAgregate>>;
     findAllMethods(pagination: FindAllPaymentMethodRequestDto): Promise<Result<PaymentMethodAgregate[]>>;
+    verifyMethodRegisteredByName(name:PaymentMethodName):Promise<Result<boolean>>
 }

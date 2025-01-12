@@ -23,7 +23,7 @@ export interface IOrderModel{
 export interface productsOrderResponse {
     id: string
     name: string 
-    descripcion: string
+    description: string
     quantity: number
     price:number 
     images:string[]
@@ -34,7 +34,7 @@ export interface productsOrderResponse {
 export interface bundlesOrderResponse {
     id: string
     name: string 
-    descripcion: string
+    description: string
     quantity: number
     price:number 
     images:string[]
@@ -51,4 +51,8 @@ export interface reportOrderResponse {
 export interface courierOrderResponse {
     courierName: string
     courierImage: string
+    location: {
+        lat: number
+        long: number
+    }
 }

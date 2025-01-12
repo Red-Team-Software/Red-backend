@@ -34,7 +34,7 @@ export class ChangePasswordApplicationService extends IApplicationService
         const result = await this.queryAccountRepository.findAccountByEmail( data.email )
 
         if ( !result.isSuccess() ) 
-            return Result.fail(new UserNotFoundApplicationException())
+            return Result.fail(new UserNotFoundApplicationException(data.userId))
 
         const account=result.getValue 
 

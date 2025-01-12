@@ -9,6 +9,7 @@ import { PaymentAmount } from "src/order/domain/entities/payment/value-object/pa
 import { PaymentCurrency } from "src/order/domain/entities/payment/value-object/payment-currency";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { IPaymentMethodService } from "src/order/domain/domain-services/interfaces/payment-method-interface";
+import { PaymentFailedException } from "src/order/domain/exception/domain-services/payment-failed-exception";
 
 
 export class StripePayOrderMethod implements IPaymentMethodService {    
@@ -67,7 +68,7 @@ export class StripePayOrderMethod implements IPaymentMethodService {
             
             return Result.success(newOrder);
         } catch (error) {
-            return Result.fail(error);
+            return Result.fail(new PaymentFailedException());
         }
         
     }
