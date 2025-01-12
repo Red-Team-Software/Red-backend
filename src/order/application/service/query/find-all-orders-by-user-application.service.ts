@@ -99,6 +99,8 @@ export class FindAllOdersByUserApplicationService extends IApplicationService<Fi
             };
         };
 
+        console.log("domainProducts")
+
         let courierResponse = await this.ormCourierQueryRepository.findAllCouriers();
 
         let ordersDto: orderResponse[] = [];
@@ -107,19 +109,26 @@ export class FindAllOdersByUserApplicationService extends IApplicationService<Fi
 
             let associatedProducts: productsOrderResponse[];
             let associatedBundles: bundlesOrderResponse[];
+            let associatedCourier: courierOrderResponse;
             
             if (domainProducts) associatedProducts = domainProducts.filter((product) => product.orderid === order.getId().orderId); 
             
             if (domainBundles) associatedBundles = domainBundles.filter((bundle) => bundle.orderid === order.getId().orderId); 
 
-            let courier = courierResponse.getValue.find(
-                (courier) => courier.getId().courierId === order.OrderCourierId.OrderCourierId
-            );
+            if (order.OrderCourierId){
+                let courier = courierResponse.getValue.find(
+                    (courier) => courier.getId().courierId === order.OrderCourierId.OrderCourierId
+                );
 
-            let associatedCourier: courierOrderResponse = {
-                courierName: courier.CourierName.courierName,
-                courierImage: courier.CourierImage.Value
-            };
+                associatedCourier = {
+                    courierName: courier.CourierName.courierName,
+                    courierImage: courier.CourierImage.Value,
+                    location: {
+                        lat: courier.CourierDirection.Latitude,
+                        long: courier.CourierDirection.Longitude
+                    }
+                };
+            }
 
             ordersDto.push({
                 orderId: order.getId().orderId,
@@ -144,7 +153,7 @@ export class FindAllOdersByUserApplicationService extends IApplicationService<Fi
                     description: order.OrderReport.Description.Value,
                     orderid: order.getId().orderId
                 } : null,
-                orderCourier: associatedCourier ? associatedCourier : null
+                orderCourier: order.OrderCourierId ? associatedCourier : null
             });
         });
 
