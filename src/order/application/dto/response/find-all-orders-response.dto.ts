@@ -31,6 +31,10 @@ export type reportOrderResponse = {
 export type courierOrderResponse = {
     courierName: string
     courierImage: string
+    location: {
+        lat: number
+        long: number
+    }
 }
 
 export type orderResponse = {
