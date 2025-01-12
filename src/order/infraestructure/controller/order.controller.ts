@@ -281,7 +281,8 @@ export class OrderController {
                             this.calculateShipping,
                             this.calculateTax,
                             new PayOrderService(
-                                new ComplexPayOrderMethod(
+                                data.stripePaymentMethod
+                                ? new ComplexPayOrderMethod(
                                     [
                                         new StripePayOrderMethod(
                                             this.stripeSingleton,
@@ -297,6 +298,12 @@ export class OrderController {
                                             )
                                     ]
                                 )
+                                : new WalletPaymentMethod(
+                                    this.idGen, 
+                                    this.ormUserQueryRepository,
+                                    this.ormUserCommandRepo,
+                                    this.TransactionCommandRepository
+                                    )
                             ),
                             this.orderRepository,
                             this.idGen,
