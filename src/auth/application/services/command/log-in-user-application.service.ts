@@ -14,7 +14,6 @@ import { Result } from "src/common/utils/result-handler/result";
 import { UserNotFoundApplicationException } from "../../application-exception/user-not-found-application-exception";
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { UserId } from "src/user/domain/value-object/user-id";
-import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
 import { ErrorRegisteringSessionApplicationException } from "../../application-exception/error-registering-session-application-exception";
 import { AccountNotFoundApplicationException } from "../../application-exception/account-not-found-application-exception";
 
@@ -48,10 +47,6 @@ export class LogInUserApplicationService extends IApplicationService
             return Result.fail(new UserNotFoundApplicationException(account.idUser))
 
         const user= resultUser.getValue
-
-        //TODO para nosotros exclusivamente
-        // if(!account.isConfirmed) 
-        //     return Result.fail(new UserNotVerifiedApplicationException())
 
         const validPassword = await this.encryptor.comparePlaneAndHash( data.password, account.password )
         

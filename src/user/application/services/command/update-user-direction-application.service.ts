@@ -47,9 +47,6 @@ export class UpdateUserDirectionApplicationService extends IApplicationService
 
         user.updateDirection(directionsUpdated)
 
-
-
-
         let userResponse= await this.commandUserRepository.updateUser(user)
 
         if (!userResponse.isSuccess())

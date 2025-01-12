@@ -27,7 +27,7 @@ export class FindUserDirectionApplicationService extends IApplicationService
         let response=await this.queryUserRepository.findUserById(UserId.create(data.userId));
 
         if (!response.isSuccess())
-            return Result.fail(new UserNotFoundApplicationException())
+            return Result.fail(new UserNotFoundApplicationException(data.userId))
         
         let directions = response.getValue
         
