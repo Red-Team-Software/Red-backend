@@ -3,8 +3,8 @@ import { User } from "src/user/domain/aggregate/user.aggregate";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { UserPhone } from "src/user/domain/value-object/user-phone";
 import { IUserDirection } from "../model/user.direction.interface";
-import { UserDirection } from "src/user/domain/value-object/user-direction";
 import { IDirection } from "../model/direction-interface";
+import { UserDirection } from "src/user/domain/entities/directions/direction.entity";
 
 export interface IQueryUserRepository {
     findUserById(id:UserId):Promise<Result<User>>

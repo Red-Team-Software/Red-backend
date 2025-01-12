@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { IsUUID, IsNotEmpty, IsString, MinLength, IsBoolean, IsNumber } from "class-validator"
+import { ByIdDTO } from "src/common/infraestructure/dto/entry/by-id.dto"
 
-export class UserDirectionsInfraestructureRequestDTO {
+export class UserDirectionsByIdInfraestructureRequestDTO extends ByIdDTO {
 
     @ApiProperty( { required: true, default: 'casa' })
     @IsNotEmpty()

@@ -5,6 +5,6 @@ export interface AddUserDirectionsApplicationRequestDTO extends IServiceRequestD
         name: string
         favorite: boolean
         lat: number
-        lng: number
+        long: number
     }[]
 }

@@ -14,7 +14,7 @@ export class AddUserDirectionsInfraestructureRequestDTO {
             name: 'casa',
             favorite: true,
             lat: 38.8951,
-            lng: -77.0364
+            long: -77.0364
         }],
       })
     directions:UserDirectionsInfraestructureRequestDTO[]

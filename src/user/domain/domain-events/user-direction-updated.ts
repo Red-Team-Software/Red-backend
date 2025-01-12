@@ -1,6 +1,6 @@
 import { DomainEvent } from "src/common/domain"
-import { UserDirection } from "../value-object/user-direction"
 import { UserId } from "../value-object/user-id"
+import { UserDirection } from "../entities/directions/direction.entity"
 
 
 export class UserDirectionUpdated extends DomainEvent {
@@ -8,10 +8,11 @@ export class UserDirectionUpdated extends DomainEvent {
         let data= {  
             userId:this.userId.Value,
             userDirection:this.userDirection.map(direction=>({
-                name: direction.Name,
-                favorite: direction.Favorite,
-                lat: direction.Lat,
-                lng: direction.Lng   
+                id: direction.getId().Value,
+                name: direction.DirectionName.Value,
+                favorite: direction.DirectionFavorite.Value,
+                lat: direction.DirectionLat.Value,
+                lng: direction.DirectionLng.Value   
             }))
         }
         return JSON.stringify(data)

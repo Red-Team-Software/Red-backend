@@ -2,14 +2,17 @@ import { IEventPublisher } from "src/common/application/events/event-publisher/e
 import { IApplicationService } from "src/common/application/services"
 import { Result } from "src/common/utils/result-handler/result"
 import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface"
-import { UserDirection } from "src/user/domain/value-object/user-direction"
 import { UserId } from "src/user/domain/value-object/user-id"
 import { ErrorUpdatinDirectionApplicationException } from "../../application-exeption/error-updating-directions-application-exception"
 import { UpdateUserDirectionsApplicationRequestDTO } from "../../dto/request/update-user-direction-application-request-dto"
 import { UpdateUserDirectionsApplicationResponseDTO } from "../../dto/response/update-user-direction-application-response-dto"
 import { IQueryUserRepository } from "../../repository/user.query.repository.interface"
-
-
+import { UserDirection } from "src/user/domain/entities/directions/direction.entity"
+import { DirectionId } from "src/user/domain/entities/directions/value-objects/Direction-id"
+import { DirectionFavorite } from "src/user/domain/entities/directions/value-objects/direction-favorite"
+import { DirectionLat } from "src/user/domain/entities/directions/value-objects/direction-lat"
+import { DirectionLng } from "src/user/domain/entities/directions/value-objects/direction-lng"
+import { DirectionName } from "src/user/domain/entities/directions/value-objects/direction-name"
 
 
 export class UpdateUserDirectionApplicationService extends IApplicationService 
@@ -29,44 +32,28 @@ export class UpdateUserDirectionApplicationService extends IApplicationService
         if (!userRepoResponse.isSuccess())
             return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
 
-        let userDirections=data.directions.map(direction=>UserDirection.create(
-            direction.name,
-            direction.favorite,
-            direction.lat,
-            direction.lng
-        ))
-
         let user=userRepoResponse.getValue
 
-        let currentDirections=user.UserDirections
-
-        user.updateDirection(userDirections)
-
-        let modifiedDirections=user.UserDirections
-
-        let directionsToDelete=currentDirections.filter(
-            (direction)=>!modifiedDirections.find(
-                (current)=>direction.Lat==current.Lat&&
-                direction.Lng==current.Lng
+        const directionsUpdated=data.directions.map(d=>
+            UserDirection.create(
+                DirectionId.create(d.id),
+                DirectionFavorite.create(d.favorite),
+                DirectionLat.create(d.lat),
+                DirectionLng.create(d.long),
+                DirectionName.create(d.name)
             )
         )
+
+
+        user.updateDirection(directionsUpdated)
+
+
+
 
         let userResponse= await this.commandUserRepository.updateUser(user)
 
         if (!userResponse.isSuccess())
             return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
-
-        if (directionsToDelete.length!==0){
-            for (const directionToDelete of directionsToDelete){
-
-                let deleteResponse=await this.commandUserRepository.deleteUserDirection(
-                    user.getId(),
-                    directionToDelete
-                )
-                if (!deleteResponse.isSuccess())
-                    return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
-            }
-        }
 
         this.eventPublisher.publish(user.pullDomainEvents())
 

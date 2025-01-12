@@ -4,7 +4,6 @@ import { UserName } from "../value-object/user-name";
 import { UserPhone } from "../value-object/user-phone";
 import { UserRegistered } from '../domain-events/user-registered';
 import { UserImage } from "../value-object/user-image";
-import { UserDirection } from '../value-object/user-direction';
 import { UserDirectionAdded } from "../domain-events/user-direction-added";
 import { UserDirectionDeleted } from "../domain-events/user-direction-deleted";
 import { DomainExceptionNotHandled } from "src/common/domain/domain-exception-not-handled/domain-exception-not-handled";
@@ -19,6 +18,9 @@ import { InvalidUserDirectionQuantityException } from "../domain-exceptions/inva
 import { UserBalanceAmountAdded } from "../domain-events/user-balance-amount-added";
 import { UserBalanceAmountDecremented } from "../domain-events/user-balance-amount-decremented";
 import { Ballance } from "../entities/wallet/value-objects/balance";
+import { UserDirection } from "../entities/directions/direction.entity"
+import { DirectionId } from "../entities/directions/value-objects/Direction-id";
+
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -37,8 +39,10 @@ export class User extends AggregateRoot <UserId>{
                 break;
             }
             case 'UserDirectionDeleted':{
-                const userDirectionDeleted: UserDirectionAdded = event as UserDirectionAdded
-                this.UserDirections.filter(userDirection=>!userDirection.equals(userDirectionDeleted.userDirection))
+                const userDirectionDeleted: UserDirectionDeleted = event as UserDirectionDeleted
+                this.userDirections = this.userDirections.filter(
+                    userDirection => !userDirection.getId().equals(userDirectionDeleted.directionId)
+                )
                 break;
             }
             case 'UserDirectionUpdated':{
@@ -157,7 +161,8 @@ export class User extends AggregateRoot <UserId>{
         )
         this.validateState()  
     }
-    deleteDirection(direction:UserDirection):void{
+
+    deleteDirection(direction:DirectionId):void{
         this.apply(
             UserDirectionDeleted.create(
                 this.getId(),
@@ -165,6 +170,7 @@ export class User extends AggregateRoot <UserId>{
             )
         )    
     }
+
     updateImage(userImage:UserImage):void{
         this.apply(
             UserImageUpdated.create(

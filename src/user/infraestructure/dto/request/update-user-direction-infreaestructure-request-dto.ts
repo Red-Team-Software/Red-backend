@@ -2,13 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ArrayNotEmpty, IsArray, IsBoolean, IsNotEmpty, IsNumber, IsString, IsUUID, MinLength, ValidateNested } from 'class-validator';
 import { UserDirectionsInfraestructureRequestDTO } from './user-direction-infraestructure-request-dto';
+import { UserDirectionsByIdInfraestructureRequestDTO } from './update-user-direction-infraestructure-request-dto';
 
 
 export class UpdateUserDirectionsInfraestructureRequestDTO {
     @IsArray() 
     @ArrayNotEmpty() 
     @ValidateNested({ each: true })
-    @Type(() => UserDirectionsInfraestructureRequestDTO)
+    @Type(() => UserDirectionsByIdInfraestructureRequestDTO)
     @ApiProperty({
         description: 'Delete User direction',
         example: [{
@@ -16,8 +17,8 @@ export class UpdateUserDirectionsInfraestructureRequestDTO {
             name: 'casa',
             favorite: true,
             lat: 38.8951,
-            lng: -77.0364
+            long: -77.0364
         }],
       })
-    directions:UserDirectionsInfraestructureRequestDTO[]
+    directions:UserDirectionsByIdInfraestructureRequestDTO[]
 }
