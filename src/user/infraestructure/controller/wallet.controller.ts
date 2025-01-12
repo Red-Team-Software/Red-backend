@@ -110,6 +110,7 @@ export class PaymentWalletController {
                 new LoggerDecorator(
                     new PerformanceDecorator(
                         new AddBalanceToWalletApplicationService (
+                            this.paymentMethodQueryRepository,
                             this.ormUserCommandRepo,
                             this.ormUserQueryRepo,
                             new RabbitMQPublisher(this.channel),
@@ -119,8 +120,7 @@ export class PaymentWalletController {
                                 )
                             ),
                             this.TransactionCommandRepository,
-                            this.idGen,
-                            this.paymentMethodQueryRepository
+                            this.idGen
                         ), new NestTimer(), new NestLogger(new Logger())
                     ), new NestLogger(new Logger())
                 ),this.auditRepository, new DateHandler()
@@ -158,6 +158,7 @@ export class PaymentWalletController {
                 new LoggerDecorator(
                     new PerformanceDecorator(
                         new AddBalanceToWalletApplicationService (
+                            this.paymentMethodQueryRepository,
                             this.ormUserCommandRepo,
                             this.ormUserQueryRepo,
                             new RabbitMQPublisher(this.channel),

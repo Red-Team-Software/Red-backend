@@ -24,7 +24,7 @@ export class DeleteCardToUserApplicationService extends IApplicationService<Dele
         let userResponse= await this.queryUserRepository.findUserById(UserId.create(data.userId));
         
         if (!userResponse.isSuccess())
-            return Result.fail(new UserNotFoundApplicationException());
+            return Result.fail(new UserNotFoundApplicationException(data.userId));
 
         let cardResponse = await this.userExternalSite.deleteUserCards(
             data.cardId
