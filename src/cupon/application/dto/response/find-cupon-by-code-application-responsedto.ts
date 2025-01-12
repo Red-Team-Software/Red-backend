@@ -1,7 +1,8 @@
 import { IServiceResponseDto } from "src/common/application/services";
 
 export interface FindCuponByCodeApplicationResponseDTO extends IServiceResponseDto {
-    cuponUserId:string;
+    cuponId: string;
+    cuponUserId: string;
     discount: number;
     state: string;
 }

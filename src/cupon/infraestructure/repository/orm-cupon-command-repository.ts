@@ -21,7 +21,7 @@ export class OrmCuponCommandRepository extends Repository<OrmCuponEntity> implem
         this.mapperCuponUser= mapperCuponUser
     }
 
-    async saveCuponUser(cuponUser: CuponUser): Promise<Result<boolean>> {
+    async registerCuponUser(cuponUser: CuponUser): Promise<Result<boolean>> {
         try {
             const ormCuponUser = await this.cuponUserMapper.fromDomaintoPersistence(cuponUser);
             await this.manager.save(ormCuponUser);

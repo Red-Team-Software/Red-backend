@@ -10,7 +10,7 @@ import { UseCuponApplicationResponseDTO } from '../../dto/response/use-cupon-app
 import { CuponCode } from 'src/cupon/domain/value-object/cupon-code';
 import { ICommandCuponRepository } from '../../../domain/repository/command-cupon-repository';
 
-export class UseCuponApplicationService extends IApplicationService<
+export class MarkCuponAsUsedApplicationService extends IApplicationService<
     UseCuponApplicationRequestDTO,UseCuponApplicationResponseDTO
 > {
     constructor(
@@ -21,9 +21,9 @@ export class UseCuponApplicationService extends IApplicationService<
     }
 
     async execute(data: UseCuponApplicationRequestDTO): Promise<Result<UseCuponApplicationResponseDTO>> {
-        const { userId, cuponCode } = data;
+        const { userId, cuponId } = data;
 
-        const cupon = await this.queryCuponRepository.findCuponByCode(CuponCode.create(cuponCode));
+        const cupon = await this.queryCuponRepository.findCuponById({userId:data.userId ,id:data.cuponId});
         
         if(!cupon.isSuccess()){
             return Result.fail(new NotFoundCuponApplicationException())
@@ -47,7 +47,7 @@ export class UseCuponApplicationService extends IApplicationService<
 
         // 3. Marcar el cupon como usado
         cuponUser.markAsUsed();
-        const saveResult = await this.commandCuponRepository.saveCuponUser(cuponUser);
+        const saveResult = await this.commandCuponRepository.registerCuponUser(cuponUser);
 
         if (!saveResult.isSuccess()) {
             return Result.fail(saveResult.getError);
@@ -57,7 +57,7 @@ export class UseCuponApplicationService extends IApplicationService<
             userId: data.userId,
             cuponId: cupon.getValue.getId().Value,
             discount: cupon.getValue.CuponDiscount.Value,
-            status: 'used',
+            status: 'USED',
         };
     
         return Result.success(responseDto);

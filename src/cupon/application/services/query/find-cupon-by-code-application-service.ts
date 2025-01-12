@@ -7,6 +7,8 @@ import { NotFoundCuponApplicationException } from "src/cupon/application/applica
 import { CuponCode } from "src/cupon/domain/value-object/cupon-code";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { CuponId } from "src/cupon/domain/value-object/cupon-id";
+import { CuponUserInvalidUseApplicationException } from "../../application-exception/cupon-user-invalid-use-application-exception";
+import { CuponAlreadyUsedException } from "../../application-exception/cupon-already-use-application-exception";
 
 export class FindCuponByCodeApplicationService extends 
 IApplicationService<FindCuponByCodeApplicationRequestDTO, FindCuponByCodeApplicationResponseDTO> {
@@ -20,19 +22,23 @@ IApplicationService<FindCuponByCodeApplicationRequestDTO, FindCuponByCodeApplica
         
         const cuponCode= CuponCode.create(data.cuponCode);
         const userId=UserId.create(data.userId);
-        const response = await this.queryCuponRepository.findCuponByCode(cuponCode);
+        const result = await this.queryCuponRepository.findCuponByCode(cuponCode);
 
-        if (!response.isSuccess() || !response.getValue) {
+        if (!result.isSuccess()) {
             return Result.fail(new NotFoundCuponApplicationException());
         }
-
-        let cuponUserResponse = await this.queryCuponRepository.findCuponUserByUserIdAndCuponId(userId, response.getValue.getId());
+        
+        let cuponUserResponse = await this.queryCuponRepository.findCuponUserByUserIdAndCuponId(userId, result.getValue.getId());
         if (!cuponUserResponse.isSuccess()) {
-            return Result.fail(new NotFoundCuponApplicationException());}
-
+            return Result.fail(new CuponUserInvalidUseApplicationException());}
+        
+        if(cuponUserResponse.getValue.isCuponUsed()){
+            return Result.fail(new CuponAlreadyUsedException());
+        }
         const cupon = cuponUserResponse.getValue;
 
         const responseDto: FindCuponByCodeApplicationResponseDTO = {
+            cuponId: cupon.getId().Value,
             cuponUserId: cupon.getId().Value,
             discount: cupon.Discount.Value,
             state: cupon.State.Value

@@ -8,6 +8,6 @@ export interface ICommandCuponRepository {
     createCupon(cupon: Cupon): Promise<Result<Cupon>>;
     deleteCuponById(id: CuponId): Promise<Result<CuponId>>;
     updateCupon(cupon: Cupon): Promise<Result<Cupon>>;
-    saveCuponUser(cuponUser: CuponUser): Promise<Result<boolean>>;
-    updateCuponUser(cuponUser:CuponUser): Promise<Result<CuponUser>>
+    registerCuponUser(cuponUser: CuponUser): Promise<Result<boolean>>;
+    updateCuponUser(cuponUser:CuponUser): Promise<Result<CuponUser>>;
 }

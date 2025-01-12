@@ -27,6 +27,11 @@ import { FindCuponByCodeApplicationService } from 'src/cupon/application/service
 import { ICommandCuponRepository } from 'src/cupon/domain/repository/command-cupon-repository';
 import { OrmCuponUserEntity } from '../orm-entities/orm-cupon-user-entity';
 import { CuponUser } from 'src/cupon/domain/entities/cuponUser/cuponUser.entity';
+import { NotificationQueues } from 'src/notification/infraestructure/queues/notification.queues';
+import { RabbitMQSubscriber } from 'src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber';
+import { ICreateOrder } from 'src/product/infraestructure/interfaces/create-order.interface';
+import { MarkCuponAsUsedApplicationService } from 'src/cupon/application/services/command/mark-cupon-used-application-service';
+import { RegisterCuponToUserInfraestructureRequestDTO } from '../dto-request/register-cupon-to-user-infraestructure-dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -35,15 +40,73 @@ import { CuponUser } from 'src/cupon/domain/entities/cuponUser/cuponUser.entity'
 
 export class CuponController {
 
+  private readonly subscriber:RabbitMQSubscriber;
   private readonly ormCuponCommandRepo: ICommandCuponRepository;
   private readonly idGen: IIdGen<string>;
   private readonly ormCuponQueryRepo: IQueryCuponRepository;
   private readonly cuponMapper: IMapper<Cupon, OrmCuponEntity>;
   private readonly cuponUserMapper: IMapper<CuponUser, OrmCuponUserEntity>;
+
   constructor(@Inject("RABBITMQ_CONNECTION") private readonly channel: Channel) {
     this.idGen = new UuidGen();
+    this.subscriber=new RabbitMQSubscriber(this.channel);
     this.ormCuponCommandRepo = new OrmCuponCommandRepository(PgDatabaseSingleton.getInstance(),this.cuponMapper, this.cuponUserMapper);
     this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance(),this.cuponMapper);
+
+    this.subscriber.buildQueue({
+      name:'OrderEvents',
+      pattern: 'OrderRegistered',
+      exchange:{
+          name:'DomainEvent',
+          type:'direct',
+          options:{
+              durable:false,
+          }
+      }
+  });
+
+  this.initializeQueues();
+
+  this.subscriber.consume<ICreateOrder>(
+              { name: 'OrderEvents/OrderRegistered'}, 
+              (data):Promise<void>=>{
+                if(data.orderCuponId){
+                  this.MarkCuponAsRegistered(data)
+                }
+                  return
+              }
+          )
+  }
+
+      private initializeQueues():void{        
+          NotificationQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+      }
+  
+      private buildQueue(name: string, pattern: string) {
+          this.subscriber.buildQueue({
+            name,
+            pattern,
+            exchange: {
+              name: 'DomainEvent',
+              type: 'direct',
+              options: {
+                durable: false,
+              },
+            },
+          })
+      }
+      
+      
+  async MarkCuponAsRegistered(data:ICreateOrder){
+    let service= new ExceptionDecorator(
+      new LoggerDecorator(
+        new MarkCuponAsUsedApplicationService(this.ormCuponQueryRepo,this.ormCuponCommandRepo),
+        new NestLogger(new Logger())
+      )
+    );
+
+    let response= await service.execute({userId:data.orderUserId,cuponId:data.orderCuponId});
+
   }
 
   @Post('create')
@@ -109,7 +172,7 @@ export class CuponController {
   @Get(':code')
   async getCuponByCode(
     @GetCredential() credential:ICredential,
-    @Param('code') code:string
+    @Param('code') code:string 
   ){
     let service = new ExceptionDecorator(
       new LoggerDecorator(
@@ -118,8 +181,15 @@ export class CuponController {
     );
 
     let response= service.execute({userId:credential.account.idUser, cuponCode:code})
+
     return (await response).getValue
   }
 
-  
+  @Post('registerCupon')
+  async registerCupon(
+    @GetCredential() credential:ICredential,
+    @Body() entry: RegisterCuponToUserInfraestructureRequestDTO){
+      
+    }
 }
+

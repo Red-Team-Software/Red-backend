@@ -14,6 +14,7 @@ import { ErrorCreatingCuponApplicationException } from "../../application-except
 import { ErrorNameAlreadyApplicationException } from "../../application-exception/error-name-already-exist-cupon-application-exception";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IQueryCuponRepository } from "../../query-repository/query-cupon-repository";
+import { ErrorCodeAlreadyExistsCuponApplicationException } from "../../application-exception/error-code-already-exists-application-exception";
 
 export class CreateCuponApplicationService extends IApplicationService<
   CreateCuponApplicationRequestDTO,
@@ -44,6 +45,11 @@ export class CreateCuponApplicationService extends IApplicationService<
       return Result.fail(new ErrorNameAlreadyApplicationException());
     }
 
+    let searchCode = await this.queryCuponRepository.findCuponByCode(CuponCode.create(command.code));
+    if(searchCode.isSuccess()){
+      return Result.fail(new ErrorCodeAlreadyExistsCuponApplicationException());
+    }
+
     // Generar el cupón
     let id = await this.idGen.genId();
     let cupon = Cupon.registerCupon(
@@ -52,7 +58,6 @@ export class CreateCuponApplicationService extends IApplicationService<
       CuponCode.create(command.code),
       CuponDiscount.create(command.discount),
       CuponState.create(command.state)
-
     );
 
     // Guardar el cupón en el repositorio

@@ -3,7 +3,7 @@ import { CuponUserId } from "./value-objects/cuponUserId";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { CuponId } from "../../value-object/cupon-id";
 import { CuponDiscount } from "../../value-object/cupon-discount";
-import { CuponUserStateEnum } from "./value-objects/cupon-state-enum";
+import { CuponUserStateEnum, EnumCuponState } from "./value-objects/cupon-state-enum";
 import { CuponCode } from "../../value-object/cupon-code";
 
 export class CuponUser extends Entity<CuponUserId> {
@@ -11,15 +11,15 @@ export class CuponUser extends Entity<CuponUserId> {
     private userId: UserId;
     private cuponId: CuponId;
     private discount: CuponDiscount;
-
+    private cuponUserId: CuponUserId;
     private constructor(
-        private cuponUserId: CuponUserId,
+        id: CuponUserId,
         userId: UserId,
         cuponId: CuponId,
         discount: CuponDiscount,
         state:CuponUserStateEnum
     ) {
-        super(cuponUserId);
+        super(id);
         this.userId = userId;
         this.cuponId = cuponId;
         this.discount = discount;
@@ -27,21 +27,21 @@ export class CuponUser extends Entity<CuponUserId> {
     }
 
     static create(
-        cuponUserId: CuponUserId,
+        id: CuponUserId,
         userId: UserId,
         cuponId: CuponId,
         discount: CuponDiscount,
         state:CuponUserStateEnum
     ): CuponUser {
-        return new CuponUser(cuponUserId, userId, cuponId, discount, state);
+        return new CuponUser(id, userId, cuponId, discount, state);
     }
 
     public markAsUsed(): void {
-        this.state = CuponUserStateEnum.create('USED');
+        this.state = CuponUserStateEnum.create(EnumCuponState.USED);
     }
 
-    public isCuponUsed(): boolean {
-        return this.state.equals(CuponUserStateEnum.create('USED'));
+    public isCuponUsed(): string {
+        return this.state.Value;
     }
 
     get CuponUserId(): CuponUserId {

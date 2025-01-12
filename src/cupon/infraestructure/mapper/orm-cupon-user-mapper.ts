@@ -5,15 +5,16 @@ import { CuponUserId } from "src/cupon/domain/entities/cuponUser/value-objects/c
 import { CuponId } from "src/cupon/domain/value-object/cupon-id";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { CuponDiscount } from "src/cupon/domain/value-object/cupon-discount";
+import { CuponUserStateEnum } from "src/cupon/domain/entities/cuponUser/value-objects/cupon-state-enum";
 
 export class OrmCuponUserMapper implements IMapper<CuponUser, OrmCuponUserEntity> {
     async fromPersistencetoDomain(ormEntity: OrmCuponUserEntity): Promise<CuponUser> {
-        return new CuponUser(
+        return CuponUser.create(
             CuponUserId.create(ormEntity.user_id, ormEntity.cupon_id),
             UserId.create(ormEntity.user_id),
             CuponId.create(ormEntity.cupon_id),
             CuponDiscount.create(ormEntity.discount),
-            ormEntity.isUsed
+            CuponUserStateEnum.create(ormEntity.state)
         );
     }
 
