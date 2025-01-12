@@ -14,6 +14,7 @@ export class UserStripeAccount implements IUserExternalAccount {
         this.stripe = stripe;
     }
     
+    
     async saveUser(userId: UserId, email: string): Promise<Result<string>> {
         try{
             const customer = await this.stripe.stripeInstance.customers.create({
@@ -64,6 +65,19 @@ export class UserStripeAccount implements IUserExternalAccount {
         }catch(error){
             return Result.fail(error);
         };
+    }
+
+
+    async deleteUserCards(cardId: string): Promise<Result<string>> {
+        try{
+            const paymentMethod = await this.stripe.stripeInstance.paymentMethods.detach(
+                cardId, 
+            );
+
+            return Result.success("success");
+        }catch(error){
+            return Result.fail(error);
+        };;
     }
     
 }

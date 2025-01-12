@@ -4,7 +4,6 @@ import { StripeSingelton } from "src/common/infraestructure/stripe/stripe-singel
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { ExceptionDecorator } from "src/common/application/aspects/exeption-decorator/exception-decorator";
-import { PayOrderAplicationService } from "src/order/application/service/pay-order-application.service";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IApplicationService } from "src/common/application/services";
 import { OrderPayApplicationServiceRequestDto } from "src/order/application/dto/request/order-pay-request-dto";
@@ -17,8 +16,6 @@ import { CalculateShippingFeeHereMaps } from "../domain-service/calculate-shippi
 import { HereMapsSingelton } from '../../../common/infraestructure/here-maps/here-maps-singleton';
 import { TaxesShippingFeeEntryDto } from "../dto/taxes-shipping-dto";
 import { TaxesShippingFeeApplicationServiceEntryDto } from "src/order/application/dto/request/tax-shipping-fee-request-dto";
-import { CalculateTaxesShippingResponseDto } from "src/order/application/dto/response/calculate-taxes-shipping-fee-response.dto";
-import { CalculateTaxShippingFeeAplicationService } from "src/order/application/service/calculate-tax-shipping-fee-application.service";
 import { ICommandOrderRepository } from "src/order/domain/command-repository/order-command-repository-interface";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { Order } from "src/order/domain/aggregate/order";
@@ -30,8 +27,6 @@ import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-data
 import { IQueryOrderRepository } from "src/order/application/query-repository/order-query-repository-interface";
 import { FindAllOrdersEntryDto } from "../dto/find-all-orders.dto";
 import { FindAllOrdersApplicationServiceRequestDto } from "src/order/application/dto/request/find-all-orders-request.dto";
-import { FindAllOrdersApplicationServiceResponseDto } from "src/order/application/dto/response/find-all-orders-response.dto";
-import { FindAllOdersApplicationService } from "src/order/application/service/find-all-orders-application.service";
 import { Channel } from 'amqplib';
 import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher";
 import { IGeocodification } from "src/order/domain/domain-services/interfaces/geocodification-interface";
@@ -39,12 +34,10 @@ import { GeocodificationHereMapsDomainService } from "../domain-service/geocodif
 import { OrmProductQueryRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-query-repository";
 import { CancelOrderApplicationServiceRequestDto } from "src/order/application/dto/request/cancel-order-request-dto";
 import { CancelOrderApplicationServiceResponseDto } from "src/order/application/dto/response/cancel-order-response-dto";
-import { CancelOderApplicationService } from "src/order/application/service/cancel-order-application.service";
 import { CancelOrderDto } from "../dto/cancel-order-entry.dto";
 import { StripePayOrderMethod } from "../domain-service/pay-order-stripe-method";
 import { CreateOrderReportApplicationServiceResponseDto } from "src/order/application/dto/response/create-order-report-response.dto";
 import { CreateOrderReportApplicationServiceRequestDto } from "src/order/application/dto/request/create-order-report-request-dto";
-import { CreateReportApplicationService } from "src/order/application/service/create-report-application.service";
 import { CreateReportEntryDto } from "../dto/create-report-entry.dto";
 import { RefundPaymentStripeConnection } from "../domain-service/refund-amount-stripe";
 import { ICourierRepository } from "src/courier/domain/repositories/courier-repository-interface";
@@ -59,7 +52,6 @@ import { IQueryUserRepository } from "src/user/application/repository/user.query
 import { OrmUserQueryRepository } from "src/user/infraestructure/repositories/orm-repository/orm-user-query-repository";
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler";
 import { FindOrderByIdRequestDto } from "src/order/application/dto/request/find-order-by-id-request-dto";
-import { FindOrderByIdApplicationService } from "src/order/application/service/find-order-by-id-application.service";
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
 import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository";
 import { OrmBundleQueryRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository";
@@ -67,13 +59,11 @@ import { OrmPromotionQueryRepository } from "src/promotion/infraestructure/repos
 import { FindAllOrdersByUserInfraestructureEntryDto } from "../dto/find-all-orders-by-user-ifraestructure-request-dto";
 import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator";
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer";
-import { FindAllOdersByUserApplicationService } from "src/order/application/service/find-all-orders-by-user-application.service";
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
 import { OrmPaymentMethodMapper } from "src/payment-methods/infraestructure/mapper/orm-mapper/orm-payment-method-mapper";
 import { OrmPaymentMethodQueryRepository } from "src/payment-methods/infraestructure/repository/orm-repository/orm-payment-method-query-repository";
 import { DeliveredOrderApplicationServiceRequestDto } from "src/order/application/dto/request/delivered-order-request-dto";
 import { DeliveredOrderDto } from "../dto/delivered-order-entry.dto";
-import { DeliveredOderApplicationService } from "src/order/application/service/delivered-order-application.service";
 import { PaymentEntryDto } from "../dto/payment-entry-dto";
 import { WalletPaymentMethod } from "../domain-service/wallet-method";
 import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface";
@@ -84,18 +74,27 @@ import { ITransaction } from "src/user/application/model/transaction-interface";
 import { WalletPaymentEntryDto } from "../dto/wallet-payment-entry-dto";
 import { OrderQueues } from "../queues/order.queues";
 import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber";
-import { ICreateOrder } from "src/product/infraestructure/interfaces/create-order.interface";
 import { ICancelOrder } from "src/notification/infraestructure/interfaces/cancel-order.interface";
-import { RefundPaymentApplicationService } from "src/order/application/service/refund-payment-application.service";
 import { RefundPaymentApplicationServiceRequestDto } from "src/order/application/dto/request/refund-payment-request-dto";
 import { IQueryCuponRepository } from "src/cupon/domain/query-repository/query-cupon-repository";
 import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-cupon-query-repository";
 import { AssignCourierDto } from "../dto/delivering-order-entry.dto";
 import { AssignCourierApplicationServiceRequestDto } from "src/order/application/dto/request/assign-courier-request-dto";
-import { AssignCourierApplicationService } from "src/order/application/service/assign-courier-application.service";
 import { AuditDecorator } from "src/common/application/aspects/audit-decorator/audit-decorator";
 import { IAuditRepository } from "src/common/application/repositories/audit.repository";
 import { OrmAuditRepository } from "src/common/infraestructure/repository/orm-repository/orm-audit.repository";
+import { RefundPaymentApplicationService } from "src/order/application/service/command/refund-payment-application.service";
+import { CalculateTaxShippingFeeAplicationService } from "src/order/application/service/command/calculate-tax-shipping-fee-application.service";
+import { FindAllOdersApplicationService } from "src/order/application/service/query/find-all-orders-application.service";
+import { FindAllOdersByUserApplicationService } from "src/order/application/service/query/find-all-orders-by-user-application.service";
+import { CancelOderApplicationService } from "src/order/application/service/command/cancel-order-application.service";
+import { AssignCourierApplicationService } from "src/order/application/service/command/assign-courier-application.service";
+import { DeliveredOderApplicationService } from "src/order/application/service/command/delivered-order-application.service";
+import { CreateReportApplicationService } from "src/order/application/service/command/create-report-application.service";
+import { FindOrderByIdApplicationService } from "src/order/application/service/query/find-order-by-id-application.service";
+import { PayOrderAplicationService } from "src/order/application/service/command/pay-order-application.service";
+import { PayOrderService } from "src/order/domain/domain-services/services/pay-order.service";
+import { ComplexPayOrderMethod } from "src/order/domain/domain-services/services/complex-pay-order-method.service";
 
 
 @ApiBearerAuth()
@@ -220,7 +219,6 @@ export class OrderController {
         this.subscriber.consume<ICancelOrder>(
             { name: 'WalletRefund/OrderStatusCancelled'}, 
             (data):Promise<void>=>{
-                console.log("hola")
                 this.walletRefund(data)
                 return
             }
@@ -281,7 +279,31 @@ export class OrderController {
                             this.rabbitMq,
                             this.calculateShipping,
                             this.calculateTax,
-                            new StripePayOrderMethod(this.stripeSingleton, this.idGen, data.stripePaymentMethod),
+                            new PayOrderService(
+                                data.stripePaymentMethod
+                                ? new ComplexPayOrderMethod(
+                                    [
+                                        new StripePayOrderMethod(
+                                            this.stripeSingleton,
+                                            this.idGen,
+                                            data.stripePaymentMethod
+                                        )
+                                        ,
+                                        new WalletPaymentMethod(
+                                            this.idGen, 
+                                            this.ormUserQueryRepository,
+                                            this.ormUserCommandRepo,
+                                            this.TransactionCommandRepository
+                                            )
+                                    ]
+                                )
+                                : new WalletPaymentMethod(
+                                    this.idGen, 
+                                    this.ormUserQueryRepository,
+                                    this.ormUserCommandRepo,
+                                    this.TransactionCommandRepository
+                                    )
+                            ),
                             this.orderRepository,
                             this.idGen,
                             this.geocodificationAddress,
@@ -328,11 +350,13 @@ export class OrderController {
                             this.rabbitMq,
                             this.calculateShipping,
                             this.calculateTax,
-                            new WalletPaymentMethod(
+                            new PayOrderService(
+                                new WalletPaymentMethod(
                                 this.idGen, 
                                 this.ormUserQueryRepository,
                                 this.ormUserCommandRepo,
                                 this.TransactionCommandRepository
+                                )
                             ),
                             this.orderRepository,
                             this.idGen,
@@ -526,7 +550,8 @@ export class OrderController {
                     new DeliveredOderApplicationService(
                         this.orderQueryRepository,
                         this.orderRepository,
-                        this.rabbitMq
+                        this.rabbitMq,
+                        new DateHandler()
                     ),new NestTimer(),new NestLogger(new Logger())
                 ),this.auditRepository,new DateHandler()
             )

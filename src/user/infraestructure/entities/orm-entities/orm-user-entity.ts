@@ -20,13 +20,13 @@ export class OrmUserEntity implements IUser{
     @OneToMany( () => OrmAccountEntity, account => account.user,{ eager: true, nullable:true })  
     accounts: OrmAccountEntity[];
 
-    @OneToMany( () => OrmDirectionUserEntity, direction => direction.direction,{  nullable:true })  
+    @OneToMany( () => OrmDirectionUserEntity, direction => direction.direction,{  nullable:true , cascade:true})  
     direcction: OrmDirectionUserEntity[];
 
     @OneToMany( () => OrmOrderEntity, order => order.user)
     orders?: OrmOrderEntity[]
 
-    @OneToOne(() => OrmWalletEntity, wallet => wallet, {eager:true}) 
+    @OneToOne(() => OrmWalletEntity, wallet => wallet, {eager:true, cascade:true}) 
     @JoinColumn()
     wallet: OrmWalletEntity;
 

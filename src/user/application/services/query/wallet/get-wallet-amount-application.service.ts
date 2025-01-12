@@ -16,9 +16,9 @@ export class GetWalletAmountApplicationService extends IApplicationService<Walle
 
     async execute(data: WalletAmountApplicationRequestDTO): Promise<Result<WalletAmountApplicationResponseDTO>> {
         let userResponse= await this.queryUserRepository.findUserById(UserId.create(data.userId));
-        
+    
         if (!userResponse.isSuccess())
-            return Result.fail(new UserNotFoundApplicationException())
+            return Result.fail(new UserNotFoundApplicationException(data.userId))
         
         const user = userResponse.getValue;
 

@@ -21,7 +21,7 @@ export class OrmPaymentMethodQueryRepository extends Repository<PaymentMethodEnt
         super( PaymentMethodEntity, dataSource.createEntityManager());
         this.paymentMethodMapper = paymentMethodMapper;
     }
-    
+
     async findMethodById(id: PaymentMethodId): Promise<Result<PaymentMethodAgregate>> {
         try{
 
@@ -78,6 +78,13 @@ export class OrmPaymentMethodQueryRepository extends Repository<PaymentMethodEnt
             return Result.fail(new NotFoundException('Payment merthods not found'));
         };
     }
-    
 
+    async verifyMethodRegisteredByName(name: PaymentMethodName): Promise<Result<boolean>> {
+        try{
+            let paymentMethod=await this.existsBy({name:name.paymentMethodName})
+            return Result.success(paymentMethod)
+        }catch(e){
+            return Result.fail(new NotFoundException('Payment merthods not found'));
+        }
+    }
 }
