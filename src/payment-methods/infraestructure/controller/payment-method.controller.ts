@@ -263,7 +263,7 @@ export class PaymentMethodController {
         return response.getValue;
     }
 
-    @Post('/aviable') 
+    @Post('/avaliable') 
     async AvailablePaymentMethod(
         @GetCredential() credential:ICredential,
         @Body() data: DisablePaymentMethodInfraestructureRequestDTO,
