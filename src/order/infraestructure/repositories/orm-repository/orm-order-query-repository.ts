@@ -92,6 +92,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
         : null,
         orderCourier: ormOrder.order_courier 
         ? {
+            courierId: ormOrder.order_courier.id,
             courierName: ormOrder.order_courier.name,
             courierImage: ormOrder.order_courier.image.image,
             location: {

@@ -45,6 +45,7 @@ export interface reportOrderResponse {
 }
 
 export interface courierOrderResponse {
+    courierId: string
     courierName: string
     courierImage: string
     location: {

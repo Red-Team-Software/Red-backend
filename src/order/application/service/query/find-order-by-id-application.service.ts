@@ -179,6 +179,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
 
         if (order.orderCourier){
             associatedCourier = {
+                courierId: order.orderCourier.courierId,
                 courierName: order.orderCourier.courierName,
                 courierImage: order.orderCourier.courierImage,
                 location: {
