@@ -158,7 +158,7 @@ export class UserController {
   return response.getValue
 }
 
-  @Post('add-directions')
+  @Post('add/directions')
   @ApiResponse({
     status: 200,
     description: 'User direction information',

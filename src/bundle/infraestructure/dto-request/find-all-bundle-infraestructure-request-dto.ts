@@ -4,10 +4,13 @@ import { IsArray, IsNumber, IsOptional, IsString } from "class-validator";
 import { PaginationDto } from "src/common/infraestructure/dto/entry/pagination.dto";
 
 export class FindAllBundlesInfraestructureRequestDTO extends PaginationDto{
-        @ApiProperty( { required: false })
+    
+        @ApiProperty({ required: false })
+        @IsArray()
         @IsString({ each: true })
         @IsOptional()
-        category:string[]
+        @Transform(({ value }) => typeof value === 'string' ? [value] : value)
+        category: string[];
     
         @ApiProperty( { required: false })
         @IsString()

@@ -69,13 +69,10 @@ export class LogInUserApplicationService extends IApplicationService
             return Result.fail(new ErrorRegisteringSessionApplicationException())
 
         return Result.success({
-            accountId:account.id,
-            user: {
-                id: user.getId().Value,
-                email: account.email,
-                name: user.UserName.Value,
-                phone: user.UserPhone.Value
-            },
+            id: user.getId().Value,
+            email: account.email,
+            name: user.UserName.Value,
+            phone: user.UserPhone.Value,
             type: user.UserRole.Value,
             token: jwt
         })
