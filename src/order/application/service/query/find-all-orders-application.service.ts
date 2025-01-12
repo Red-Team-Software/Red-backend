@@ -110,14 +110,22 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
             
             if (domainBundles) associatedBundles = domainBundles.filter((bundle) => bundle.orderid === order.getId().orderId); 
 
-            let courier = courierResponse.getValue.find(
-                (courier) => courier.getId().courierId === order.OrderCourierId.OrderCourierId
-            );
+            let associatedCourier: courierOrderResponse;
 
-            let associatedCourier: courierOrderResponse = {
-                courierName: courier.CourierName.courierName,
-                courierImage: courier.CourierImage.Value
-            };
+            if( order.OrderCourierId){
+                let courier = courierResponse.getValue.find(
+                    (courier) => courier.getId().courierId === order.OrderCourierId.OrderCourierId
+                );
+
+                associatedCourier = {
+                    courierName: courier.CourierName.courierName,
+                    courierImage: courier.CourierImage.Value,
+                    location: {
+                        lat: courier.CourierDirection.Latitude,
+                        long: courier.CourierDirection.Longitude
+                    }
+                };
+            }
 
             ordersDto.push({
                 orderId: order.getId().orderId,
@@ -142,7 +150,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
                     description: order.OrderReport.Description.Value,
                     orderid: order.getId().orderId
                 } : null,
-                orderCourier: associatedCourier ? associatedCourier : null
+                orderCourier: order.OrderCourierId ? associatedCourier : null
             });
         });
 

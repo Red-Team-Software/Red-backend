@@ -14,6 +14,7 @@ import { NotFoundOrderApplicationException } from '../../application-exception/n
 import { bundlesOrderType, productsOrderType } from '../../types/get-all-orders-types';
 import { ErrorCreatingOrderProductNotFoundApplicationException } from '../../application-exception/error-creating-order-product-not-found-application.exception';
 import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../../application-exception/error-creating-order-bundle-not-found-application.exception';
+import { Courier } from 'src/courier/domain/aggregate/courier';
 
 
 export class FindOrderByIdApplicationService extends IApplicationService<FindOrderByIdRequestDto,FindOrderByIdResponseDto>{
@@ -96,25 +97,22 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
                 }
             };
         };
+        
+        let associatedCourier: courierOrderByIdResponse
 
-        let courierResponse = await this.ormCourierQueryRepository.findCourierById(CourierId.create(order.OrderCourierId.OrderCourierId));
+        if (order.OrderCourierId){
+            let courierResponse = await this.ormCourierQueryRepository.findCourierById(
+                CourierId.create(order.OrderCourierId.OrderCourierId));
 
-        let associatedProducts;
-        let associatedBundles;
-            
-        if (domainProducts) associatedProducts = domainProducts.filter((product) => product.orderid === order.getId().orderId); 
-            
-        if (domainBundles) associatedBundles = domainBundles.filter((bundle) => bundle.orderid === order.getId().orderId); 
-
-
-        let associatedCourier: courierOrderByIdResponse = {
-            courierName: courierResponse.getValue.CourierName.courierName,
-            courierImage: courierResponse.getValue.CourierImage.Value,
-            location: {
-                lat: courierResponse.getValue.CourierDirection.Latitude,
-                long: courierResponse.getValue.CourierDirection.Longitude
-            }
-        };
+            let associatedCourier: courierOrderByIdResponse = {
+                courierName: courierResponse.getValue.CourierName.courierName,
+                courierImage: courierResponse.getValue.CourierImage.Value,
+                location: {
+                    lat: courierResponse.getValue.CourierDirection.Latitude,
+                    long: courierResponse.getValue.CourierDirection.Longitude
+                }
+            };
+        }
 
         let ordersDto: orderByIdResponse = {
             orderId: order.getId().orderId,
@@ -132,14 +130,20 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
                 lat: order.OrderDirection.Latitude,
                 long: order.OrderDirection.Longitude
             },
-            products: associatedProducts,
-            bundles: associatedBundles,
+            products: order.Products ? 
+            domainProducts.filter((product) => product.orderid === order.getId().orderId)
+            : []
+            ,
+            bundles: order.Bundles 
+            ? domainBundles.filter((bundle) => bundle.orderid === order.getId().orderId)
+            : []
+            ,
             orderReport: order.OrderReport ? {
                 id: order.OrderReport.getId().OrderReportId,
                 description: order.OrderReport.Description.Value,
                 orderid: order.getId().orderId
             } : null,
-            orderCourier: associatedCourier ? associatedCourier : null
+            orderCourier: order.OrderCourierId ? associatedCourier : null
         };
 
         return Result.success(new FindOrderByIdResponseDto(ordersDto));

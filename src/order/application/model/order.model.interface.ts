@@ -51,4 +51,8 @@ export interface reportOrderResponse {
 export interface courierOrderResponse {
     courierName: string
     courierImage: string
+    location: {
+        lat: number
+        long: number
+    }
 }
