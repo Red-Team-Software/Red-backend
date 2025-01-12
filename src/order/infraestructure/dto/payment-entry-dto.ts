@@ -1,4 +1,4 @@
-import { IsArray, IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PaymentEntryDto {
@@ -54,12 +54,14 @@ export class PaymentEntryDto {
     required: true, default: 'pm_card_threeDSecureOptional' 
   })
   @IsString()
-  stripePaymentMethod: string;
+  @IsOptional()
+  stripePaymentMethod?: string;
 
   @ApiProperty({
     example: '2cc214ab-1e1e-4a22-9547-185b4a09df0a',
     description: 'cupon Id to apply to the payment',
   })
   @IsString()
+  @IsOptional()
   cuponId?: string;
 }

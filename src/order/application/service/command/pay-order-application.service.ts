@@ -1,31 +1,20 @@
 import { IApplicationService} from 'src/common/application/services';
 import { Result } from 'src/common/utils/result-handler/result';
-import { OrderPayApplicationServiceRequestDto } from '../dto/request/order-pay-request-dto';
-import { OrderPayResponseDto } from '../dto/response/order-pay-response-dto';
 import { IEventPublisher } from 'src/common/application/events/event-publisher/event-publisher.abstract';
 import { ICalculateShippingFee } from 'src/order/domain/domain-services/interfaces/calculate-shippping-fee.interface';
 import { ICalculateTaxesFee } from 'src/order/domain/domain-services/interfaces/calculate-taxes-fee.interface';
 import { OrderTotalAmount } from 'src/order/domain/value_objects/order-totalAmount';
 import { IPaymentMethodService } from 'src/order/domain/domain-services/interfaces/payment-method-interface';
 import { OrderDirection } from 'src/order/domain/value_objects/order-direction';
-import { ErrorCreatingPaymentApplicationException } from '../application-exception/error-creating-payment-application.exception';
-import { ErrorObtainingTaxesApplicationException } from '../application-exception/error-obtaining-taxes.application.exception';
 import { ICommandOrderRepository } from 'src/order/domain/command-repository/order-command-repository-interface';
 import { Order } from 'src/order/domain/aggregate/order';
 import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
 import { OrderCreatedDate } from 'src/order/domain/value_objects/order-created-date';
 import { OrderId } from 'src/order/domain/value_objects/order-id';
 import { OrderState } from 'src/order/domain/value_objects/order-state';
-import { OrderShippingFee } from 'src/order/domain/value_objects/order-shipping-fee';
-import { OrderReceivedDate } from 'src/order/domain/value_objects/order-received-date';
-import { ErrorCreatingOrderApplicationException } from '../application-exception/error-creating-order-application.exception';
 import { IGeocodification } from 'src/order/domain/domain-services/interfaces/geocodification-interface';
 import { OrderAddressStreet } from 'src/order/domain/value_objects/order-direction-street';
-import { ProductID } from '../../../product/domain/value-object/product-id';
-import { BundleId } from '../../../bundle/domain/value-object/bundle-id';
 import { Product } from 'src/product/domain/aggregate/product.aggregate';
-import { ErrorCreatingOrderProductNotFoundApplicationException } from '../application-exception/error-creating-order-product-not-found-application.exception';
-import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../application-exception/error-creating-order-bundle-not-found-application.exception';
 import { Bundle } from 'src/bundle/domain/aggregate/bundle.aggregate';
 import { OrderReport } from 'src/order/domain/entities/report/report-entity';
 import { OrderPayment } from 'src/order/domain/entities/payment/order-payment-entity';
@@ -38,7 +27,6 @@ import { IQueryBundleRepository } from 'src/bundle/application/query-repository/
 import { IQueryPromotionRepository } from 'src/promotion/application/query-repository/promotion.query.repository.interface';
 import { Promotion } from 'src/promotion/domain/aggregate/promotion.aggregate';
 import { FindAllPromotionApplicationRequestDTO } from 'src/promotion/application/dto/request/find-all-promotion-application-request-dto';
-import { ErrorObtainingShippingFeeApplicationException } from '../application-exception/error-obtaining-shipping-fee.application.exception';
 import { IPaymentMethodQueryRepository } from 'src/payment-methods/application/query-repository/orm-query-repository.interface';
 import { PaymentMethodId } from 'src/payment-methods/domain/value-objects/payment-method-id';
 import { BundleDetail } from 'src/order/domain/entities/bundle-detail/bundle-detail-entity';
@@ -52,7 +40,19 @@ import { BundleDetailPrice } from 'src/order/domain/entities/bundle-detail/value
 import { CalculateAmountService } from 'src/order/domain/domain-services/services/calculate-amount.service';
 import { Cupon } from 'src/cupon/domain/aggregate/cupon.aggregate';
 import { OrderCuponId } from 'src/order/domain/value_objects/order-cupon-id';
+import { IQueryCuponRepository } from 'src/cupon/domain/query-repository/query-cupon-repository';
 import { CuponId } from 'src/cupon/domain/value-object/cupon-id';
+import { OrderPayApplicationServiceRequestDto } from '../../dto/request/order-pay-request-dto';
+import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
+import { ProductID } from 'src/product/domain/value-object/product-id';
+import { ErrorCreatingOrderApplicationException } from '../../application-exception/error-creating-order-application.exception';
+import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../../application-exception/error-creating-order-bundle-not-found-application.exception';
+import { ErrorCreatingOrderProductNotFoundApplicationException } from '../../application-exception/error-creating-order-product-not-found-application.exception';
+import { ErrorCreatingPaymentApplicationException } from '../../application-exception/error-creating-payment-application.exception';
+import { ErrorObtainingShippingFeeApplicationException } from '../../application-exception/error-obtaining-shipping-fee.application.exception';
+import { ErrorObtainingTaxesApplicationException } from '../../application-exception/error-obtaining-taxes.application.exception';
+import { OrderPayResponseDto } from '../../dto/response/order-pay-response-dto';
+import { PayOrderService } from 'src/order/domain/domain-services/services/pay-order.service';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -63,7 +63,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly eventPublisher: IEventPublisher,
         private readonly calculateShippingFee: ICalculateShippingFee,
         private readonly calculateTaxesFee: ICalculateTaxesFee,
-        private readonly payOrder: IPaymentMethodService,
+        private readonly payOrder:PayOrderService ,
         private readonly orderRepository: ICommandOrderRepository,
         private readonly idGen: IIdGen<string>,
         private readonly geocodificationAddress: IGeocodification,
@@ -71,7 +71,8 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly bundleRepository:IQueryBundleRepository,
         private readonly dateHandler: IDateHandler,
         private readonly queryPromotionRepositoy: IQueryPromotionRepository,
-        private readonly paymentQueryRepository:IPaymentMethodQueryRepository
+        private readonly paymentQueryRepository:IPaymentMethodQueryRepository,
+        private readonly ormCuponQueryRepo: IQueryCuponRepository
     ){
         super()
     }
@@ -92,6 +93,15 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         if (!paymentResponse.isSuccess())
             return Result.fail(paymentResponse.getError)
 
+        if (data.cuponId){
+            let cuponRes = await this.ormCuponQueryRepo.findCuponById(CuponId.create(data.cuponId))
+
+            if (!cuponRes.isSuccess())
+                return Result.fail(cuponRes.getError)
+            cupon = cuponRes.getValue;
+        }
+
+
         let findPromotion: FindAllPromotionApplicationRequestDTO = {
             userId: data.userId,
             name: '',
@@ -105,6 +115,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
 
         if(data.products){
+            
             for (const product of data.products){
                 let domain=await this.productRepository.findProductById(ProductID.create(product.id))
 
@@ -114,28 +125,26 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 products.push(domain.getValue)
             }
             // TODO hacerlo servicio de dominio
-            if (data.products){
-                products.forEach(product => {
-                    let promotion = promotions.find(promo => {
-                        return promo.Products.some(productId => productId.Value === product.getId().Value);
-                    });
-        
-                    let productTotal = product.ProductPrice.Price;
-        
-                    if (promotion) productTotal -= (product.ProductPrice.Price * (promotion.PromotionDiscounts.Value));
-        
-                    let pr = ProductDetail.create(
-                        ProductDetailId.create(product.getId().Value),
-                        ProductDetailQuantity.create(data.products.find(p=>p.id==product.getId().Value).quantity),
-                        ProductDetailPrice.create(productTotal, product.ProductPrice.Currency)
-                    );
-
-                    orderproducts.push( pr );
-
+            products.forEach(product => {
+                let promotion = promotions.find(promo => {
+                    return promo.Products.some(productId => productId.Value === product.getId().Value);
                 });
-            }
-        }
+        
+                let productTotal = product.ProductPrice.Price;
+        
+                if (promotion) productTotal -= (product.ProductPrice.Price * (promotion.PromotionDiscounts.Value));
+        
+                let pr = ProductDetail.create(
+                    ProductDetailId.create(product.getId().Value),
+                    ProductDetailQuantity.create(data.products.find(p=>p.id==product.getId().Value).quantity),
+                    ProductDetailPrice.create(productTotal, product.ProductPrice.Currency)
+                );
 
+                orderproducts.push( pr );
+
+            });
+            
+        }
 
         // TODO hacerlo servicio de dominio
 
@@ -148,27 +157,24 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 bundles.push(domain.getValue)
             }
 
-            if (data.bundles)
-                bundles.forEach(bundle => {
-                    let promotion = promotions.find(promo => {
-                        return promo.Bundles.some(bundleId => bundleId.Value === bundle.getId().Value);
-                    });
-        
-                    let bundleTotal = bundle.BundlePrice.Price;
-        
-                    if (promotion) 
-                        bundleTotal -= (bundle.BundlePrice.Price * (promotion.PromotionDiscounts.Value ));
-        
-                    let bu = BundleDetail.create(
-                        BundleDetailId.create(bundle.getId().Value),
-                        BundleDetailQuantity.create(data.bundles.find(b=>b.id==bundle.getId().Value).quantity),
-                        BundleDetailPrice.create(bundleTotal, bundle.BundlePrice.Currency)
-                    );
-
-                    orderBundles.push( bu );
+            bundles.forEach(bundle => {
+                let promotion = promotions.find(promo => {
+                    return promo.Bundles.some(bundleId => bundleId.Value === bundle.getId().Value);
                 });
-                
         
+                let bundleTotal = bundle.BundlePrice.Price;
+        
+                if (promotion) 
+                    bundleTotal -= (bundle.BundlePrice.Price * (promotion.PromotionDiscounts.Value ));
+        
+                let bu = BundleDetail.create(
+                    BundleDetailId.create(bundle.getId().Value),
+                    BundleDetailQuantity.create(data.bundles.find(b=>b.id==bundle.getId().Value).quantity),
+                    BundleDetailPrice.create(bundleTotal, bundle.BundlePrice.Currency)
+                );
+
+                orderBundles.push( bu );
+            });
         }
 
         let amount = this.calculateAmount.calculateAmount(
@@ -233,7 +239,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 orderPayment
             );
 
-            let response = await this.payOrder.createPayment(order);
+            let response = await this.payOrder.PayOrder(order);
 
             if (!response.isSuccess()) 
                 return Result.fail(new ErrorCreatingPaymentApplicationException());

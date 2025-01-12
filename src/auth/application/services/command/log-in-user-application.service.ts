@@ -16,6 +16,7 @@ import { IQueryUserRepository } from "src/user/application/repository/user.query
 import { UserId } from "src/user/domain/value-object/user-id";
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
 import { ErrorRegisteringSessionApplicationException } from "../../application-exception/error-registering-session-application-exception";
+import { AccountNotFoundApplicationException } from "../../application-exception/account-not-found-application-exception";
 
 export class LogInUserApplicationService extends IApplicationService 
 <LogInUserApplicationRequestDTO,LogInUserApplicationResponseDTO> {
@@ -37,14 +38,14 @@ export class LogInUserApplicationService extends IApplicationService
         let resultaccount=await this.queryAccountRepository.findAccountByEmail(data.email)
 
         if (!resultaccount.isSuccess())
-            return Result.fail(new UserNotFoundApplicationException())
+            return Result.fail(new AccountNotFoundApplicationException(data.email))
 
         const account = resultaccount.getValue
 
         let resultUser=await this.queryUserRepository.findUserById(UserId.create(account.idUser))
 
         if (!resultUser.isSuccess())
-            return Result.fail(new UserNotFoundApplicationException())
+            return Result.fail(new UserNotFoundApplicationException(account.idUser))
 
         const user= resultUser.getValue
 

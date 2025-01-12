@@ -1,16 +1,15 @@
+import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IApplicationService } from "src/common/application/services";
-import { CancelOrderApplicationServiceRequestDto } from "../dto/request/cancel-order-request-dto";
 import { Result } from "src/common/utils/result-handler/result";
-import { CancelOrderApplicationServiceResponseDto } from "../dto/response/cancel-order-response-dto";
-import { IQueryOrderRepository } from "../query-repository/order-query-repository-interface";
 import { ICommandOrderRepository } from "src/order/domain/command-repository/order-command-repository-interface";
 import { OrderId } from "src/order/domain/value_objects/order-id";
-import { NotFoundOrderApplicationException } from "../application-exception/not-found-order-application.exception";
 import { OrderState } from "src/order/domain/value_objects/order-state";
-import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
-import { ErrorModifiyingOrderStateApplicationException } from "../application-exception/error-modifying-order-status-application.exception";
-import { IRefundPaymentService } from "src/order/domain/domain-services/interfaces/refund-amount.interface";
-import { ErrorOrderAlreadyCancelledApplicationException } from "../application-exception/error-orden-already-cancelled-application.exception";
+import { ErrorModifiyingOrderStateApplicationException } from "../../application-exception/error-modifying-order-status-application.exception";
+import { NotFoundOrderApplicationException } from "../../application-exception/not-found-order-application.exception";
+import { CancelOrderApplicationServiceRequestDto } from "../../dto/request/cancel-order-request-dto";
+import { CancelOrderApplicationServiceResponseDto } from "../../dto/response/cancel-order-response-dto";
+import { IQueryOrderRepository } from "../../query-repository/order-query-repository-interface";
+
 
 
 export class CancelOderApplicationService extends IApplicationService<CancelOrderApplicationServiceRequestDto,CancelOrderApplicationServiceResponseDto>{
@@ -31,11 +30,7 @@ export class CancelOderApplicationService extends IApplicationService<CancelOrde
 
         let newOrder = response.getValue;
 
-        if (newOrder.OrderState.orderState === 'cancelled') return Result.fail(
-            new ErrorOrderAlreadyCancelledApplicationException('The order is already cancelled')
-        );
-
-        newOrder.cancelOrder(OrderState.create('cancelled'));
+        newOrder.cancelOrder();
 
         let responseCommand = await this.orderRepository.saveOrder(newOrder);
 

@@ -41,7 +41,6 @@ export class OrmAccountCommandRepository extends Repository<OrmAccountEntity> im
                 entry.idUser,
                 entry.idStripe
             )
-            console.log(ormAccount)
 
             let account =await this.save(ormAccount)
 
@@ -50,7 +49,6 @@ export class OrmAccountCommandRepository extends Repository<OrmAccountEntity> im
             
             return Result.success(entry)
         }catch(e){
-            console.log(e)
             return Result.fail( new PersistenceException('Create account unsucssessfully') )
         }
     }

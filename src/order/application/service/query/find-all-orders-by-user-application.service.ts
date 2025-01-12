@@ -1,20 +1,23 @@
-import { IApplicationService} from 'src/common/application/services';
-import { Result } from 'src/common/utils/result-handler/result';
-import { IQueryOrderRepository } from '../query-repository/order-query-repository-interface';
-import { NotFoundOrderApplicationException } from '../application-exception/not-found-order-application.exception';
-import { ProductID } from 'src/product/domain/value-object/product-id';
-import { ErrorCreatingOrderProductNotFoundApplicationException } from '../application-exception/error-creating-order-product-not-found-application.exception';
-import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
-import { ErrorCreatingOrderBundleNotFoundApplicationException } from '../application-exception/error-creating-order-bundle-not-found-application.exception';
-import { FindAllOrdersApplicationServiceRequestDto } from '../dto/request/find-all-orders-request.dto';
-import { bundlesOrderResponse, courierOrderResponse, FindAllOrdersApplicationServiceResponseDto,  orderResponse, productsOrderResponse } from '../dto/response/find-all-orders-response.dto';
-import { bundlesOrderType, productsOrderType } from '../types/get-all-orders-types';
-import { ICourierQueryRepository } from 'src/courier/application/query-repository/courier-query-repository-interface';
-import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
-import { IQueryBundleRepository } from 'src/bundle/application/query-repository/query-bundle-repository';
+import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository";
+import { BundleId } from "src/bundle/domain/value-object/bundle-id";
+import { IApplicationService } from "src/common/application/services";
+import { Result } from "src/common/utils/result-handler/result";
+import { ICourierQueryRepository } from "src/courier/application/query-repository/courier-query-repository-interface";
+import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
+import { ProductID } from "src/product/domain/value-object/product-id";
+import { ErrorCreatingOrderBundleNotFoundApplicationException } from "../../application-exception/error-creating-order-bundle-not-found-application.exception";
+import { ErrorCreatingOrderProductNotFoundApplicationException } from "../../application-exception/error-creating-order-product-not-found-application.exception";
+import { NotFoundOrderApplicationException } from "../../application-exception/not-found-order-application.exception";
+import { FindAllOrdersByUserApplicationServiceRequestDto } from "../../dto/request/find-all-orders-by-user-request.dto";
+import { bundlesOrderResponse, FindAllOrdersApplicationServiceResponseDto, orderResponse, productsOrderResponse } from "../../dto/response/find-all-orders-response.dto";
+import { courierOrderResponse } from "../../model/order.model.interface";
+import { IQueryOrderRepository } from "../../query-repository/order-query-repository-interface";
+import { productsOrderType, bundlesOrderType } from "../../types/get-all-orders-types";
 
 
-export class FindAllOdersApplicationService extends IApplicationService<FindAllOrdersApplicationServiceRequestDto,FindAllOrdersApplicationServiceResponseDto>{
+
+
+export class FindAllOdersByUserApplicationService extends IApplicationService<FindAllOrdersByUserApplicationServiceRequestDto,FindAllOrdersApplicationServiceResponseDto>{
     
     constructor(
         private readonly orderRepository: IQueryOrderRepository,
@@ -25,13 +28,14 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
         super()
     }
     
-    async execute(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<FindAllOrdersApplicationServiceResponseDto>> {
+    async execute(data: FindAllOrdersByUserApplicationServiceRequestDto): Promise<Result<FindAllOrdersApplicationServiceResponseDto>> {
 
         data.page = data.page * data.perPage - data.perPage
 
-        let response = await this.orderRepository.findAllOrders(data);
 
-        if (response.isFailure()) return Result.fail(new NotFoundOrderApplicationException());
+        let response = await this.orderRepository.findAllOrdersByUser(data);
+
+        if (!response.isSuccess()) return Result.fail(new NotFoundOrderApplicationException());
 
         let orders = response.getValue;
 
@@ -61,7 +65,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
 
                     domainProducts.push({
                         id: domain.getValue.getId().Value,
-                        nombre: domain.getValue.ProductName.Value,
+                        name: domain.getValue.ProductName.Value,
                         description: domain.getValue.ProductDescription.Value,
                         quantity: prod.Quantity.Quantity,
                         price: prod.Price.Price,
@@ -83,7 +87,7 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
 
                     domainBundles.push({
                         id: domain.getValue.getId().Value,
-                        nombre: domain.getValue.BundleName.Value,
+                        name: domain.getValue.BundleName.Value,
                         description: domain.getValue.BundleDescription.Value,
                         quantity: bund.Quantity.Quantity,
                         price: bund.Price.Price,
@@ -95,6 +99,8 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
             };
         };
 
+        console.log("domainProducts")
+
         let courierResponse = await this.ormCourierQueryRepository.findAllCouriers();
 
         let ordersDto: orderResponse[] = [];
@@ -103,19 +109,26 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
 
             let associatedProducts: productsOrderResponse[];
             let associatedBundles: bundlesOrderResponse[];
+            let associatedCourier: courierOrderResponse;
             
             if (domainProducts) associatedProducts = domainProducts.filter((product) => product.orderid === order.getId().orderId); 
             
             if (domainBundles) associatedBundles = domainBundles.filter((bundle) => bundle.orderid === order.getId().orderId); 
 
-            let courier = courierResponse.getValue.find(
-                (courier) => courier.getId().courierId === order.OrderCourierId.OrderCourierId
-            );
+            if (order.OrderCourierId){
+                let courier = courierResponse.getValue.find(
+                    (courier) => courier.getId().courierId === order.OrderCourierId.OrderCourierId
+                );
 
-            let associatedCourier: courierOrderResponse = {
-                courierName: courier.CourierName.courierName,
-                courierImage: courier.CourierImage.Value
-            };
+                associatedCourier = {
+                    courierName: courier.CourierName.courierName,
+                    courierImage: courier.CourierImage.Value,
+                    location: {
+                        lat: courier.CourierDirection.Latitude,
+                        long: courier.CourierDirection.Longitude
+                    }
+                };
+            }
 
             ordersDto.push({
                 orderId: order.getId().orderId,
@@ -140,11 +153,12 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
                     description: order.OrderReport.Description.Value,
                     orderid: order.getId().orderId
                 } : null,
-                orderCourier: associatedCourier ? associatedCourier : null
+                orderCourier: order.OrderCourierId ? associatedCourier : null
             });
         });
 
 
         return Result.success(new FindAllOrdersApplicationServiceResponseDto(ordersDto));
+
     }
 }

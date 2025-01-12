@@ -29,7 +29,7 @@ export class FindAllTransactionsByUserApplicationService extends IApplicationSer
         let user = await this.userQueryRepository.findUserById(UserId.create(data.userId));
 
         if (!user.isSuccess())
-            return Result.fail(new UserNotFoundApplicationException());
+            return Result.fail(new UserNotFoundApplicationException(data.userId));
 
         let walletId = user.getValue.Wallet.getId().Value;
 
