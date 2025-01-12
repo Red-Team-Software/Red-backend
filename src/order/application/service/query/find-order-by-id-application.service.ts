@@ -30,120 +30,194 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
     
     async execute(data: FindOrderByIdRequestDto): Promise<Result<FindOrderByIdResponseDto>> {
 
-        let response = await this.orderRepository.findOrderById(OrderId.create(data.orderId));
+        let response = await this.orderRepository.findOrderByIdDetails(OrderId.create(data.orderId));
 
         if (!response.isSuccess()) return Result.fail(new NotFoundOrderApplicationException());
 
         let order = response.getValue;
 
-        let products: productsOrderType[] = [];  
-        let bundles: bundlesOrderType[] = []; 
-
-
-        if (order.Products && order.Products.length > 0) products.push({
-            products: order.Products, 
-            orderid: order.getId().orderId
-        });
-
-        if (order.Bundles && order.Bundles.length > 0) bundles.push({
-            bundles: order.Bundles, 
-            orderid: order.getId().orderId
-        });
-
-
         let domainProducts: productsOrderByIdResponse[]=[];
         let domainBundles: bundlesOrderByIdResponse[]=[];
 
-        if(products){
-            for (const product of products){
-                for (const prod of product.products){
-                    let domain=await this.productRepository.findProductById(ProductID.create(prod.ProductDetailId.productDetailId))
+        // let products: productsOrderType[] = [];  
+        // let bundles: bundlesOrderType[] = []; 
 
-                    if(!domain.isSuccess())
-                        return Result.fail(new ErrorCreatingOrderProductNotFoundApplicationException())
 
-                    domainProducts.push({
-                        id: domain.getValue.getId().Value,
-                        name: domain.getValue.ProductName.Value,
-                        description: domain.getValue.ProductDescription.Value,
-                        quantity: prod.Quantity.Quantity,
-                        price: prod.Price.Price,
-                        images: domain.getValue.ProductImages.map((image)=>image.Value),
-                        currency: domain.getValue.ProductPrice.Currency,
-                        orderid: product.orderid
-                    });
-                }
-            };
-        };
+        // if (order.Products && order.Products.length > 0) products.push({
+        //     products: order.Products, 
+        //     orderid: order.getId().orderId
+        // });
 
-        if(bundles){
-            for (const bundle of bundles){
-                for (const bund of bundle.bundles){
-                    let domain=await this.bundleRepository.findBundleById(BundleId.create(bund.BundleDetailId.BundleDetailId))
+        // if (order.Bundles && order.Bundles.length > 0) bundles.push({
+        //     bundles: order.Bundles, 
+        //     orderid: order.getId().orderId
+        // });
 
-                    if(!domain.isSuccess()) return Result.fail(new ErrorCreatingOrderBundleNotFoundApplicationException())
+        // if(products){
+        //     for (const product of products){
+        //         for (const prod of product.products){
+        //             let domain=await this.productRepository.findProductById(ProductID.create(prod.ProductDetailId.productDetailId))
+
+        //             if(!domain.isSuccess())
+        //                 return Result.fail(new ErrorCreatingOrderProductNotFoundApplicationException())
+
+        //             domainProducts.push({
+        //                 id: domain.getValue.getId().Value,
+        //                 name: domain.getValue.ProductName.Value,
+        //                 description: domain.getValue.ProductDescription.Value,
+        //                 quantity: prod.Quantity.Quantity,
+        //                 price: Number(prod.Price.Price),
+        //                 images: domain.getValue.ProductImages.map((image)=>image.Value),
+        //                 currency: domain.getValue.ProductPrice.Currency,
+        //                 orderid: product.orderid
+        //             });
+        //         }
+        //     };
+        // };
+
+        // if(bundles){
+        //     for (const bundle of bundles){
+        //         for (const bund of bundle.bundles){
+        //             let domain=await this.bundleRepository.findBundleById(BundleId.create(bund.BundleDetailId.BundleDetailId))
+
+        //             if(!domain.isSuccess()) return Result.fail(new ErrorCreatingOrderBundleNotFoundApplicationException())
                 
 
-                    domainBundles.push({
-                        id: domain.getValue.getId().Value,
-                        name: domain.getValue.BundleName.Value,
-                        description: domain.getValue.BundleDescription.Value,
-                        quantity: bund.Quantity.Quantity,
-                        price: bund.Price.Price,
-                        images: domain.getValue.BundleImages.map((image)=>image.Value),
-                        currency: domain.getValue.BundlePrice.Currency,
-                        orderid: bundle.orderid
-                    });
-                }
+        //             domainBundles.push({
+        //                 id: domain.getValue.getId().Value,
+        //                 name: domain.getValue.BundleName.Value,
+        //                 description: domain.getValue.BundleDescription.Value,
+        //                 quantity: bund.Quantity.Quantity,
+        //                 price: Number(bund.Price.Price),
+        //                 images: domain.getValue.BundleImages.map((image)=>image.Value),
+        //                 currency: domain.getValue.BundlePrice.Currency,
+        //                 orderid: bundle.orderid
+        //             });
+        //         }
+        //     };
+        // };
+        
+        // let associatedCourier: courierOrderByIdResponse
+
+        // if (order.OrderCourierId){
+        //     let courierResponse = await this.ormCourierQueryRepository.findCourierById(
+        //         CourierId.create(order.OrderCourierId.OrderCourierId));
+
+        //     let associatedCourier: courierOrderByIdResponse = {
+        //         courierName: courierResponse.getValue.CourierName.courierName,
+        //         courierImage: courierResponse.getValue.CourierImage.Value,
+        //         location: {
+        //             lat: courierResponse.getValue.CourierDirection.Latitude,
+        //             long: courierResponse.getValue.CourierDirection.Longitude
+        //         }
+        //     };
+        // }
+
+        // let ordersDto: orderByIdResponse = {
+        //     orderId: order.getId().orderId,
+        //     orderState: order.OrderState.orderState,
+        //     orderCreatedDate: order.OrderCreatedDate.OrderCreatedDate,
+        //     orderTimeCreated: new Date(order.OrderCreatedDate.OrderCreatedDate).toTimeString().split(' ')[0],
+        //     totalAmount: order.TotalAmount.OrderAmount,
+        //     orderReceivedDate: order.OrderReceivedDate? order.OrderReceivedDate.OrderReceivedDate : null,
+        //     orderPayment: {
+        //         paymetAmount: order.OrderPayment.PaymentAmount.Value,
+        //         paymentCurrency: order.OrderPayment.PaymentCurrency.Value,
+        //         payementMethod: order.OrderPayment.PaymentMethods.Value
+        //     },
+        //     orderDirection: {
+        //         lat: order.OrderDirection.Latitude,
+        //         long: order.OrderDirection.Longitude
+        //     },
+        //     products: order.Products ? 
+        //     domainProducts.filter((product) => product.orderid === order.getId().orderId)
+        //     : []
+        //     ,
+        //     bundles: order.Bundles 
+        //     ? domainBundles.filter((bundle) => bundle.orderid === order.getId().orderId)
+        //     : []
+        //     ,
+        //     orderReport: order.OrderReport ? {
+        //         id: order.OrderReport.getId().OrderReportId,
+        //         description: order.OrderReport.Description.Value,
+        //         orderid: order.getId().orderId
+        //     } : null,
+        //     orderCourier: order.OrderCourierId ? associatedCourier : null
+        // };
+
+        if(order.products){
+            for (const product of order.products){
+                domainProducts.push({
+                    id: product.id,
+                    name: product.name,
+                    description: product.description,
+                    quantity: product.quantity,
+                    price: product.price,
+                    images: product.images,
+                    currency: product.currency,
+                    orderid: order.orderId
+                });
             };
         };
-        
+
+        if(order.bundles){
+            for (const bundle of order.bundles){
+                domainBundles.push({
+                    id: bundle.id,
+                    name: bundle.name,
+                    description: bundle.description,
+                    quantity: bundle.quantity,
+                    price: bundle.price,
+                    images: bundle.images,
+                    currency: bundle.currency,
+                    orderid: order.orderId
+                });
+            };
+        };
+
         let associatedCourier: courierOrderByIdResponse
 
-        if (order.OrderCourierId){
-            let courierResponse = await this.ormCourierQueryRepository.findCourierById(
-                CourierId.create(order.OrderCourierId.OrderCourierId));
-
-            let associatedCourier: courierOrderByIdResponse = {
-                courierName: courierResponse.getValue.CourierName.courierName,
-                courierImage: courierResponse.getValue.CourierImage.Value,
+        if (order.orderCourier){
+            associatedCourier = {
+                courierName: order.orderCourier.courierName,
+                courierImage: order.orderCourier.courierImage,
                 location: {
-                    lat: courierResponse.getValue.CourierDirection.Latitude,
-                    long: courierResponse.getValue.CourierDirection.Longitude
+                    lat: order.orderCourier.location.lat,
+                    long: order.orderCourier.location.long
                 }
             };
         }
 
         let ordersDto: orderByIdResponse = {
-            orderId: order.getId().orderId,
-            orderState: order.OrderState.orderState,
-            orderCreatedDate: order.OrderCreatedDate.OrderCreatedDate,
-            orderTimeCreated: new Date(order.OrderCreatedDate.OrderCreatedDate).toTimeString().split(' ')[0],
-            totalAmount: order.TotalAmount.OrderAmount,
-            orderReceivedDate: order.OrderReceivedDate? order.OrderReceivedDate.OrderReceivedDate : null,
+            orderId: order.orderId,
+            orderState: order.orderState,
+            orderCreatedDate: order.orderCreatedDate,
+            orderTimeCreated: new Date(order.orderCreatedDate).toTimeString().split(' ')[0],
+            totalAmount: order.totalAmount,
+            orderReceivedDate: order.orderReceivedDate ? order.orderReceivedDate : null,
             orderPayment: {
-                paymetAmount: order.OrderPayment.PaymentAmount.Value,
-                paymentCurrency: order.OrderPayment.PaymentCurrency.Value,
-                payementMethod: order.OrderPayment.PaymentMethods.Value
+                paymetAmount: order.orderPayment.paymetAmount,
+                paymentCurrency: order.orderPayment.paymentCurrency,
+                payementMethod: order.orderPayment.payementMethod
             },
             orderDirection: {
-                lat: order.OrderDirection.Latitude,
-                long: order.OrderDirection.Longitude
+                lat: order.orderDirection.lat,
+                long: order.orderDirection.long
             },
-            products: order.Products ? 
-            domainProducts.filter((product) => product.orderid === order.getId().orderId)
+            products: order.products ? 
+            domainProducts
             : []
             ,
-            bundles: order.Bundles 
-            ? domainBundles.filter((bundle) => bundle.orderid === order.getId().orderId)
+            bundles: order.bundles 
+            ? domainBundles
             : []
             ,
-            orderReport: order.OrderReport ? {
-                id: order.OrderReport.getId().OrderReportId,
-                description: order.OrderReport.Description.Value,
-                orderid: order.getId().orderId
+            orderReport: order.orderReport ? {
+                id: order.orderReport.id,
+                description: order.orderReport.description,
+                orderid: order.orderId
             } : null,
-            orderCourier: order.OrderCourierId ? associatedCourier : null
+            orderCourier: order.orderCourier ? associatedCourier : null
         };
 
         return Result.success(new FindOrderByIdResponseDto(ordersDto));

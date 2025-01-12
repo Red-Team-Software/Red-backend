@@ -38,6 +38,10 @@ import { DisablePaymentMethodInfraestructureRequestDTO } from "../dto/entry/disa
 import { DisablePaymentMethodRequestDto } from "src/payment-methods/application/dto/request/disable-payment-method-request-dto";
 import { DisablePaymentMethodApplicationService } from "src/payment-methods/application/service/disable-payment-method.application.service";
 import { AvailablePaymentMethodRequestDto } from "src/payment-methods/application/dto/request/aviable-payment-method-request-dto";
+import { PaymentMethodQueues } from "../queues/payment-method-queues";
+import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber";
+import { IPaymentMethodRegistered } from "../interface/payment-method-registered.interface";
+import { IPaymentMethodStateUpdated } from "../queues/payment-method-state-updated.interface";
 
 
 @ApiBearerAuth()
@@ -60,7 +64,25 @@ export class PaymentMethodController {
 
     //*RabbitMQ
     private readonly rabbitMq: IEventPublisher;
+    private readonly subscriber: RabbitMQSubscriber;
 
+    private initializeQueues():void{        
+        PaymentMethodQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+    }
+                
+    private buildQueue(name: string, pattern: string) {
+        this.subscriber.buildQueue({
+            name,
+            pattern,
+            exchange: {
+                name: 'DomainEvent',
+                type: 'direct',
+                options: {
+                    durable: false,
+                },
+            },
+        })
+    }
 
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -80,6 +102,35 @@ export class PaymentMethodController {
         //*Repositories
         this.paymentMethodRepository = new OrmPaymentMethodRepository(PgDatabaseSingleton.getInstance(),this.paymentMethodMapper);
         this.paymentMethodQueryRepository = new OrmPaymentMethodQueryRepository(PgDatabaseSingleton.getInstance(),this.paymentMethodMapper);
+    
+        this.subscriber= new RabbitMQSubscriber(this.channel);
+
+        this.initializeQueues();
+        
+        this.subscriber.consume<IPaymentMethodRegistered>(
+            { name: 'PaymentMethodSync/PaymentMethodRegistered'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
+                return
+            }
+        )
+        
+        this.subscriber.consume<IPaymentMethodStateUpdated>(
+            { name: 'PaymentMethodSync/AvailablePayment'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
+                return
+            }
+        )
+        
+        this.subscriber.consume<IPaymentMethodStateUpdated>(
+            { name: 'PaymentMethodSync/DisablePayment'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
+                return
+            }
+        )
+    
     }
 
     @Post('/create')
