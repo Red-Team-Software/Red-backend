@@ -48,7 +48,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
                             name: product.product.name ,
                             description: product.product.desciption,
                             quantity: product.quantity,
-                            price:product.price ,
+                            price: Number(product.price) ,
                             images:product.product.images.map(image=>image.image),
                             currency:product.product.currency,
                         }
@@ -63,7 +63,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
                             name: bundle.bundle.name,
                             description: bundle.bundle.desciption,
                             quantity: bundle.quantity,
-                            price: bundle.price,
+                            price: Number(bundle.price),
                             images: bundle.bundle.images.map(image=>image.image),
                             currency: bundle.currency,
                         }
@@ -75,7 +75,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
                     orderId: ormOrder.id,
                     orderState: ormOrder.state,
                     orderCreatedDate: ormOrder.orderCreatedDate,
-                    totalAmount: ormOrder.totalAmount,
+                    totalAmount: Number(Number(ormOrder.totalAmount).toFixed(2)),
                     orderReceivedDate: ormOrder.orderReceivedDate ? ormOrder.orderReceivedDate : null,
                     orderPayment: {
                         paymetAmount: ormOrder.pay.amount,
@@ -125,6 +125,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
             )
 
             let modelOrders = this.transformToDataModel(ormOrders);
+            console.log(modelOrders)
 
             let domainOrders: Order[] = [];
 
@@ -143,7 +144,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
     async findAllOrders(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>> {
         try {
             const ormOrders = await this.find({
-                relations: ["pay", "order_products", "order_bundles","order_report", "user"],
+                relations: ["pay", "order_products", "order_bundles","order_report", "user", "order_courier"],
                 order: { orderCreatedDate: 'DESC' },
                 skip:data.page,
                 take:data.perPage
@@ -168,7 +169,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
         try {
             const ormOrder = await this.findOne({
                 where: { id: orderId.orderId },
-                relations: ["pay", "order_products", "order_bundles","order_report", "user"]
+                relations: ["pay", "order_products", "order_bundles","order_report", "user", "order_courier"]
             });
 
             if (!ormOrder) return Result.fail(new NotFoundException('Order not found'));
