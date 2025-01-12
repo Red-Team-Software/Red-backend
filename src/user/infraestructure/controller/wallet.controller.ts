@@ -308,7 +308,7 @@ export class PaymentWalletController {
 
     }
 
-    @Get('transaction/many')
+    @Get('many/transaction')
     async findAllTransactionsByUser(
         @GetCredential() credential:ICredential,
         @Query() data: FindAllTransactionsByWalletInfraestructureEntryDto
