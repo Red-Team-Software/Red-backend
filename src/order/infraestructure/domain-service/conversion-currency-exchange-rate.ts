@@ -38,7 +38,6 @@ export class ConvertCurrencyExchangeRate implements IConversionService {
 
             return Result.success(newAmount);
         }catch(error){
-            console.log(error);
             return Result.fail(new BadRequestException());
         }
     }

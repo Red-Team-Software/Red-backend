@@ -24,14 +24,14 @@ export class SaveCardToUserApplicationService extends IApplicationService<SaveCa
         let userResponse= await this.queryUserRepository.findUserById(UserId.create(data.userId));
         
         if (!userResponse.isSuccess())
-            return Result.fail(new UserNotFoundApplicationException());
+            return Result.fail(new UserNotFoundApplicationException(data.userId));
         
         const user = userResponse.getValue;
 
         let userAccount = await this.accountRepository.findAccountById(user.getId().Value);
 
         if ( !userAccount.isSuccess() ) 
-            return Result.fail(new UserNotFoundApplicationException());
+            return Result.fail(new UserNotFoundApplicationException(data.userId));
 
         let cardResponse = await this.userExternalSite.saveCardtoUser(
             userAccount.getValue.idStripe,

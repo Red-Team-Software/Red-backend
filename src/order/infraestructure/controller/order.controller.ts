@@ -219,7 +219,6 @@ export class OrderController {
         this.subscriber.consume<ICancelOrder>(
             { name: 'WalletRefund/OrderStatusCancelled'}, 
             (data):Promise<void>=>{
-                console.log("hola")
                 this.walletRefund(data)
                 return
             }

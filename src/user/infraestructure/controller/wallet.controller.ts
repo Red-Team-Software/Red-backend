@@ -119,7 +119,8 @@ export class PaymentWalletController {
                                 )
                             ),
                             this.TransactionCommandRepository,
-                            this.idGen
+                            this.idGen,
+                            this.paymentMethodQueryRepository
                         ), new NestTimer(), new NestLogger(new Logger())
                     ), new NestLogger(new Logger())
                 ),this.auditRepository, new DateHandler()

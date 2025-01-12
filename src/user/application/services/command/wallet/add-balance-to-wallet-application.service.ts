@@ -24,12 +24,14 @@ import { CalculateBallanceService } from "src/user/domain/domain-services/servic
 export class AddBalanceToWalletApplicationService extends IApplicationService<AddBalancePagoMovilApplicationRequestDTO, AddBalanceZelleApplicationResponseDTO> {
     
     constructor(
+        private readonly paymentQueryRepository:IPaymentMethodQueryRepository,
         private readonly commandUserRepository:ICommandUserRepository,
         private readonly queryUserRepository:IQueryUserRepository,
         private readonly eventPublisher: IEventPublisher,
         private readonly calculateBallanceService:CalculateBallanceService,
         private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>,
-        private readonly idGen: IIdGen<string>
+        private readonly idGen: IIdGen<string>,
+        private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository
     ) {
         super();
     }
@@ -37,10 +39,22 @@ export class AddBalanceToWalletApplicationService extends IApplicationService<Ad
 
     async execute(data: AddBalancePagoMovilApplicationRequestDTO): Promise<Result<AddBalanceZelleApplicationResponseDTO>> {
         
+        let paymentMethod = await this.paymentMethodQueryRepository.findMethodById(PaymentMethodId.create(data.paymentId));
+        
+        if (!paymentMethod.isSuccess())
+            return Result.fail(new NotFoundPaymentMethodApplicationException(data.paymentId));
+        
         let userResponse= await this.queryUserRepository.findUserById(UserId.create(data.userId));
         
         if (!userResponse.isSuccess())
-            return Result.fail(new UserNotFoundApplicationException())
+            return Result.fail(new UserNotFoundApplicationException(data.userId))
+
+        let paymentMethodResponse=await this.paymentQueryRepository.findMethodById(
+            PaymentMethodId.create(data.paymentId)
+        )
+
+        if (!paymentMethodResponse.isSuccess())
+            return Result.fail(new NotFoundPaymentMethodApplicationException(data.paymentId))
         
         const user = userResponse.getValue;
 
@@ -50,6 +64,7 @@ export class AddBalanceToWalletApplicationService extends IApplicationService<Ad
 
         user.addWalletBalance(newBalance);
 
+        let userRes= await this.commandUserRepository.updateUser(user);
         let userRes= await this.commandUserRepository.updateUser(user);
 
         if (!userRes.isSuccess())
