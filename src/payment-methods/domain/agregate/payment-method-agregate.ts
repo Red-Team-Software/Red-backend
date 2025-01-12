@@ -6,6 +6,8 @@ import { PaymentMethodState } from "../value-objects/payment-method-state";
 import { MissingPaymentMethodAtributes } from "../exceptions/missing-payment-method-atributes.exception";
 import { PaymentMethodRegistered } from "../domain-events/payment-method-registered";
 import { PaymentMethodImage } from "../value-objects/payment-method-image";
+import { AvailablePayment } from "../domain-events/available-payment";
+import { DisablePayment } from "../domain-events/disable-payment";
 
 
 export class PaymentMethodAgregate extends AggregateRoot <PaymentMethodId>{
@@ -16,6 +18,12 @@ export class PaymentMethodAgregate extends AggregateRoot <PaymentMethodId>{
             this.paymentMethodState = event.paymentMethodState;
             this.paymentMethodImage = event.paymentMethodImage;
         };
+        if (event instanceof AvailablePayment) {
+            this.paymentMethodState = event.paymentMethodState;
+        }
+        if(event instanceof DisablePayment){
+            this.paymentMethodState = event.paymentMethodState;
+        }
     };
     protected validateState(): void {
         if (!this.paymentMethodName || 
@@ -70,7 +78,24 @@ export class PaymentMethodAgregate extends AggregateRoot <PaymentMethodId>{
             paymentMethodImage
         );
     }
+
+    avaliablePayment():void{
+        this.apply(
+            AvailablePayment.create(
+                this.getId(),
+                this.paymentMethodState.active()
+            )
+        )
+    }
     
+    disablePayment():void{
+        this.apply(
+            DisablePayment.create(
+                this.getId(),
+                this.paymentMethodState.inactive()
+            )
+        );
+    }
 
     get name(){
         return this.paymentMethodName;

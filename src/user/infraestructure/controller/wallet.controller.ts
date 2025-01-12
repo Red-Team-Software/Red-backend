@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Inject, Logger, Post, Query, UseGuards } from "@nestjs/common"
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
+import { Body, Controller, Delete, Get, Inject, Logger, Param, Post, Query, UseGuards } from "@nestjs/common"
+import { ApiBearerAuth, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { Channel } from "amqplib"
 import { IAccount } from "src/auth/application/model/account.interface"
 import { IQueryAccountRepository } from "src/auth/application/repository/query-account-repository.interface"
@@ -23,13 +23,11 @@ import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
 import { NestLogger } from "src/common/infraestructure/logger/nest-logger"
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler"
-import { AddBalanceToWalletPagoMovilApplicationService } from "src/user/application/services/command/wallet/add-balance-to-wallet-pago-movil-application.service"
+import { AddBalanceToWalletApplicationService } from "src/user/application/services/command/wallet/add-balance-to-wallet-application.service"
 import { ConvertCurrencyExchangeRate } from "src/order/infraestructure/domain-service/conversion-currency-exchange-rate"
 import { ExchangeRateSingelton } from "src/common/infraestructure/exchange-rate/exchange-rate-singleton"
 import { UpdateWalletBalancePagoMovilInfraestructureRequestDTO } from "../dto/request/wallet/update-wallet-balance-pago-movil-infraestructure-request-dto"
 import { AddBalancePagoMovilApplicationRequestDTO } from "src/user/application/dto/request/wallet/add-balance-to-wallet-pago-movil-application-resquest-dto"
-import { AddBalanceToWalletZelleApplicationService } from "src/user/application/services/command/wallet/add-balance-to-wallet-zelle-application.service"
-import { AddBalanceZelleApplicationRequestDTO } from "src/user/application/dto/request/wallet/add-balance-to-wallet-zelle-application-resquest-dto"
 import { UpdateWalletBalanceZelleInfraestructureRequestDTO } from "../dto/request/wallet/update-wallet-balance-zelle-infraestructure-request-dto"
 import { SaveCardApplicationRequestDTO } from "src/user/application/dto/request/wallet/save-card-application-request-dto"
 import { SaveCardInfraestructureRequestDTO } from "../dto/request/wallet/save-card-infraestructure-request-dto"
@@ -57,11 +55,17 @@ import { GetTransactionByIdApplicationRequestDTO } from "src/user/application/dt
 import { FindTransactionByIdEntryDTO } from "../dto/request/wallet/find-transaction-by-id-entry.dto"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
+import { DeleteCardInfraestructureRequestDTO } from "../dto/request/wallet/delete-card-infraestructure-request-dto"
+import { AddBalanceZelleResponseDTO } from "../dto/response/wallet/add-balance-to-wallet-pago-movil-direction-response-dto"
+import { DeleteCardToUserApplicationService } from "src/user/application/services/command/wallet/delete-card-to-user-application.service"
+import { DeleteCardApplicationRequestDTO } from "src/user/application/dto/request/wallet/delete-card-application-request-dto"
+import { CalculateBallanceService } from "src/user/domain/domain-services/services/calculate-ballance.service"
+import { ConvertDollars } from "../domain-services/convert-dollars.service"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('Wallet')
-@Controller('pay')
+@Controller('payment/method')
 export class PaymentWalletController {
 
     private readonly idGen: IIdGen<string> 
@@ -91,7 +95,12 @@ export class PaymentWalletController {
         this.TransactionCommandRepository = new OrmTransactionCommandRepository(PgDatabaseSingleton.getInstance());
     }
 
-    @Post('pago-movil')
+    @Post('recharge/pago-movil')
+    @ApiResponse({
+        status: 200,
+        description: 'Add balance to wallet',
+        type: AddBalanceZelleResponseDTO,
+    })
     async CreatePaymentPagoMovil(
         @GetCredential() credential:ICredential, 
         @Body() entry: UpdateWalletBalancePagoMovilInfraestructureRequestDTO
@@ -100,53 +109,17 @@ export class PaymentWalletController {
             new AuditDecorator(
                 new LoggerDecorator(
                     new PerformanceDecorator(
-                        new AddBalanceToWalletPagoMovilApplicationService (
+                        new AddBalanceToWalletApplicationService (
                             this.paymentMethodQueryRepository,
                             this.ormUserCommandRepo,
                             this.ormUserQueryRepo,
                             new RabbitMQPublisher(this.channel),
-                            new ConvertCurrencyExchangeRate(ExchangeRateSingelton.getInstance()),
+                            new CalculateBallanceService(
+                                new ConvertDollars(
+                                    new ConvertCurrencyExchangeRate(ExchangeRateSingelton.getInstance())
+                                )
+                            ),
                             this.TransactionCommandRepository,
-                            this.idGen,
-                            this.paymentMethodQueryRepository
-                        ), new NestTimer(), new NestLogger(new Logger())
-                    ), new NestLogger(new Logger())
-                ),this.auditRepository, new DateHandler()
-            )
-        );
-
-        let data: AddBalancePagoMovilApplicationRequestDTO = {
-            userId: credential.account.idUser,
-            phone: entry.phone,
-            cedula: entry.cedula,
-            bank: entry.bank,
-            amount: entry.amount,
-            reference: entry.reference,
-            date: new Date(),
-            paymentId: entry.paymentId
-        }
-
-        let response = await service.execute(data);
-
-        return response.getValue;
-
-    }
-
-    @Post('zelle')
-    async CreatePaymentZelle(
-        @GetCredential() credential:ICredential, 
-        @Body() entry: UpdateWalletBalanceZelleInfraestructureRequestDTO
-    ){
-        let service= new ExceptionDecorator(
-            new AuditDecorator(
-                new LoggerDecorator(
-                    new PerformanceDecorator(
-                        new AddBalanceToWalletZelleApplicationService (
-                            this.ormUserCommandRepo,
-                            this.ormUserQueryRepo,
-                            new RabbitMQPublisher(this.channel),
-                            this.TransactionCommandRepository,
-                            this.paymentMethodQueryRepository,
                             this.idGen
                         ), new NestTimer(), new NestLogger(new Logger())
                     ), new NestLogger(new Logger())
@@ -154,10 +127,11 @@ export class PaymentWalletController {
             )
         );
 
-        let data: AddBalanceZelleApplicationRequestDTO = {
+
+        let data: AddBalancePagoMovilApplicationRequestDTO = {
             userId: credential.account.idUser,
             amount: entry.amount,
-            reference: entry.reference,
+            currency: 'bsf',
             date: new Date(),
             paymentId: entry.paymentId
         }
@@ -168,7 +142,60 @@ export class PaymentWalletController {
 
     }
 
-    @Post('card/create')
+    @Post('recharge/zelle')
+    @ApiResponse({
+        status: 200,
+        description: 'Add balance to wallet',
+        type: AddBalanceZelleResponseDTO,
+    })
+    async CreatePaymentZelle(
+        @GetCredential() credential:ICredential, 
+        @Body() entry: UpdateWalletBalanceZelleInfraestructureRequestDTO
+    ){
+
+        let service= new ExceptionDecorator(
+            new AuditDecorator(
+                new LoggerDecorator(
+                    new PerformanceDecorator(
+                        new AddBalanceToWalletApplicationService (
+                            this.paymentMethodQueryRepository,
+                            this.ormUserCommandRepo,
+                            this.ormUserQueryRepo,
+                            new RabbitMQPublisher(this.channel),
+                            new CalculateBallanceService(
+                                new ConvertDollars(
+                                    new ConvertCurrencyExchangeRate(ExchangeRateSingelton.getInstance())
+                                )
+                            ),
+                            this.TransactionCommandRepository,
+                            this.idGen
+                        ), new NestTimer(), new NestLogger(new Logger())
+                    ), new NestLogger(new Logger())
+                ),this.auditRepository, new DateHandler()
+            )
+        );
+
+
+        let data: AddBalancePagoMovilApplicationRequestDTO = {
+            userId: credential.account.idUser,
+            amount: entry.amount,
+            currency: 'usd',
+            date: new Date(),
+            paymentId: entry.paymentId
+        }
+
+        let response = await service.execute(data);
+
+        return response.getValue;
+
+    }
+
+    @Post('user/add/card')
+    @ApiResponse({
+        status: 200,
+        description: 'Add balance to wallet',
+        type: AddBalanceZelleResponseDTO,
+    })
     async CreatePaymentStripe(
         @GetCredential() credential:ICredential, 
         @Body() entry: SaveCardInfraestructureRequestDTO
@@ -198,7 +225,36 @@ export class PaymentWalletController {
 
     }
 
-    @Get('wallet-amount')
+    @Delete('user/delete/{id}')
+    async DeletePaymentStripe(
+        @GetCredential() credential:ICredential, 
+        @Param() entry: DeleteCardInfraestructureRequestDTO
+    ){
+        let service= new ExceptionDecorator(
+            new AuditDecorator(
+                new LoggerDecorator(
+                    new PerformanceDecorator(
+                        new DeleteCardToUserApplicationService (
+                            this.ormUserQueryRepo,
+                            this.userExternalSite
+                        ), new NestTimer(), new NestLogger(new Logger())
+                    ), new NestLogger(new Logger())
+                ),this.auditRepository, new DateHandler()
+            )
+        );
+
+        let data: DeleteCardApplicationRequestDTO = {
+            userId: credential.account.idUser,
+            cardId: entry.id
+        }
+
+        let response = await service.execute(data);
+
+        return response.getValue;
+
+    }
+
+    @Get('user/wallet-amount')
     async GetWalletAmount(
         @GetCredential() credential:ICredential
     ){
@@ -224,7 +280,7 @@ export class PaymentWalletController {
 
     }
 
-    @Get('card/many')
+    @Get('user/card/many')
     async GetCards(
         @GetCredential() credential:ICredential
     ){
