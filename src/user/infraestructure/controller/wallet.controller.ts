@@ -225,7 +225,7 @@ export class PaymentWalletController {
 
     }
 
-    @Delete('user/delete/{id}')
+    @Delete('user/card/delete/{id}')
     async DeletePaymentStripe(
         @GetCredential() credential:ICredential, 
         @Param() entry: DeleteCardInfraestructureRequestDTO
