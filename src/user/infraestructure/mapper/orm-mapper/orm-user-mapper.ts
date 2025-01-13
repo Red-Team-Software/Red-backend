@@ -15,8 +15,7 @@ import { WalletId } from 'src/user/domain/entities/wallet/value-objects/wallet-i
 import { Ballance } from 'src/user/domain/entities/wallet/value-objects/balance';
 import { OrmWalletEntity } from '../../entities/orm-entities/orm-wallet-entity';
 import { UserDirection } from 'src/user/domain/entities/directions/direction.entity';
-import { DirectionId } from 'src/user/domain/entities/directions/value-objects/Direction-id';
-import { DirectionFavorite } from 'src/user/domain/entities/directions/value-objects/direction-favorite';
+import { DirectionId } from 'src/user/domain/entities/directions/value-objects/direction-id';import { DirectionFavorite } from 'src/user/domain/entities/directions/value-objects/direction-favorite';
 import { DirectionLat } from 'src/user/domain/entities/directions/value-objects/direction-lat';
 import { DirectionLng } from 'src/user/domain/entities/directions/value-objects/direction-lng';
 import { DirectionName } from 'src/user/domain/entities/directions/value-objects/direction-name';

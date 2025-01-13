@@ -1,4 +1,4 @@
-import { Then, When } from '@cucumber/cucumber';
+import { DirectionId } from 'src/user/domain/entities/directions/value-objects/direction-id';import { Then, When } from '@cucumber/cucumber';
 import * as assert from 'assert';
 import { UserCommandRepositoryMock } from '../../../infraestructure/mocks/repositories/user-command-repository.mock';
 import { User } from 'src/user/domain/aggregate/user.aggregate';
@@ -16,7 +16,6 @@ import { IdGeneratorMock } from 'test/common/mocks/infraestructure/id-generator.
 import { EventPublisherMock } from 'test/common/mocks/infraestructure/event-publisher.mock';
 import { UserDirection } from 'src/user/domain/entities/directions/direction.entity';
 import { DirectionFavorite } from 'src/user/domain/entities/directions/value-objects/direction-favorite';
-import { DirectionId } from 'src/user/domain/entities/directions/value-objects/Direction-id';
 import { DirectionLat } from 'src/user/domain/entities/directions/value-objects/direction-lat';
 import { DirectionLng } from 'src/user/domain/entities/directions/value-objects/direction-lng';
 import { DirectionName } from 'src/user/domain/entities/directions/value-objects/direction-name';

@@ -1,7 +1,6 @@
 import * as assert from 'assert';
 import { InvalidDirectionIdException } from 'src/user/domain/entities/directions/domain-exceptions/invalid-direction-id-exception';
-import { DirectionId } from 'src/user/domain/entities/directions/value-objects/Direction-id';
-
+import { DirectionId } from 'src/user/domain/entities/directions/value-objects/direction-id';
 
 describe("User direction id Invariants", () => {
   let caughtError: any
