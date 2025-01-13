@@ -8,7 +8,7 @@ import { UpdateUserDirectionsApplicationRequestDTO } from "../../dto/request/upd
 import { UpdateUserDirectionsApplicationResponseDTO } from "../../dto/response/update-user-direction-application-response-dto"
 import { IQueryUserRepository } from "../../repository/user.query.repository.interface"
 import { UserDirection } from "src/user/domain/entities/directions/direction.entity"
-import { DirectionId } from "src/user/domain/entities/directions/value-objects/Direction-id"
+import { DirectionId } from "src/user/domain/entities/directions/value-objects/direction-id"
 import { DirectionFavorite } from "src/user/domain/entities/directions/value-objects/direction-favorite"
 import { DirectionLat } from "src/user/domain/entities/directions/value-objects/direction-lat"
 import { DirectionLng } from "src/user/domain/entities/directions/value-objects/direction-lng"

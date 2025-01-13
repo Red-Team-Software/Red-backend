@@ -5,7 +5,7 @@ import { UserPhone } from "src/user/domain/value-object/user-phone";
 import { IUserDirection } from "../model/user.direction.interface";
 import { IDirection } from "../model/direction-interface";
 import { UserDirection } from "src/user/domain/entities/directions/direction.entity";
-import { DirectionId } from "src/user/domain/entities/directions/value-objects/Direction-id";
+import { DirectionId } from "src/user/domain/entities/directions/value-objects/direction-id";
 
 export interface IQueryUserRepository {
     findUserById(id:UserId):Promise<Result<User>>

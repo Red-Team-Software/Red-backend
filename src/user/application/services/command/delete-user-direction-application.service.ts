@@ -5,7 +5,7 @@ import { UserId } from "src/user/domain/value-object/user-id"
 import { ErrorUpdatinDirectionApplicationException } from "../../application-exeption/error-updating-directions-application-exception"
 import { IQueryUserRepository } from "../../repository/user.query.repository.interface"
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract"
-import { DirectionId } from "src/user/domain/entities/directions/value-objects/Direction-id"
+import { DirectionId } from "src/user/domain/entities/directions/value-objects/direction-id"
 import { DeleteUserDirectionsApplicationRequestDTO } from "../../dto/request/delete-user-direction-application-request-dto"
 import { DeleteUserDirectionsApplicationResponseDTO } from "../../dto/response/delete-user-direction-application-response-dto"
 
