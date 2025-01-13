@@ -6,6 +6,7 @@ import { IUserDirection } from "src/user/application/model/user.direction.interf
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { User } from "src/user/domain/aggregate/user.aggregate";
 import { UserDirection } from "src/user/domain/entities/directions/direction.entity";
+import { DirectionId } from "src/user/domain/entities/directions/value-objects/Direction-id";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { UserPhone } from "src/user/domain/value-object/user-phone";
 
@@ -17,6 +18,17 @@ export class UserQueryRepositoryMock implements IQueryUserRepository{
         private readonly users: User[] = [],
         private readonly idGen: IIdGen<string>
     ){}
+
+
+    async findDirectionById(id: DirectionId, userId: UserId): Promise<Result<UserDirection>> {
+        let user=this.users.find(u=>u.getId().equals(userId))
+        if (!user)
+            return Result.fail(new PersistenceException('Find user direction by id unsucssessfully'))
+        let direction=user.UserDirections.find(d=>d.getId().equals(id))
+        if (!direction)
+            return Result.fail(new PersistenceException('Find user direction by id unsucssessfully'))
+        return Result.success(direction)
+    }
 
     async findUserById(id: UserId): Promise<Result<User>> {
         let user=this.users.find((u) => u.getId().equals(id))

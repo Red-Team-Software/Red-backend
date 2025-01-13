@@ -93,20 +93,13 @@ When('Trying to create a User with one more direction, when he already has the 6
   try {
     await service.execute({
       userId: 'e09771db-2657-45fb-ad39-ae6604422919',
-      directions: [
-        {
+      directions:{
           name: 'Supermarket',
           favorite: true,
           lat: 24.123456,
-          long: 10.123456
-        },
-        {
-          name: 'Pharmacy',
-          favorite: false,
-          lat: 20.123456,
-          long: 2.123456
+          long: 10.123456,
+          direction:''
         }
-      ] 
     }
   )
   } catch (error) {
