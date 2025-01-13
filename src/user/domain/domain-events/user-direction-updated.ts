@@ -1,24 +1,25 @@
 import { DomainEvent } from "src/common/domain"
-import { UserDirection } from "../value-object/user-direction"
 import { UserId } from "../value-object/user-id"
+import { UserDirection } from "../entities/directions/direction.entity"
 
 
 export class UserDirectionUpdated extends DomainEvent {
     serialize(): string {
         let data= {  
             userId:this.userId.Value,
-            userDirection:this.userDirection.map(direction=>({
-                name: direction.Name,
-                favorite: direction.Favorite,
-                lat: direction.Lat,
-                lng: direction.Lng   
-            }))
+            userDirection:{
+                id: this.userDirection.getId().Value,
+                name: this.userDirection.DirectionName,
+                favorite: this.userDirection.DirectionFavorite,
+                lat: this.userDirection.DirectionLat,
+                lng: this.userDirection.DirectionLng    
+            } 
         }
         return JSON.stringify(data)
     }
     static create(
         userId:UserId,
-        userDirection:UserDirection[]
+        userDirection:UserDirection
     ){
         return new UserDirectionUpdated(
             userId,
@@ -27,7 +28,7 @@ export class UserDirectionUpdated extends DomainEvent {
     }
     constructor(
         public userId:UserId,
-        public userDirection:UserDirection[]
+        public userDirection:UserDirection
     ){
         super()
     }

@@ -11,4 +11,7 @@ export interface IQueryOrderRepository {
     findAllOrders(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>>;
     findAllOrdersByUser(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>>;
     findOrderById(orderId: OrderId): Promise<Result<Order>>;
+    findAllOrdersDetails(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<IOrderModel[]>>;
+    findAllOrdersByUserDetails(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<IOrderModel[]>>;
+    findOrderByIdDetails(orderId: OrderId): Promise<Result<IOrderModel>>;
 }

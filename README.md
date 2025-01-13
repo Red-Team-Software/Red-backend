@@ -245,4 +245,45 @@ NT: Hoy 08/11/2024 Ponceleon si completo su responsabilidad (3 dias despues de l
 ❌ NOT done
 :construction: Working
 
-...On going
+
+### Modelo de dominio
+
+#### Domain model
+[![domain model construction](./public/images/construction/Diagramas-Equipo-Rojo%20-%20domain-model%20(1).svg)](https://lucid.app/lucidchart/6702d2bf-abc6-4e63-9c91-a2162adb8348/edit?invitationId=inv_e6b8aa9a-adee-4f9c-bda7-4b37490b17ca&page=_W5nKC6R8y1b#)
+
+#### ORM model
+[![orm model construction](./public/images/elaboration/Diagramas-Equipo-Rojo%20-%20orm-model.svg)](https://lucid.app/lucidchart/6702d2bf-abc6-4e63-9c91-a2162adb8348/edit?invitationId=inv_e6b8aa9a-adee-4f9c-bda7-4b37490b17ca&page=_W5nKC6R8y1b#)
+
+
+### Transition (06-01-2025 / 17-01-2025 ) 2 weeks
+
+
+### Historias de Usuario
+
+| Task                                     | Time required | Assigned to   | Current Status           | Finished        |
+|------------------------------------------|---------------|---------------|--------------------------|-----------------|
+| Agregar un cupón a la orden              | 2 weeks       | Daniel Ponceleon | :construction: Working |                 |
+| Agregar ID cupón a la orden (opcional)   | 2 weeks       | Gabriel De Sousa | :construction: Working |                 |
+| Test de cupón                            | 2 weeks       | Daniel Ponceleon | :construction: Working |                 |
+| Test de categoría                        | 2 weeks       | Daniel Ponceleon | :construction: Working |                 |
+| Auth de currier login                    | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
+| Añadir un curier a una orden             | 2 weeks       | Gabriel De Sousa | :construction: Working |                 |
+| Hacer test de módulo de User             | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
+| Hacer test de módulo de Producto         | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
+| Hacer test de módulo de Bundle           | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
+| Hacer test de módulo de Promoción        | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
+| Modificar producto                       | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
+| Modificar bundle                         | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
+| Modificar promoción                      | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
+| Eliminar producto                        | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
+| Eliminar bundle                          | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
+| Eliminar promoción                       | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
+| Refactorizar Orden                       | 2 weeks       | Gabriel De Sousa | :construction: Working |                 |
+| Refactorizar payment method              | 2 weeks       | Gabriel De Sousa | :construction: Working |                 |
+| Refactorizar Curier                      | 2 weeks       | Gabriel De Sousa | :construction: Working |                 |
+
+
+#### Leyenda
+✅ done
+❌ NOT done
+:construction: Working

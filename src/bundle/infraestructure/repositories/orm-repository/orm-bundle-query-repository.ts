@@ -72,13 +72,13 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
                 .leftJoinAndSelect('bundle.categories','categories')
 
                 if (criteria.category) 
-                    query.andWhere('categories.id IN (:...categories)', { categories: criteria.category })
-                  
+                    query.andWhere('LOWER(categories.name) LIKE ANY(:categoryNames)', { categoryNames: criteria.category.map(name => `%${name.toLowerCase()}%`) })
+
                 if (criteria.name) 
                     query.andWhere('LOWER(bundle.name) LIKE :name', { name: `%${criteria.name.toLowerCase().trim()}%` })
                   
                 if (criteria.price) 
-                    query.andWhere('bundle.price = :price', { price: criteria.price })
+                    query.andWhere('bundle.price <= :price', { price: criteria.price })
         
                 if (criteria.popular) {
                     query.addSelect(subQuery => {
@@ -91,8 +91,7 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
                   }     
         
                 if (criteria.discount ) 
-                    query.andWhere('promotion.discount <= :discount', { discount: criteria.discount })
-                  
+                    query.andWhere('promotion.discount > 0');                  
         
                 const ormBundle = await query.getMany();
                 
@@ -106,6 +105,7 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
                 )
 
             }catch(e){
+                console.log(e)
                 return Result.fail( new NotFoundException('bundles empty please try again'))
             }
         }    

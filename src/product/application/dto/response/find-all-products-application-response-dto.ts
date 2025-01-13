@@ -3,7 +3,7 @@ import { IServiceResponseDto } from "src/common/application/services";
 export interface FindAllProductsApplicationResponseDTO extends IServiceResponseDto {
     id: string
     name:string
-    image: string []
+    images: string []
     price: number
     currency:string
     weight: number

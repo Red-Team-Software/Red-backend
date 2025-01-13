@@ -59,7 +59,6 @@ import { OrmPromotionQueryRepository } from "src/promotion/infraestructure/repos
 import { FindAllOrdersByUserInfraestructureEntryDto } from "../dto/find-all-orders-by-user-ifraestructure-request-dto";
 import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator";
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer";
-import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
 import { OrmPaymentMethodMapper } from "src/payment-methods/infraestructure/mapper/orm-mapper/orm-payment-method-mapper";
 import { OrmPaymentMethodQueryRepository } from "src/payment-methods/infraestructure/repository/orm-repository/orm-payment-method-query-repository";
 import { DeliveredOrderApplicationServiceRequestDto } from "src/order/application/dto/request/delivered-order-request-dto";
@@ -95,9 +94,11 @@ import { FindOrderByIdApplicationService } from "src/order/application/service/q
 import { PayOrderAplicationService } from "src/order/application/service/command/pay-order-application.service";
 import { PayOrderService } from "src/order/domain/domain-services/services/pay-order.service";
 import { ComplexPayOrderMethod } from "src/order/domain/domain-services/services/complex-pay-order-method.service";
-import { OrmCuponEntity } from "src/cupon/infraestructure/orm-entities/orm-cupon-entity";
-import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
-import { OrmCuponMapper } from "src/cupon/infraestructure/mapper/orm-cupon-mapper";
+import { ICreateOrder } from "src/notification/infraestructure/interfaces/create-order.interface";
+import { IDeliveringOrder } from "src/notification/infraestructure/interfaces/delivering-order.interface";
+import { IDeliveredOrder } from "src/notification/infraestructure/interfaces/delivered-order.interface";
+import { IReportedOrder } from "src/notification/infraestructure/interfaces/order-reported.interface";
+import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
 
 
 @ApiBearerAuth()
@@ -173,7 +174,7 @@ export class OrderController {
 
         //*RabbitMQ
         this.rabbitMq = new RabbitMQPublisher(this.channel);
-        this.subscriber= new RabbitMQSubscriber(this.channel)
+        this.subscriber= new RabbitMQSubscriber(this.channel);
 
         //*implementations of domain services
         this.calculateShipping = new CalculateShippingFeeHereMaps(this.hereMapsSingelton);
@@ -227,6 +228,46 @@ export class OrderController {
             { name: 'WalletRefund/OrderStatusCancelled'}, 
             (data):Promise<void>=>{
                 this.walletRefund(data)
+                return
+            }
+        )
+
+        this.subscriber.consume<ICreateOrder>(
+            { name: 'OrderSync/OrderRegistered'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
+                return
+            }
+        )
+
+        this.subscriber.consume<ICancelOrder>(
+            { name: 'OrderSync/OrderStatusCancelled'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
+                return
+            }
+        )
+
+        this.subscriber.consume<IReportedOrder>(
+            { name: 'OrderSync/OrderReported'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
+                return
+            }
+        )
+
+        this.subscriber.consume<IDeliveredOrder>(
+            { name: 'OrderSync/OrderStatusDelivered'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
+                return
+            }
+        )
+
+        this.subscriber.consume<IDeliveringOrder>(
+            { name: 'OrderSync/CourierAssignedToDeliver'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
                 return
             }
         )
