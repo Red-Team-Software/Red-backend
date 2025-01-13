@@ -39,7 +39,7 @@ import { BundleDetailPrice } from 'src/order/domain/entities/bundle-detail/value
 import { CalculateAmountService } from 'src/order/domain/domain-services/services/calculate-amount.service';
 import { Cupon } from 'src/cupon/domain/aggregate/cupon.aggregate';
 import { OrderCuponId } from 'src/order/domain/value_objects/order-cupon-id';
-import { IQueryCuponRepository } from 'src/cupon/domain/query-repository/query-cupon-repository';
+import { IQueryCuponRepository } from 'src/cupon/application/query-repository/query-cupon-repository';
 import { CuponId } from 'src/cupon/domain/value-object/cupon-id';
 import { OrderPayApplicationServiceRequestDto } from '../../dto/request/order-pay-request-dto';
 import { BundleId } from 'src/bundle/domain/value-object/bundle-id';

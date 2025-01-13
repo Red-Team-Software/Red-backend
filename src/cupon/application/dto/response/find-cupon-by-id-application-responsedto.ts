@@ -5,5 +5,5 @@ export interface FindCuponByIdApplicationResponseDTO extends IServiceResponseDto
     code: string; // Código único del cupón
     name: string;
     discount: number; // Valor del descuento (porcentaje o monto fijo)
-    state: boolean;
+    state: string;
 }

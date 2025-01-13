@@ -1,5 +1,5 @@
 import { IApplicationService } from "src/common/application/services";
-import { IQueryCuponRepository } from "src/cupon/domain/query-repository/query-cupon-repository";
+import { IQueryCuponRepository } from "src/cupon/application/query-repository/query-cupon-repository";
 import { Result } from "src/common/utils/result-handler/result";
 import { FindAllCuponsApplicationRequestDTO } from "../../dto/request/find-all-cupons-application-RequestDTO";
 import { FindAllCuponsApplicationResponseDTO } from "../../dto/response/find-all-cupons-application-responsedto";

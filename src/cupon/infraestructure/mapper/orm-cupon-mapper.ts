@@ -6,13 +6,10 @@ import { CuponName } from "src/cupon/domain/value-object/cupon-name";
 import { CuponCode } from "src/cupon/domain/value-object/cupon-code";
 import { CuponDiscount } from "src/cupon/domain/value-object/cupon-discount";
 import { CuponState } from "src/cupon/domain/value-object/cupon-state";
-import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 
 export class OrmCuponMapper implements IMapper<Cupon, OrmCuponEntity> {
 
-    constructor(
-        private readonly idGen:IIdGen<string>
-    ){}
+    constructor(){}
     
     async fromDomaintoPersistence(domainEntity: Cupon): Promise<OrmCuponEntity> {
         const ormEntity: OrmCuponEntity = {
