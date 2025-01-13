@@ -46,17 +46,17 @@ export class OrmOrderEntity implements IOrderInterface {
     @Column('date', { nullable: true })
     orderReceivedDate?: Date;
 
-    @OneToMany( () => OrmOrderProductEntity, (orderProduct) => orderProduct.order, { cascade: true } )
+    @OneToMany( () => OrmOrderProductEntity, (orderProduct) => orderProduct.order, { cascade: true, eager: true } )
     order_products?: OrmOrderProductEntity[];
 
-    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.order, { cascade: true } )
+    @OneToMany(() => OrmOrderBundleEntity, (orderBundle) => orderBundle.order, { cascade: true, eager: true } )
     order_bundles?: OrmOrderBundleEntity[]
 
-    @OneToOne( () => OrmOrderReportEntity, (orderReport) => orderReport.order, { cascade: true })
+    @OneToOne( () => OrmOrderReportEntity, (orderReport) => orderReport.order, { cascade: true, eager: true })
     @JoinColumn()
     order_report?: OrmOrderReportEntity;
 
-    @OneToOne( () => OrmCourierEntity, (courier) => courier.orders, { nullable: true } )
+    @OneToOne( () => OrmCourierEntity, (courier) => courier.orders, { nullable: true, eager: true} )
     @JoinColumn({ name: 'courier_id' })
     order_courier?: OrmCourierEntity | null;
 

@@ -112,7 +112,7 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
             .skip(criteria.page)
 
         if (criteria.category && criteria.category.length > 0) 
-            query.andWhere('category.id IN (:...categories)', { categories: criteria.category })
+            query.andWhere('LOWER(category.name) LIKE ANY(:categoryNames)', { categoryNames: criteria.category.map(name => `%${name.toLowerCase()}%`) });
           
         if (criteria.name) 
             query.andWhere('LOWER(product.name) LIKE :name', { name: `%${criteria.name.toLowerCase().trim()}%` })
@@ -131,8 +131,7 @@ export class OrmProductQueryRepository extends Repository<OrmProductEntity> impl
           }     
 
         if (criteria.discount ) 
-            query.andWhere('promotion.discount = :discount', { discount: criteria.discount })
-          
+            query.andWhere('promotion.discount > 0');          
 
         const ormProducts = await query.getMany();
 
