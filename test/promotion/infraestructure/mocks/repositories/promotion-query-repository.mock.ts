@@ -10,6 +10,10 @@ import { PromotionName } from "src/promotion/domain/value-object/promotion-name"
 export class PromotionQueryRepositoryMock implements IQueryPromotionRepository{
 
     constructor(private readonly promotions: Promotion[]){}
+    
+    async findAllPromo(): Promise<Result<Promotion[]>> {
+        return Result.success(this.promotions);
+    }
 
     async findAllPromotion(criteria: FindAllPromotionApplicationRequestDTO): Promise<Result<Promotion[]>> {
         let promotions= this.promotions.slice(criteria.page,criteria.perPage)
