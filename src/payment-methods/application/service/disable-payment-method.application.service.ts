@@ -5,9 +5,9 @@ import { IPaymentMethodRepository } from "src/payment-methods/domain/repository/
 import { PaymentMethodId } from "src/payment-methods/domain/value-objects/payment-method-id";
 import { ErrorSavingPaymentMethodApplicationException } from "../application-exception/error-saving-payment-method-application.exception";
 import { DisablePaymentMethodResponseDto } from "../dto/response/disable-payment-method-response-dto";
-import { IPaymentMethodQueryRepository } from "../query-repository/orm-query-repository.interface";
 import { NotFoundPaymentMethodApplicationException } from "../application-exception/not-found-payment-method-application.exception";
 import { DisablePaymentMethodRequestDto } from "../dto/request/disable-payment-method-request-dto";
+import { IPaymentMethodQueryRepository } from "../query-repository/orm-query-repository.interface";
 
 
 export class DisablePaymentMethodApplicationService extends IApplicationService<DisablePaymentMethodRequestDto,DisablePaymentMethodResponseDto>{
@@ -24,6 +24,8 @@ export class DisablePaymentMethodApplicationService extends IApplicationService<
         
         let methodRes = await this.paymentMethodQueryRepository.findMethodById(
             PaymentMethodId.create(data.paymentMethodId));
+
+            console.log(methodRes);
 
         if(!methodRes.isSuccess()) 
             return Result.fail(new NotFoundPaymentMethodApplicationException());

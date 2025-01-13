@@ -29,6 +29,7 @@ export type reportOrderByIdResponse = {
 }
 
 export type courierOrderByIdResponse = {
+    courierId: string
     courierName: string
     courierImage: string
     location: {

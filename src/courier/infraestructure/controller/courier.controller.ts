@@ -34,6 +34,10 @@ import { AuditDecorator } from "src/common/application/aspects/audit-decorator/a
 import { DateHandler } from "src/common/infraestructure/date-handler/date-handler"
 import { IAuditRepository } from "src/common/application/repositories/audit.repository"
 import { OrmAuditRepository } from "src/common/infraestructure/repository/orm-repository/orm-audit.repository"
+import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber"
+import { CourierQueues } from "../queues/courier-queues"
+import { ICourierRegistered } from "src/courier/infraestructure/interface/courier-registered.interface"
+import { ICourierDirectionUpdated } from "src/courier/infraestructure/interface/courier-direction-updated.interface"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -45,8 +49,26 @@ export class CourierController {
         private readonly courierQueryRepository: ICourierQueryRepository;
         private readonly idGen:IIdGen<string>;
         private readonly auditRepository: IAuditRepository;
-
+        private readonly subscriber: RabbitMQSubscriber;
         private readonly ormMapper: IMapper<Courier,OrmCourierEntity>;
+
+        private initializeQueues():void{        
+            CourierQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+        }
+            
+        private buildQueue(name: string, pattern: string) {
+            this.subscriber.buildQueue({
+                name,
+                pattern,
+                exchange: {
+                    name: 'DomainEvent',
+                    type: 'direct',
+                    options: {
+                        durable: false,
+                    },
+                },
+            })
+        }
 
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
@@ -55,7 +77,29 @@ export class CourierController {
         this.ormMapper = new OrmCourierMapper(this.idGen);
         this.courierRepository= new CourierRepository( PgDatabaseSingleton.getInstance(),this.ormMapper );
         this.courierQueryRepository= new CourierQueryRepository( PgDatabaseSingleton.getInstance(),this.ormMapper );
-        this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
+        this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance());
+        this.subscriber= new RabbitMQSubscriber(this.channel);
+
+        this.initializeQueues();
+
+        this.subscriber.consume<ICourierRegistered>(
+            { name: 'CourierSync/CourierRegistered'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
+                    return
+            }
+        )
+        
+        this.subscriber.consume<ICourierDirectionUpdated>(
+            { name: 'CourierSync/CourierDirectionUpdated'}, 
+            (data):Promise<void>=>{
+                //this.walletRefund(data)
+                return
+            }
+        )
+
+
+
     }
 
     @Post('create')
