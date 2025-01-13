@@ -1,20 +1,15 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsPositive } from "class-validator";
+import { IsIn, IsOptional, IsPositive, IsString } from "class-validator";
 import { Transform } from "class-transformer";
-import { UserId } from '../../../user/domain/value-object/user-id';
+import { PaginationDto } from "src/common/infraestructure/dto/entry/pagination.dto";
 
 
-export class FindAllOrdersEntryDto {
+export class FindAllOrdersEntryDto extends PaginationDto{
 
-    @ApiProperty( { required: false })
+
+    @ApiProperty({ required: false, description: "Active or Past" })
+    @IsString()
     @IsOptional()
-    @IsPositive()
-    @Transform(({ value }) => { return Number(value); })  
-    page?: number
-
-    @ApiProperty( { required: false, default: 5, minimum: 1 })
-    @IsOptional()
-    @IsPositive()
-    @Transform(({ value }) => { return Number(value); })  
-    perPage?: number
+    @IsIn(['active', 'past'])
+    state?: string;
 }

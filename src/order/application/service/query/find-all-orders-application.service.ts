@@ -151,88 +151,26 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
         //     });
         // });
 
+        const ord = await Promise.all(
+            orders.map(async order => {
+            const summaryOrder = [
+                ...order.products.map(product => `${product.name} (${product.quantity})`),
+                ...order.bundles.map(bundle => `${bundle.name} (${bundle.quantity})`),
+            ].join(', ');
 
-        orders.forEach( (order) => {
-
-            let associatedCourier: courierOrderResponse;
-
-            let associatedProducts: productsOrderResponse[] = [];
-            let associatedBundles: bundlesOrderResponse[] = [];
-
-            if( order.orderCourier){
-                associatedCourier = {
-                    courierId: order.orderCourier.courierId,
-                    courierName: order.orderCourier.courierName,
-                    courierImage: order.orderCourier.courierImage,
-                    location: {
-                        lat: order.orderCourier.location.lat,
-                        long: order.orderCourier.location.long
-                    }
-                };
-            }
-
-            if(order.products){
-                for (const product of order.products){    
-                    associatedProducts.push({
-                        id: product.id,
-                        name: product.name,
-                        description: product.description,
-                        quantity: product.quantity,
-                        price: product.price,
-                        images: product.images,
-                        currency: product.currency,
-                        orderid: order.orderId,
-                    })
-                }
-            }
-
-            if(order.bundles){
-                for (const bundle of order.bundles){
-                    associatedBundles.push({
-                        id: bundle.id,
-                        name: bundle.name, 
-                        description: bundle.description,
-                        quantity: bundle.quantity,
-                        price: bundle.price, 
-                        images: bundle.images,
-                        currency: bundle.currency,
-                        orderid: order.orderId
-                    })
-                }
-            }
-
-            ordersDto.push({
-                orderId: order.orderId,
-                orderState: order.orderState,
-                orderCreatedDate: order.orderCreatedDate,
-                orderTimeCreated: new Date(order.orderCreatedDate).toTimeString().split(' ')[0],
+            return {
+                id: order.orderId,
+                last_state: {
+                    state: order.orderState,
+                    date: new Date(),
+                },
                 totalAmount: order.totalAmount,
-                orderReceivedDate: order.orderReceivedDate? order.orderReceivedDate : null,
-                orderPayment: {
-                    paymetAmount: order.orderPayment.paymetAmount,
-                    paymentCurrency: order.orderPayment.paymentCurrency,
-                    payementMethod: order.orderPayment.payementMethod
-                },
-                orderDirection: {
-                    lat: order.orderDirection.lat,
-                    long: order.orderDirection.long
-                },
-                products: order.products 
-                ? associatedProducts
-                : [],
-                bundles: order.bundles
-                ? associatedBundles
-                : [],
-                orderReport: order.orderReport ? {
-                    id: order.orderReport.id,
-                    description: order.orderReport.description,
-                    orderid: order.orderId
-                } : null,
-                orderCourier: order.orderCourier ? associatedCourier : null
-            });
-        });
+                summary_order: summaryOrder,
+                };
+            }),
+        );
 
 
-        return Result.success(new FindAllOrdersApplicationServiceResponseDto(ordersDto));
+        return Result.success(new FindAllOrdersApplicationServiceResponseDto(ord));
     }
 }

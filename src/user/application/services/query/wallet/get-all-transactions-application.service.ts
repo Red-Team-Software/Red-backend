@@ -1,7 +1,9 @@
 import { UserNotFoundApplicationException } from "src/auth/application/application-exception/user-not-found-application-exception";
 import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
+import { IPaymentMethodModel } from "src/payment-methods/application/model/payment-method-model";
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
+import { PaymentMethodId } from "src/payment-methods/domain/value-objects/payment-method-id";
 import { NotFoundTransactionApplicationException } from "src/user/application/application-exeption/not-found-transaction-application.exception";
 import { GetAllTransactionsApplicationRequestDTO } from "src/user/application/dto/request/wallet/get-all-transactions-application-request-dto";
 import { GetAllTransactionsApplicationResponseDTO } from "src/user/application/dto/response/wallet/get-all-transactions-application-response-dto";
@@ -44,28 +46,35 @@ export class FindAllTransactionsByUserApplicationService extends IApplicationSer
         if (!transactions.isSuccess())
             return Result.fail(new NotFoundTransactionApplicationException());
 
-        let paymentMethods = await this.paymentMethodQueryRepository.findAllMethods({
-            userId: data.userId,
-            page: 0,
-            perPage: 200,
-        })
+        let trans = transactions.getValue;
 
-        transactions.getValue.forEach(t => {
+        for(let t of trans){
 
-            let paymentMethod = paymentMethods.getValue.find(pm => pm.getId().paymentMethodId === t.payment_method_id);
+            let paymentMethod: IPaymentMethodModel;
 
-            response.push({
+            if(t.payment_method_id){
+                let method = await this.paymentMethodQueryRepository.findMethodByIdDetail(
+                    PaymentMethodId.create(t.payment_method_id));
+                paymentMethod = method.getValue;
+            }
+
+            let res: ITypeTransaction = {
                 id: t.id,
                 currency: t.currency,
                 price: t.price,
                 walletId: t.wallet_id,
-                paymentMethod:{
-                    id: paymentMethod.getId().paymentMethodId,
-                    name: paymentMethod.name.paymentMethodName,
-                },
+                paymentMethod: t.payment_method_id 
+                ? 
+                {
+                    id: paymentMethod.paymentMethodId,
+                    name: paymentMethod.paymentMethodName,
+                }
+                : null,
                 date: t.date,
-            });
-        });
+            };
+
+            response.push(res);
+        }
 
         return Result.success(new GetAllTransactionsApplicationResponseDTO(response));
 

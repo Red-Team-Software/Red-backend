@@ -309,7 +309,7 @@ export class OrderController {
             paymentId: data.paymentId,
             currency: data.currency.toLowerCase(),
             paymentMethod: data.paymentMethod,
-            address: data.address,
+            directionId: data.idUserDirection,
             products: data.products,
             bundles: data.bundles,
             cuponId: data.cuponId,
@@ -356,7 +356,8 @@ export class OrderController {
                             new DateHandler(),
                             new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
                             this.paymentMethodQueryRepository,
-                            this.ormCuponQueryRepo
+                            this.ormCuponQueryRepo,
+                            this.ormUserQueryRepository
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
                     new NestLogger(new Logger())
@@ -380,7 +381,7 @@ export class OrderController {
             paymentId: data.paymentId,
             currency: data.currency.toLowerCase(),
             paymentMethod: data.paymentMethod,
-            address: data.address,
+            directionId: data.idUserDirection,
             products: data.products,
             bundles: data.bundles,
             cuponId: data.cuponId
@@ -410,7 +411,8 @@ export class OrderController {
                             new DateHandler(),
                             new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
                             this.paymentMethodQueryRepository,
-                            this.ormCuponQueryRepo
+                            this.ormCuponQueryRepo,
+                            this.ormUserQueryRepository
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
                     new NestLogger(new Logger())
@@ -463,6 +465,7 @@ export class OrderController {
     ) {
         let values: FindAllOrdersApplicationServiceRequestDto = {
             userId: credential.account.idUser,
+            state: data.state ? data.state : null,
             ...data
         }
 
@@ -497,6 +500,7 @@ export class OrderController {
     ) {
         let values: FindAllOrdersApplicationServiceRequestDto = {
             userId: credential.account.idUser,
+            state: data.state ? data.state : null,
             ...data
         }
 
@@ -519,7 +523,7 @@ export class OrderController {
             )
         )
         
-        let response=await service.execute({...data,userId:credential.account.idUser})
+        let response=await service.execute(values)
         return response.getValue
     }
 

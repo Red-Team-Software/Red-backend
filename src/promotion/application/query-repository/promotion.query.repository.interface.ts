@@ -11,4 +11,5 @@ export interface IQueryPromotionRepository{
     findPromotionById(id:PromotionId):Promise<Result<Promotion>>
     findPromotionWithMoreDetailsById(id:PromotionId):Promise<Result<IPromotion>>
     verifyPromotionExistenceByName(promotionName:PromotionName):Promise<Result<boolean>>
+    findAllPromo(): Promise<Result<Promotion[]>>
 }
