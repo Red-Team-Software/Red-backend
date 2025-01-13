@@ -1,6 +1,6 @@
+import { DirectionId } from './../entities/directions/value-objects/direction-id';
 import { DomainEvent } from "src/common/domain"
 import { UserId } from "../value-object/user-id"
-import { DirectionId } from "../entities/directions/value-objects/Direction-id"
 
 
 export class UserDirectionDeleted extends DomainEvent {
