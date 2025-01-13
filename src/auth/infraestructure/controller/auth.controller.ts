@@ -120,7 +120,8 @@ export class AuthController {
                 this.encryptor,
                 this.dateHandler,
                 this.eventPublisher,
-                this.saveUserExternalApi
+                this.saveUserExternalApi,
+                this.jwtGen
               ),new NestTimer(),new NestLogger(new Logger())
             // ),new NestLogger(new Logger())
           ),this.auditRepository,this.dateHandler)

@@ -2,7 +2,7 @@
 export interface IUserDirection {
     id:string
     name: string
-    favorite: boolean
+    isFavorite: boolean
     lat: number
     lng: number
 }

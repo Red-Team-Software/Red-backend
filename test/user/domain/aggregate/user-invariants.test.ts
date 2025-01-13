@@ -4,7 +4,6 @@ import { InvalidUserIdException } from 'src/user/domain/domain-exceptions/invali
 import { Ballance } from 'src/user/domain/entities/wallet/value-objects/balance';
 import { WalletId } from 'src/user/domain/entities/wallet/value-objects/wallet-id';
 import { Wallet } from 'src/user/domain/entities/wallet/wallet.entity';
-import { UserDirection } from 'src/user/domain/value-object/user-direction';
 import { UserId } from 'src/user/domain/value-object/user-id';
 import { UserName } from 'src/user/domain/value-object/user-name';
 import { UserPhone } from 'src/user/domain/value-object/user-phone';
@@ -25,14 +24,7 @@ describe("User Aggregate Invariants", () => {
             UserName.create('John Doe'),
             UserPhone.create('04122345678'),
             UserRole.create('CLIENT'),
-            [
-              UserDirection.create('Home',true,10.123456,-66.123456),
-              UserDirection.create('Work',false,10.123456,-66.789456),
-              UserDirection.create('School',false,10.123456,-66.14564),
-              UserDirection.create('Gym',false,10.123456,-66.12465),
-              UserDirection.create('Park',false,10.123456,-78.123456),
-              UserDirection.create('Restaurant',false,10.123456,-45.123456)
-            ],
+            [],
             Wallet.create(
               WalletId.create('fd5235de-9533-4660-8b00-67448de3b767'),
               Ballance.create(45,'usd')
