@@ -40,6 +40,19 @@ import { SecurityDecorator } from 'src/common/application/aspects/security-decor
 import { UpdatePromotionApplicationService } from 'src/promotion/application/services/command/update-promotion-application.service';
 import { UserRoles } from 'src/user/domain/value-object/enum/user.roles';
 import { UpdatePromotionInfraestructureRequestDTO } from '../dto/request/update-promotion-infraestructure-request-dto';
+import { PromotionQueues } from '../queues/promotion.queues';
+import { RabbitMQSubscriber } from 'src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber';
+import { IPromotionCreated } from '../interfaces/promotion-created';
+import { PromotionRegisteredSyncroniceService } from '../services/syncronice/promotion-registered-syncronice.service';
+import { Mongoose } from 'mongoose';
+import { IPromotionBundlesUpdated } from '../interfaces/promotion-bundles-updated';
+import { PromotionUpdatedInfraestructureRequestDTO } from '../services/dto/request/promotion-updated-infraestructure-request-dto';
+import { PromotionUpdatedSyncroniceService } from '../services/syncronice/promotion-updated-syncronice.service';
+import { IPromotionDescriptionUpdated } from '../interfaces/promotion-description-updated';
+import { IPromotionDiscountUpdated } from '../interfaces/promotion-discount-updated';
+import { IPromotionNameUpdated } from '../interfaces/promotion-name-updated';
+import { IPromotionProductsUpdated } from '../interfaces/promotion-products-updated';
+import { IPromotionStateUpdated } from '../interfaces/promotion-state-updated';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -53,10 +66,31 @@ export class PromotionController {
   private readonly ormPromotionCommandRepo:ICommandPromotionRepository
   private readonly ormQueryBundleRepo:IQueryBundleRepository
   private readonly ormQueryProductRepo:IQueryProductRepository
+  private readonly subscriber: RabbitMQSubscriber
+  
+
+    private initializeQueues():void{        
+      PromotionQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+    }
+    
+    private buildQueue(name: string, pattern: string) {
+        this.subscriber.buildQueue({
+              name,
+              pattern,
+              exchange: {
+                name: 'DomainEvent',
+                type: 'direct',
+                options: {
+                  durable: false,
+                },
+         },
+      })
+    }
 
   
   constructor(
-    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+    @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose,
   ) {
     this.idGen= new UuidGen()
     this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
@@ -64,6 +98,76 @@ export class PromotionController {
     this.ormPromotionCommandRepo=new OrmPromotionCommandRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryBundleRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryProductRepo=new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
+    this.subscriber= new RabbitMQSubscriber(this.channel)
+
+
+    this.initializeQueues()
+
+    this.subscriber.consume<IPromotionCreated>(
+      { name: 'PromotionSync/PromotionRegistered'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionRegistered(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IPromotionBundlesUpdated>(
+      { name: 'PromotionSync/PromotionUpdatedBundles'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionUpdated(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IPromotionDescriptionUpdated>(
+      { name: 'PromotionSync/PromotionUpdatedDescription'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionUpdated(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IPromotionDiscountUpdated>(
+      { name: 'PromotionSync/PromotionUpdatedDiscount'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionUpdated(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IPromotionNameUpdated>(
+      { name: 'PromotionSync/PromotionUpdatedName'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionUpdated(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IPromotionProductsUpdated>(
+      { name: 'PromotionSync/PromotionUpdatedProducts'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionUpdated(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IPromotionStateUpdated>(
+      { name: 'PromotionSync/PromotionUpdatedState'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionUpdated({...data,promotionState:data.promotionState.state})
+        return
+      }
+    )
+  }
+
+  async syncPromotionRegistered(data:IPromotionCreated){
+    let service= new PromotionRegisteredSyncroniceService(this.mongoose)
+    await service.execute(data)
+  }
+
+  async syncPromotionUpdated(data:PromotionUpdatedInfraestructureRequestDTO){
+    let service= new PromotionUpdatedSyncroniceService(this.mongoose)
+    await service.execute(data)
   }
 
   @ApiResponse({
