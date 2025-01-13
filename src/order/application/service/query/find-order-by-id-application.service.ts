@@ -183,12 +183,14 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
             };
         }
 
+        let state = [{
+            state: order.orderState,
+            date: order.orderCreatedDate
+        }]
+
         let ordersDto: orderByIdResponse = {
             orderId: order.orderId,
-            orderState: {
-                state: order.orderState,
-                date: order.orderCreatedDate
-            },
+            orderState: state,
             orderTimeCreated: new Date(order.orderCreatedDate).toTimeString().split(' ')[0],
             totalAmount: order.totalAmount,
             orderReceivedDate: order.orderReceivedDate ? order.orderReceivedDate : null,
