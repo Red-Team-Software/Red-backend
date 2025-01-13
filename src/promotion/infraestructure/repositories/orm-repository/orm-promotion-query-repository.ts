@@ -11,9 +11,6 @@ import { PromotionName } from "src/promotion/domain/value-object/promotion-name"
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { OrmPromotionMapper } from "../../mapper/orm-mapper/orm-promotion-mapper";
 import { IPromotion } from "src/promotion/application/model/promotion.interface";
-import { ProductID } from "src/product/domain/value-object/product-id";
-import { Bundle } from '../../../../../dist/bundle/infraestructure/interfaces/create-order.interface';
-import { BundleId } from "src/bundle/domain/value-object/bundle-id";
 
 
 
