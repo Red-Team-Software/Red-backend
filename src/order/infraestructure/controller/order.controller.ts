@@ -19,7 +19,7 @@ import { TaxesShippingFeeApplicationServiceEntryDto } from "src/order/applicatio
 import { ICommandOrderRepository } from "src/order/domain/command-repository/order-command-repository-interface";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { Order } from "src/order/domain/aggregate/order";
-import { OrmOrderEntity } from "../entities/orm-order-entity";
+import { OrmOrderEntity } from "../entities/orm-entities/orm-order-entity";
 import { OrmOrderMapper } from "../mappers/order-mapper";
 import { OrderQueryRepository } from "../repositories/orm-repository/orm-order-query-repository";
 import { OrmOrderRepository } from "../repositories/orm-repository/orm-order-repository";
@@ -578,7 +578,7 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Post('/delivered/order')
+    @Post('/delivered')
     async deliveredOrder(
         @GetCredential() credential:ICredential,
         @Body() data: DeliveredOrderDto) {
@@ -606,7 +606,7 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Post('/report/order')
+    @Post('/report')
     async reportOrder(
         @GetCredential() credential:ICredential,
         @Body() data: CreateReportEntryDto
