@@ -5,11 +5,13 @@ import { FindCuponByCodeApplicationRequestDTO } from "../../dto/request/find-cup
 import { FindCuponByCodeApplicationResponseDTO } from "../../dto/response/find-cupon-by-code-application-responsedto";
 import { NotFoundCuponApplicationException } from "src/cupon/application/application-exception/not-found-cupon-application-exception";
 import { CuponCode } from "src/cupon/domain/value-object/cupon-code";
+import { IQueryCuponRepository } from "../../query-repository/query-cupon-repository";
+import { CuponId } from "src/cupon/domain/value-object/cupon-id";
 
 export class FindCuponByCodeApplicationService extends 
 IApplicationService<FindCuponByCodeApplicationRequestDTO, FindCuponByCodeApplicationResponseDTO> {
     constructor(
-        private readonly queryCuponRepository: ICuponRepository
+        private readonly queryCuponRepository: IQueryCuponRepository
     ) {
         super();
     }
@@ -17,7 +19,7 @@ IApplicationService<FindCuponByCodeApplicationRequestDTO, FindCuponByCodeApplica
     async execute(data: FindCuponByCodeApplicationRequestDTO): Promise<Result<FindCuponByCodeApplicationResponseDTO>> {
         const cuponCode = CuponCode.create(data.code);
 
-        const response = await this.queryCuponRepository.findCuponByCode(cuponCode);
+        const response = await this.queryCuponRepository.findCuponById(CuponId.create(data.code));
 
         if (!response.isSuccess() || !response.getValue) {
             return Result.fail(new NotFoundCuponApplicationException());

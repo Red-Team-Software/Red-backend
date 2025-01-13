@@ -7,6 +7,7 @@ import { CuponState } from "../value-object/cupon-state";
 import { CuponRegistered } from "../domain-events/cupon-created";
 import { CuponDeleted } from "../domain-events/cupon-delete";
 import { CuponStateChanged } from "../domain-events/cupon-state-change";
+import { InvalidCuponException } from "../domain-exceptions/invalid-cupon-exception";
 
 export class Cupon extends AggregateRoot<CuponId> {
     protected when(event: DomainEvent): void {
@@ -31,9 +32,13 @@ export class Cupon extends AggregateRoot<CuponId> {
     }
 
     protected validateState(): void {
-        if (!this.getId() || !this.cuponName || !this.cuponCode || !this.cuponDiscount || !this.cuponState) {
-            throw new Error("Invalid cupon state: All properties must be defined.");
-        }
+        if (!this.getId() || 
+            !this.cuponName || 
+            !this.cuponCode || 
+            !this.cuponDiscount || 
+            !this.cuponState
+            ) 
+            throw new InvalidCuponException()
     }
 
     private constructor(
@@ -53,9 +58,21 @@ export class Cupon extends AggregateRoot<CuponId> {
         cuponDiscount: CuponDiscount,
         cuponState: CuponState
     ): Cupon {
-        const cupon = new Cupon(cuponId, cuponName, cuponCode, cuponDiscount, cuponState);
+        const cupon = new Cupon(
+            cuponId,
+            cuponName,
+            cuponCode,
+            cuponDiscount,
+            cuponState
+        )
         cupon.apply(
-            CuponRegistered.create(cuponId, cuponName, cuponCode, cuponDiscount, cuponState)
+            CuponRegistered.create(
+                cuponId,
+                cuponName,
+                cuponCode,
+                cuponDiscount,
+                cuponState
+            )
         );
         return cupon;
     }
@@ -67,7 +84,13 @@ export class Cupon extends AggregateRoot<CuponId> {
         cuponDiscount: CuponDiscount,
         cuponState: CuponState
     ): Cupon {
-        const cupon = new Cupon(cuponId, cuponName, cuponCode, cuponDiscount, cuponState);
+        const cupon = new Cupon(
+            cuponId,
+            cuponName,
+            cuponCode,
+            cuponDiscount,
+            cuponState
+        )
         cupon.validateState();
         return cupon;
     }

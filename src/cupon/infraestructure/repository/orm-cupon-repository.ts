@@ -16,7 +16,7 @@ export class OrmCuponRepository extends Repository<OrmCuponEntity> implements IC
 
     constructor(dataSource: DataSource) {
         super(OrmCuponEntity, dataSource.createEntityManager());
-        this.mapper = new OrmCuponMapper(new UuidGen());
+        this.mapper = new OrmCuponMapper();
     }
 
 
@@ -62,39 +62,6 @@ export class OrmCuponRepository extends Repository<OrmCuponEntity> implements IC
             return Result.success(cupon);
         } catch (e) {
             return Result.fail(new NotFoundException('Find cupon unsuccessfully'));
-        }
-    }
-
-    async findCuponByCode(cuponCode: CuponCode): Promise<Result<Cupon>> {
-        try {
-            const ormCupon = await this.findOneBy({ code: cuponCode.Value });
-
-            if (!ormCupon) {
-                return Result.fail(new NotFoundException('Find cupon by code unsuccessfully'));
-            }
-
-            const cupon = await this.mapper.fromPersistencetoDomain(ormCupon);
-            return Result.success(cupon);
-        } catch (e) {
-            return Result.fail(new NotFoundException('Find cupon by code unsuccessfully'));
-        }
-    }
-
-    async verifyCuponExistenceByCode(cuponCode: CuponCode): Promise<Result<boolean>> {
-        try {
-            const cupon = await this.findOneBy({ code: cuponCode.Value });
-            return Result.success(!!cupon);
-        } catch (e) {
-            return Result.fail(new NotFoundException('Verify cupon by code unsuccessfully'));
-        }
-    }
-
-    async verifyCuponExistenceByName(name: CuponName): Promise<Result<boolean>> {
-        try {
-            const cupon = await this.findOneBy({ name: name.Value });
-            return Result.success(!!cupon);
-        } catch (e) {
-            return Result.fail(new NotFoundException('Verify cupon by code unsuccessfully'));
         }
     }
 }

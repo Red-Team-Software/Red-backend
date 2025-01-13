@@ -6,7 +6,7 @@ import { CreateCuponApplicationService } from 'src/cupon/application/services/co
 import { ExceptionDecorator } from 'src/common/application/aspects/exeption-decorator/exception-decorator';
 import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
 import { UuidGen } from 'src/common/infraestructure/id-gen/uuid-gen';
-import { IQueryCuponRepository } from 'src/cupon/domain/query-repository/query-cupon-repository';
+import { IQueryCuponRepository } from 'src/cupon/application/query-repository/query-cupon-repository';
 import { OrmCuponQueryRepository } from '../repository/orm-cupon-query-repository';
 import { FindCuponByIdApplicationService } from 'src/cupon/application/services/query/find-cupon-by-id-application-service';
 import { FindAllCuponsInfraestructureRequestDTO } from '../dto-request/find-all-cupons-infraestructure-request';
@@ -21,6 +21,7 @@ import { Channel } from 'amqplib';
 import { JwtAuthGuard } from 'src/auth/infraestructure/jwt/guards/jwt-auth.guard';
 import { ICredential } from 'src/auth/application/model/credential.interface';
 import { GetCredential } from 'src/auth/infraestructure/jwt/decorator/get-credential.decorator';
+import { ByIdDTO } from 'src/common/infraestructure/dto/entry/by-id.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -47,6 +48,7 @@ export class CuponController {
       new CreateCuponApplicationService(
         new RabbitMQPublisher(this.channel),
         this.ormCuponRepo,
+        this.ormCuponQueryRepo,
         this.idGen
       )
     );
@@ -82,18 +84,18 @@ export class CuponController {
   @Get(':id')
   async getCuponById(
     @GetCredential() credential:ICredential,
-    @Param('id') id: string
+    @Param() entry: ByIdDTO
   ) {
       let service = new ExceptionDecorator(
           new LoggerDecorator(
               new FindCuponByIdApplicationService( 
-                  this.ormCuponRepo
+                  this.ormCuponQueryRepo
               ),
               new NestLogger(new Logger()) 
           )
       );
       
-      let response = await service.execute({ userId: credential.account.idUser, id: id }); 
+      let response = await service.execute({ userId: credential.account.idUser, id: entry.id }); 
       return response.getValue; 
   }
   
