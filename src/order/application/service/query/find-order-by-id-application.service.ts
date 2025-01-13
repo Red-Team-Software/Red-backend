@@ -191,6 +191,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
             },
             orderTimeCreated: new Date(order.orderCreatedDate).toTimeString().split(' ')[0],
             totalAmount: order.totalAmount,
+            subTotal: order.totalAmount,
             orderReceivedDate: order.orderReceivedDate ? order.orderReceivedDate : null,
             orderPayment: {
                 paymetAmount: order.orderPayment.paymetAmount,

@@ -38,6 +38,7 @@ export type orderByIdResponse = {
     }
     orderTimeCreated: string;
     totalAmount: number;
+    subTotal: number;
     orderReceivedDate?: Date;
     orderPayment?: {
         paymetAmount: number;
