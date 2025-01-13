@@ -27,7 +27,7 @@ export class OrmUserEntity implements IUser{
     @OneToMany( () => OrmOrderEntity, order => order.user)
     orders?: OrmOrderEntity[]
 
-    @OneToMany( () => OrmCuponUserEntity, cupon => cupon.cupon, {eager:true})
+    @OneToMany( () => OrmCuponUserEntity, cuponUser => cuponUser.cupon, {eager:true, cascade:true})
     cupon?: OrmCuponUserEntity[]
 
     @OneToOne(() => OrmWalletEntity, wallet => wallet, {eager:true, cascade:true}) 

@@ -22,7 +22,10 @@ export class UserCoupon extends Entity<CuponId> {
     }
 
     get CuponState():CuponState{return this.cuponState}
-
     
+    aplyCoupon(){
+        this.cuponState.changeUsed()
+        return this
+    }
 
 }

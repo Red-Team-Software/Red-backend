@@ -23,6 +23,8 @@ import { DirectionName } from 'src/user/domain/entities/directions/value-objects
 import { UserCoupon } from "src/user/domain/entities/coupon/user-coupon.entity"
 import { CuponId } from "src/cupon/domain/value-object/cupon-id"
 import { CuponState } from "src/user/domain/entities/coupon/value-objects/cupon-state"
+import { OrmCuponEntity } from "src/cupon/infraestructure/orm-entities/orm-cupon-entity"
+import { OrmCuponUserEntity } from "../../entities/orm-entities/orm-coupon-user-entity"
 
 
 export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
@@ -35,6 +37,7 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
     async fromDomaintoPersistence(domainEntity: User): Promise<OrmUserEntity> {
 
         let ormDirectionUserEntities:OrmDirectionUserEntity[]=[]
+        let ormUserCupon:OrmCuponUserEntity[]=[]
 
         let ormWallet=OrmWalletEntity.create(
             domainEntity.Wallet.getId().Value,
@@ -66,7 +69,19 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
             )
         }
 
+        for (const coupon of domainEntity.UserCoupon){
+            ormUserCupon.push(OrmCuponUserEntity.create(
+                domainEntity.getId().Value,
+                coupon.getId().Value,
+                coupon.CuponState.Value
+            ))
+        }
+
+        data.cupon=ormUserCupon
+
         data.direcction=ormDirectionUserEntities
+
+        console.log(data)
 
         return data
 

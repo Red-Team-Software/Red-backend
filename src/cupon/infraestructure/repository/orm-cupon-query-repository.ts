@@ -48,10 +48,9 @@ export class OrmCuponQueryRepository extends Repository<OrmCuponEntity> implemen
     async findCuponById(cuponId: CuponId): Promise<Result<Cupon>> {
         try {
             const ormCupon = await this.findOneBy({ id: cuponId.Value });
-
-            if (!ormCupon) {
-                return Result.fail(new NotFoundCuponApplicationException());
-            }
+            
+            if (!ormCupon) 
+                return Result.fail(new NotFoundCuponApplicationException())
 
             const cupon = await this.mapper.fromPersistencetoDomain(ormCupon);
             return Result.success(cupon);

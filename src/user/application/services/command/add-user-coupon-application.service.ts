@@ -18,6 +18,9 @@ import { AddUserCouponApplicationResponseDTO } from "../../dto/response/add-user
 import { IQueryCuponRepository } from "src/cupon/application/query-repository/query-cupon-repository"
 import { ErrorUpdatinngUserCuponsApplicationException } from "../../application-exeption/error-updating-user-cupons-application-exception"
 import { AddUserCouponApplicationRequestDTO } from "../../dto/request/add-user-coupon-application-request-dto"
+import { CuponId } from "src/cupon/domain/value-object/cupon-id"
+import { NotFoundCouponApplicationException } from "../../application-exeption/not-found-coupon-application.exception"
+import { UserCoupon } from "src/user/domain/entities/coupon/user-coupon.entity"
 
 
 
@@ -29,7 +32,6 @@ export class AddUserCouponApplicationService extends IApplicationService
         private readonly queryUserRepository:IQueryUserRepository,
         private readonly queryCuponRepository:IQueryCuponRepository,
         private readonly eventPublisher: IEventPublisher,
-        private readonly idGen:IIdGen<string>,
     ){
         super()
     }
@@ -43,12 +45,21 @@ export class AddUserCouponApplicationService extends IApplicationService
 
         let user=userRepoResponse.getValue
 
-        user
+        let couponresponse= await this.queryCuponRepository.findCuponById(
+            CuponId.create(data.idCoupon)
+        )
+
+        if (!couponresponse.isSuccess())
+            return Result.fail(new NotFoundCouponApplicationException(data.idCoupon))
+
+        const coupon=couponresponse.getValue
+
+        user.aplyCoupon(coupon.getId())
 
         let userResponse= await this.commandUserRepository.updateUser(user)
         
         if (!userResponse.isSuccess())
-            return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
+            return Result.fail(new ErrorUpdatinngUserCuponsApplicationException(data.userId,data.idCoupon))
 
         this.eventPublisher.publish(user.pullDomainEvents())
         

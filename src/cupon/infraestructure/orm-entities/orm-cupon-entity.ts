@@ -1,6 +1,7 @@
 import { CouponStateEnum } from "src/cupon/domain/value-object/enum/coupon.state.enum";
 import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-order-entity";
-import { Column, Entity, PrimaryColumn, OneToOne, JoinColumn } from "typeorm";
+import { OrmCuponUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-coupon-user-entity";
+import { Column, Entity, PrimaryColumn, OneToOne, JoinColumn, OneToMany } from "typeorm";
 
 @Entity('cupon')
 export class OrmCuponEntity {
@@ -18,6 +19,9 @@ export class OrmCuponEntity {
 
     @Column({ type: 'enum', enum: CouponStateEnum, default: CouponStateEnum.avaleable })
     state: string;
+    
+    @OneToMany( () => OrmCuponUserEntity, cupon => cupon.user)
+    user?: OrmCuponUserEntity[]
 
     @OneToOne( () => OrmOrderEntity, (order) => order.cupon, { nullable: true } )
     order?: OrmOrderEntity;

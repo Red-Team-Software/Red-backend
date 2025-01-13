@@ -21,6 +21,9 @@ import { Ballance } from "../entities/wallet/value-objects/balance";
 import { UserDirection } from "../entities/directions/direction.entity"
 import { DirectionId } from "../entities/directions/value-objects/Direction-id";
 import { UserCoupon } from "../entities/coupon/user-coupon.entity";
+import { UserCouponAplied } from "../domain-events/user-coupon-aplied";
+import { CuponId } from "src/cupon/domain/value-object/cupon-id";
+import { CuponState } from "../entities/coupon/value-objects/cupon-state";
 
 
 export class User extends AggregateRoot <UserId>{
@@ -79,6 +82,15 @@ export class User extends AggregateRoot <UserId>{
                 this.wallet= userBalanceAmountDecremented.userWallet
                 break;
             }
+            case 'UserCouponAplied':{                    
+                const userCouponAplied: UserCouponAplied = event as UserCouponAplied
+                const index = this.userCoupon.findIndex(c => c.equals(userCouponAplied.userCoupon))
+                if (index !== -1)
+                    this.userCoupon.splice(index, 1, userCouponAplied.userCoupon)
+                else
+                    this.userCoupon.push(userCouponAplied.userCoupon)
+                break;
+            }
             default: { throw new DomainExceptionNotHandled(JSON.stringify(event)) }
         }
     }
@@ -133,7 +145,8 @@ export class User extends AggregateRoot <UserId>{
                 userName,
                 userPhone,
                 userImage,
-                wallet
+                wallet,
+                userCoupon
             )
         )
         return user
@@ -230,7 +243,35 @@ export class User extends AggregateRoot <UserId>{
                 direction
             )
         )    
-    }    
+    }
+
+    aplyCoupon(coupon:CuponId){
+
+        let cupontoaply=this.userCoupon.find(c=>c.getId().equals(coupon))
+
+        if (!cupontoaply)
+            this.apply(
+                UserCouponAplied.create(
+                    this.getId(),
+                    UserCoupon.create(
+                        coupon,
+                        CuponState.create('used')
+                    )
+                )
+            )
+        else
+        this.apply(
+            UserCouponAplied.create(
+                this.getId(),
+                cupontoaply.aplyCoupon()
+            )
+        )
+    }
+
+    verifyCouponById(coupon:CuponId):boolean{
+        return this.userCoupon.some(c => c.getId().equals(coupon));
+    }
+    
     get UserName():UserName {return this.userName}
     get UserPhone():UserPhone {return this.userPhone}
     get UserImage():UserImage {return this.userImage}
