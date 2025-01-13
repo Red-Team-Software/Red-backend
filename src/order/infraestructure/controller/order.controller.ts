@@ -99,6 +99,7 @@ import { IDeliveringOrder } from "src/notification/infraestructure/interfaces/de
 import { IDeliveredOrder } from "src/notification/infraestructure/interfaces/delivered-order.interface";
 import { IReportedOrder } from "src/notification/infraestructure/interfaces/order-reported.interface";
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
+import { Mongoose } from "mongoose";
 
 
 @ApiBearerAuth()
@@ -162,7 +163,8 @@ export class OrderController {
 
 
     constructor(
-        @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+        @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+        @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose,
     ) {
         //*IdGen
         this.idGen = new UuidGen();
@@ -268,6 +270,11 @@ export class OrderController {
             }
         )
 
+    }
+
+    async syncOrderRegistered(data:ICreateOrder){
+        //let service= new ProductRegisteredSyncroniceService(this.mongoose)
+        //await service.execute(data)
     }
 
     async walletRefund(data:ICancelOrder){
