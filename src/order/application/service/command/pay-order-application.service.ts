@@ -72,7 +72,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly payOrder:PayOrderService ,
         private readonly orderRepository: ICommandOrderRepository,
         private readonly idGen: IIdGen<string>,
-        private readonly geocodificationAddress: IGeocodification,
         private readonly productRepository:IQueryProductRepository,
         private readonly bundleRepository:IQueryBundleRepository,
         private readonly dateHandler: IDateHandler,
@@ -167,11 +166,14 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let user = userRes.getValue;
 
-            //let direction = user.UserDirections.find((direction) => direction.id === data.directionId);
+            let direction = user.UserDirections.find((direction) => direction.getId().Value === data.directionId);
 
-            //let orderDirection = OrderDirection.create(direction.Lat, direction.Lng);
+            let orderDirection = OrderDirection.create(
+                direction.DirectionLat.Value, 
+                direction.DirectionLng.Value
+            );
 
-            let orderDirection = OrderDirection.create(10.4399, -66.89275);
+            //let orderDirection = OrderDirection.create(10.4399, -66.89275);
 
             let shippingFee = await this.calculateShippingFee.calculateShippingFee(orderDirection);
 
