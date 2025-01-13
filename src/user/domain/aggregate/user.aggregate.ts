@@ -19,7 +19,7 @@ import { UserBalanceAmountAdded } from "../domain-events/user-balance-amount-add
 import { UserBalanceAmountDecremented } from "../domain-events/user-balance-amount-decremented";
 import { Ballance } from "../entities/wallet/value-objects/balance";
 import { UserDirection } from "../entities/directions/direction.entity"
-import { DirectionId } from "../entities/directions/value-objects/Direction-id";
+import { DirectionId } from 'src/user/domain/entities/directions/value-objects/direction-id';
 
 
 export class User extends AggregateRoot <UserId>{
