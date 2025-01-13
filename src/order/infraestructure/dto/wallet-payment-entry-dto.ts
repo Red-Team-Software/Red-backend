@@ -22,11 +22,11 @@ export class WalletPaymentEntryDto {
   paymentMethod: string;
 
   @ApiProperty({
-    example: 'Avenida Principal Alto Prado, Edificio Alto Prado Plaza',
-    description: 'The address of the location',
+    example: 'El id de la direccion que tenga el user',
+    description: 'ad5c1b9f-9e35-4e8d-8531-8452d5b8b6fe',
   })
   @IsString()
-  address: string;
+  idUserDirection: string;
 
   @ApiProperty({
     description: 'The bundles with their ids and quantities',

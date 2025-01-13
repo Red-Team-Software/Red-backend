@@ -1,14 +1,7 @@
 import { Product } from "src/product/domain/aggregate/product.aggregate";
-import { OrderTotalAmount } from "../../value_objects/order-totalAmount";
-import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate";
 import { Promotion } from "src/promotion/domain/aggregate/promotion.aggregate"
-import { InsufficientBundleStockException } from "../../exception/insufficient-bundle-stock-exception";
-import { InsufficientProductStockException } from "../../exception/insufficient-product-stock-exception";
 import { ProductDetail } from "../../entities/product-detail/product-detail-entity";
-import { BundleDetail } from "../../entities/bundle-detail/bundle-detail-entity";
 import { ProductDetailId } from "../../entities/product-detail/value_object/product-detail-id";
-import { BundleDetailId } from "../../entities/bundle-detail/value_object/bundle-detail-id";
-import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
 import { ProductDetailQuantity } from "../../entities/product-detail/value_object/product-detail-quantity";
 import { ProductDetailPrice } from "../../entities/product-detail/value_object/product-detail-price";
 
@@ -20,9 +13,7 @@ type productDetails = {
 
 export class CreateProductDetailService {
 
-    //TODO: Refactor when coupon and discount are implemented
-
-    calculateAmount(
+    createProductDetail(
         products: Product[], 
         promotions: Promotion[],
         productsEntry: productDetails[],

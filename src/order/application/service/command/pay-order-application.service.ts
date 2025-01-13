@@ -53,11 +53,17 @@ import { ErrorObtainingTaxesApplicationException } from '../../application-excep
 import { OrderPayResponseDto } from '../../dto/response/order-pay-response-dto';
 import { PayOrderService } from 'src/order/domain/domain-services/services/pay-order.service';
 import { IPaymentMethodQueryRepository } from 'src/payment-methods/application/query-repository/orm-query-repository.interface';
+import { IQueryUserRepository } from 'src/user/application/repository/user.query.repository.interface';
+import { CreateProductDetailService } from 'src/order/domain/domain-services/services/create-product-details.service';
+import { CreateBundleDetailService } from 'src/order/domain/domain-services/services/create-bundle-details.service';
+import { UserId } from 'src/user/domain/value-object/user-id';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
     
     private readonly calculateAmount = new CalculateAmountService();
+    private readonly createProductDetail = new CreateProductDetailService();
+    private readonly createBundleDetail = new CreateBundleDetailService();
 
     constructor(
         private readonly eventPublisher: IEventPublisher,
@@ -66,16 +72,18 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         private readonly payOrder:PayOrderService ,
         private readonly orderRepository: ICommandOrderRepository,
         private readonly idGen: IIdGen<string>,
-        private readonly geocodificationAddress: IGeocodification,
         private readonly productRepository:IQueryProductRepository,
         private readonly bundleRepository:IQueryBundleRepository,
         private readonly dateHandler: IDateHandler,
         private readonly queryPromotionRepositoy: IQueryPromotionRepository,
         private readonly paymentQueryRepository:IPaymentMethodQueryRepository,
-        private readonly ormCuponQueryRepo: IQueryCuponRepository
+        private readonly ormCuponQueryRepo: IQueryCuponRepository,
+        private readonly queryUserRepository:IQueryUserRepository
     ){
         super()
     }
+
+    // TODO : IMPLEMENTAR EL METODO DE LA DIRECCION CUANDO ALFREDO TERMINE DE IMPLEMENTARLO
     
     async execute(data: OrderPayApplicationServiceRequestDto): Promise<Result<OrderPayResponseDto>> {
 
@@ -101,15 +109,7 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             cupon = cuponRes.getValue;
         }
 
-
-        let findPromotion: FindAllPromotionApplicationRequestDTO = {
-            userId: data.userId,
-            name: '',
-            perPage: 1000,
-            page: 0
-        }
-
-        let promoResponse = await this.queryPromotionRepositoy.findAllPromotion(findPromotion);
+        let promoResponse = await this.queryPromotionRepositoy.findAllPromo();
 
         if (promoResponse.isSuccess()) promotions = promoResponse.getValue;
 
@@ -117,36 +117,23 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         if(data.products){
             
             for (const product of data.products){
-                let domain=await this.productRepository.findProductById(ProductID.create(product.id))
+                let domain = await this.productRepository.findProductById(ProductID.create(product.id))
 
                 if(!domain.isSuccess())
                     return Result.fail(new ErrorCreatingOrderProductNotFoundApplicationException())
 
                 products.push(domain.getValue)
             }
-            // TODO hacerlo servicio de dominio
-            products.forEach(product => {
-                let promotion = promotions.find(promo => {
-                    return promo.Products.some(productId => productId.Value === product.getId().Value);
-                });
-        
-                let productTotal = product.ProductPrice.Price;
-        
-                if (promotion) productTotal -= (product.ProductPrice.Price * (promotion.PromotionDiscounts.Value));
-        
-                let pr = ProductDetail.create(
-                    ProductDetailId.create(product.getId().Value),
-                    ProductDetailQuantity.create(data.products.find(p=>p.id==product.getId().Value).quantity),
-                    ProductDetailPrice.create(productTotal, product.ProductPrice.Currency)
-                );
+            
+            let p = this.createProductDetail.createProductDetail(
+                products,
+                promotions,
+                data.products
+            )
 
-                orderproducts.push( pr );
-
-            });
+            orderproducts = p;
             
         }
-
-        // TODO hacerlo servicio de dominio
 
         if(data.bundles){
             for (const bundle of data.bundles){
@@ -157,24 +144,13 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
                 bundles.push(domain.getValue)
             }
 
-            bundles.forEach(bundle => {
-                let promotion = promotions.find(promo => {
-                    return promo.Bundles.some(bundleId => bundleId.Value === bundle.getId().Value);
-                });
-        
-                let bundleTotal = bundle.BundlePrice.Price;
-        
-                if (promotion) 
-                    bundleTotal -= (bundle.BundlePrice.Price * (promotion.PromotionDiscounts.Value ));
-        
-                let bu = BundleDetail.create(
-                    BundleDetailId.create(bundle.getId().Value),
-                    BundleDetailQuantity.create(data.bundles.find(b=>b.id==bundle.getId().Value).quantity),
-                    BundleDetailPrice.create(bundleTotal, bundle.BundlePrice.Currency)
-                );
+            let b = this.createBundleDetail.createBundleDetail(
+                bundles,
+                promotions,
+                data.bundles
+            )
 
-                orderBundles.push( bu );
-            });
+            orderBundles = b;
         }
 
         let amount = this.calculateAmount.calculateAmount(
@@ -186,11 +162,16 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             data.currency
         );
 
-            let orderAddress = OrderAddressStreet.create(data.address);
-        
-            let address = await this.geocodificationAddress.DirecctiontoLatitudeLongitude(orderAddress);
-            
-            let orderDirection = OrderDirection.create(address.getValue.Latitude, address.getValue.Longitude);
+            let userRes = await this.queryUserRepository.findUserById(UserId.create(data.userId));
+
+            let user = userRes.getValue;
+
+            let direction = user.UserDirections.find((direction) => direction.getId().Value === data.directionId);
+
+            let orderDirection = OrderDirection.create(
+                direction.DirectionLat.Value, 
+                direction.DirectionLng.Value
+            );
 
             //let orderDirection = OrderDirection.create(10.4399, -66.89275);
 

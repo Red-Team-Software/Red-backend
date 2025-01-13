@@ -1,15 +1,15 @@
 import { IQueryOrderRepository } from "src/order/application/query-repository/order-query-repository-interface";
-import { OrmOrderEntity } from "../../entities/orm-order-entity";
+import { OrmOrderEntity } from "../../entities/orm-entities/orm-order-entity";
 import { DataSource, Repository } from "typeorm";
 import { Result } from "src/common/utils/result-handler/result";
 import { Order } from "src/order/domain/aggregate/order";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
-import { OrmOrderPayEntity } from "../../entities/orm-order-payment";
 import { FindAllOrdersApplicationServiceRequestDto } from "src/order/application/dto/request/find-all-orders-request.dto";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { OrderId } from "src/order/domain/value_objects/order-id";
 import { bundlesOrderRes, IOrderModel, productsOrderRes } from "src/order/application/model/order.model.interface";
 import { OrmUserEntity } from 'src/user/infraestructure/entities/orm-entities/orm-user-entity';
+import { OrmOrderPayEntity } from "../../entities/orm-entities/orm-order-payment";
 
 
 export class OrderQueryRepository extends Repository<OrmOrderEntity> implements IQueryOrderRepository {
@@ -124,10 +124,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
 
             let domainOrders: Order[] = [];
 
-            for(let ormOrder of ormOrders){
-                let or = await this.orderMapper.fromPersistencetoDomain(ormOrder)
-                domainOrders.push(or);
-            };
+            
 
             return Result.success(domainOrders);
         } catch (error) {
@@ -188,8 +185,26 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
             },
             )
 
+            let modelOrders: IOrderModel[] = [];
 
-            let modelOrders = ormOrders.map((ormOrder) => this.transformToDataModel(ormOrder));
+            if (data.state){
+                for(let ormOrder of ormOrders){
+                    if(data.state === "active" && (ormOrder.state == "ongoing" ||
+                        ormOrder.state == "waiting" || ormOrder.state == "delivering")) {
+                            modelOrders.push( this.transformToDataModel(ormOrder));
+                    } 
+                    
+                    if(data.state === "past" && (ormOrder.state === "cancelled" ||
+                        ormOrder.state === "delivered")) {
+                            modelOrders.push( this.transformToDataModel(ormOrder));
+                    }
+                };
+            } else {
+                modelOrders = ormOrders.map((ormOrder) => this.transformToDataModel(ormOrder));
+            }
+
+
+            //let modelOrders = ormOrders.map((ormOrder) => this.transformToDataModel(ormOrder));
 
             return Result.success(modelOrders);
         } catch (error) {
@@ -226,8 +241,23 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
             
             if(!ormOrders) return Result.fail( new NotFoundException('Orders empty, please try again'))
             
-            let modelOrders = ormOrders.map((ormOrder) => this.transformToDataModel(ormOrder));
+            let modelOrders: IOrderModel[] = [];
 
+            if (data.state){
+                for(let ormOrder of ormOrders){
+                    if(data.state === "active" && (ormOrder.state == "ongoing" ||
+                        ormOrder.state == "waiting" || ormOrder.state == "delivering")) {
+                            modelOrders.push( this.transformToDataModel(ormOrder));
+                    } 
+                    
+                    if(data.state === "past" && (ormOrder.state === "cancelled" ||
+                        ormOrder.state === "delivered")) {
+                            modelOrders.push( this.transformToDataModel(ormOrder));
+                    }
+                };
+            } else {
+                modelOrders = ormOrders.map((ormOrder) => this.transformToDataModel(ormOrder));
+            }
             return Result.success(modelOrders);
         } catch (error) {
             return Result.fail(new NotFoundException('Orders empty, please try again'));

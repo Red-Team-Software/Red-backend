@@ -154,8 +154,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
                     quantity: product.quantity,
                     price: product.price,
                     images: product.images,
-                    currency: product.currency,
-                    orderid: order.orderId
+                    currency: product.currency
                 });
             };
         };
@@ -169,8 +168,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
                     quantity: bundle.quantity,
                     price: bundle.price,
                     images: bundle.images,
-                    currency: bundle.currency,
-                    orderid: order.orderId
+                    currency: bundle.currency
                 });
             };
         };
@@ -179,20 +177,18 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
 
         if (order.orderCourier){
             associatedCourier = {
-                courierId: order.orderCourier.courierId,
                 courierName: order.orderCourier.courierName,
                 courierImage: order.orderCourier.courierImage,
-                location: {
-                    lat: order.orderCourier.location.lat,
-                    long: order.orderCourier.location.long
-                }
+                phone: "584121234567"
             };
         }
 
         let ordersDto: orderByIdResponse = {
             orderId: order.orderId,
-            orderState: order.orderState,
-            orderCreatedDate: order.orderCreatedDate,
+            orderState: {
+                state: order.orderState,
+                date: order.orderCreatedDate
+            },
             orderTimeCreated: new Date(order.orderCreatedDate).toTimeString().split(' ')[0],
             totalAmount: order.totalAmount,
             orderReceivedDate: order.orderReceivedDate ? order.orderReceivedDate : null,
@@ -214,9 +210,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
             : []
             ,
             orderReport: order.orderReport ? {
-                id: order.orderReport.id,
-                description: order.orderReport.description,
-                orderid: order.orderId
+                description: order.orderReport.description
             } : null,
             orderCourier: order.orderCourier ? associatedCourier : null
         };

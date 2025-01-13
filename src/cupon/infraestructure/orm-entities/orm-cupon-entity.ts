@@ -1,4 +1,4 @@
-import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-order-entity";
+import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-entities/orm-order-entity";
 import { Column, Entity, PrimaryColumn, OneToOne, JoinColumn } from "typeorm";
 
 @Entity('cupon')

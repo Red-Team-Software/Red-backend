@@ -2,9 +2,9 @@ import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryColumn } from 
 import { IBundle } from "../../model-entity/orm-model-entity/bundle-interface";
 import { OrmBundleImage } from "./orm-bundle-image";
 import { OrmProductEntity } from "src/product/infraestructure/entities/orm-entities/orm-product-entity";
-import { OrmOrderBundleEntity } from "src/order/infraestructure/entities/orm-order-bundle-entity";
 import { OrmPromotionEntity } from '../../../../promotion/infraestructure/entities/orm-entities/orm-promotion-entity';
 import { OrmCategoryEntity } from "src/category/infraestructure/entities/orm-entities/orm-category-entity";
+import { OrmOrderBundleEntity } from "src/order/infraestructure/entities/orm-entities/orm-order-bundle-entity";
 
 @Entity('bundle')
 export class OrmBundleEntity implements IBundle{
