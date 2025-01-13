@@ -57,6 +57,9 @@ import { IQueryUserRepository } from 'src/user/application/repository/user.query
 import { CreateProductDetailService } from 'src/order/domain/domain-services/services/create-product-details.service';
 import { CreateBundleDetailService } from 'src/order/domain/domain-services/services/create-bundle-details.service';
 import { UserId } from 'src/user/domain/value-object/user-id';
+import { ErrorCuponUnavaleableApplicationException } from '../../application-exception/error-cupon-unavaleable-application-exception';
+import { ErrorCuponAlreadyUsedApplicationException } from '../../application-exception/error-cupon-already-user-application-exception';
+import { ErrorUserDontHaveTheCuponApplicationException } from '../../application-exception/error-user-dont-have-the-cupon-application-exception';
 
 
 export class PayOrderAplicationService extends IApplicationService<OrderPayApplicationServiceRequestDto,OrderPayResponseDto>{
@@ -82,8 +85,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
     ){
         super()
     }
-
-    // TODO : IMPLEMENTAR EL METODO DE LA DIRECCION CUANDO ALFREDO TERMINE DE IMPLEMENTARLO
     
     async execute(data: OrderPayApplicationServiceRequestDto): Promise<Result<OrderPayResponseDto>> {
 
@@ -101,12 +102,31 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
         if (!paymentResponse.isSuccess())
             return Result.fail(paymentResponse.getError)
 
+        let userRes = await this.queryUserRepository.findUserById(UserId.create(data.userId));
+
+        let user = userRes.getValue;
+
         if (data.cuponId){
             let cuponRes = await this.ormCuponQueryRepo.findCuponById(CuponId.create(data.cuponId))
 
             if (!cuponRes.isSuccess())
                 return Result.fail(cuponRes.getError)
+
             cupon = cuponRes.getValue;
+
+            if (cupon.CuponState.Value === 'unavaleable')
+                return Result.fail(new ErrorCuponUnavaleableApplicationException())
+
+            let userCupon = user.UserCoupon.find((userCupon) => userCupon.getId().Value === data.cuponId);
+
+            if (!userCupon) 
+                return Result.fail(new ErrorUserDontHaveTheCuponApplicationException());
+            
+
+            if (userCupon.CuponState.Value === 'used') 
+                return Result.fail(new ErrorCuponAlreadyUsedApplicationException());
+        
+
         }
 
         let promoResponse = await this.queryPromotionRepositoy.findAllPromo();
@@ -161,10 +181,6 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
             cupon,
             data.currency
         );
-
-            let userRes = await this.queryUserRepository.findUserById(UserId.create(data.userId));
-
-            let user = userRes.getValue;
 
             let direction = user.UserDirections.find((direction) => direction.getId().Value === data.directionId);
 
