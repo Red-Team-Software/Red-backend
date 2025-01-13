@@ -1,24 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { IsUUID, IsNotEmpty, IsString, MinLength, IsBoolean, IsNumber } from "class-validator"
-import { ByIdDTO } from "src/common/infraestructure/dto/entry/by-id.dto"
+import { UserDirectionsInfraestructureRequestDTO } from "./user-direction-infraestructure-request-dto"
 
-export class UserDirectionsByIdInfraestructureRequestDTO extends ByIdDTO {
+export class UserDirectionsByIdInfraestructureRequestDTO extends UserDirectionsInfraestructureRequestDTO{
 
-    @ApiProperty( { required: true, default: 'casa' })
-    @IsNotEmpty()
+    @ApiProperty( { required: true, default: '94bfc16a-0757-45f5-a326-6dceac87b8fd' })
     @IsString()
-    @MinLength(3)
-    name:string
-    
-    @ApiProperty( { required: true, default: true })
-    @IsBoolean()
-    favorite:boolean
+    @IsUUID()
+    directionId:string
 
-    @ApiProperty( { required: true, default:38.8951 })
-    @IsNumber()
-    lat:number
-
-    @ApiProperty( { required: true, default:-77.0364 })
-    @IsNumber()
-    long:number
 }

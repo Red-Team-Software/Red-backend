@@ -99,8 +99,6 @@ export class FindAllOdersByUserApplicationService extends IApplicationService<Fi
             };
         };
 
-        console.log("domainProducts")
-
         let courierResponse = await this.ormCourierQueryRepository.findAllCouriers();
 
         let ordersDto: orderResponse[] = [];

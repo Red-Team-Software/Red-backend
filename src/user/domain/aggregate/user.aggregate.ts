@@ -47,7 +47,10 @@ export class User extends AggregateRoot <UserId>{
             }
             case 'UserDirectionUpdated':{
                 const userDirectionUpdated: UserDirectionUpdated = event as UserDirectionUpdated
-                this.userDirections=userDirectionUpdated.userDirection
+                this.userDirections = this.userDirections.filter(direction =>
+                    !direction.equals(userDirectionUpdated.userDirection)
+                )
+                this.userDirections.unshift(userDirectionUpdated.userDirection)
                 break;
             }
             case 'UserImageUpdated':{
@@ -214,7 +217,7 @@ export class User extends AggregateRoot <UserId>{
             )
         )
     }
-    updateDirection(direction:UserDirection[]):void{
+    updateDirection(direction:UserDirection):void{
         this.apply(
             UserDirectionUpdated.create(
                 this.getId(),

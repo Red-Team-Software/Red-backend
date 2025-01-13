@@ -7,19 +7,19 @@ export class UserDirectionUpdated extends DomainEvent {
     serialize(): string {
         let data= {  
             userId:this.userId.Value,
-            userDirection:this.userDirection.map(direction=>({
-                id: direction.getId().Value,
-                name: direction.DirectionName.Value,
-                favorite: direction.DirectionFavorite.Value,
-                lat: direction.DirectionLat.Value,
-                lng: direction.DirectionLng.Value   
-            }))
+            userDirection:{
+                id: this.userDirection.getId().Value,
+                name: this.userDirection.DirectionName,
+                favorite: this.userDirection.DirectionFavorite,
+                lat: this.userDirection.DirectionLat,
+                lng: this.userDirection.DirectionLng    
+            } 
         }
         return JSON.stringify(data)
     }
     static create(
         userId:UserId,
-        userDirection:UserDirection[]
+        userDirection:UserDirection
     ){
         return new UserDirectionUpdated(
             userId,
@@ -28,7 +28,7 @@ export class UserDirectionUpdated extends DomainEvent {
     }
     constructor(
         public userId:UserId,
-        public userDirection:UserDirection[]
+        public userDirection:UserDirection
     ){
         super()
     }

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsUUID, IsNotEmpty, IsString, MinLength, IsBoolean, IsNumber } from "class-validator"
+import { IsUUID, IsNotEmpty, IsString, MinLength, IsBoolean, IsNumber, IsOptional } from "class-validator"
 
 export class UserDirectionsInfraestructureRequestDTO {
 
@@ -8,6 +8,11 @@ export class UserDirectionsInfraestructureRequestDTO {
     @IsString()
     @MinLength(3)
     name:string
+
+    @ApiProperty( { required: false, default: true })
+    @IsString()
+    @IsOptional()
+    direction:string
     
     @ApiProperty( { required: true, default: true })
     @IsBoolean()

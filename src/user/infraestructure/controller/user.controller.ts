@@ -1,7 +1,7 @@
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 import { UpdateProfileInfraestructureRequestDTO } from "../dto/request/update-profile-infraestructure-request-dto"
-import { Controller, Inject, Patch, Body, Get, Query, Post, UseGuards, BadRequestException, Logger, Delete, Put } from "@nestjs/common"
+import { Controller, Inject, Patch, Body, Get, Query, Post, UseGuards, BadRequestException, Logger, Delete, Put, Param } from "@nestjs/common"
 import { ApiBearerAuth, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { UpdateProfileInfraestructureResponseDTO } from "../dto/response/update-profile-infraestructure-response-dto"
 import { OrmUserQueryRepository } from "../repositories/orm-repository/orm-user-query-repository"
@@ -48,6 +48,8 @@ import { HereMapsSingelton } from "src/common/infraestructure/here-maps/here-map
 import { OrderDirection } from "src/order/domain/value_objects/order-direction"
 import { GeocodificationOpenStreeMapsDomainService } from "src/order/infraestructure/domain-service/geocodification-naminatim-maps-domain-service"
 import { FindUserDirectionApplicationService } from "src/user/application/services/query/find-user-direction-application.service"
+import { FindUserDirectionByIdApplicationService } from "src/user/application/services/query/find-user-direction-by-id-application.service"
+import { ByIdDTO } from "src/common/infraestructure/dto/entry/by-id.dto"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -138,7 +140,7 @@ export class UserController {
     return response.getValue
   }
 
-  @Get('directions')
+  @Get('address/many')
   async findUserDirectionById(@GetCredential() credential:ICredential){
     let service= new ExceptionDecorator(
       new AuditDecorator(
@@ -156,9 +158,64 @@ export class UserController {
     userId:credential.account.idUser
   })
   return response.getValue
-}
+  }
 
-  @Post('add/directions')
+  
+  @Patch('update/address')
+  @ApiResponse({
+    status: 200,
+    description: 'Update direction information',
+    type: UpdateUserDirectionInfraestructureResponseDTO,
+  })
+  async updateDirectionToUser(
+    @GetCredential() credential:ICredential ,
+    @Body() entry:UpdateUserDirectionsInfraestructureRequestDTO){
+
+    let service= new ExceptionDecorator(
+      new AuditDecorator(
+        new LoggerDecorator(
+          new PerformanceDecorator(
+              new UpdateUserDirectionApplicationService (
+                this.ormUserCommandRepo,
+                this.ormUserQueryRepo,
+                new RabbitMQPublisher(this.channel)
+              ), new NestTimer(), new NestLogger(new Logger())
+            ), new NestLogger(new Logger())
+        ),this.auditRepository, new DateHandler()
+      )
+  )
+
+  let response = await service.execute({
+    userId:credential.account.idUser,
+    directions:{...entry, id:entry.directionId}
+  })
+
+  return response.getValue
+  }
+
+  @Get('address/:id')
+  async findUserDirections(
+    @Param() entry:ByIdDTO,
+    @GetCredential() credential:ICredential){
+    let service= new ExceptionDecorator(
+      new AuditDecorator(
+        new LoggerDecorator(
+          new PerformanceDecorator(
+            new FindUserDirectionByIdApplicationService (
+              this.ormUserQueryRepo,
+              this.geocodification
+            ), new NestTimer(), new NestLogger(new Logger())
+          ), new NestLogger(new Logger())
+        ),this.auditRepository, new DateHandler()
+      )
+  )
+  let response = await service.execute({
+    userId:credential.account.idUser,...entry
+  })
+  return response.getValue
+  }
+
+  @Post('add/address')
   @ApiResponse({
     status: 200,
     description: 'User direction information',
@@ -183,12 +240,12 @@ export class UserController {
       )
   )
   let response = await service.execute({
-    userId:credential.account.idUser,...entry
+    userId:credential.account.idUser,directions:entry
   })
   return response.getValue
   }
 
-  @Delete('delete-directions')
+  @Delete('delete/address')
   @ApiResponse({
     status: 200,
     description: 'Delete direction information',
@@ -211,34 +268,7 @@ export class UserController {
         ),this.auditRepository, new DateHandler()
       )
   )
-  let response = await service.execute({userId:credential.account.idUser,...entry})
-  return response.getValue
-  }
-
-  @Put('update-directions')
-  @ApiResponse({
-    status: 200,
-    description: 'Delete direction information',
-    type: UpdateUserDirectionInfraestructureResponseDTO,
-  })
-  async updateDirectionToUser(
-    @GetCredential() credential:ICredential ,
-    @Body() entry:UpdateUserDirectionsInfraestructureRequestDTO){
-
-    let service= new ExceptionDecorator(
-      new AuditDecorator(
-        new LoggerDecorator(
-          new PerformanceDecorator(
-              new UpdateUserDirectionApplicationService (
-                this.ormUserCommandRepo,
-                this.ormUserQueryRepo,
-                new RabbitMQPublisher(this.channel)
-              ), new NestTimer(), new NestLogger(new Logger())
-            ), new NestLogger(new Logger())
-        ),this.auditRepository, new DateHandler()
-      )
-  )
-  let response = await service.execute({userId:credential.account.idUser,...entry})
+  let response = await service.execute({userId:credential.account.idUser,directions:{id:entry.id}})
   return response.getValue
   }
 }

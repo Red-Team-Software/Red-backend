@@ -7,5 +7,5 @@ export interface UpdateUserDirectionsApplicationRequestDTO extends IServiceReque
         favorite: boolean
         lat: number
         long: number
-    }[]
+    }
 }

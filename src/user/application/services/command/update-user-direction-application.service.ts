@@ -34,18 +34,15 @@ export class UpdateUserDirectionApplicationService extends IApplicationService
 
         let user=userRepoResponse.getValue
 
-        const directionsUpdated=data.directions.map(d=>
-            UserDirection.create(
-                DirectionId.create(d.id),
-                DirectionFavorite.create(d.favorite),
-                DirectionLat.create(d.lat),
-                DirectionLng.create(d.long),
-                DirectionName.create(d.name)
+        const direction = UserDirection.create(
+                DirectionId.create(data.directions.id),
+                DirectionFavorite.create(data.directions.favorite),
+                DirectionLat.create(data.directions.lat),
+                DirectionLng.create(data.directions.long),
+                DirectionName.create(data.directions.name)
             )
-        )
 
-
-        user.updateDirection(directionsUpdated)
+        user.updateDirection(direction)
 
         let userResponse= await this.commandUserRepository.updateUser(user)
 
@@ -54,7 +51,14 @@ export class UpdateUserDirectionApplicationService extends IApplicationService
 
         this.eventPublisher.publish(user.pullDomainEvents())
 
-        return Result.success({userId:data.userId})
+        return Result.success({
+            id:direction.getId().Value,
+            name: direction.DirectionName.Value,
+            direction: data.directions.name,
+            favorite: direction.DirectionFavorite.Value,
+            lat: direction.DirectionLat.Value,
+            long: direction.DirectionLng.Value,   
+        })
+        
     }
-
 }

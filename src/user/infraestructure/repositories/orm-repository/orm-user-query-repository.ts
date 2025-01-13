@@ -13,6 +13,11 @@ import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { IUserDirection } from "src/user/application/model/user.direction.interface";
 import { IDirection } from "src/user/application/model/direction-interface";
 import { UserDirection } from "src/user/domain/entities/directions/direction.entity";
+import { DirectionId } from "src/user/domain/entities/directions/value-objects/Direction-id";
+import { DirectionFavorite } from "src/user/domain/entities/directions/value-objects/direction-favorite";
+import { DirectionLat } from "src/user/domain/entities/directions/value-objects/direction-lat";
+import { DirectionLng } from "src/user/domain/entities/directions/value-objects/direction-lng";
+import { DirectionName } from "src/user/domain/entities/directions/value-objects/direction-name";
 
 
 
@@ -26,6 +31,7 @@ export class OrmUserQueryRepository extends Repository<OrmUserEntity> implements
         this.mapper=new OrmUserMapper(new UuidGen(),this)
         this.ormDirectionUserRepository=dataSource.getRepository(OrmDirectionUserEntity)
     }
+
    async verifyUserExistenceByPhoneNumber(phoneNumber: UserPhone): Promise<Result<boolean>> {
     try{
         const account = await this.findOneBy({phone:phoneNumber.Value})
@@ -91,6 +97,27 @@ export class OrmUserQueryRepository extends Repository<OrmUserEntity> implements
             return Result.success(directions)
         }catch(e){
             return Result.fail(new PersistenceException('Find direcction by lat and lng unsucssessfully'))
+        }    
+    }
+
+    async findDirectionById(id:DirectionId,userId:UserId):Promise<Result<UserDirection>>{
+        try{
+            let ormDirection=await this.ormDirectionUserRepository.findOneBy({
+            id:id.Value,
+            user_id:userId.Value
+            })
+            if (!ormDirection)
+                return Result.fail(new PersistenceException('Find direcction by id unsucssessfully'))
+
+            return Result.success(UserDirection.create(
+                id,
+                DirectionFavorite.create(ormDirection.isFavorite),
+                DirectionLat.create(Number(ormDirection.lat)),
+                DirectionLng.create(Number(ormDirection.lng)),
+                DirectionName.create(ormDirection.name)
+            ))
+        }catch(e){
+            return Result.fail(new PersistenceException('Find direcction by id unsucssessfully'))
         }    
     }
 

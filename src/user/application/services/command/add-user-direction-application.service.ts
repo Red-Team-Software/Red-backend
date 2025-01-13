@@ -36,21 +36,17 @@ export class AddUserDirectionApplicationService extends IApplicationService
         if (!userRepoResponse.isSuccess())
             return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
 
-        let userDirections = await Promise.all(data.directions.map(async (direction) =>
-            UserDirection.create(
+        const direction= UserDirection.create(
                 DirectionId.create(await this.idGen.genId()),
-                DirectionFavorite.create(direction.favorite),
-                DirectionLat.create(direction.lat),
-                DirectionLng.create(direction.long),
-                DirectionName.create(direction.name)
+                DirectionFavorite.create(data.directions.favorite),
+                DirectionLat.create(data.directions.lat),
+                DirectionLng.create(data.directions.long),
+                DirectionName.create(data.directions.name)
             )
-        ))
 
         let user=userRepoResponse.getValue
 
-        userDirections.forEach(direction=>{
-            user.addDirection(direction)
-        })
+        user.addDirection(direction)
 
         let userResponse= await this.commandUserRepository.updateUser(user)
         
@@ -58,8 +54,17 @@ export class AddUserDirectionApplicationService extends IApplicationService
             return Result.fail(new ErrorUpdatinDirectionApplicationException(data.userId))
 
         this.eventPublisher.publish(user.pullDomainEvents())
-
-        return Result.success({userId:data.userId})
+        
+        return Result.success(
+            {
+                id:direction.getId().Value,
+                name: direction.DirectionName.Value,
+                direction: data.directions.direction,
+                favorite: direction.DirectionFavorite.Value,
+                lat: direction.DirectionLat.Value,
+                long: direction.DirectionLng.Value
+            }
+        )
     }
 
 }
