@@ -84,7 +84,8 @@ export class RegisterUserApplicationService extends IApplicationService
             Wallet.create(
                 WalletId.create(await this.idGen.genId()),
                 Ballance.create(0,'usd')
-            )
+            ),
+            []
         )
 
         let externalId = await this.userExternalSite.saveUser(user.getId(), data.email);

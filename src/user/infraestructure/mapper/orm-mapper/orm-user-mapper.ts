@@ -20,6 +20,9 @@ import { DirectionFavorite } from 'src/user/domain/entities/directions/value-obj
 import { DirectionLat } from 'src/user/domain/entities/directions/value-objects/direction-lat';
 import { DirectionLng } from 'src/user/domain/entities/directions/value-objects/direction-lng';
 import { DirectionName } from 'src/user/domain/entities/directions/value-objects/direction-name';
+import { UserCoupon } from "src/user/domain/entities/coupon/user-coupon.entity"
+import { CuponId } from "src/cupon/domain/value-object/cupon-id"
+import { CuponState } from "src/user/domain/entities/coupon/value-objects/cupon-state"
 
 
 export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
@@ -96,6 +99,13 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
                     , infraEstructure.wallet.currency,
                 )
             ),
+            infraEstructure.cupon
+            ? infraEstructure.cupon.map(c=>            
+                UserCoupon.create(
+                CuponId.create(c.cupon_id),
+                CuponState.create(c.state)
+            ))
+            : [],
             infraEstructure.image ? UserImage.create(infraEstructure.image) : undefined
         )
         return user

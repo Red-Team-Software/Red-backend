@@ -5,6 +5,7 @@ import { OrmDirectionUserEntity } from "./orm-direction-user-entity";
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
 import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-order-entity";
 import { OrmWalletEntity } from "./orm-wallet-entity";
+import { OrmCuponUserEntity } from "./orm-coupon-user-entity";
 
 
 @Entity('user')
@@ -25,6 +26,9 @@ export class OrmUserEntity implements IUser{
 
     @OneToMany( () => OrmOrderEntity, order => order.user)
     orders?: OrmOrderEntity[]
+
+    @OneToMany( () => OrmCuponUserEntity, cupon => cupon.cupon, {eager:true})
+    cupon?: OrmCuponUserEntity[]
 
     @OneToOne(() => OrmWalletEntity, wallet => wallet, {eager:true, cascade:true}) 
     @JoinColumn()
