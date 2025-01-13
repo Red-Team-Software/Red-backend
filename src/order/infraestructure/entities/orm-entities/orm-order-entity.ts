@@ -1,12 +1,12 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
-import { IOrderInterface } from "../orm-model-entity/order-interface";
-import { OrmOrderPayEntity } from "./orm-order-payment";
-import { OrmOrderProductEntity } from "./orm-order-product-entity";
+import { IOrderInterface } from "../../model-entity/orm-model-entity/order-interface";
 import { OrmOrderBundleEntity } from "./orm-order-bundle-entity";
-import { OrmOrderReportEntity } from "./orm-order-report-entity";
 import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-user-entity";
 import { OrmCourierEntity } from "src/courier/infraestructure/entities/orm-courier-entity";
 import { OrmCuponEntity } from "src/cupon/infraestructure/orm-entities/orm-cupon-entity";
+import { OrmOrderPayEntity } from "./orm-order-payment";
+import { OrmOrderProductEntity } from "./orm-order-product-entity";
+import { OrmOrderReportEntity } from "./orm-order-report-entity";
 
 @Entity('order')
 export class OrmOrderEntity implements IOrderInterface {

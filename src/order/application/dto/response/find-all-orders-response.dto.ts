@@ -38,25 +38,13 @@ export type courierOrderResponse = {
 }
 
 export type orderResponse = {
-    orderId: string;
-    orderState: string;
-    orderCreatedDate: Date;
-    orderTimeCreated: string;
+    id: string;
+    last_state: {
+        state: string;
+        date: Date;
+    };
     totalAmount: number;
-    orderReceivedDate?: Date;
-    orderPayment?: {
-        paymetAmount: number;
-        paymentCurrency: string;
-        payementMethod: string;
-    };
-    orderDirection: {
-        lat: number;
-        long: number;
-    };
-    products?: productsOrderResponse[];
-    bundles?: bundlesOrderResponse[];
-    orderReport?: reportOrderResponse;
-    orderCourier?: courierOrderResponse;
+    summary_order: string;
 }
 
 export class FindAllOrdersApplicationServiceResponseDto implements IServiceResponseDto {

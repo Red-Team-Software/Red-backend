@@ -1,7 +1,8 @@
-import { UserNotFoundApplicationException } from "src/auth/application/application-exception/user-not-found-application-exception";
 import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
+import { IPaymentMethodModel } from "src/payment-methods/application/model/payment-method-model";
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
+import { PaymentMethodId } from "src/payment-methods/domain/value-objects/payment-method-id";
 import { NotFoundTransactionApplicationException } from "src/user/application/application-exeption/not-found-transaction-application.exception";
 import { GetTransactionByIdApplicationRequestDTO } from "src/user/application/dto/request/wallet/get-transaction-by-id-application-request-dto";
 import { GetTransactionByIdApplicationResponseDTO } from "src/user/application/dto/response/wallet/get-transaction-by-id-application-response-dto";
@@ -26,14 +27,14 @@ export class FindTransactionByIdApplicationService extends IApplicationService<G
         if (!transaction.isSuccess())
             return Result.fail(new NotFoundTransactionApplicationException());
 
-        let paymentMethods = await this.paymentMethodQueryRepository.findAllMethods({
-            userId: data.userId,
-            page: 0,
-            perPage: 200,
-        });
+        let paymentMethod: IPaymentMethodModel;
 
-        let paymentMethod = paymentMethods.getValue.find(
-            pm => pm.getId().paymentMethodId === transaction.getValue.payment_method_id);
+        if (transaction.getValue.payment_method_id) {
+            let method = await this.paymentMethodQueryRepository.findMethodByIdDetail(
+                PaymentMethodId.create(transaction.getValue.payment_method_id)
+            );
+            paymentMethod = method.getValue;
+        }
 
         let response: ITypeTransaction = {
             id: transaction.getValue.id,
@@ -41,8 +42,8 @@ export class FindTransactionByIdApplicationService extends IApplicationService<G
             price: transaction.getValue.price,
             walletId: transaction.getValue.wallet_id,
             paymentMethod:{
-                id: paymentMethod.getId().paymentMethodId,
-                name: paymentMethod.name.paymentMethodName,
+                id: paymentMethod.paymentMethodId,
+                name: paymentMethod.paymentMethodName,
             },
             date: transaction.getValue.date,
         };
