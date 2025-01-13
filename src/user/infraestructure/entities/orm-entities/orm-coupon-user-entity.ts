@@ -6,11 +6,11 @@ import { CuponUserStateEnum } from "src/user/domain/entities/coupon/value-object
 @Entity('cupon_user')
 export class OrmCuponUserEntity {
     
-    @ManyToOne(() => OrmCuponEntity, (cupon) => cupon.user)
+    @ManyToOne(() => OrmCuponEntity, (cupon) => cupon.user_cupons)
     @JoinColumn({ name: 'cupon_id' })
     cupon: OrmCuponEntity;
 
-    @ManyToOne(() => OrmUserEntity, (user) => user.cupon)
+    @ManyToOne(() => OrmUserEntity, (user) => user.cupons)
     @JoinColumn({ name: 'user_id' })
     user: OrmUserEntity;
     

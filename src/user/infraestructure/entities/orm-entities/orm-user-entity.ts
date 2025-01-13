@@ -27,8 +27,8 @@ export class OrmUserEntity implements IUser{
     @OneToMany( () => OrmOrderEntity, order => order.user)
     orders?: OrmOrderEntity[]
 
-    @OneToMany( () => OrmCuponUserEntity, cuponUser => cuponUser.cupon, {eager:true, cascade:true})
-    cupon?: OrmCuponUserEntity[]
+    @OneToMany( () => OrmCuponUserEntity, (cuponUser) => cuponUser.user, {eager:true, cascade:true})
+    cupons?: OrmCuponUserEntity[]
 
     @OneToOne(() => OrmWalletEntity, wallet => wallet, {eager:true, cascade:true}) 
     @JoinColumn()
@@ -40,6 +40,8 @@ export class OrmUserEntity implements IUser{
         phone:string,
         userRole:UserRoles,
         wallet:OrmWalletEntity,
+        cupons: OrmCuponUserEntity[],
+        direction: OrmDirectionUserEntity[],
         image?:string,
     ): OrmUserEntity
     {
@@ -49,6 +51,8 @@ export class OrmUserEntity implements IUser{
         user.phone=phone
         user.type=userRole
         user.wallet=wallet
+        user.cupons=cupons
+        user.direcction=direction
         image ? user.image=image : user.image=null
         return user
     }

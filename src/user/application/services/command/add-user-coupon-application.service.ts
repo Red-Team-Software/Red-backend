@@ -56,7 +56,7 @@ export class AddUserCouponApplicationService extends IApplicationService
 
         user.aplyCoupon(coupon.getId())
 
-        let userResponse= await this.commandUserRepository.updateUser(user)
+        let userResponse= await this.commandUserRepository.saveUser(user)
         
         if (!userResponse.isSuccess())
             return Result.fail(new ErrorUpdatinngUserCuponsApplicationException(data.userId,data.idCoupon))

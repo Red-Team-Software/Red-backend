@@ -42,6 +42,8 @@ import { BundleDetailQuantity } from "src/order/domain/entities/bundle-detail/va
 import { ProductDetailPrice } from "src/order/domain/entities/product-detail/value_object/product-detail-price";
 import { BundleDetailPrice } from "src/order/domain/entities/bundle-detail/value_object/bundle-detail-price";
 import { OrderCuponId } from "src/order/domain/value_objects/order-cupon-id";
+import { OrmCuponUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-coupon-user-entity";
+import { OrmDirectionUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-direction-user-entity";
 
 
 export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
@@ -200,17 +202,48 @@ export class OrmOrderMapper implements IMapper<Order,OrmOrderEntity> {
 
         let userDomain = await this.ormUserQueryRepository.findUserById(UserId.create(domainEntity.OrderUserId.userId));
 
+        let ormDirectionUserEntities:OrmDirectionUserEntity[]=[]
+        let ormUserCupon:OrmCuponUserEntity[]=[]
+
+        let user = userDomain.getValue;
+
+        if(user.UserDirections)
+            for (const direction of user.UserDirections){
+                ormDirectionUserEntities.push(
+                    OrmDirectionUserEntity.create(
+                        user.getId().Value,
+                        direction.getId().Value,
+                        direction.DirectionFavorite.Value,
+                        direction.DirectionName.Value,
+                        direction.DirectionLat.Value,
+                        direction.DirectionLng.Value
+                    )
+                )
+            }
+        
+        if (user.UserCoupon)
+            for (const coupon of user.UserCoupon){
+                ormUserCupon.push(OrmCuponUserEntity.create(
+                    user.getId().Value,
+                    coupon.getId().Value,
+                    coupon.CuponState.Value
+                ))
+            }
+        
+        
         let ormUser = OrmUserEntity.create(
-            userDomain.getValue.getId().Value,
-            userDomain.getValue.UserName.Value,
-            userDomain.getValue.UserPhone.Value,
-            userDomain.getValue.UserRole.Value as UserRoles,
+            user.getId().Value,
+            user.UserName.Value,
+            user.UserPhone.Value,
+            user.UserRole.Value as UserRoles,
             OrmWalletEntity.create(
-                userDomain.getValue.Wallet.getId().Value,
-                userDomain.getValue.Wallet.Ballance.Currency,
-                userDomain.getValue.Wallet.Ballance.Amount,   
+                user.Wallet.getId().Value,
+                user.Wallet.Ballance.Currency,
+                user.Wallet.Ballance.Amount,   
             ),
-            userDomain.getValue.UserImage ? userDomain.getValue.UserImage.Value : null 
+            user.UserCoupon ? ormUserCupon : [],
+            user.UserDirections ? ormDirectionUserEntities : [],
+            user.UserImage ? user.UserImage.Value : null 
         )
 
         let orrOrder = OrmOrderEntity.create(

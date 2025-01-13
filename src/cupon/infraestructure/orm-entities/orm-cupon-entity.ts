@@ -20,8 +20,8 @@ export class OrmCuponEntity {
     @Column({ type: 'enum', enum: CouponStateEnum, default: CouponStateEnum.avaleable })
     state: string;
     
-    @OneToMany( () => OrmCuponUserEntity, cupon => cupon.user)
-    user?: OrmCuponUserEntity[]
+    @OneToMany( () => OrmCuponUserEntity, (cuponUser) => cuponUser.cupon, { nullable: true } )
+    user_cupons? : OrmCuponUserEntity[];
 
     @OneToOne( () => OrmOrderEntity, (order) => order.cupon, { nullable: true } )
     order?: OrmOrderEntity;
