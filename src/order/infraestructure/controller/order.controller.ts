@@ -99,7 +99,7 @@ import { IDeliveringOrder } from "src/notification/infraestructure/interfaces/de
 import { IDeliveredOrder } from "src/notification/infraestructure/interfaces/delivered-order.interface";
 import { IReportedOrder } from "src/notification/infraestructure/interfaces/order-reported.interface";
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
-import { OrderCourierPositionDto } from "../dto/order-courier-position-entry.dto copy";
+import { OrderCourierPositionDto } from "../dto/order-courier-position-entry.dto";
 import { FindOrderCourierPositionRequestDto } from "src/order/application/dto/request/find-order-courier-position-request-dto";
 import { FindOrderCourierPositionApplicationService } from "src/order/application/service/query/find-order-courier-position-application.service";
 
