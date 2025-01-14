@@ -11,7 +11,7 @@ export interface ICreateOrder {
     orderReceivedDate: null;
     orderReport:       null;
     orderPayment:      OrderPayment;
-    orderCuponId:      string;
+    orderCupon:      string;
 }
 
 export interface Details {

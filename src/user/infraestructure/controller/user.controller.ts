@@ -54,6 +54,10 @@ import { AddUserCouponInfraestructureRequestDTO } from "../dto/request/add-user-
 import { AddUserCouponApplicationService } from "src/user/application/services/command/add-user-coupon-application.service"
 import { IQueryCuponRepository } from "src/cupon/application/query-repository/query-cupon-repository"
 import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-cupon-query-repository"
+import { UserQueues } from "../queues/user.queues"
+import { ICreateOrder } from "src/notification/infraestructure/interfaces/create-order.interface"
+import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber"
+import { Mongoose } from "mongoose"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -72,11 +76,29 @@ export class UserController {
   private readonly geocodification: IGeocodification
   private readonly hereMapsSingelton: HereMapsSingelton;
   private readonly ormCuponQueryRepo: IQueryCuponRepository;
+  private readonly subscriber: RabbitMQSubscriber;
   
-
+    private initializeQueues():void{        
+      UserQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+        }
+        
+    private buildQueue(name: string, pattern: string) {
+      this.subscriber.buildQueue({
+        name,
+        pattern,
+        exchange: {
+          name: 'DomainEvent',
+          type: 'direct',
+          options: {
+            durable: false,
+          },
+        },
+      })
+    }
   
   constructor(
-    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+    @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose,
   ) {
     this.idGen= new UuidGen()
     this.ormUserQueryRepo=new OrmUserQueryRepository(PgDatabaseSingleton.getInstance())
@@ -89,6 +111,33 @@ export class UserController {
     this.hereMapsSingelton= HereMapsSingelton.getInstance()
     this.geocodification= new GeocodificationOpenStreeMapsDomainService()
     this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
+    this.subscriber= new RabbitMQSubscriber(this.channel);
+    
+    this.initializeQueues();
+        
+    this.subscriber.consume<ICreateOrder>(
+      { name: 'ApplyCoupon/OrderRegistered'}, 
+        (data):Promise<void>=>{
+            this.aplyCoupon({
+              orderId:           data.orderId,
+              orderState:        data.orderState,
+              orderCreateDate:   data.orderCreateDate,
+              totalAmount:       data.totalAmount,
+              orderDirection:    data.orderDirection,
+              orderCourier:      data.orderCourier,
+              orderUserId:       data.orderUserId,
+              products:          data.products,
+              bundles:           data.bundles,
+              orderReceivedDate: null,
+              orderReport:       null,
+              orderPayment:      data.orderPayment,
+              orderCupon:        data.orderCupon,
+            })
+            return
+        }
+    )
+
+
 
   }
 
@@ -278,15 +327,12 @@ export class UserController {
   let response = await service.execute({userId:credential.account.idUser,directions:{id:entry.id}})
   return response.getValue
   }
-  @Put('aply/coupon')
-  @ApiResponse({
-    status: 200,
-    description: 'Aply a coupon to the user',
-    type: AddUserDirectionsInfraestructureRequestDTO,
-  })
-  async aplyCoupon(
-    @GetCredential() credential:ICredential ,
-    @Body() entry:AddUserCouponInfraestructureRequestDTO){
+  
+  
+  async aplyCoupon(entry:ICreateOrder){
+
+    if (!entry.orderCupon || entry.orderCupon.length === 0)
+      return
 
     let service= new ExceptionDecorator(
       new AuditDecorator(  
@@ -302,7 +348,7 @@ export class UserController {
         ),this.auditRepository, new DateHandler()
       )
   )
-  let response = await service.execute({userId:credential.account.idUser,idCoupon:entry.id})
+  let response = await service.execute({userId: entry.orderUserId,idCoupon:entry.orderCupon})
   return response.getValue
   }
 }

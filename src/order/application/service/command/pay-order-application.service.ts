@@ -114,18 +114,11 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             cupon = cuponRes.getValue;
 
-            if (cupon.CuponState.Value === 'unavaleable')
-                return Result.fail(new ErrorCuponUnavaleableApplicationException())
+            cupon.validateCouponState();
 
-            let userCupon = user.UserCoupon.find((userCupon) => userCupon.getId().Value === data.cuponId);
+            user.verifyCouponById(cupon.getId());
 
-            if (!userCupon) 
-                return Result.fail(new ErrorUserDontHaveTheCuponApplicationException());
-            
-
-            if (userCupon.CuponState.Value === 'used') 
-                return Result.fail(new ErrorCuponAlreadyUsedApplicationException());
-        
+            user.verifyApplyCouponById(cupon.getId());
 
         }
 
