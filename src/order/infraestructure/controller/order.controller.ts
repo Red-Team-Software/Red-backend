@@ -198,8 +198,7 @@ export class OrderController {
             new OrmCourierMapper(this.idGen)
         );
         this.ormCourierQueryRepository = new CourierQueryRepository(
-            PgDatabaseSingleton.getInstance(),
-            new OrmCourierMapper(this.idGen)
+            PgDatabaseSingleton.getInstance()
         );
         this.ormUserQueryRepository = new OrmUserQueryRepository(
             PgDatabaseSingleton.getInstance()

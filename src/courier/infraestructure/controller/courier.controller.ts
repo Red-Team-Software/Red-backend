@@ -76,7 +76,7 @@ export class CourierController {
         this.idGen= new UuidGen();
         this.ormMapper = new OrmCourierMapper(this.idGen);
         this.courierRepository= new CourierRepository( PgDatabaseSingleton.getInstance(),this.ormMapper );
-        this.courierQueryRepository= new CourierQueryRepository( PgDatabaseSingleton.getInstance(),this.ormMapper );
+        this.courierQueryRepository= new CourierQueryRepository( PgDatabaseSingleton.getInstance());
         this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance());
         this.subscriber= new RabbitMQSubscriber(this.channel);
 

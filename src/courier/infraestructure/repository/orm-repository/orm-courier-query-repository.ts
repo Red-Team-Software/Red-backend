@@ -7,14 +7,18 @@ import { Result } from "src/common/utils/result-handler/result";
 import { CourierId } from "src/courier/domain/value-objects/courier-id";
 import { CourierName } from "src/courier/domain/value-objects/courier-name";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
+import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
+import { OrmCourierMapper } from "../../mapper/orm-courier-mapper/orm-courier-mapper";
 
 
 
 export class CourierQueryRepository extends Repository<OrmCourierEntity> implements ICourierQueryRepository{
     
+    
+    private readonly ormMapper = new OrmCourierMapper(new UuidGen())
+    
     constructor(
         dataSourse: DataSource,
-        private readonly ormMapper: IMapper<Courier,OrmCourierEntity>
     ) {
         super(OrmCourierEntity, dataSourse.createEntityManager());
     }
