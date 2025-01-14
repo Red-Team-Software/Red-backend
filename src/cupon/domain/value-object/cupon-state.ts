@@ -1,8 +1,9 @@
 import { ValueObject } from "src/common/domain";
 import { InvalidCuponStateException } from "../domain-exceptions/invalid-cupon-state-exception";
+import { CouponStateEnum } from "./enum/coupon.state.enum";
 
 export class CuponState implements ValueObject<CuponState> {
-    private readonly state: boolean;
+    private readonly state: string;
 
     equals(valueObject: CuponState): boolean {
         return this.Value === valueObject.Value;
@@ -12,12 +13,13 @@ export class CuponState implements ValueObject<CuponState> {
         return this.state;
     }
 
-    static create(state: boolean): CuponState {
+    static create(state: string): CuponState {
         return new CuponState(state);
     }
 
-    private constructor(state: boolean) {
-        if (state === null || state === undefined) throw new InvalidCuponStateException();
+    private constructor(state: string) {
+        if (!CouponStateEnum[state]) 
+            throw new InvalidCuponStateException(state);
         this.state = state;
     }
 }

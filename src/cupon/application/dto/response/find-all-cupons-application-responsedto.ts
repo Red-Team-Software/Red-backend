@@ -6,6 +6,6 @@ export interface FindAllCuponsApplicationResponseDTO extends IServiceResponseDto
     code: string; 
     name: string;
     discount: number;
-    state: boolean;
+    state: string;
     
 }

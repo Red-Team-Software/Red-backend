@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { Transform } from "class-transformer"
-import { ArrayMinSize, IsArray, IsBase64, isBase64, IsBoolean, IsDate, IsDateString, IsNegative, IsNumber, isPositive, IsPositive, IsString, MinLength } from "class-validator"
+import { IsString, MinLength, IsNumber, IsPositive, IsEnum } from "class-validator"
+import { CouponStateEnum } from "src/cupon/domain/value-object/enum/coupon.state.enum"
 
 export class CreateCuponInfraestructureRequestDTO{
 
@@ -20,9 +20,8 @@ export class CreateCuponInfraestructureRequestDTO{
     @IsPositive()
     discount: number
 
-    @ApiProperty( { required: true, default: true })
-    @IsBoolean()
-    state: boolean
-
+    @ApiProperty({ enum: CouponStateEnum, required: true, default: CouponStateEnum.avaleable })
+    @IsEnum(CouponStateEnum)
+    state: string
 
 }

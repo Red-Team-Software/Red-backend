@@ -13,6 +13,7 @@ import { CuponState } from "src/cupon/domain/value-object/cupon-state";
 import { ErrorCreatingCuponApplicationException } from "../../application-exception/error-creating-cupon-application-exception copy";
 import { ErrorNameAlreadyApplicationException } from "../../application-exception/error-name-already-exist-cupon-application-exception";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
+import { IQueryCuponRepository } from "../../query-repository/query-cupon-repository";
 
 export class CreateCuponApplicationService extends IApplicationService<
   CreateCuponApplicationRequestDTO,
@@ -20,7 +21,8 @@ export class CreateCuponApplicationService extends IApplicationService<
 > {
   constructor(
     private readonly eventPublisher: IEventPublisher,
-    private readonly cuponRepository: ICuponRepository,
+    private readonly cuponCommandRepository: ICuponRepository,
+    private readonly cuponQueryRepository: IQueryCuponRepository,
     private readonly idGen: IIdGen<string>
   ) {
     super();
@@ -29,8 +31,8 @@ export class CreateCuponApplicationService extends IApplicationService<
   async execute(
     command: CreateCuponApplicationRequestDTO
   ): Promise<Result<CreateCuponApplicationResponseDTO>> {
-    // Verifica si el nombre del cupón ya existe
-    let search = await this.cuponRepository.verifyCuponExistenceByName(
+
+    let search = await this.cuponQueryRepository.verifyCuponExistenceByName(
       CuponName.create(command.name)
     );
 
@@ -44,6 +46,7 @@ export class CreateCuponApplicationService extends IApplicationService<
 
     // Generar el cupón
     let id = await this.idGen.genId();
+    
     let cupon = Cupon.registerCupon(
       CuponId.create(id),
       CuponName.create(command.name),
@@ -53,7 +56,7 @@ export class CreateCuponApplicationService extends IApplicationService<
     );
 
     // Guardar el cupón en el repositorio
-    let result = await this.cuponRepository.createCupon(cupon);
+    let result = await this.cuponCommandRepository.createCupon(cupon);
 
     if (!result.isSuccess()) 
       return Result.fail(new ErrorCreatingCuponApplicationException());

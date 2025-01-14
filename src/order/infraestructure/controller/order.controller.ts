@@ -75,7 +75,7 @@ import { OrderQueues } from "../queues/order.queues";
 import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber";
 import { ICancelOrder } from "src/notification/infraestructure/interfaces/cancel-order.interface";
 import { RefundPaymentApplicationServiceRequestDto } from "src/order/application/dto/request/refund-payment-request-dto";
-import { IQueryCuponRepository } from "src/cupon/domain/query-repository/query-cupon-repository";
+import { IQueryCuponRepository } from "src/cupon/application/query-repository/query-cupon-repository";
 import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-cupon-query-repository";
 import { AssignCourierDto } from "../dto/delivering-order-entry.dto";
 import { AssignCourierApplicationServiceRequestDto } from "src/order/application/dto/request/assign-courier-request-dto";
@@ -99,6 +99,7 @@ import { IDeliveringOrder } from "src/notification/infraestructure/interfaces/de
 import { IDeliveredOrder } from "src/notification/infraestructure/interfaces/delivered-order.interface";
 import { IReportedOrder } from "src/notification/infraestructure/interfaces/order-reported.interface";
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
+import { Mongoose } from "mongoose";
 
 
 @ApiBearerAuth()
@@ -162,7 +163,8 @@ export class OrderController {
 
 
     constructor(
-        @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+        @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+        @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose,
     ) {
         //*IdGen
         this.idGen = new UuidGen();
@@ -268,6 +270,11 @@ export class OrderController {
             }
         )
 
+    }
+
+    async syncOrderRegistered(data:ICreateOrder){
+        //let service= new ProductRegisteredSyncroniceService(this.mongoose)
+        //await service.execute(data)
     }
 
     async walletRefund(data:ICancelOrder){

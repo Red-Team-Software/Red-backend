@@ -35,7 +35,7 @@ export type orderByIdResponse = {
     orderState: {
         state: string;
         date: Date;
-    }
+    }[]
     orderTimeCreated: string;
     totalAmount: number;
     subTotal: number;

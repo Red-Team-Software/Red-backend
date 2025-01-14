@@ -50,6 +50,10 @@ import { GeocodificationOpenStreeMapsDomainService } from "src/order/infraestruc
 import { FindUserDirectionApplicationService } from "src/user/application/services/query/find-user-direction-application.service"
 import { FindUserDirectionByIdApplicationService } from "src/user/application/services/query/find-user-direction-by-id-application.service"
 import { ByIdDTO } from "src/common/infraestructure/dto/entry/by-id.dto"
+import { AddUserCouponInfraestructureRequestDTO } from "../dto/request/add-user-coupon-application-request-dto"
+import { AddUserCouponApplicationService } from "src/user/application/services/command/add-user-coupon-application.service"
+import { IQueryCuponRepository } from "src/cupon/application/query-repository/query-cupon-repository"
+import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-cupon-query-repository"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -67,6 +71,8 @@ export class UserController {
   private readonly encryptor: IEncryptor
   private readonly geocodification: IGeocodification
   private readonly hereMapsSingelton: HereMapsSingelton;
+  private readonly ormCuponQueryRepo: IQueryCuponRepository;
+  
 
   
   constructor(
@@ -82,6 +88,7 @@ export class UserController {
     this.encryptor= new BcryptEncryptor()
     this.hereMapsSingelton= HereMapsSingelton.getInstance()
     this.geocodification= new GeocodificationOpenStreeMapsDomainService()
+    this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
 
   }
 
@@ -269,6 +276,33 @@ export class UserController {
       )
   )
   let response = await service.execute({userId:credential.account.idUser,directions:{id:entry.id}})
+  return response.getValue
+  }
+  @Put('aply/coupon')
+  @ApiResponse({
+    status: 200,
+    description: 'Aply a coupon to the user',
+    type: AddUserDirectionsInfraestructureRequestDTO,
+  })
+  async aplyCoupon(
+    @GetCredential() credential:ICredential ,
+    @Body() entry:AddUserCouponInfraestructureRequestDTO){
+
+    let service= new ExceptionDecorator(
+      new AuditDecorator(  
+        new LoggerDecorator(
+          new PerformanceDecorator(
+            new AddUserCouponApplicationService (
+              this.ormUserCommandRepo,
+              this.ormUserQueryRepo,
+              this.ormCuponQueryRepo,
+              new RabbitMQPublisher(this.channel)
+            ), new NestTimer(), new NestLogger(new Logger())
+          ),new NestLogger(new Logger())
+        ),this.auditRepository, new DateHandler()
+      )
+  )
+  let response = await service.execute({userId:credential.account.idUser,idCoupon:entry.id})
   return response.getValue
   }
 }
