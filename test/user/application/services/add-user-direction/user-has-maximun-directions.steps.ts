@@ -19,6 +19,9 @@ import { DirectionFavorite } from 'src/user/domain/entities/directions/value-obj
 import { DirectionLat } from 'src/user/domain/entities/directions/value-objects/direction-lat';
 import { DirectionLng } from 'src/user/domain/entities/directions/value-objects/direction-lng';
 import { DirectionName } from 'src/user/domain/entities/directions/value-objects/direction-name';
+import { UserCoupon } from 'src/user/domain/entities/coupon/user-coupon.entity';
+import { CuponId } from 'src/cupon/domain/value-object/cupon-id';
+import { CuponState } from 'src/user/domain/entities/coupon/value-objects/cupon-state';
 
 let idGen = new IdGeneratorMock()
 
@@ -75,7 +78,11 @@ const users: User[] = [
     Wallet.create(
       WalletId.create('fd5235de-9533-4660-8b00-67448de3b767'),
       Ballance.create(45,'usd')
-    )
+    ),
+    [UserCoupon.create(
+      CuponId.create('fd5235de-9533-4660-8b00-67448de3b767'),
+      CuponState.create('USED')
+    )],
   )
 ]
 
