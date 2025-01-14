@@ -6,5 +6,7 @@ export interface CreateCourierApplicationServiceRequestDto extends IServiceReque
     lat: number;
     long: number;
     name: string;
+    email: string;
+    password: string;
     image: Buffer;
 }

@@ -1,5 +1,5 @@
 import { Result } from "src/common/utils/result-handler/result";
-import { ICourierQueryRepository } from "src/courier/application/query-repository/courier-query-repository-interface";
+import { ICourierQueryRepository } from "src/courier/application/repository/query-repository/courier-query-repository-interface";
 import { Courier } from "src/courier/domain/aggregate/courier";
 import { CourierId } from "src/courier/domain/value-objects/courier-id";
 import { CourierImage } from "src/courier/domain/value-objects/courier-image";

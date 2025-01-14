@@ -1,4 +1,4 @@
-import { CreateCourierApplicationService } from "src/courier/application/services/create-courier-application.service"
+import { CreateCourierApplicationService } from "src/courier/application/services/register-courier-application.service"
 import { When, Then } from "@cucumber/cucumber"
 import { CourierRepositoryMock } from "test/courier/infraestructure/mock/repositories/courier-command-repository.mock"
 import * as assert from 'assert';

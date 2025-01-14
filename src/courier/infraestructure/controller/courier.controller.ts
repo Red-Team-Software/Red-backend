@@ -5,8 +5,8 @@ import { IEventPublisher } from "src/common/application/events/event-publisher/e
 import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface"
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
-import { ICourierRepository } from "src/courier/domain/repositories/courier-repository-interface"
-import { CreateCourierEntryDTO } from "../dto/create-courier-entry.dto"
+import { ICourierRepository } from "src/courier/application/repository/repositories-command/courier-repository-interface"
+import { RegisterCourierEntryDTO } from "../dto/register-courier-entry.dto"
 import { CourierRepository } from "../repository/orm-repository/orm-courier-repository"
 import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton"
 import { IMapper } from "src/common/application/mappers/mapper.interface"
@@ -14,7 +14,7 @@ import { Courier } from "src/courier/domain/aggregate/courier"
 import { OrmCourierEntity } from "../entities/orm-courier-entity"
 import { OrmCourierMapper } from "../mapper/orm-courier-mapper/orm-courier-mapper"
 import { ExceptionDecorator } from "src/common/application/aspects/exeption-decorator/exception-decorator"
-import { CreateCourierApplicationService } from "src/courier/application/services/create-courier-application.service"
+import { RegisterCourierApplicationService } from "src/courier/application/services/register-courier-application.service"
 import { RabbitMQPublisher } from "src/common/infraestructure/events/publishers/rabbit-mq-publisher"
 import { CloudinaryService } from "src/common/infraestructure/file-uploader/cloudinary-uploader"
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger"
@@ -23,7 +23,7 @@ import { GetCredential } from "src/auth/infraestructure/jwt/decorator/get-creden
 import { ICredential } from "src/auth/application/model/credential.interface"
 import { LoggerDecorator } from "src/common/application/aspects/logger-decorator/logger-decorator"
 import { NestLogger } from "src/common/infraestructure/logger/nest-logger"
-import { ICourierQueryRepository } from "src/courier/application/query-repository/courier-query-repository-interface"
+import { ICourierQueryRepository } from "src/courier/application/repository/query-repository/courier-query-repository-interface"
 import { CourierQueryRepository } from "../repository/orm-repository/orm-courier-query-repository"
 import { ModifyCourierLocationEntryDto } from "../dto/modify-order-courier-location-entry.dto"
 import { ModifyCourierLocationRequestDto } from "src/courier/application/dto/request/modify-courier-location-request.dto"
@@ -38,6 +38,13 @@ import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber
 import { CourierQueues } from "../queues/courier-queues"
 import { ICourierRegistered } from "src/courier/infraestructure/interface/courier-registered.interface"
 import { ICourierDirectionUpdated } from "src/courier/infraestructure/interface/courier-direction-updated.interface"
+import { IJwtGenerator } from "src/common/application/jwt-generator/jwt-generator.interface"
+import { JwtCourierGenerator } from "../jwt/jwt-courier-generator"
+import { JwtService } from "@nestjs/jwt"
+import { BcryptEncryptor } from "src/common/infraestructure/encryptor/bcrypt-encryptor"
+import { IEncryptor } from "src/common/application/encryptor/encryptor.interface"
+import { LogInCourierInfraestructureRequestDTO } from "../dto/log-in-courier-infraestructure-request-dto"
+import { LogInCourierApplicationService } from "src/courier/application/services/log-in-courier-application.service"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -51,7 +58,9 @@ export class CourierController {
         private readonly auditRepository: IAuditRepository;
         private readonly subscriber: RabbitMQSubscriber;
         private readonly ormMapper: IMapper<Courier,OrmCourierEntity>;
-
+        private readonly jwtGen:IJwtGenerator<string>;
+        private readonly encryptor: IEncryptor;
+        
         private initializeQueues():void{        
             CourierQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
         }
@@ -71,7 +80,8 @@ export class CourierController {
         }
 
     constructor(
-        @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+        @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+        private jwtCourierService: JwtService
     ) {
         this.idGen= new UuidGen();
         this.ormMapper = new OrmCourierMapper(this.idGen);
@@ -79,6 +89,8 @@ export class CourierController {
         this.courierQueryRepository= new CourierQueryRepository( PgDatabaseSingleton.getInstance());
         this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance());
         this.subscriber= new RabbitMQSubscriber(this.channel);
+        this.jwtGen= new JwtCourierGenerator(jwtCourierService)
+        this.encryptor= new BcryptEncryptor()
 
         this.initializeQueues();
 
@@ -102,9 +114,9 @@ export class CourierController {
 
     }
 
-    @Post('create')
+    @Post('register')
     @UseInterceptors(FileInterceptor('image'))  
-    async createCourier(@Body() entry: CreateCourierEntryDTO,
+    async createCourier(@Body() entry: RegisterCourierEntryDTO,
     @UploadedFile(
         new ParseFilePipe({
             validators: [
@@ -117,11 +129,13 @@ export class CourierController {
 
         let service= new ExceptionDecorator(
             new AuditDecorator(
-                new CreateCourierApplicationService(
+                new RegisterCourierApplicationService(
                     new RabbitMQPublisher(this.channel),
                     this.courierRepository,
                     this.idGen,
-                    new CloudinaryService()
+                    new CloudinaryService(),
+                    this.jwtGen,
+                    this.encryptor
                 ),this.auditRepository,new DateHandler()
             )
         );
@@ -155,6 +169,24 @@ export class CourierController {
             
         let response = await modifyCourierLocation.execute(request);
             
+        return response.getValue;
+    }
+
+    @Post('login') 
+    async loginCourier(@Body() entry: LogInCourierInfraestructureRequestDTO) {
+
+        let service= new ExceptionDecorator(
+            new AuditDecorator(
+                new LogInCourierApplicationService(
+                    this.courierQueryRepository,
+                    this.encryptor,
+                    this.jwtGen,
+                ),this.auditRepository,new DateHandler()
+            )
+        );
+
+        let response= await service.execute({userId:'none',...entry});
+
         return response.getValue;
     }
 

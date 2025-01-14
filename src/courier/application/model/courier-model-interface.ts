@@ -6,4 +6,6 @@ export interface ICourierModel{
         lat: number,
         long: number
     }
+    email: string,
+    password: string
 }

@@ -14,7 +14,7 @@ import { JwtService } from "@nestjs/jwt"
 import { OrmUserQueryRepository } from "src/user/infraestructure/repositories/orm-repository/orm-user-query-repository"
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles"
 import { CourierQueryRepository } from "../../repository/orm-repository/orm-courier-query-repository"
-import { ICourierQueryRepository } from "src/courier/application/query-repository/courier-query-repository-interface"
+import { ICourierQueryRepository } from "src/courier/application/repository/query-repository/courier-query-repository-interface"
 import { CourierId } from "src/courier/domain/value-objects/courier-id"
 import { JwtPayloadInfraestructureDTO } from "src/auth/infraestructure/jwt/decorator/dto/jwt-payload-infraestructure-dto"
 import { ICourierModel } from "src/courier/application/model/courier-model-interface"
@@ -23,7 +23,7 @@ import { ICourierModel } from "src/courier/application/model/courier-model-inter
 
 
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
+export class JwtCourierAuthGuard implements CanActivate {
 
     private readonly courierRepository: ICourierQueryRepository
 
@@ -56,20 +56,11 @@ export class JwtAuthGuard implements CanActivate {
     }
     
     private async validate(payload: JwtPayloadInfraestructureDTO):Promise<ICourierModel>{
-        const courier= await this.courierRepository.findCourierById(CourierId.create(payload.id))
+        const courier= await this.courierRepository.findCourierByIdDetail(CourierId.create(payload.id))
 
         if (!courier.isSuccess())
             throw new NotFoundException('user id not found')
         
-        let credential:ICourierModel={
-            courierId: courier.getValue.getId().courierId,
-            courierName: courier.getValue.CourierName.courierName,
-            courierImage: courier.getValue.CourierImage.Value,
-            courierDirection: {
-                lat: courier.getValue.CourierDirection.Latitude,
-                long: courier.getValue.CourierDirection.Longitude
-            }
-        }
-        return credential
+        return courier.getValue
     }
 }
