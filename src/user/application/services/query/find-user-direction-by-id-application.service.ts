@@ -48,7 +48,7 @@ export class FindUserDirectionByIdApplicationService extends IApplicationService
             favorite: direction.DirectionFavorite.Value,
             lat: direction.DirectionLat.Value,
             long: direction.DirectionLng.Value,
-            address: address.isSuccess()
+            direction: address.isSuccess()
             ? address.getValue.Address
             : 'no direction'
         })

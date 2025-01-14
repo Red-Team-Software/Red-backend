@@ -84,7 +84,7 @@ describe("User Aggregate Invariants", () => {
             ),
               [UserCoupon.create(
                 CuponId.create('fd5235de-9533-4660-8b00-67448de3b767'),
-                CuponState.create('USED')
+                CuponState.create('used')
               )],
           )
           user.addDirection(
@@ -100,6 +100,7 @@ describe("User Aggregate Invariants", () => {
     catch (error) {
       caughtError = error
     }
+    console.log(caughtError)
     assert.ok(
       caughtError instanceof InvalidUserDirectionQuantityException,
       `Expected InvalidUserDirectionQuantityException but got ${caughtError}`

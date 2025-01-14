@@ -81,7 +81,7 @@ const users: User[] = [
     ),
     [UserCoupon.create(
       CuponId.create('fd5235de-9533-4660-8b00-67448de3b767'),
-      CuponState.create('USED')
+      CuponState.create('used')
     )],
   )
 ]
