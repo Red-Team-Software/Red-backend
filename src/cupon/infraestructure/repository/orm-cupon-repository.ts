@@ -19,8 +19,6 @@ export class OrmCuponRepository extends Repository<OrmCuponEntity> implements IC
         this.mapper = new OrmCuponMapper();
     }
 
-
-
     async createCupon(cupon: Cupon): Promise<Result<Cupon>> {
         try {
             const entry = await this.mapper.fromDomaintoPersistence(cupon);
