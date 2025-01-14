@@ -100,6 +100,9 @@ import { IDeliveredOrder } from "src/notification/infraestructure/interfaces/del
 import { IReportedOrder } from "src/notification/infraestructure/interfaces/order-reported.interface";
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
 import { Mongoose } from "mongoose";
+import { OrderCourierPositionDto } from "../dto/order-courier-position-entry.dto";
+import { FindOrderCourierPositionRequestDto } from "src/order/application/dto/request/find-order-courier-position-request-dto";
+import { FindOrderCourierPositionApplicationService } from "src/order/application/service/query/find-order-courier-position-application.service";
 
 
 @ApiBearerAuth()
@@ -669,6 +672,31 @@ export class OrderController {
         );
 
         let response = await findById.execute(values);
+        
+        return response.getValue;
+    }
+
+    @Get('/courier/position/:id')
+    async courierPosition(
+        @GetCredential() credential:ICredential,
+        @Param() data: OrderCourierPositionDto) {
+        let request: FindOrderCourierPositionRequestDto = {
+            userId: credential.account.idUser,
+            orderId: data.id
+        }
+
+        let position = new ExceptionDecorator(
+            new LoggerDecorator(
+                    new PerformanceDecorator(
+                        new FindOrderCourierPositionApplicationService(
+                            this.orderQueryRepository
+                        ),new NestTimer(),new NestLogger(new Logger())
+                    ),
+                    new NestLogger(new Logger())
+            )
+        );
+        
+        let response = await position.execute(request);
         
         return response.getValue;
     }
