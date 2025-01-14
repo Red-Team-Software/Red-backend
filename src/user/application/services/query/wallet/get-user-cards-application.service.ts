@@ -10,7 +10,7 @@ import { UserCardsApplicationResponseDTO } from "src/user/application/dto/respon
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { UserId } from "src/user/domain/value-object/user-id";
 
-export class GetUserCardsApplicationService extends IApplicationService<UserCardsApplicationRequestDTO, UserCardsApplicationResponseDTO> {
+export class GetUserCardsApplicationService extends IApplicationService<UserCardsApplicationRequestDTO, UserCardsApplicationResponseDTO[]> {
     
     constructor(
         private readonly queryUserRepository:IQueryUserRepository,
@@ -20,7 +20,7 @@ export class GetUserCardsApplicationService extends IApplicationService<UserCard
         super();
     }
 
-    async execute(data: UserCardsApplicationRequestDTO): Promise<Result<UserCardsApplicationResponseDTO>> {
+    async execute(data: UserCardsApplicationRequestDTO): Promise<Result<UserCardsApplicationResponseDTO[]>> {
         let userResponse= await this.queryUserRepository.findUserById(UserId.create(data.userId));
         
         if (!userResponse.isSuccess())

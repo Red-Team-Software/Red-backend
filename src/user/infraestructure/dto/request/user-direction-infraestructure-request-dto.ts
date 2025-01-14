@@ -9,7 +9,7 @@ export class UserDirectionsInfraestructureRequestDTO {
     @MinLength(3)
     name:string
 
-    @ApiProperty( { required: false, default: true })
+    @ApiProperty( { required: false, default: 'Avenida tejeran' })
     @IsString()
     @IsOptional()
     direction:string
@@ -17,7 +17,7 @@ export class UserDirectionsInfraestructureRequestDTO {
     @ApiProperty( { required: true, default: true })
     @IsBoolean()
     favorite:boolean
-
+    
     @ApiProperty( { required: true, default:38.8951 })
     @IsNumber()
     lat:number

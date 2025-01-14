@@ -15,6 +15,6 @@ export class PaginationDto {
     @IsOptional()
     @IsPositive()
     @Transform(({ value }) => { return Number(value); })  
-    perPage?: number
+    perpage?: number
 
 }

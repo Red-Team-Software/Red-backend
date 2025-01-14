@@ -41,7 +41,7 @@ export class OdmBundle extends Document implements IOdmBundle {
         type: [
             {
                 _id:false,
-                id: SchemaTypes.UUID,
+                id: SchemaTypes.String,
                 name:SchemaTypes.String
             }
         ], 
@@ -58,7 +58,7 @@ export class OdmBundle extends Document implements IOdmBundle {
         type: [
             {
                 _id:false,
-                id: SchemaTypes.UUID,
+                id: SchemaTypes.String,
                 name:SchemaTypes.String
             }
         ], 

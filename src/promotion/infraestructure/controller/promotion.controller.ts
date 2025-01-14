@@ -53,6 +53,9 @@ import { IPromotionDiscountUpdated } from '../interfaces/promotion-discount-upda
 import { IPromotionNameUpdated } from '../interfaces/promotion-name-updated';
 import { IPromotionProductsUpdated } from '../interfaces/promotion-products-updated';
 import { IPromotionStateUpdated } from '../interfaces/promotion-state-updated';
+import { OdmPromotionQueryRepository } from '../repositories/odm-repository/odm-promotion-query-repository';
+import { OdmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/odm-repository/odm-bundle-query-repository';
+import { OdmProductQueryRepository } from 'src/product/infraestructure/repositories/odm-repository/odm-product-query-repository';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -67,7 +70,9 @@ export class PromotionController {
   private readonly ormQueryBundleRepo:IQueryBundleRepository
   private readonly ormQueryProductRepo:IQueryProductRepository
   private readonly subscriber: RabbitMQSubscriber
-  
+  private readonly odmQueryBundleRepo:IQueryBundleRepository
+  private readonly odmQueryProductRepo:IQueryProductRepository
+  private readonly odmPromotionQueryRepo:IQueryPromotionRepository
 
     private initializeQueues():void{        
       PromotionQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
@@ -99,7 +104,11 @@ export class PromotionController {
     this.ormQueryBundleRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryProductRepo=new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
     this.subscriber= new RabbitMQSubscriber(this.channel)
+    this.odmPromotionQueryRepo= new OdmPromotionQueryRepository(mongoose)
 
+    this.odmQueryBundleRepo= new OdmBundleQueryRepository(mongoose)
+    this.odmQueryProductRepo= new OdmProductQueryRepository(mongoose)
+    this.odmPromotionQueryRepo = new OdmPromotionQueryRepository(mongoose)
 
     this.initializeQueues()
 
@@ -213,12 +222,12 @@ export class PromotionController {
   ){
     if(!entry.page)
       entry.page=1
-    if(!entry.perPage)
-      entry.perPage=10
+    if(!entry.perpage)
+      entry.perpage=10
     if(!entry.term)
       entry.term=''
 
-    const pagination:PaginationRequestDTO={userId:credential.account.idUser,page:entry.page, perPage:entry.perPage}
+    const pagination:PaginationRequestDTO={userId:credential.account.idUser,page:entry.page, perPage:entry.perpage}
 
     let service= new ExceptionDecorator(
         new LoggerDecorator(

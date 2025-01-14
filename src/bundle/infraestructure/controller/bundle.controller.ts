@@ -63,6 +63,7 @@ import { BundleUpdatedSyncroniceService } from "../services/syncronice/bundle-up
 import { OdmBundleCommandRepository } from "../repositories/odm-repository/orm-bundle-command-repository"
 import { OdmBundleQueryRepository } from "../repositories/odm-repository/odm-bundle-query-repository"
 import { IBundleUpdatedProducts } from "../interfaces/bundle-updated-products.interface"
+import { OdmProductQueryRepository } from "src/product/infraestructure/repositories/odm-repository/odm-product-query-repository"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -78,6 +79,8 @@ export class BundleController {
   private readonly subscriber: RabbitMQSubscriber
   private readonly odmBundleCommandRepo:ICommandBundleRepository
   private readonly odmQueryBundletRepo:IQueryBundleRepository
+  private readonly odmQueryProductRepo:IQueryProductRepository
+
   
   private initializeQueues():void{        
     BundleQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
@@ -109,6 +112,8 @@ export class BundleController {
     this.subscriber= new RabbitMQSubscriber(this.channel)
     this.odmBundleCommandRepo=new OdmBundleCommandRepository(mongoose)
     this.odmQueryBundletRepo=new OdmBundleQueryRepository(mongoose)
+    this.odmQueryProductRepo=new OdmProductQueryRepository(mongoose)
+    
 
     this.initializeQueues() //TODO: REVISAR EL ERROR Y ACTIVARLO
 
@@ -229,7 +234,7 @@ export class BundleController {
             new AdjustBundleStockApplicationService(
               new RabbitMQPublisher(this.channel),
               this.ormBundleCommandRepo,
-              this.ormQueryBundletRepo
+              this.odmQueryBundletRepo
             ),new NestTimer(),new NestLogger(new Logger())
         ),this.auditRepository,new DateHandler()
       )
@@ -258,9 +263,9 @@ export class BundleController {
           new PerformanceDecorator(
             new CreateBundleApplicationService(
               new RabbitMQPublisher(this.channel),
-              this.ormQueryBundletRepo,
+              this.odmQueryBundletRepo,
               this.ormBundleCommandRepo,
-              this.ormQueryProductRepo,
+              this.odmQueryProductRepo,
               this.idGen,
               new CloudinaryService()
             ),new NestTimer(),new NestLogger(new Logger())
@@ -279,13 +284,13 @@ export class BundleController {
   ){
     if(!entry.page)
       entry.page=1
-    if(!entry.perPage)
-      entry.perPage=10
+    if(!entry.perpage)
+      entry.perpage=10
 
     const pagination:FindAllBundlesbyNameApplicationRequestDTO={
       userId:credential.account.idUser,
       page:entry.page,
-      perPage:entry.perPage,
+      perPage:entry.perpage,
       name:entry.term
     }
 
@@ -293,7 +298,7 @@ export class BundleController {
       new LoggerDecorator(
           new PerformanceDecorator(
             new FindAllBundlesByNameApplicationService(
-              this.ormQueryBundletRepo
+              this.odmQueryBundletRepo
             ),new NestTimer(), new NestLogger(new Logger())
           ),new NestLogger(new Logger())
       )
@@ -309,13 +314,13 @@ export class BundleController {
   ){
     if(!entry.page)
       entry.page=1
-    if(!entry.perPage)
-      entry.perPage=10
+    if(!entry.perpage)
+      entry.perpage=10
 
     const pagination:FindAllBundlesbyNameApplicationRequestDTO={
       userId:credential.account.idUser,
       page:entry.page, 
-      perPage:entry.perPage,
+      perPage:entry.perpage,
       ...entry
     }
 
@@ -323,7 +328,7 @@ export class BundleController {
       new LoggerDecorator(
           new PerformanceDecorator(
             new FindAllBundlesApplicationService(
-              this.ormQueryBundletRepo
+              this.odmQueryBundletRepo
             ),new NestTimer(), new NestLogger(new Logger())
           ),new NestLogger(new Logger())
       )
@@ -343,7 +348,7 @@ export class BundleController {
       new LoggerDecorator(
           new PerformanceDecorator(
             new FindBundleByIdApplicationService(
-              this.ormQueryBundletRepo
+              this.odmQueryBundletRepo
             ),new NestTimer(), new NestLogger(new Logger())
           ),new NestLogger(new Logger())
       )
@@ -376,9 +381,9 @@ export class BundleController {
                 new PerformanceDecorator(
                   new UpdateBundleApplicationService(
                     new RabbitMQPublisher(this.channel),
-                    this.ormQueryBundletRepo,
+                    this.odmQueryBundletRepo,
                     this.ormBundleCommandRepo,
-                    this.ormQueryProductRepo,
+                    this.odmQueryProductRepo,
                     this.idGen,
                     new CloudinaryService()
                   ),new NestTimer(),new NestLogger(new Logger())
@@ -410,7 +415,7 @@ export class BundleController {
                 new DeleteBundleApplicationService(
                   new RabbitMQPublisher(this.channel),
                   this.ormBundleCommandRepo,
-                  this.ormQueryBundletRepo,
+                  this.odmQueryBundletRepo,
                   new CloudinaryService()              
                 ),new NestTimer(),new NestLogger(new Logger())
               ),new NestLogger(new Logger())
