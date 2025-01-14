@@ -47,7 +47,7 @@ export class OrderRegistered extends DomainEvent {
             }
             : null,
             orderPayment: this.orderPayment,
-            orderCupon: this.orderCupon.cuponId
+            orderCupon: this.orderCupon ? this.orderCupon.cuponId : null
         }
         
         return JSON.stringify(data);

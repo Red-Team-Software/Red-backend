@@ -118,21 +118,7 @@ export class UserController {
     this.subscriber.consume<ICreateOrder>(
       { name: 'ApplyCoupon/OrderRegistered'}, 
         (data):Promise<void>=>{
-            this.aplyCoupon({
-              orderId:           data.orderId,
-              orderState:        data.orderState,
-              orderCreateDate:   data.orderCreateDate,
-              totalAmount:       data.totalAmount,
-              orderDirection:    data.orderDirection,
-              orderCourier:      data.orderCourier,
-              orderUserId:       data.orderUserId,
-              products:          data.products,
-              bundles:           data.bundles,
-              orderReceivedDate: null,
-              orderReport:       null,
-              orderPayment:      data.orderPayment,
-              orderCupon:        data.orderCupon,
-            })
+            this.aplyCoupon(data)
             return
         }
     )

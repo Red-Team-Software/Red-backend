@@ -28,7 +28,7 @@ export class CourierQueryRepository extends Repository<OrmCourierEntity> impleme
         return{
             courierId: orm.id,
             courierName: orm.name,
-            courierImage: orm.image.image,
+            courierImage: orm.image,
             courierDirection:{
                 lat: orm.latitude,
                 long: orm.longitude,
