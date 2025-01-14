@@ -8,7 +8,6 @@ export type productsOrderByIdResponse = {
     price:number 
     images:string[]
     currency:string
-    orderid: string
 }
 
 export type bundlesOrderByIdResponse = {
@@ -19,29 +18,24 @@ export type bundlesOrderByIdResponse = {
     price:number 
     images:string[]
     currency:string
-    orderid: string
 }
 
 export type reportOrderByIdResponse = {
-    id: string
     description: string
-    orderid: string
 }
 
 export type courierOrderByIdResponse = {
-    courierId: string
     courierName: string
     courierImage: string
-    location: {
-        lat: number
-        long: number
-    }
+    phone: string
 }
 
 export type orderByIdResponse = {
     orderId: string;
-    orderState: string;
-    orderCreatedDate: Date;
+    orderState: {
+        state: string;
+        date: Date;
+    }[]
     orderTimeCreated: string;
     totalAmount: number;
     orderReceivedDate?: Date;

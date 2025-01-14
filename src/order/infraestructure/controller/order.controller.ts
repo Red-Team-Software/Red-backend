@@ -19,7 +19,7 @@ import { TaxesShippingFeeApplicationServiceEntryDto } from "src/order/applicatio
 import { ICommandOrderRepository } from "src/order/domain/command-repository/order-command-repository-interface";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { Order } from "src/order/domain/aggregate/order";
-import { OrmOrderEntity } from "../entities/orm-order-entity";
+import { OrmOrderEntity } from "../entities/orm-entities/orm-order-entity";
 import { OrmOrderMapper } from "../mappers/order-mapper";
 import { OrderQueryRepository } from "../repositories/orm-repository/orm-order-query-repository";
 import { OrmOrderRepository } from "../repositories/orm-repository/orm-order-repository";
@@ -99,6 +99,10 @@ import { IDeliveringOrder } from "src/notification/infraestructure/interfaces/de
 import { IDeliveredOrder } from "src/notification/infraestructure/interfaces/delivered-order.interface";
 import { IReportedOrder } from "src/notification/infraestructure/interfaces/order-reported.interface";
 import { IPaymentMethodQueryRepository } from "src/payment-methods/application/query-repository/orm-query-repository.interface";
+import { Mongoose } from "mongoose";
+import { OrderCourierPositionDto } from "../dto/order-courier-position-entry.dto";
+import { FindOrderCourierPositionRequestDto } from "src/order/application/dto/request/find-order-courier-position-request-dto";
+import { FindOrderCourierPositionApplicationService } from "src/order/application/service/query/find-order-courier-position-application.service";
 
 
 @ApiBearerAuth()
@@ -163,7 +167,8 @@ export class OrderController {
 
 
     constructor(
-        @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+        @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+        @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose,
     ) {
         //*IdGen
         this.idGen = new UuidGen();
@@ -274,6 +279,11 @@ export class OrderController {
 
     }
 
+    async syncOrderRegistered(data:ICreateOrder){
+        //let service= new ProductRegisteredSyncroniceService(this.mongoose)
+        //await service.execute(data)
+    }
+
     async walletRefund(data:ICancelOrder){
         let request: RefundPaymentApplicationServiceRequestDto = {
             userId: data.orderUserId,
@@ -313,7 +323,7 @@ export class OrderController {
             paymentId: data.paymentId,
             currency: data.currency.toLowerCase(),
             paymentMethod: data.paymentMethod,
-            address: data.address,
+            directionId: data.idUserDirection,
             products: data.products,
             bundles: data.bundles,
             cuponId: data.cuponId,
@@ -354,13 +364,13 @@ export class OrderController {
                             ),
                             this.orderRepository,
                             this.idGen,
-                            this.geocodificationAddress,
                             this.ormProductRepository,
                             this.ormBundleRepository,
                             new DateHandler(),
                             new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
                             this.paymentMethodQueryRepository,
-                            this.ormCuponQueryRepo
+                            this.ormCuponQueryRepo,
+                            this.ormUserQueryRepository
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
                     new NestLogger(new Logger())
@@ -384,7 +394,7 @@ export class OrderController {
             paymentId: data.paymentId,
             currency: data.currency.toLowerCase(),
             paymentMethod: data.paymentMethod,
-            address: data.address,
+            directionId: data.idUserDirection,
             products: data.products,
             bundles: data.bundles,
             cuponId: data.cuponId
@@ -408,13 +418,13 @@ export class OrderController {
                             ),
                             this.orderRepository,
                             this.idGen,
-                            this.geocodificationAddress,
                             this.ormProductRepository,
                             this.ormBundleRepository,
                             new DateHandler(),
                             new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
                             this.paymentMethodQueryRepository,
-                            this.ormCuponQueryRepo
+                            this.ormCuponQueryRepo,
+                            this.ormUserQueryRepository
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
                     new NestLogger(new Logger())
@@ -467,6 +477,7 @@ export class OrderController {
     ) {
         let values: FindAllOrdersApplicationServiceRequestDto = {
             userId: credential.account.idUser,
+            state: data.state ? data.state : null,
             ...data
         }
 
@@ -486,7 +497,7 @@ export class OrderController {
 
         if(!data.page)
             values.page=1
-          if(!data.perPage)
+          if(!data.perpage)
             values.perPage=10
         
         let response = await getAllOrders.execute(values);
@@ -501,12 +512,13 @@ export class OrderController {
     ) {
         let values: FindAllOrdersApplicationServiceRequestDto = {
             userId: credential.account.idUser,
+            state: data.state ? data.state : null,
             ...data
         }
 
         if(!data.page)
             values.page=1
-        if(!data.perPage)
+        if(!data.perpage)
             values.perPage=10
         
         let service=
@@ -523,7 +535,7 @@ export class OrderController {
             )
         )
         
-        let response=await service.execute({...data,userId:credential.account.idUser})
+        let response=await service.execute(values)
         return response.getValue
     }
 
@@ -582,7 +594,7 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Post('/delivered/order')
+    @Post('/delivered')
     async deliveredOrder(
         @GetCredential() credential:ICredential,
         @Body() data: DeliveredOrderDto) {
@@ -610,7 +622,7 @@ export class OrderController {
         return response.getValue;
     }
 
-    @Post('/report/order')
+    @Post('/report')
     async reportOrder(
         @GetCredential() credential:ICredential,
         @Body() data: CreateReportEntryDto
@@ -664,6 +676,31 @@ export class OrderController {
         );
 
         let response = await findById.execute(values);
+        
+        return response.getValue;
+    }
+
+    @Get('/courier/position/:id')
+    async courierPosition(
+        @GetCredential() credential:ICredential,
+        @Param() data: OrderCourierPositionDto) {
+        let request: FindOrderCourierPositionRequestDto = {
+            userId: credential.account.idUser,
+            orderId: data.id
+        }
+
+        let position = new ExceptionDecorator(
+            new LoggerDecorator(
+                    new PerformanceDecorator(
+                        new FindOrderCourierPositionApplicationService(
+                            this.orderQueryRepository
+                        ),new NestTimer(),new NestLogger(new Logger())
+                    ),
+                    new NestLogger(new Logger())
+            )
+        );
+        
+        let response = await position.execute(request);
         
         return response.getValue;
     }

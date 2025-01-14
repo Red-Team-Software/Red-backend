@@ -7,7 +7,7 @@ import { CuponState } from "../value-object/cupon-state";
 import { CuponCreated } from "../domain-events/cupon-created";
 import { CuponDeleted } from "../domain-events/cupon-delete";
 import { CuponStateChanged } from "../domain-events/cupon-state-change";
-import { CuponUser } from "../entities/cuponUser/cuponUser.entity";
+import { InvalidCuponException } from "../domain-exceptions/invalid-cupon-exception";
 
 export class Cupon extends AggregateRoot<CuponId> {
 
@@ -16,8 +16,7 @@ export class Cupon extends AggregateRoot<CuponId> {
         private cuponName: CuponName,
         private cuponCode: CuponCode,
         private cuponDiscount: CuponDiscount,
-        private cuponState: CuponState,
-        private users?: CuponUser[]
+        private cuponState: CuponState
     ) {
         super(cuponId);
     }
@@ -30,7 +29,6 @@ export class Cupon extends AggregateRoot<CuponId> {
                 this.cuponCode = cuponCreated.cuponCode;
                 this.cuponDiscount = cuponCreated.cuponDiscount;
                 this.cuponState = cuponCreated.cuponState;
-                this.users=cuponCreated.users;
                 break;
 
             case "CuponStateChange":
@@ -45,9 +43,13 @@ export class Cupon extends AggregateRoot<CuponId> {
     }
 
     protected validateState(): void {
-        if (!this.getId() || !this.cuponName || !this.cuponCode || !this.cuponDiscount || !this.cuponState) {
-            throw new Error("Invalid cupon state: All properties must be defined.");
-        }
+        if (!this.getId() || 
+            !this.cuponName || 
+            !this.cuponCode || 
+            !this.cuponDiscount || 
+            !this.cuponState
+            ) 
+            throw new InvalidCuponException()
     }
 
     
@@ -57,12 +59,23 @@ export class Cupon extends AggregateRoot<CuponId> {
         cuponName: CuponName,
         cuponCode: CuponCode,
         cuponDiscount: CuponDiscount,
-        cuponState: CuponState,
-        users?:CuponUser[]
+        cuponState: CuponState
     ): Cupon {
-        const cupon = new Cupon(cuponId, cuponName, cuponCode, cuponDiscount, cuponState, users);
+        const cupon = new Cupon(
+            cuponId,
+            cuponName,
+            cuponCode,
+            cuponDiscount,
+            cuponState
+        )
         cupon.apply(
-            CuponCreated.create(cuponId, cuponName, cuponCode, cuponDiscount, cuponState, users)
+            CuponRegistered.create(
+                cuponId,
+                cuponName,
+                cuponCode,
+                cuponDiscount,
+                cuponState
+            )
         );
         return cupon;
     }
@@ -72,10 +85,15 @@ export class Cupon extends AggregateRoot<CuponId> {
         cuponName: CuponName,
         cuponCode: CuponCode,
         cuponDiscount: CuponDiscount,
-        cuponState: CuponState,
-        users:CuponUser[]
+        cuponState: CuponState
     ): Cupon {
-        const cupon = new Cupon(cuponId, cuponName, cuponCode, cuponDiscount, cuponState, users);
+        const cupon = new Cupon(
+            cuponId,
+            cuponName,
+            cuponCode,
+            cuponDiscount,
+            cuponState
+        )
         cupon.validateState();
         return cupon;
     }
@@ -108,7 +126,4 @@ export class Cupon extends AggregateRoot<CuponId> {
         return this.cuponState;
     }
     
-    get CuponUsers(): CuponUser[] {
-        return this.users
-    }
 }

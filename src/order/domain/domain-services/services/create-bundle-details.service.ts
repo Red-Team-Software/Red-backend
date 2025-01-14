@@ -9,8 +9,6 @@ import { BundleDetail } from "../../entities/bundle-detail/bundle-detail-entity"
 import { ProductDetailId } from "../../entities/product-detail/value_object/product-detail-id";
 import { BundleDetailId } from "../../entities/bundle-detail/value_object/bundle-detail-id";
 import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
-import { ProductDetailQuantity } from "../../entities/product-detail/value_object/product-detail-quantity";
-import { ProductDetailPrice } from "../../entities/product-detail/value_object/product-detail-price";
 import { BundleDetailQuantity } from "../../entities/bundle-detail/value_object/bundle-detail-quantity";
 import { BundleDetailPrice } from "../../entities/bundle-detail/value_object/bundle-detail-price";
 
@@ -22,9 +20,7 @@ type bundleDetails = {
 
 export class CreateBundleDetailService {
 
-    //TODO: Refactor when coupon and discount are implemented
-
-    calculateAmount(
+    createBundleDetail(
         bundles: Bundle[], 
         promotions: Promotion[],
         bundlesEntry: bundleDetails[],

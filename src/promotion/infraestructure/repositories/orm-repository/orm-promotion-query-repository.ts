@@ -49,6 +49,7 @@ export class OrmPromotionQueryRepository extends Repository<OrmPromotionEntity> 
             return Result.fail( new NotFoundException('error finding promotion please try again'))
         }
     }
+
     async findPromotionById(id: PromotionId): Promise<Result<Promotion>> {
         try{
             const ormPromotion=await this.findOneBy({id:id.Value})
@@ -104,4 +105,27 @@ export class OrmPromotionQueryRepository extends Repository<OrmPromotionEntity> 
             return Result.fail( new NotFoundException('Veify promotion existance unsucssessfully '))
         }
     } 
+
+    async findAllPromo(): Promise<Result<Promotion[]>> {
+        try{
+
+            const ormPromotions = await this.createQueryBuilder('promotion')
+                .leftJoinAndSelect('promotion.products', 'promotion_product')
+                .leftJoinAndSelect('promotion.bundles', 'promotion_bundle')
+                .getMany();
+
+
+            // if(ormProducts.length==0)
+            //     return Result.fail( new NotFoundException('products empty please try again'))
+
+            const promotions:Promotion[]=[]
+
+            for (const promotion of ormPromotions){
+                promotions.push(await this.mapper.fromPersistencetoDomain(promotion))
+            }
+            return Result.success(promotions)
+        }catch(e){
+            return Result.fail( new NotFoundException('error finding promotion please try again'))
+        }
+    }
 }

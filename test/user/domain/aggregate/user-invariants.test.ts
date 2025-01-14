@@ -1,6 +1,9 @@
 import * as assert from 'assert';
+import { CuponId } from 'src/cupon/domain/value-object/cupon-id';
 import { User } from 'src/user/domain/aggregate/user.aggregate';
 import { InvalidUserIdException } from 'src/user/domain/domain-exceptions/invalid-user-id-exception copy';
+import { UserCoupon } from 'src/user/domain/entities/coupon/user-coupon.entity';
+import { CuponState } from 'src/user/domain/entities/coupon/value-objects/cupon-state';
 import { Ballance } from 'src/user/domain/entities/wallet/value-objects/balance';
 import { WalletId } from 'src/user/domain/entities/wallet/value-objects/wallet-id';
 import { Wallet } from 'src/user/domain/entities/wallet/wallet.entity';
@@ -28,7 +31,11 @@ describe("User Aggregate Invariants", () => {
             Wallet.create(
               WalletId.create('fd5235de-9533-4660-8b00-67448de3b767'),
               Ballance.create(45,'usd')
-            )
+            ),
+            [UserCoupon.create(
+              CuponId.create('fd5235de-9533-4660-8b00-67448de3b767'),
+              CuponState.create('USED')
+            )],
           )
     } 
     catch (error) {

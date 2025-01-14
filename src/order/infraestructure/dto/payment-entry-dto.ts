@@ -1,5 +1,6 @@
 import { IsArray, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class PaymentEntryDto {
   
@@ -11,22 +12,25 @@ export class PaymentEntryDto {
   paymentId: string;
 
   @ApiProperty({
-    example: 'USD',
+    example: 'usd',
     description: 'The currency in which the payment is made, only use USD, EUR or BSF',
   })
   @IsString()
+  @IsOptional()
+  @Transform(({ value }) => value ?? 'usd')
   currency: string;
 
-  @ApiProperty({ example: 'card', description: 'The method of payment used' })
+  @ApiProperty({ example: 'credit', description: 'The method of payment used' })
+  @Transform(({ value }) => value ?? 'credit')
   @IsString()
   paymentMethod: string;
 
   @ApiProperty({
-    example: 'Avenida Principal Alto Prado, Edificio Alto Prado Plaza',
-    description: 'The address of the location',
+    example: 'El id de la direccion que tenga el user',
+    description: 'ad5c1b9f-9e35-4e8d-8531-8452d5b8b6fe',
   })
   @IsString()
-  address: string;
+  idUserDirection: string;
 
   @ApiProperty({
     description: 'The bundles with their ids and quantities',

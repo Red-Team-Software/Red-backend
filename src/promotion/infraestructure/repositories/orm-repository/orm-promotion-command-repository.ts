@@ -26,9 +26,9 @@ export class OrmPromotionCommandRepository extends Repository<OrmPromotionEntity
             
             if (!response)
                 return Result.fail( new PersistenceException('Create promotion unsucssessfully') )
-
             return Result.success(promotion)
         }catch(e){
+            console.log(e)
             return Result.fail( new PersistenceException('Create promotion unsucssessfully') )
         }
     }

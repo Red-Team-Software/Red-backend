@@ -82,6 +82,8 @@ export class CreatePromotionApplicationService extends IApplicationService
 
         let result=await this.commandPromotionRepository.createPromotion(promotion)
 
+        console.log(result)
+
         if (!result.isSuccess()) 
             return Result.fail(new ErrorCreatingPromotionApplicationException())
         

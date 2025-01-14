@@ -12,6 +12,11 @@ export interface IOdmBundle {
   currency: string;
   weigth: number;
   measurament: string;
-  category?: IOdmCategory[];
-  products: IOdmProduct[]
-}
+  category: {
+    id:string
+    name:string
+  }[];  
+  products: {
+    id:string
+    name:string
+  }[];}

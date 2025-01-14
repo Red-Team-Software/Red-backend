@@ -32,6 +32,7 @@ import { RabbitMQSubscriber } from 'src/common/infraestructure/events/subscriber
 import { ICreateOrder } from 'src/product/infraestructure/interfaces/create-order.interface';
 import { MarkCuponAsUsedApplicationService } from 'src/cupon/application/services/command/mark-cupon-used-application-service';
 import { RegisterCuponToUserInfraestructureRequestDTO } from '../dto-request/register-cupon-to-user-infraestructure-dto';
+import { ByIdDTO } from 'src/common/infraestructure/dto/entry/by-id.dto';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -117,7 +118,7 @@ export class CuponController {
     let service = new ExceptionDecorator(
       new CreateCuponApplicationService(
         new RabbitMQPublisher(this.channel),
-        this.ormCuponCommandRepo,
+        this.ormCuponRepo,
         this.ormCuponQueryRepo,
         this.idGen
       )
@@ -154,7 +155,7 @@ export class CuponController {
   @Get(':id')
   async getCuponById(
     @GetCredential() credential:ICredential,
-    @Param('id') id: string
+    @Param() entry: ByIdDTO
   ) {
       let service = new ExceptionDecorator(
           new LoggerDecorator(
@@ -165,7 +166,7 @@ export class CuponController {
           )
       );
       
-      let response = await service.execute({ userId: credential.account.idUser, id: id }); 
+      let response = await service.execute({ userId: credential.account.idUser, id: entry.id }); 
       return response.getValue; 
   }
 

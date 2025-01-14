@@ -99,62 +99,26 @@ export class FindAllOdersApplicationService extends IApplicationService<FindAllO
 
         let courierResponse = await this.ormCourierQueryRepository.findAllCouriers();
 
-        let ordersDto: orderResponse[] = [];
+        const ord = await Promise.all(
+            orders.map(async order => {
+            const summaryOrder = [
+                ...order.products.map(product => `${product.name} (${product.quantity})`),
+                ...order.bundles.map(bundle => `${bundle.name} (${bundle.quantity})`),
+            ].join(', ');
 
-        orders.forEach( (order) => {
-
-            let associatedProducts: productsOrderResponse[];
-            let associatedBundles: bundlesOrderResponse[];
-            
-            if (domainProducts) associatedProducts = domainProducts.filter((product) => product.orderid === order.getId().orderId); 
-            
-            if (domainBundles) associatedBundles = domainBundles.filter((bundle) => bundle.orderid === order.getId().orderId); 
-
-            let associatedCourier: courierOrderResponse;
-
-            if( order.OrderCourierId){
-                let courier = courierResponse.getValue.find(
-                    (courier) => courier.getId().courierId === order.OrderCourierId.OrderCourierId
-                );
-
-                associatedCourier = {
-                    courierName: courier.CourierName.courierName,
-                    courierImage: courier.CourierImage.Value,
-                    location: {
-                        lat: courier.CourierDirection.Latitude,
-                        long: courier.CourierDirection.Longitude
-                    }
+            return {
+                id: order.orderId,
+                last_state: {
+                    state: order.orderState,
+                    date: new Date(),
+                },
+                totalAmount: order.totalAmount,
+                summary_order: summaryOrder,
                 };
-            }
-
-            ordersDto.push({
-                orderId: order.getId().orderId,
-                orderState: order.OrderState.orderState,
-                orderCreatedDate: order.OrderCreatedDate.OrderCreatedDate,
-                orderTimeCreated: new Date(order.OrderCreatedDate.OrderCreatedDate).toTimeString().split(' ')[0],
-                totalAmount: order.TotalAmount.OrderAmount,
-                orderReceivedDate: order.OrderReceivedDate? order.OrderReceivedDate.OrderReceivedDate : null,
-                orderPayment: {
-                    paymetAmount: order.OrderPayment.PaymentAmount.Value,
-                    paymentCurrency: order.OrderPayment.PaymentCurrency.Value,
-                    payementMethod: order.OrderPayment.PaymentMethods.Value
-                },
-                orderDirection: {
-                    lat: order.OrderDirection.Latitude,
-                    long: order.OrderDirection.Longitude
-                },
-                products: associatedProducts,
-                bundles: associatedBundles,
-                orderReport: order.OrderReport ? {
-                    id: order.OrderReport.getId().OrderReportId,
-                    description: order.OrderReport.Description.Value,
-                    orderid: order.getId().orderId
-                } : null,
-                orderCourier: order.OrderCourierId ? associatedCourier : null
-            });
-        });
+            }),
+        );
 
 
-        return Result.success(new FindAllOrdersApplicationServiceResponseDto(ordersDto));
+        return Result.success(new FindAllOrdersApplicationServiceResponseDto(ord));
     }
 }

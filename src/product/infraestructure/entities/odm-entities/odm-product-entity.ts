@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
-import mongoose, { Document } from "mongoose"
+import mongoose, { Document, SchemaType, SchemaTypes } from "mongoose"
 import { OdmCategory } from "src/category/infraestructure/entities/odm-entities/odm-category.entity"
 import { IOdmProduct } from "../../model-entity/odm-model-entity/odm-product-interface"
 
-@Schema()
+@Schema({ collection: 'odmproduct' })
 export class OdmProduct extends Document implements IOdmProduct {
 
     @Prop({ type: String, unique: true, index: true, required: true }) 
@@ -36,8 +36,21 @@ export class OdmProduct extends Document implements IOdmProduct {
     @Prop({ type: String, unique: false, required: true })   
     measurament:string
 
-    @Prop({ type: [mongoose.Schema.ObjectId], unique: false, required: false })   
-    category: OdmCategory[]
+    @Prop({ 
+        type: [
+            {
+                _id:false,
+                id: SchemaTypes.UUID,
+                name:SchemaTypes.String
+            }
+        ], 
+        unique: false,
+        required: false 
+    })   
+    category: {
+        id:string,
+        name:string
+    }[]
 
 }
 

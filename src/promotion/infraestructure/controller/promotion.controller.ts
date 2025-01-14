@@ -40,6 +40,22 @@ import { SecurityDecorator } from 'src/common/application/aspects/security-decor
 import { UpdatePromotionApplicationService } from 'src/promotion/application/services/command/update-promotion-application.service';
 import { UserRoles } from 'src/user/domain/value-object/enum/user.roles';
 import { UpdatePromotionInfraestructureRequestDTO } from '../dto/request/update-promotion-infraestructure-request-dto';
+import { PromotionQueues } from '../queues/promotion.queues';
+import { RabbitMQSubscriber } from 'src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber';
+import { IPromotionCreated } from '../interfaces/promotion-created';
+import { PromotionRegisteredSyncroniceService } from '../services/syncronice/promotion-registered-syncronice.service';
+import { Mongoose } from 'mongoose';
+import { IPromotionBundlesUpdated } from '../interfaces/promotion-bundles-updated';
+import { PromotionUpdatedInfraestructureRequestDTO } from '../services/dto/request/promotion-updated-infraestructure-request-dto';
+import { PromotionUpdatedSyncroniceService } from '../services/syncronice/promotion-updated-syncronice.service';
+import { IPromotionDescriptionUpdated } from '../interfaces/promotion-description-updated';
+import { IPromotionDiscountUpdated } from '../interfaces/promotion-discount-updated';
+import { IPromotionNameUpdated } from '../interfaces/promotion-name-updated';
+import { IPromotionProductsUpdated } from '../interfaces/promotion-products-updated';
+import { IPromotionStateUpdated } from '../interfaces/promotion-state-updated';
+import { OdmPromotionQueryRepository } from '../repositories/odm-repository/odm-promotion-query-repository';
+import { OdmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/odm-repository/odm-bundle-query-repository';
+import { OdmProductQueryRepository } from 'src/product/infraestructure/repositories/odm-repository/odm-product-query-repository';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -53,10 +69,33 @@ export class PromotionController {
   private readonly ormPromotionCommandRepo:ICommandPromotionRepository
   private readonly ormQueryBundleRepo:IQueryBundleRepository
   private readonly ormQueryProductRepo:IQueryProductRepository
+  private readonly subscriber: RabbitMQSubscriber
+  private readonly odmQueryBundleRepo:IQueryBundleRepository
+  private readonly odmQueryProductRepo:IQueryProductRepository
+  private readonly odmPromotionQueryRepo:IQueryPromotionRepository
+
+    private initializeQueues():void{        
+      PromotionQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+    }
+    
+    private buildQueue(name: string, pattern: string) {
+        this.subscriber.buildQueue({
+              name,
+              pattern,
+              exchange: {
+                name: 'DomainEvent',
+                type: 'direct',
+                options: {
+                  durable: false,
+                },
+         },
+      })
+    }
 
   
   constructor(
-    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+    @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose,
   ) {
     this.idGen= new UuidGen()
     this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
@@ -64,6 +103,80 @@ export class PromotionController {
     this.ormPromotionCommandRepo=new OrmPromotionCommandRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryBundleRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryProductRepo=new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
+    this.subscriber= new RabbitMQSubscriber(this.channel)
+    this.odmPromotionQueryRepo= new OdmPromotionQueryRepository(mongoose)
+
+    this.odmQueryBundleRepo= new OdmBundleQueryRepository(mongoose)
+    this.odmQueryProductRepo= new OdmProductQueryRepository(mongoose)
+    this.odmPromotionQueryRepo = new OdmPromotionQueryRepository(mongoose)
+
+    this.initializeQueues()
+
+    this.subscriber.consume<IPromotionCreated>(
+      { name: 'PromotionSync/PromotionRegistered'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionRegistered(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IPromotionBundlesUpdated>(
+      { name: 'PromotionSync/PromotionUpdatedBundles'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionUpdated(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IPromotionDescriptionUpdated>(
+      { name: 'PromotionSync/PromotionUpdatedDescription'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionUpdated(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IPromotionDiscountUpdated>(
+      { name: 'PromotionSync/PromotionUpdatedDiscount'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionUpdated(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IPromotionNameUpdated>(
+      { name: 'PromotionSync/PromotionUpdatedName'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionUpdated(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IPromotionProductsUpdated>(
+      { name: 'PromotionSync/PromotionUpdatedProducts'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionUpdated(data)
+        return
+      }
+    )
+
+    this.subscriber.consume<IPromotionStateUpdated>(
+      { name: 'PromotionSync/PromotionUpdatedState'}, 
+      (data):Promise<void>=>{
+        this.syncPromotionUpdated({...data,promotionState:data.promotionState.state})
+        return
+      }
+    )
+  }
+
+  async syncPromotionRegistered(data:IPromotionCreated){
+    let service= new PromotionRegisteredSyncroniceService(this.mongoose)
+    await service.execute(data)
+  }
+
+  async syncPromotionUpdated(data:PromotionUpdatedInfraestructureRequestDTO){
+    let service= new PromotionUpdatedSyncroniceService(this.mongoose)
+    await service.execute(data)
   }
 
   @ApiResponse({
@@ -84,9 +197,9 @@ export class PromotionController {
         new PerformanceDecorator(
           new CreatePromotionApplicationService(
             this.ormPromotionCommandRepo,
-            this.ormPromotionQueryRepo,
-            this.ormQueryProductRepo,
-            this.ormQueryBundleRepo,
+            this.odmPromotionQueryRepo,
+            this.odmQueryProductRepo,
+            this.odmQueryBundleRepo,
             this.idGen,
             new RabbitMQPublisher(this.channel),
           ),new NestTimer(),new NestLogger(new Logger())
@@ -109,18 +222,18 @@ export class PromotionController {
   ){
     if(!entry.page)
       entry.page=1
-    if(!entry.perPage)
-      entry.perPage=10
+    if(!entry.perpage)
+      entry.perpage=10
     if(!entry.term)
       entry.term=''
 
-    const pagination:PaginationRequestDTO={userId:credential.account.idUser,page:entry.page, perPage:entry.perPage}
+    const pagination:PaginationRequestDTO={userId:credential.account.idUser,page:entry.page, perPage:entry.perpage}
 
     let service= new ExceptionDecorator(
         new LoggerDecorator(
           new PerformanceDecorator(
             new FindAllPromotionApplicationService(
-              this.ormPromotionQueryRepo
+              this.odmPromotionQueryRepo
             ),new NestTimer(),new NestLogger(new Logger())
           ),new NestLogger(new Logger())
         )
@@ -145,7 +258,7 @@ export class PromotionController {
       new LoggerDecorator(
         new PerformanceDecorator(
           new FindPromotionByIdApplicationService(
-            this.ormPromotionQueryRepo
+            this.odmPromotionQueryRepo
           ),new NestTimer(),new NestLogger(new Logger())
         ),new NestLogger(new Logger())
       )
@@ -167,9 +280,9 @@ export class PromotionController {
             new PerformanceDecorator(
               new UpdatePromotionApplicationService(
                 this.ormPromotionCommandRepo,
-                this.ormPromotionQueryRepo,
-                this.ormQueryProductRepo,
-                this.ormQueryBundleRepo,
+                this.odmPromotionQueryRepo,
+                this.odmQueryProductRepo,
+                this.odmQueryBundleRepo,
                 new RabbitMQPublisher(this.channel)
               ),new NestTimer(),new NestLogger(new Logger())
           ),credential,[UserRoles.ADMIN])

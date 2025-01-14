@@ -36,11 +36,16 @@ export class BundleRegisteredSyncroniceService implements ISycnchronizeService<B
             price: event.bundlePrice.price,
             currency: event.bundlePrice.currency,
             weigth: event.bundleWeigth.weigth,
-            measurament: event.bundleWeigth.weigth,
-            products:odmProducts,
+            measurament: event.bundleWeigth.measure,
+            products:odmProducts
+            ? odmProducts.map(p=>({
+              id:p.id,
+              name:p.name
+            }))
+            : [],
             category:[] 
         })
-        let pepe=await this.model.create(bundle)
+        await this.model.create(bundle)
         return Result.success(undefined)
     }   
 }

@@ -54,25 +54,11 @@ export class OrmCuponMapper implements IMapper<Cupon, OrmCuponEntity> {
             CuponName.create(infraEntity.name),
             CuponCode.create(infraEntity.code),
             CuponDiscount.create(Number(infraEntity.discount)),
-            CuponState.create(infraEntity.state),
-            users
+            CuponState.create(infraEntity.state)
         );
     }
 
     async fromDomaintoPersistence(domainEntity: Cupon): Promise<OrmCuponEntity> {
-        const ormUsers: OrmCuponUserEntity[] = [];
-
-        for (let cuponUser of domainEntity.CuponUsers || []) {
-            ormUsers.push(
-                OrmCuponUserEntity.create(
-                    cuponUser.UserId.Value,
-                    cuponUser.CuponId.Value,
-                    cuponUser.CuponUserId.Value,
-                    cuponUser.Discount.Value,
-                    cuponUser.State.Value
-                )
-            );
-        }
 
         // Retornar la entidad de persistencia con usuarios asociados
         return {
@@ -80,8 +66,7 @@ export class OrmCuponMapper implements IMapper<Cupon, OrmCuponEntity> {
             name: domainEntity.CuponName.Value,
             code: domainEntity.CuponCode.Value,
             discount: domainEntity.CuponDiscount.Value,
-            state: domainEntity.CuponState.Value,
-            cupon_users: ormUsers
+            state: domainEntity.CuponState.Value
         };
     }
 }

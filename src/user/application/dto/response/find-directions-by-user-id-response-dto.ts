@@ -6,5 +6,5 @@ export class FindUserDirectionsByIdApplicationResponseDTO implements IServiceRes
     favorite: boolean
     lat: number
     long: number
-    address:string
+    direction:string
 }
