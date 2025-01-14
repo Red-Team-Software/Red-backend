@@ -10,6 +10,10 @@ import { PromotionName } from "src/promotion/domain/value-object/promotion-name"
 export class PromotionQueryRepositoryMock implements IQueryPromotionRepository{
 
     constructor(private readonly promotions: Promotion[]){}
+    
+    async findAllPromo(): Promise<Result<Promotion[]>> {
+        return Result.success(this.promotions);
+    }
 
     async findAllPromotion(criteria: FindAllPromotionApplicationRequestDTO): Promise<Result<Promotion[]>> {
         let promotions= this.promotions.slice(criteria.page,criteria.perPage)
@@ -22,7 +26,28 @@ export class PromotionQueryRepositoryMock implements IQueryPromotionRepository{
         return Result.success(promotion)
     }
     async findPromotionWithMoreDetailsById(id: PromotionId): Promise<Result<IPromotion>> {
-        throw new Error("Method not implemented.");
+        let promotion = this.promotions.find((p) => p.getId().equals(id));
+        
+        return Result.success({
+            id: promotion.getId().Value,
+            description: promotion.PromotionDescription.Value,
+            name: promotion.PromotionName.Value,
+            state: promotion.PromotionState.Value,
+            discount: Number(promotion.PromotionDiscounts.Value),
+            products: promotion.Products
+            ? promotion.Products.map(product=>({
+                id: product.Value,
+                name: product.Value
+            }))
+            : [],
+            bundles: promotion.Bundles
+            ? promotion.Bundles.map(bundle=>({
+                id: bundle.Value,
+                name: bundle.Value
+            }))
+            : [],
+            categories:[]
+        })
     }
     async verifyPromotionExistenceByName(promotionName: PromotionName): Promise<Result<boolean>> {
         let promotion=this.promotions.find((p) => p.PromotionName.equals(promotionName))
