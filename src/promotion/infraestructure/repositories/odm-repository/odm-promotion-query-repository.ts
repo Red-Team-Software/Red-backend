@@ -1,15 +1,7 @@
-import { FindAllBundlesApplicationRequestDTO } from "src/bundle/application/dto/request/find-all-bundles-application-request-dto";
-import { FindAllBundlesbyNameApplicationRequestDTO } from "src/bundle/application/dto/request/find-all-bundles-by-name-application-request-dto";
-import { IBundleModel } from "src/bundle/application/model/bundle.model.interface";
-import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository";
-import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate";
-import { BundleId } from "src/bundle/domain/value-object/bundle-id";
-import { BundleName } from "src/bundle/domain/value-object/bundle-name";
 import { Result } from "src/common/utils/result-handler/result";
 import { OdmPromotionEntity, OdmPromotionSchema } from "../../entities/odm-entities/odm-promotion-entity";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { OdmBundle, OdmBundleSchema } from "src/bundle/infraestructure/entities/odm-entities/odm-bundle-entity";
-import { OdmBundleMapper } from "src/bundle/infraestructure/mapper/odm-mapper/odm-bundle-mapper";
 import { Model, Mongoose } from "mongoose";
 import { IQueryPromotionRepository } from "src/promotion/application/query-repository/promotion.query.repository.interface";
 import { FindAllPromotionApplicationRequestDTO } from "src/promotion/application/dto/request/find-all-promotion-application-request-dto";
@@ -17,31 +9,114 @@ import { IPromotion } from "src/promotion/application/model/promotion.interface"
 import { Promotion } from "src/promotion/domain/aggregate/promotion.aggregate";
 import { PromotionId } from "src/promotion/domain/value-object/promotion-id";
 import { PromotionName } from "src/promotion/domain/value-object/promotion-name";
+import { OdmPromotionMapper } from "../../mapper/odm-mapper/odm-promotion-mapper";
 
 
 export class OdmPromotionQueryRepository implements IQueryPromotionRepository{
 
     private readonly model: Model<OdmPromotionEntity>;
-    private readonly odmMapper: OdmBundleMapper
+    private readonly odmMapper: OdmPromotionMapper
 
     constructor( mongoose: Mongoose ) { 
         this.model = mongoose.model<OdmPromotionEntity>('odmpromotion', OdmPromotionSchema)
-        this.odmMapper= new OdmBundleMapper()
+        this.odmMapper= new OdmPromotionMapper()
     }
+
+        private trasnformtoDataModel(odm:OdmPromotionEntity):IPromotion{
+            return {
+                id:odm.id,
+                description:odm.description,
+                name:odm.name,
+                state:odm.state,
+                discount:Number(odm.discount),
+                products:odm.products
+                ? odm.products.map(product=>({
+                    id:product.id,
+                    name:product.name
+                }))
+                : [],
+                bundles:odm.bundles
+                ? odm.bundles.map(bundle=>({
+                    id:bundle.id,
+                    name:bundle.name
+                }))
+                : [],
+                categories:[]
+            }
+        }
     
-    findAllPromotion(criteria: FindAllPromotionApplicationRequestDTO): Promise<Result<Promotion[]>> {
-        throw new Error("Method not implemented.");
+    async findAllPromotion(criteria: FindAllPromotionApplicationRequestDTO): Promise<Result<Promotion[]>> {
+        try {
+            const query: any = {};
+
+            if (criteria.name) 
+                query.name = { $regex: criteria.name, $options: 'i' }
+
+            const odm = await this.model.find(query).exec()
+
+            let elements:Promotion[]=[]
+
+            for (const o of odm){
+                if(o)
+                elements.push(
+                    await this.odmMapper.fromPersistencetoDomain(o)
+                )
+            }
+            return Result.success(
+                elements
+            )
+        
+        } catch (error) {
+            console.log(error)
+            return Result.fail(error.message);
+        }
     }
-    findPromotionById(id: PromotionId): Promise<Result<Promotion>> {
-        throw new Error("Method not implemented.");
+    async findPromotionById(id: PromotionId): Promise<Result<Promotion>> {
+        try{
+            let odm=await this.model.findOne({id:id.Value})
+            if(!odm)
+                return Result.fail( new NotFoundException('Find promotion unsucsessfully'))
+            return Result.success(await this.odmMapper.fromPersistencetoDomain(odm))
+        }
+        catch(e){
+            return Result.fail( new NotFoundException('Find promotion unsucsessfully'))
+        }
     }
-    findPromotionWithMoreDetailsById(id: PromotionId): Promise<Result<IPromotion>> {
-        throw new Error("Method not implemented.");
+    async findPromotionWithMoreDetailsById(id: PromotionId): Promise<Result<IPromotion>> {
+        try{
+            let odm=await this.model.findOne({id:id.Value})
+            if(!odm)
+                return Result.fail( new NotFoundException('Find promotion unsucsessfully'))
+            return Result.success( this.trasnformtoDataModel(odm))
+        }
+        catch(e){
+            return Result.fail( new NotFoundException('Find promotion unsucsessfully'))
+        } 
     }
-    verifyPromotionExistenceByName(promotionName: PromotionName): Promise<Result<boolean>> {
-        throw new Error("Method not implemented.");
+    async verifyPromotionExistenceByName(promotionName: PromotionName): Promise<Result<boolean>> {
+        try{
+            const odm = await this.model.findOne({name:promotionName.Value})
+            if(!odm) 
+                return Result.success(false)
+            return Result.success(true)
+        }
+        catch(e){
+            return Result.fail( new NotFoundException('Find promotion unsucsessfully'))
+        }  
     }
-    findAllPromo(): Promise<Result<Promotion[]>> {
-        throw new Error("Method not implemented.");
+    async findAllPromo(): Promise<Result<Promotion[]>> {
+        try{
+            const odm = await this.model.find()
+            if(!odm) 
+                return Result.fail( new NotFoundException('Find promotion unsucsessfully'))
+            return Result.success(
+                odm
+                    ? await Promise.all(odm.map(async o => await this.odmMapper.fromPersistencetoDomain(o)))
+                    : []
+            )
+        }
+        catch(e){
+            return Result.fail( new NotFoundException('Find promotion unsucsessfully'))
+        }  
     }
 }

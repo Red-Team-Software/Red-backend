@@ -197,9 +197,9 @@ export class PromotionController {
         new PerformanceDecorator(
           new CreatePromotionApplicationService(
             this.ormPromotionCommandRepo,
-            this.ormPromotionQueryRepo,
-            this.ormQueryProductRepo,
-            this.ormQueryBundleRepo,
+            this.odmPromotionQueryRepo,
+            this.odmQueryProductRepo,
+            this.odmQueryBundleRepo,
             this.idGen,
             new RabbitMQPublisher(this.channel),
           ),new NestTimer(),new NestLogger(new Logger())
@@ -233,7 +233,7 @@ export class PromotionController {
         new LoggerDecorator(
           new PerformanceDecorator(
             new FindAllPromotionApplicationService(
-              this.ormPromotionQueryRepo
+              this.odmPromotionQueryRepo
             ),new NestTimer(),new NestLogger(new Logger())
           ),new NestLogger(new Logger())
         )
@@ -258,7 +258,7 @@ export class PromotionController {
       new LoggerDecorator(
         new PerformanceDecorator(
           new FindPromotionByIdApplicationService(
-            this.ormPromotionQueryRepo
+            this.odmPromotionQueryRepo
           ),new NestTimer(),new NestLogger(new Logger())
         ),new NestLogger(new Logger())
       )
@@ -280,9 +280,9 @@ export class PromotionController {
             new PerformanceDecorator(
               new UpdatePromotionApplicationService(
                 this.ormPromotionCommandRepo,
-                this.ormPromotionQueryRepo,
-                this.ormQueryProductRepo,
-                this.ormQueryBundleRepo,
+                this.odmPromotionQueryRepo,
+                this.odmQueryProductRepo,
+                this.odmQueryBundleRepo,
                 new RabbitMQPublisher(this.channel)
               ),new NestTimer(),new NestLogger(new Logger())
           ),credential,[UserRoles.ADMIN])

@@ -10,13 +10,19 @@ import { OdmProduct, OdmProductSchema } from '../../entities/odm-entities/odm-pr
 import { Product } from 'src/product/domain/aggregate/product.aggregate';
 import { NotFoundException } from 'src/common/infraestructure/infraestructure-exception';
 import { OdmProductMapper } from '../../mapper/odm-mapper/odm-product-mapper';
+import { OdmPromotionEntity, OdmPromotionSchema } from 'src/promotion/infraestructure/entities/odm-entities/odm-promotion-entity';
 
 export class OdmProductQueryRepository implements IQueryProductRepository {
 
     private readonly model: Model<OdmProduct>;
+    private readonly promotionmodel:Model<OdmPromotionEntity>
     private readonly odmMapper:OdmProductMapper
 
-        private trasnformtoDataModel(odmProduct:OdmProduct):IProductModel{
+        private async trasnformtoDataModel(odmProduct:OdmProduct):Promise<IProductModel>{
+
+            const promotions = await this.promotionmodel.find({
+                products: { $elemMatch: { id: odmProduct.id } }
+            }).exec();
             return {
                 id:odmProduct.id,
                 description:odmProduct.description,
@@ -37,7 +43,13 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
                     name:c.name
                 }))
                 : [],
-                promotion: []
+                promotion: promotions
+                ? promotions.map(p=>({
+                    id:p.id,
+                    name:p.name,
+                    discount:p.discount
+                }))
+                : []
                 // odmProduct.promotions
                 // ? odmProduct.promotions.map(promotion=>({
                 //     id:promotion.id,
@@ -52,11 +64,13 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
     constructor( mongoose: Mongoose ) { 
         this.model = mongoose.model<OdmProduct>('OdmProduct', OdmProductSchema)
         this.odmMapper=new OdmProductMapper()
+        this.promotionmodel=mongoose.model<OdmPromotionEntity>('odmpromotion',OdmPromotionSchema)
     }
 
     async findAllProducts(criteria: FindAllProductsApplicationRequestDTO): Promise<Result<IProductModel[]>> {
         try {
             const query: any = {};
+            const model:IProductModel[]=[]
 
             if (criteria.name) 
                 query.name = { $regex: criteria.name, $options: 'i' }
@@ -72,10 +86,11 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
 
             const products = await this.model.find(query).exec()
 
-            return Result.success(products
-                ? products.map(p=>this.trasnformtoDataModel(p))
-                : []
-            )
+            for (const p of products){
+                model.push(await this.trasnformtoDataModel(p))
+            }
+
+            return Result.success(model)
         
         } catch (error) {
             return Result.fail(error.message);
@@ -111,7 +126,7 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
             let product=await this.model.findOne({id:id.Value})
             if(!product)
                 return Result.fail( new NotFoundException('Find product unsucssessfully'))
-            return Result.success(this.trasnformtoDataModel(product))
+            return Result.success(await this.trasnformtoDataModel(product))
         }
         catch(e){
             return Result.fail( new NotFoundException('Find product unsucssessfully'))

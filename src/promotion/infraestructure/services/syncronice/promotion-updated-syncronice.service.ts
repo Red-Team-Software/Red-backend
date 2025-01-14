@@ -22,8 +22,6 @@ implements ISycnchronizeService<PromotionUpdatedInfraestructureRequestDTO,void>{
     async execute(event: PromotionUpdatedInfraestructureRequestDTO): Promise<Result<void>> {
         let promotion= await this.promotionModel.findOne({id:event.promotionId})
 
-        console.log(event)
-
         if(!promotion)
             return Result.success(undefined)
 
@@ -34,7 +32,10 @@ implements ISycnchronizeService<PromotionUpdatedInfraestructureRequestDTO,void>{
                 if(b)
                     odmBundles.push(b)
             }
-            promotion.bundles=odmBundles
+            promotion.bundles=odmBundles.map(b=>({
+                id:b.id,
+                name:b.name
+            }))
         }
         if (event.products){
             const odmProduct:OdmProduct[]=[]
@@ -43,7 +44,10 @@ implements ISycnchronizeService<PromotionUpdatedInfraestructureRequestDTO,void>{
                 if(b)
                     odmProduct.push(b)
             }
-            promotion.products=odmProduct
+            promotion.products=odmProduct.map(b=>({
+                id:b.id,
+                name:b.name
+            }))        
         }
         if (event.promotionDescription)
             promotion.description=event.promotionDescription

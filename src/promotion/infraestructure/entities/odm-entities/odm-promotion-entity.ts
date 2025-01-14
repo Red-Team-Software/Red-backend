@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document, SchemaTypes } from 'mongoose';
 import { PromotionStateEnum } from 'src/promotion/domain/value-object/enum/promotion-state.enum';
 import { IOdmModelPromotion } from '../../model-entity/odm-model-entity/odm-promotion-interface';
 import { OdmProduct } from 'src/product/infraestructure/entities/odm-entities/odm-product-entity';
@@ -21,13 +21,39 @@ export class OdmPromotionEntity extends Document implements IOdmModelPromotion{
 
     @Prop({ type: Number, required: true })
     discount: number;
+    
+    @Prop({ 
+        type: [
+            {
+                _id:false,
+                id: SchemaTypes.String,
+                name:SchemaTypes.String
+            }
+        ], 
+        unique: false,
+        required: false 
+    })   
+    products: {
+        id:string,
+        name:string
+    }[]
 
-    @Prop({ type: [{ type: String, ref: 'odmproduct', localField: 'productId', foreignField: 'id' }], default: [] })
-    products?: OdmProduct[];
-
-    @Prop({ type: [{ type: String, ref: 'odmbundle', localField: 'bundleId', foreignField: 'id' }], default: [] })
-    bundles?: OdmBundle[];
-
+    @Prop({ 
+        type: [
+            {
+                _id:false,
+                id: SchemaTypes.String,
+                name:SchemaTypes.String
+            }
+        ], 
+        unique: false,
+        required: false 
+    })   
+    bundles: {
+        id:string,
+        name:string
+    }[]
+    
 }
 
 export const OdmPromotionSchema = SchemaFactory.createForClass(OdmPromotionEntity);

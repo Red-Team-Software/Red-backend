@@ -13,19 +13,28 @@ import { OdmProduct } from "src/product/infraestructure/entities/odm-entities/od
 import { IProductModel } from "src/product/application/model/product.model.interface";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { OdmBundleMapper } from "../../mapper/odm-mapper/odm-bundle-mapper";
+import { OdmPromotionEntity, OdmPromotionSchema } from "src/promotion/infraestructure/entities/odm-entities/odm-promotion-entity";
 
 
 export class OdmBundleQueryRepository implements IQueryBundleRepository{
 
     private readonly model: Model<OdmBundle>;
+    private readonly promotionmodel: Model<OdmPromotionEntity>;
+    
     private readonly odmMapper: OdmBundleMapper
 
     constructor( mongoose: Mongoose ) { 
-        this.model = mongoose.model<OdmBundle>('OdmBundle', OdmBundleSchema)
+        this.model = mongoose.model<OdmBundle>('odmbundle', OdmBundleSchema)
+        this.promotionmodel=mongoose.model<OdmPromotionEntity>('odmpromotion',OdmPromotionSchema)
         this.odmMapper= new OdmBundleMapper()
     }
 
-        private trasnformtoDataModel(odm:OdmBundle):IBundleModel{
+        private async trasnformtoDataModel(odm:OdmBundle):Promise<IBundleModel>{
+
+            const promotions = await this.promotionmodel.find({
+                bundles: { $elemMatch: { id: odm.id } }
+            }).exec();
+
             return {
                 id:odm.id,
                 description:odm.description,
@@ -46,7 +55,13 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
                     name:c.name
                 }))
                 : [],
-                promotion: [],
+                promotion: promotions
+                ? promotions.map(p=>({
+                    id:p.id,
+                    name:p.name,
+                    discount:p.discount
+                }))
+                : [],
                 // odm.promotions
                 // ? odm.promotions.map(promotion=>({
                 //     id:promotion.id,
@@ -69,6 +84,8 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
         try {
             const query: any = {};
 
+            const model:IBundleModel[]=[]
+
             if (criteria.name) 
                 query.name = { $regex: criteria.name, $options: 'i' }
 
@@ -83,13 +100,13 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
 
             const bundles = await this.model.find(query).exec()
 
-            return Result.success(bundles
-                ? bundles.map(p=>this.trasnformtoDataModel(p))
-                : []
-            )
+            for (const b of bundles){
+                model.push(await this.trasnformtoDataModel(b))
+            }
+
+            return Result.success(model)
         
         } catch (error) {
-            console.log(error)
             return Result.fail(error.message);
         }
     }
@@ -108,7 +125,6 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
             )
         
         } catch (error) {
-            console.log(error)
             return Result.fail(error.message);
         }
     }
@@ -120,6 +136,7 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
             return Result.success(await this.odmMapper.fromPersistencetoDomain(odm))
         }
         catch(e){
+            console.log(e)
             return Result.fail( new NotFoundException('Find bundle unsucssessfully'))
         }
     }
@@ -128,7 +145,7 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
             let odm=await this.model.findOne({id:id.Value})
             if(!odm)
                 return Result.fail( new NotFoundException('Find bundle unsucssessfully'))
-            return Result.success(this.trasnformtoDataModel(odm))
+            return Result.success(await this.trasnformtoDataModel(odm))
         }
         catch(e){
             return Result.fail( new NotFoundException('Find bundle unsucssessfully'))
