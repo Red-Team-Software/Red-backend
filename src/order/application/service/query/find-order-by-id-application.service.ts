@@ -2,7 +2,7 @@ import { IApplicationService} from 'src/common/application/services';
 import { Result } from 'src/common/utils/result-handler/result';
 import { ProductID } from 'src/product/domain/value-object/product-id';
 import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
-import { ICourierQueryRepository } from 'src/courier/application/query-repository/courier-query-repository-interface';
+import { ICourierQueryRepository } from 'src/courier/application/repository/query-repository/courier-query-repository-interface';
 import { OrderId } from 'src/order/domain/value_objects/order-id';
 import { CourierId } from 'src/courier/domain/value-objects/courier-id';
 import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
@@ -193,6 +193,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
             orderState: state,
             orderTimeCreated: new Date(order.orderCreatedDate).toTimeString().split(' ')[0],
             totalAmount: order.totalAmount,
+            subTotal: order.totalAmount,
             orderReceivedDate: order.orderReceivedDate ? order.orderReceivedDate : null,
             orderPayment: {
                 paymetAmount: order.orderPayment.paymetAmount,

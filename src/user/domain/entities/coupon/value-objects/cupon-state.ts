@@ -29,4 +29,10 @@ export class CuponState implements ValueObject<CuponState> {
             throw new InvalidCuponUserAlreadyUsedException()
         return new CuponState(CuponUserStateEnum.used)
     }
+
+    verifyIsUsed(){
+        if(this.state === CuponUserStateEnum.used)
+            throw new InvalidCuponUserAlreadyUsedException()
+        return
+    }
 }

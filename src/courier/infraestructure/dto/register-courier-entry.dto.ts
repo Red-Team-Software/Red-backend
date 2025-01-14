@@ -1,9 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsNumber, IsString, MinLength } from "class-validator";
+import { IsEmail, IsNumber, IsString, MinLength } from "class-validator";
 
 
-export class CreateCourierEntryDTO{
+export class RegisterCourierEntryDTO{
 
     @ApiProperty( { required: true, default: 'Raul Alberto' })
     @IsString()
@@ -20,4 +20,11 @@ export class CreateCourierEntryDTO{
     @Transform(({ value }) => { return Number(value); }) 
     long: number;
 
+    @ApiProperty( { required: true, default: 'gadeso2003@gmail.com' })
+    @IsEmail()
+    email: string
+
+    @ApiProperty( { required: true, default: 'password' })
+    @IsString()
+    password: string
 }

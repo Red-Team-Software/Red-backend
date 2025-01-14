@@ -25,6 +25,7 @@ export class OrmOrderRepository extends Repository<OrmOrderEntity> implements IC
             await this.save(orderEntity);
             return Result.success(order);
         } catch (error) {
+            console.log( error );
             return Result.fail( new PersistenceException( 'Create order unsucssessfully' ) );
         }
     }

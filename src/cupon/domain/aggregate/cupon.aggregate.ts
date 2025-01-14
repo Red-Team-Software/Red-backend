@@ -106,6 +106,10 @@ export class Cupon extends AggregateRoot<CuponId> {
         this.apply(CuponDeleted.create(this.getId()));
     }
 
+    validateCouponState(): void {
+        this.cuponState.validateState();
+    }
+
     // Getters for accessing value objects
     get CuponName(): CuponName {
         return this.cuponName;

@@ -2,7 +2,7 @@ import { IQueryBundleRepository } from "src/bundle/application/query-repository/
 import { BundleId } from "src/bundle/domain/value-object/bundle-id";
 import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
-import { ICourierQueryRepository } from "src/courier/application/query-repository/courier-query-repository-interface";
+import { ICourierQueryRepository } from "src/courier/application/repository/query-repository/courier-query-repository-interface";
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
 import { ProductID } from "src/product/domain/value-object/product-id";
 import { ErrorCreatingOrderBundleNotFoundApplicationException } from "../../application-exception/error-creating-order-bundle-not-found-application.exception";

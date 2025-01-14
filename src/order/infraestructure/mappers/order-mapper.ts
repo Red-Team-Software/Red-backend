@@ -20,7 +20,7 @@ import { PaymentMethod } from "src/order/domain/entities/payment/value-object/pa
 import { PaymentAmount } from "src/order/domain/entities/payment/value-object/payment-amount";
 import { PaymentCurrency } from "src/order/domain/entities/payment/value-object/payment-currency";
 import { OrderCourierId } from "src/order/domain/value_objects/order-courier-id";
-import { ICourierRepository } from "src/courier/domain/repositories/courier-repository-interface";
+import { ICourierRepository } from "src/courier/application/repository/repositories-command/courier-repository-interface";
 import { OrderUserId } from "src/order/domain/value_objects/order-user-id";
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { UserId } from "src/user/domain/value-object/user-id";

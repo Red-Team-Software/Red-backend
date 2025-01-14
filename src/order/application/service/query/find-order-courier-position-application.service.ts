@@ -1,6 +1,6 @@
 import { IApplicationService} from 'src/common/application/services';
 import { Result } from 'src/common/utils/result-handler/result';
-import { ICourierQueryRepository } from 'src/courier/application/query-repository/courier-query-repository-interface';
+import { ICourierQueryRepository } from 'src/courier/application/repository/query-repository/courier-query-repository-interface';
 import { OrderId } from 'src/order/domain/value_objects/order-id';
 import { IQueryOrderRepository } from '../../query-repository/order-query-repository-interface';
 import { bundlesOrderByIdResponse, courierOrderByIdResponse, FindOrderByIdResponseDto, orderByIdResponse, productsOrderByIdResponse } from '../../dto/response/find-order-by-id-response-dto';
