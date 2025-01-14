@@ -12,6 +12,7 @@ import * as assert from "assert";
 import { ErrorNameAlreadyApplicationException } from "src/category/application/application-exception/error-name-already-application-exception";
 import { ProductQueryRepositoryMock } from "test/product/infraestructure/mocks/repositories/product-query-repository.mock";
 import { FileUploaderMock } from "test/common/mocks/infraestructure/file-uploader.mock";
+import { Product } from "src/product/domain/aggregate/product.aggregate";
 
 let caughtError: any;
 When(
@@ -30,6 +31,7 @@ When(
       ),
     ];
 
+    let products: Product[]=[]
     const commandRepositoryMock = new CategoryCommandRepositoryMock(categories);
     const queryRepositoryMock = new CategoryQueryRepositoryMock(categories);
 
@@ -37,7 +39,7 @@ When(
       new EventPublisherMock(),
       commandRepositoryMock,
       queryRepositoryMock,
-      new ProductQueryRepositoryMock(),
+      new ProductQueryRepositoryMock(products),
       new FileUploaderMock(),
       new IdGeneratorMock()
     );

@@ -13,6 +13,7 @@ import * as assert from "assert";
 import { ProductQueryRepositoryMock } from "test/product/infraestructure/mocks/repositories/product-query-repository.mock";
 import { ProductID } from "src/product/domain/value-object/product-id";
 import { BundleId } from "src/bundle/domain/value-object/bundle-id";
+import { Product } from "src/product/domain/aggregate/product.aggregate";
 
 let caughtError: any;
 
@@ -31,12 +32,13 @@ When(
   
       const commandRepositoryMock = new CategoryCommandRepositoryMock(categories);
       const queryRepositoryMock = new CategoryQueryRepositoryMock(categories);
-  
+      let productsIds: Product[]=[]
+      
       const service = new UpdateCategoryApplicationService(
         new EventPublisherMock(),
         commandRepositoryMock,
         queryRepositoryMock,
-        new ProductQueryRepositoryMock(),
+        new ProductQueryRepositoryMock(productsIds),
         new FileUploaderMock(),
         new IdGeneratorMock()
       );
