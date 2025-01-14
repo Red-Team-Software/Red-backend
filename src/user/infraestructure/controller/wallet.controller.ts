@@ -316,12 +316,12 @@ export class PaymentWalletController {
         let values: GetAllTransactionsApplicationRequestDTO = {
             userId: credential.account.idUser,
             page: data.page,
-            perPage: data.perPage
+            perPage: data.perpage
         };
     
         if(!data.page)
             values.page=1;
-        if(!data.perPage)
+        if(!data.perpage)
             values.perPage=10;
         
         let service=

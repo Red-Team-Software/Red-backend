@@ -1,5 +1,5 @@
 
-export type UserCard = {
+export interface UserCard {
     id: string;
     brand: string;
     last4: string;

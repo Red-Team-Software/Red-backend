@@ -493,7 +493,7 @@ export class OrderController {
 
         if(!data.page)
             values.page=1
-          if(!data.perPage)
+          if(!data.perpage)
             values.perPage=10
         
         let response = await getAllOrders.execute(values);
@@ -514,7 +514,7 @@ export class OrderController {
 
         if(!data.page)
             values.page=1
-        if(!data.perPage)
+        if(!data.perpage)
             values.perPage=10
         
         let service=

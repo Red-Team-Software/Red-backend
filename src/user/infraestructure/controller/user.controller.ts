@@ -252,7 +252,7 @@ export class UserController {
   return response.getValue
   }
 
-  @Delete('delete/address')
+  @Delete('delete/address/:id')
   @ApiResponse({
     status: 200,
     description: 'Delete direction information',
@@ -260,7 +260,7 @@ export class UserController {
   })
   async deleteDirectionToUser(
     @GetCredential() credential:ICredential ,
-    @Body() entry:DeleteUserDirectionsInfraestructureRequestDTO){
+    @Param() entry:DeleteUserDirectionsInfraestructureRequestDTO){
 
     let service= new ExceptionDecorator(
       new AuditDecorator(  

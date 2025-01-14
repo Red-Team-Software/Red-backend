@@ -58,8 +58,6 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
 
         await this.ormDirectionUserRepository.delete({user_id:ormModel.id})
 
-        console.log(ormModel)
-
         let resultUpdate = await this.save(ormModel)
     
         if (!resultUpdate)
@@ -67,7 +65,6 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
           
         return Result.success(user)
         } catch (e) {
-            console.log(e)
             return Result.fail(new PersistenceException('Update user unsucssessfully'))
         }  
     }
