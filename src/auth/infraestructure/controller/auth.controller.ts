@@ -58,8 +58,8 @@ import { PersistenceException } from "src/common/infraestructure/infraestructure
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles"
 import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator"
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
-import { IUserExternalAccountService } from "src/auth/application/interfaces/user-external-account-interface"
-import { UserStripeAccount } from "../services/user-stripe-account"
+import { IUserExternalAccount } from "src/auth/application/interfaces/user-external-account-interface"
+import { UserStripeAccount } from "../external-account/user-stripe-account"
 import { StripeSingelton } from "src/common/infraestructure/stripe/stripe-singelton"
 
 @ApiTags('Auth')
@@ -78,7 +78,7 @@ export class AuthController {
   private readonly commandTokenSessionRespository:ICommandTokenSessionRepository<ISession>
   private readonly eventPublisher:IEventPublisher
   private readonly codeGenerator:ICodeGenerator<string>
-  private readonly saveUserExternalApi: IUserExternalAccountService
+  private readonly saveUserExternalApi: IUserExternalAccount
   
   constructor(
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
@@ -120,7 +120,8 @@ export class AuthController {
                 this.encryptor,
                 this.dateHandler,
                 this.eventPublisher,
-                this.saveUserExternalApi
+                this.saveUserExternalApi,
+                this.jwtGen
               ),new NestTimer(),new NestLogger(new Logger())
             // ),new NestLogger(new Logger())
           ),this.auditRepository,this.dateHandler)

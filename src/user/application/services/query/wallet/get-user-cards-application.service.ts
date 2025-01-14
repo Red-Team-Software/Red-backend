@@ -1,5 +1,5 @@
 import { UserNotFoundApplicationException } from "src/auth/application/application-exception/user-not-found-application-exception";
-import { IUserExternalAccountService } from "src/auth/application/interfaces/user-external-account-interface";
+import { IUserExternalAccount } from "src/auth/application/interfaces/user-external-account-interface";
 import { IAccount } from "src/auth/application/model/account.interface";
 import { IQueryAccountRepository } from "src/auth/application/repository/query-account-repository.interface";
 import { IApplicationService } from "src/common/application/services";
@@ -10,28 +10,28 @@ import { UserCardsApplicationResponseDTO } from "src/user/application/dto/respon
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { UserId } from "src/user/domain/value-object/user-id";
 
-export class GetUserCardsApplicationService extends IApplicationService<UserCardsApplicationRequestDTO, UserCardsApplicationResponseDTO> {
+export class GetUserCardsApplicationService extends IApplicationService<UserCardsApplicationRequestDTO, UserCardsApplicationResponseDTO[]> {
     
     constructor(
         private readonly queryUserRepository:IQueryUserRepository,
         private readonly accountRepository:IQueryAccountRepository<IAccount>,
-        private readonly userExternalSite: IUserExternalAccountService
+        private readonly userExternalSite: IUserExternalAccount
     ) {
         super();
     }
 
-    async execute(data: UserCardsApplicationRequestDTO): Promise<Result<UserCardsApplicationResponseDTO>> {
+    async execute(data: UserCardsApplicationRequestDTO): Promise<Result<UserCardsApplicationResponseDTO[]>> {
         let userResponse= await this.queryUserRepository.findUserById(UserId.create(data.userId));
         
         if (!userResponse.isSuccess())
-            return Result.fail(new UserNotFoundApplicationException());
+            return Result.fail(new UserNotFoundApplicationException(data.userId));
         
         const user = userResponse.getValue;
 
         let userAccount = await this.accountRepository.findAccountById(user.getId().Value);
 
         if ( !userAccount.isSuccess() ) 
-            return Result.fail(new UserNotFoundApplicationException());
+            return Result.fail(new UserNotFoundApplicationException(data.userId));
 
         let cards = await this.userExternalSite.getUserCards(userAccount.getValue.idStripe);
 

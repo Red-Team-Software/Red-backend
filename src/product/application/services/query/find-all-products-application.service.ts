@@ -27,7 +27,7 @@ IApplicationService<FindAllProductsApplicationRequestDTO,FindAllProductsApplicat
             ?   products.map(p=>({
                 id: p.id,
                 name:p.name,
-                image: p.images,
+                images: p.images,
                 price: p.price,
                 currency:p.currency,
                 weight: p.weigth,

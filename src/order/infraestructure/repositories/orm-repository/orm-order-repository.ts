@@ -4,7 +4,7 @@ import { ICommandOrderRepository } from "src/order/domain/command-repository/ord
 import { Repository, DataSource } from 'typeorm';
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
-import { OrmOrderEntity } from "../../entities/orm-order-entity";
+import { OrmOrderEntity } from "../../entities/orm-entities/orm-order-entity";
 
 
 export class OrmOrderRepository extends Repository<OrmOrderEntity> implements ICommandOrderRepository {

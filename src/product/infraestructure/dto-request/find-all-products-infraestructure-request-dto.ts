@@ -6,11 +6,12 @@ import { PaginationDto } from "src/common/infraestructure/dto/entry/pagination.d
 
 export class FindAllProductsInfraestructureRequestDTO extends PaginationDto{
 
-    @ApiProperty( { required: false })
+    @ApiProperty({ required: false })
     @IsArray()
     @IsString({ each: true })
     @IsOptional()
-    category:string[]
+    @Transform(({ value }) => typeof value === 'string' ? [value] : value)
+    category: string[];
 
     @ApiProperty( { required: false })
     @IsString()

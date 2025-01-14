@@ -58,6 +58,7 @@ import { OrderDeliveringPushNotificationApplicationService } from "src/notificat
 import { IUserWalletBalanceAdded } from "../interfaces/user-wallet-balance-updated";
 import { UserWalletBalanceAddedPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/user-wallet-balance-added-push-notification-application-request-dto";
 import { UpdateUserWalletBalancePushNotificationApplicationService } from "src/notification/application/services/command/update-user-wallet-balance-push-notification-application.service";
+import { CourierAssignedToDeliver } from "src/order/domain/domain-events/courier-assigned-to-deliver";
 
 @ApiTags('Notification')
 @Controller('notification')
@@ -98,101 +99,7 @@ export class NotificationController {
         this.querySessionRepository= new OrmTokenQueryRepository(PgDatabaseSingleton.getInstance());
         this.auditRepository=new OrmAuditRepository(PgDatabaseSingleton.getInstance())
 
-        this.subscriber.buildQueue({
-            name:'ProductEvents',
-            pattern: 'ProductRegistered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'BundleEvents',
-            pattern: 'BundleRegistered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'OrderEvents',
-            pattern: 'OrderRegistered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'OrderEvents/CancelOrder',
-            pattern: 'OrderStatusCancelled',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'OrderEvents/OrderStatusDelivering',
-            pattern: 'OrderStatusDelivering',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'OrderEvents/OrderStatusDelivered',
-            pattern: 'OrderStatusDelivered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'CuponEvents',
-            pattern: 'CuponRegistered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        })
-
-        this.subscriber.buildQueue({
-            name:'UserEvents',
-            pattern: 'UserBalanceAmountAdded',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        })
+        this.initializeQueues()
 
         this.subscriber.consume<IUserWalletBalanceAdded>(
             { name: 'UserEvents'}, 
@@ -201,8 +108,6 @@ export class NotificationController {
                 return
             }
         );
-
-        this.initializeQueues()
 
         this.subscriber.consume<ICreateProduct>(
             { name: 'ProductEvents/ProductRegistered'}, 
@@ -248,7 +153,7 @@ export class NotificationController {
             }
         );
 
-        this.subscriber.consume<IDeliveringOrder>(
+        this.subscriber.consume<IDeliveredOrder>(
             { name: 'OrderEvents/OrderStatusDelivered'}, 
             (data):Promise<void>=>{
                 this.sendPushOrderDelivered(data)
@@ -257,7 +162,7 @@ export class NotificationController {
         );
 
         this.subscriber.consume<IDeliveringOrder>(
-            { name: 'OrderEvents/OrderStatusDelivering'}, 
+            { name: 'OrderEvents/CourierAssignedToDeliver'}, 
             (data):Promise<void>=>{
                 this.sendPushOrderDelivering(data)
                 return
@@ -290,32 +195,7 @@ export class NotificationController {
             code:entry.cuponCode,
             state:entry.cuponState
         }
-        service.execute(data)
-
-        this.subscriber.consume<ICancelOrder>(
-            { name: 'OrderEvents/CancelOrder'}, 
-            (data):Promise<void>=>{
-                this.sendPushOrderCancelled(data)
-                this.sendEmailOrderCancelled(data)
-                return
-            }
-        );
-
-        this.subscriber.consume<IDeliveredOrder>(
-            { name: 'OrderEvents/OrderStatusDelivered'}, 
-            (data):Promise<void>=>{
-                this.sendPushOrderDelivered(data)
-                return
-            }
-        );
-
-        this.subscriber.consume<IDeliveringOrder>(
-            { name: 'OrderEvents/OrderStatusDelivering'}, 
-            (data):Promise<void>=>{
-                this.sendPushOrderDelivering(data)
-                return
-            }
-        );
+        service.execute(data);
 
     }
 

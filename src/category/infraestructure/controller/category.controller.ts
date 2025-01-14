@@ -118,9 +118,9 @@ export class CategoryController {
     @GetCredential() credential:ICredential,
     @Query() entry: FindAllCategoriesInfraestructureRequestDTO) {
     if (!entry.page) entry.page = 1;
-    if (!entry.perPage) entry.perPage = 10;
+    if (!entry.perpage) entry.perpage = 10;
 
-    const pagination: PaginationRequestDTO = { userId: credential.account.idUser, page: entry.page, perPage: entry.perPage };
+    const pagination: PaginationRequestDTO = { userId: credential.account.idUser, page: entry.page, perPage: entry.perpage };
 
     let service = new ExceptionDecorator(
       new LoggerDecorator(

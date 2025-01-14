@@ -1,4 +1,4 @@
-import { IsArray, IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class WalletPaymentEntryDto {
@@ -22,11 +22,11 @@ export class WalletPaymentEntryDto {
   paymentMethod: string;
 
   @ApiProperty({
-    example: 'Avenida Principal Alto Prado, Edificio Alto Prado Plaza',
-    description: 'The address of the location',
+    example: 'El id de la direccion que tenga el user',
+    description: 'ad5c1b9f-9e35-4e8d-8531-8452d5b8b6fe',
   })
   @IsString()
-  address: string;
+  idUserDirection: string;
 
   @ApiProperty({
     description: 'The bundles with their ids and quantities',
@@ -49,5 +49,13 @@ export class WalletPaymentEntryDto {
     id: string,
     quantity: number
   }[];
+
+  @ApiProperty({
+    example: '2cc214ab-1e1e-4a22-9547-185b4a09df0a',
+    description: 'cupon Id to apply to the payment',
+  })
+  @IsString()
+  @IsOptional()
+  cuponId?: string;
 
 }

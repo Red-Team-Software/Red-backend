@@ -37,13 +37,11 @@ export class WalletPaymentMethod implements IPaymentMethodService {
         if (user.Wallet.Ballance.Amount < order.TotalAmount.OrderAmount) 
             return Result.fail(new InsufficientFundsInWalletException());
 
-        let newBalance = Ballance.create(user.Wallet.Ballance.Amount - order.TotalAmount.OrderAmount, user.Wallet.Ballance.Currency);
+        let newBalance = Ballance.create(order.TotalAmount.OrderAmount, user.Wallet.Ballance.Currency);
 
-        let newWallet = Wallet.create(user.Wallet.getId(), newBalance);
+        user.decreaseWalletBalance(newBalance);
 
-        user.decreaseWalletBalance(newWallet);
-
-        await this.ormUserCommandRepo.saveUser(user);
+        await this.ormUserCommandRepo.updateUser(user);
 
         let transaction: ITransaction = {
             id: await this.idGen.genId(),
@@ -66,8 +64,9 @@ export class WalletPaymentMethod implements IPaymentMethodService {
             order.OrderCreatedDate,
             order.TotalAmount,
             order.OrderDirection,
-            order.OrderCourier,
             order.OrderUserId,
+            order.OrderCuponId,
+            order.OrderCourierId,
             order.Products,
             order.Bundles,
             order.OrderReceivedDate, 

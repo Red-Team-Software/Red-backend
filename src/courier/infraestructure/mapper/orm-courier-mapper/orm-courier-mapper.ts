@@ -6,6 +6,7 @@ import { CourierImage } from "src/courier/domain/value-objects/courier-image";
 import { CourierId } from "src/courier/domain/value-objects/courier-id";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { OrmCourierImageEntity } from "../../entities/orm-courier-image-entity";
+import { CourierDirection } from "src/courier/domain/value-objects/courier-direction";
 
 
 export class OrmCourierMapper implements IMapper<Courier,OrmCourierEntity>{
@@ -25,7 +26,9 @@ export class OrmCourierMapper implements IMapper<Courier,OrmCourierEntity>{
         let ormCourier: OrmCourierEntity = OrmCourierEntity.create(
             domainEntity.getId().courierId,
             domainEntity.CourierName.courierName,
-            ormCourierImage
+            ormCourierImage,
+            domainEntity.CourierDirection.Latitude,
+            domainEntity.CourierDirection.Longitude
         );
         
         return ormCourier;
@@ -36,7 +39,11 @@ export class OrmCourierMapper implements IMapper<Courier,OrmCourierEntity>{
         let newCourier: Courier = Courier.initializeAggregate(
             CourierId.create(infraEstructure.id),
             CourierName.create(infraEstructure.name),
-            CourierImage.create(infraEstructure.image.image)
+            CourierImage.create(infraEstructure.image.image),
+            CourierDirection.create(
+                infraEstructure.latitude,
+                infraEstructure.longitude
+            )
         );
         
         return newCourier;

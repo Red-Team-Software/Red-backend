@@ -1,7 +1,7 @@
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 import { UpdateProfileInfraestructureRequestDTO } from "../dto/request/update-profile-infraestructure-request-dto"
-import { Controller, Inject, Patch, Body, Get, Query, Post, UseGuards, BadRequestException, Logger, Delete, Put } from "@nestjs/common"
+import { Controller, Inject, Patch, Body, Get, Query, Post, UseGuards, BadRequestException, Logger, Delete, Put, Param } from "@nestjs/common"
 import { ApiBearerAuth, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { UpdateProfileInfraestructureResponseDTO } from "../dto/response/update-profile-infraestructure-response-dto"
 import { OrmUserQueryRepository } from "../repositories/orm-repository/orm-user-query-repository"
@@ -45,9 +45,15 @@ import { PerformanceDecorator } from "src/common/application/aspects/performance
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
 import { IGeocodification } from "src/order/domain/domain-services/interfaces/geocodification-interface"
 import { HereMapsSingelton } from "src/common/infraestructure/here-maps/here-maps-singleton"
-import { FindUserDirectionsByIdApplicationRequestDTO } from "src/user/application/dto/response/find-directions-by-user-id-response-dto"
 import { OrderDirection } from "src/order/domain/value_objects/order-direction"
 import { GeocodificationOpenStreeMapsDomainService } from "src/order/infraestructure/domain-service/geocodification-naminatim-maps-domain-service"
+import { FindUserDirectionApplicationService } from "src/user/application/services/query/find-user-direction-application.service"
+import { FindUserDirectionByIdApplicationService } from "src/user/application/services/query/find-user-direction-by-id-application.service"
+import { ByIdDTO } from "src/common/infraestructure/dto/entry/by-id.dto"
+import { AddUserCouponInfraestructureRequestDTO } from "../dto/request/add-user-coupon-application-request-dto"
+import { AddUserCouponApplicationService } from "src/user/application/services/command/add-user-coupon-application.service"
+import { IQueryCuponRepository } from "src/cupon/application/query-repository/query-cupon-repository"
+import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-cupon-query-repository"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -65,6 +71,8 @@ export class UserController {
   private readonly encryptor: IEncryptor
   private readonly geocodification: IGeocodification
   private readonly hereMapsSingelton: HereMapsSingelton;
+  private readonly ormCuponQueryRepo: IQueryCuponRepository;
+  
 
   
   constructor(
@@ -80,6 +88,7 @@ export class UserController {
     this.encryptor= new BcryptEncryptor()
     this.hereMapsSingelton= HereMapsSingelton.getInstance()
     this.geocodification= new GeocodificationOpenStreeMapsDomainService()
+    this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
 
   }
 
@@ -138,87 +147,31 @@ export class UserController {
     return response.getValue
   }
 
-  @Get('directions')
+  @Get('address/many')
   async findUserDirectionById(@GetCredential() credential:ICredential){
-    let response=await this.ormUserQueryRepo.findUserDirectionsByUserId(UserId.create(credential.account.idUser));
-
-    let directions = response.getValue
-
-    let dir: FindUserDirectionsByIdApplicationRequestDTO[] = [];
-
-    for (let direction of directions){
-      let geo = OrderDirection.create(direction.lat,direction.lng);
-      let geoReponse= await this.geocodification.LatitudeLongitudetoDirecction(geo);
-
-      dir.push({
-        ...direction,
-        address:geoReponse.isSuccess()
-        ? geoReponse.getValue.Address
-        : 'no direction get it'
-      })
-    }
-
-    return dir
-  }
-
-  @Post('add-directions')
-  @ApiResponse({
-    status: 200,
-    description: 'User direction information',
-    type: AddUserDirectionInfraestructureResponseDTO,
-  })
-  async addDirectionToUser(
-    @GetCredential() credential:ICredential ,
-    @Body() entry:AddUserDirectionsInfraestructureRequestDTO){
-
     let service= new ExceptionDecorator(
       new AuditDecorator(
         new LoggerDecorator(
           new PerformanceDecorator(
-            new AddUserDirectionApplicationService (
-              this.ormUserCommandRepo,
+            new FindUserDirectionApplicationService (
               this.ormUserQueryRepo,
-              new RabbitMQPublisher(this.channel)
+              this.geocodification
             ), new NestTimer(), new NestLogger(new Logger())
           ), new NestLogger(new Logger())
         ),this.auditRepository, new DateHandler()
       )
   )
-  let response = await service.execute({userId:credential.account.idUser,...entry})
-  return response.getValue
-  }
-
-  @Delete('delete-directions')
-  @ApiResponse({
-    status: 200,
-    description: 'Delete direction information',
-    type: DeleteUserDirectionInfraestructureResponseDTO,
+  let response = await service.execute({
+    userId:credential.account.idUser
   })
-  async deleteDirectionToUser(
-    @GetCredential() credential:ICredential ,
-    @Body() entry:DeleteUserDirectionsInfraestructureRequestDTO){
-
-    let service= new ExceptionDecorator(
-      new AuditDecorator(  
-        new LoggerDecorator(
-          new PerformanceDecorator(
-            new DeleteUserDirectionApplicationService (
-              this.ormUserCommandRepo,
-              this.ormUserQueryRepo,
-              new RabbitMQPublisher(this.channel)
-            ), new NestTimer(), new NestLogger(new Logger())
-          ),new NestLogger(new Logger())
-        ),this.auditRepository, new DateHandler()
-      )
-  )
-  let response = await service.execute({userId:credential.account.idUser,...entry})
   return response.getValue
   }
 
-  @Put('update-directions')
+  
+  @Patch('update/address')
   @ApiResponse({
     status: 200,
-    description: 'Delete direction information',
+    description: 'Update direction information',
     type: UpdateUserDirectionInfraestructureResponseDTO,
   })
   async updateDirectionToUser(
@@ -238,7 +191,118 @@ export class UserController {
         ),this.auditRepository, new DateHandler()
       )
   )
-  let response = await service.execute({userId:credential.account.idUser,...entry})
+
+  let response = await service.execute({
+    userId:credential.account.idUser,
+    directions:{...entry, id:entry.directionId}
+  })
+
+  return response.getValue
+  }
+
+  @Get('address/:id')
+  async findUserDirections(
+    @Param() entry:ByIdDTO,
+    @GetCredential() credential:ICredential){
+    let service= new ExceptionDecorator(
+      new AuditDecorator(
+        new LoggerDecorator(
+          new PerformanceDecorator(
+            new FindUserDirectionByIdApplicationService (
+              this.ormUserQueryRepo,
+              this.geocodification
+            ), new NestTimer(), new NestLogger(new Logger())
+          ), new NestLogger(new Logger())
+        ),this.auditRepository, new DateHandler()
+      )
+  )
+  let response = await service.execute({
+    userId:credential.account.idUser,...entry
+  })
+  return response.getValue
+  }
+
+  @Post('add/address')
+  @ApiResponse({
+    status: 200,
+    description: 'User direction information',
+    type: AddUserDirectionInfraestructureResponseDTO,
+  })
+  async addDirectionToUser(
+    @GetCredential() credential:ICredential ,
+    @Body() entry:AddUserDirectionsInfraestructureRequestDTO){
+
+    let service= new ExceptionDecorator(
+      new AuditDecorator(
+        new LoggerDecorator(
+          new PerformanceDecorator(
+            new AddUserDirectionApplicationService (
+              this.ormUserCommandRepo,
+              this.ormUserQueryRepo,
+              new RabbitMQPublisher(this.channel),
+              new UuidGen()
+            ), new NestTimer(), new NestLogger(new Logger())
+          ), new NestLogger(new Logger())
+        ),this.auditRepository, new DateHandler()
+      )
+  )
+  let response = await service.execute({
+    userId:credential.account.idUser,directions:entry
+  })
+  return response.getValue
+  }
+
+  @Delete('delete/address/:id')
+  @ApiResponse({
+    status: 200,
+    description: 'Delete direction information',
+    type: DeleteUserDirectionInfraestructureResponseDTO,
+  })
+  async deleteDirectionToUser(
+    @GetCredential() credential:ICredential ,
+    @Param() entry:DeleteUserDirectionsInfraestructureRequestDTO){
+
+    let service= new ExceptionDecorator(
+      new AuditDecorator(  
+        new LoggerDecorator(
+          new PerformanceDecorator(
+            new DeleteUserDirectionApplicationService (
+              this.ormUserCommandRepo,
+              this.ormUserQueryRepo,
+              new RabbitMQPublisher(this.channel)
+            ), new NestTimer(), new NestLogger(new Logger())
+          ),new NestLogger(new Logger())
+        ),this.auditRepository, new DateHandler()
+      )
+  )
+  let response = await service.execute({userId:credential.account.idUser,directions:{id:entry.id}})
+  return response.getValue
+  }
+  @Put('aply/coupon')
+  @ApiResponse({
+    status: 200,
+    description: 'Aply a coupon to the user',
+    type: AddUserDirectionsInfraestructureRequestDTO,
+  })
+  async aplyCoupon(
+    @GetCredential() credential:ICredential ,
+    @Body() entry:AddUserCouponInfraestructureRequestDTO){
+
+    let service= new ExceptionDecorator(
+      new AuditDecorator(  
+        new LoggerDecorator(
+          new PerformanceDecorator(
+            new AddUserCouponApplicationService (
+              this.ormUserCommandRepo,
+              this.ormUserQueryRepo,
+              this.ormCuponQueryRepo,
+              new RabbitMQPublisher(this.channel)
+            ), new NestTimer(), new NestLogger(new Logger())
+          ),new NestLogger(new Logger())
+        ),this.auditRepository, new DateHandler()
+      )
+  )
+  let response = await service.execute({userId:credential.account.idUser,idCoupon:entry.id})
   return response.getValue
   }
 }

@@ -23,7 +23,7 @@ export class ProductRegisteredSyncroniceService implements ISycnchronizeService<
             price: event.productPrice.price,
             currency: event.productPrice.currency,
             weigth: event.productWeigth.weigth,
-            measurament: event.productWeigth.weigth,
+            measurament: event.productWeigth.measure,
             category:[] 
         })
         await this.model.create(product)

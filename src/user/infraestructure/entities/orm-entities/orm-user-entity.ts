@@ -3,8 +3,9 @@ import { IUser } from "../../model-entity/orm-model-entity/user-interface";
 import { OrmAccountEntity } from "src/auth/infraestructure/orm/orm-entities/orm-account-entity";
 import { OrmDirectionUserEntity } from "./orm-direction-user-entity";
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
-import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-order-entity";
+import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-entities/orm-order-entity";
 import { OrmWalletEntity } from "./orm-wallet-entity";
+import { OrmCuponUserEntity } from "./orm-coupon-user-entity";
 
 
 @Entity('user')
@@ -20,13 +21,16 @@ export class OrmUserEntity implements IUser{
     @OneToMany( () => OrmAccountEntity, account => account.user,{ eager: true, nullable:true })  
     accounts: OrmAccountEntity[];
 
-    @OneToMany( () => OrmDirectionUserEntity, direction => direction.direction,{  nullable:true })  
+    @OneToMany( () => OrmDirectionUserEntity, direction => direction.user,{  nullable:true , cascade:true, eager:true})  
     direcction: OrmDirectionUserEntity[];
 
     @OneToMany( () => OrmOrderEntity, order => order.user)
     orders?: OrmOrderEntity[]
 
-    @OneToOne(() => OrmWalletEntity, wallet => wallet, {eager:true}) 
+    @OneToMany( () => OrmCuponUserEntity, (cuponUser) => cuponUser.user, {eager:true, cascade:true})
+    cupons?: OrmCuponUserEntity[]
+
+    @OneToOne(() => OrmWalletEntity, wallet => wallet, {eager:true, cascade:true}) 
     @JoinColumn()
     wallet: OrmWalletEntity;
 
@@ -36,6 +40,8 @@ export class OrmUserEntity implements IUser{
         phone:string,
         userRole:UserRoles,
         wallet:OrmWalletEntity,
+        cupons: OrmCuponUserEntity[],
+        direction: OrmDirectionUserEntity[],
         image?:string,
     ): OrmUserEntity
     {
@@ -45,6 +51,8 @@ export class OrmUserEntity implements IUser{
         user.phone=phone
         user.type=userRole
         user.wallet=wallet
+        user.cupons=cupons
+        user.direcction=direction
         image ? user.image=image : user.image=null
         return user
     }

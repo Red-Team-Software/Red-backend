@@ -1,4 +1,3 @@
-import { IOdmCategory } from "src/category/infraestructure/model-entities/odm-model-entities/odm-category.interface";
 
 export interface IOdmProduct {
   id: string;
@@ -11,5 +10,8 @@ export interface IOdmProduct {
   currency: string;
   weigth: number;
   measurament: string;
-  category?: IOdmCategory[];
+  category: {
+    id:string
+    name:string
+  }[];
 }

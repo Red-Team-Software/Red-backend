@@ -2,7 +2,6 @@ export interface IOrderModel{
     orderId: string;
     orderState: string;
     orderCreatedDate: Date;
-    orderTimeCreated: string;
     totalAmount: number;
     orderReceivedDate?: Date;
     orderPayment?: {
@@ -14,41 +13,43 @@ export interface IOrderModel{
         lat: number;
         long: number;
     };
-    products?: productsOrderResponse[];
-    bundles?: bundlesOrderResponse[];
+    products?: productsOrderRes[];
+    bundles?: bundlesOrderRes[];
     orderReport?: reportOrderResponse;
-    orderCourier: courierOrderResponse;
+    orderCourier?: courierOrderResponse;
 }
 
-export interface productsOrderResponse {
+export interface productsOrderRes {
     id: string
     name: string 
-    descripcion: string
+    description: string
     quantity: number
     price:number 
     images:string[]
     currency:string
-    orderid: string
 }
 
-export interface bundlesOrderResponse {
+export interface bundlesOrderRes {
     id: string
     name: string 
-    descripcion: string
+    description: string
     quantity: number
     price:number 
     images:string[]
     currency:string
-    orderid: string
 }
 
 export interface reportOrderResponse {
     id: string
     description: string
-    orderid: string
 }
 
 export interface courierOrderResponse {
+    courierId: string
     courierName: string
     courierImage: string
+    location: {
+        lat: number
+        long: number
+    }
 }

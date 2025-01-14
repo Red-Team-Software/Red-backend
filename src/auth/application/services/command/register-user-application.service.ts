@@ -25,8 +25,10 @@ import { UserAlreadyExistPhoneNumberApplicationException } from "../../applicati
 import { Wallet } from "src/user/domain/entities/wallet/wallet.entity";
 import { WalletId } from "src/user/domain/entities/wallet/value-objects/wallet-id";
 import { Ballance } from "src/user/domain/entities/wallet/value-objects/balance";
-import { IUserExternalAccountService } from "src/auth/application/interfaces/user-external-account-interface";
+import { IUserExternalAccount } from "src/auth/application/interfaces/user-external-account-interface";
 import { ErrorRegisteringAccountExternalSiteApplicationException } from "../../application-exception/error-registering-account-external-site-application-exception";
+import { IJwtGenerator } from "src/common/application/jwt-generator/jwt-generator.interface";
+import { ICourierRepository } from "src/courier/domain/repositories/courier-repository-interface";
 
 
 export class RegisterUserApplicationService extends IApplicationService 
@@ -41,7 +43,8 @@ export class RegisterUserApplicationService extends IApplicationService
         private readonly encryptor:IEncryptor,
         private readonly dateHandler:IDateHandler,
         private readonly eventPublisher:IEventPublisher,
-        private readonly userExternalSite: IUserExternalAccountService
+        private readonly userExternalSite: IUserExternalAccount,
+        private readonly jwtGen:IJwtGenerator<string>
     ){
         super()
     }
@@ -81,15 +84,29 @@ export class RegisterUserApplicationService extends IApplicationService
             Wallet.create(
                 WalletId.create(await this.idGen.genId()),
                 Ballance.create(0,'usd')
-            )
+            ),
+            []
         )
 
         let externalId = await this.userExternalSite.saveUser(user.getId(), data.email);
 
-        if(!externalId.isSuccess()) return Result.fail(new ErrorRegisteringAccountExternalSiteApplicationException())
+        if(!externalId.isSuccess()) 
+            return Result.fail(new ErrorRegisteringAccountExternalSiteApplicationException())
+
+                const idSession = await this.idGen.genId() 
+
+        const jwt = this.jwtGen.generateJwt( idSession )
+
 
         let account:IAccount={
-            sessions: [] ,
+            sessions: [
+                {
+                    expired_at: this.dateHandler.getExpiry(),
+                    id: idSession,
+                    push_token: null,
+                    accountId: id
+                }
+            ] ,
             id:id,
             email: data.email,
             password: password,
@@ -111,7 +128,7 @@ export class RegisterUserApplicationService extends IApplicationService
         
         this.eventPublisher.publish(user.pullDomainEvents())
         
-        return Result.success({id})
+        return Result.success({id, token:jwt})
     }
     
 }

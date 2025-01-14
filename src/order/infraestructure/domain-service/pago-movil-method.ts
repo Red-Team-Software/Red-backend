@@ -11,6 +11,7 @@ import { OrderState } from "src/order/domain/value_objects/order-state";
 import { PagoMovilDTO } from "../dto/pago-movil-dto-entry.dto";
 import { IConversionService } from "src/order/domain/domain-services/interfaces/conversion-currency-interface";
 import { ConvertAmount } from "src/order/domain/value_objects/vo-domain-services/convert-amount";
+import { OrderCurrencyEnum } from "src/order/domain/value_objects/enum/order-enum-currency-total-amoun";
 
 
 
@@ -25,7 +26,7 @@ export class PagoMovilPaymentMethod implements IPaymentMethodService {
     async createPayment(order: Order): Promise<Result<Order>> {
         let change = ConvertAmount.create(order.TotalAmount.OrderAmount, order.TotalAmount.OrderCurrency);
 
-        let newChange = await this.exchangeRate.convertAmountUSDtoVES(change);
+        let newChange = await this.exchangeRate.convertAmount(change,OrderCurrencyEnum.bsf);
 
         let newOrder = Order.registerOrder(
             order.getId(),
@@ -33,8 +34,9 @@ export class PagoMovilPaymentMethod implements IPaymentMethodService {
             order.OrderCreatedDate,
             order.TotalAmount,
             order.OrderDirection,
-            order.OrderCourier,
             order.OrderUserId,
+            order.OrderCuponId,
+            order.OrderCourierId,
             order.Products,
             order.Bundles,
             order.OrderReceivedDate, 

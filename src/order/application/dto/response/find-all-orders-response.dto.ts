@@ -2,7 +2,7 @@ import { IServiceResponseDto } from "src/common/application/services/dto/respons
 
 export type productsOrderResponse = {
     id: string
-    nombre: string 
+    name: string 
     description: string
     quantity: number
     price:number 
@@ -13,7 +13,7 @@ export type productsOrderResponse = {
 
 export type bundlesOrderResponse = {
     id: string
-    nombre: string 
+    name: string 
     description: string
     quantity: number
     price:number 
@@ -31,29 +31,20 @@ export type reportOrderResponse = {
 export type courierOrderResponse = {
     courierName: string
     courierImage: string
+    location: {
+        lat: number
+        long: number
+    }
 }
 
 export type orderResponse = {
-    orderId: string;
-    orderState: string;
-    orderCreatedDate: Date;
-    orderTimeCreated: string;
+    id: string;
+    last_state: {
+        state: string;
+        date: Date;
+    };
     totalAmount: number;
-    orderReceivedDate?: Date;
-    orderPayment?: {
-        paymetAmount: number;
-        paymentCurrency: string;
-        payementMethod: string;
-    };
-    orderDirection: {
-        lat: number;
-        long: number;
-    };
-    //orderDirection: string;
-    products?: productsOrderResponse[];
-    bundles?: bundlesOrderResponse[];
-    orderReport?: reportOrderResponse;
-    orderCourier: courierOrderResponse;
+    summary_order: string;
 }
 
 export class FindAllOrdersApplicationServiceResponseDto implements IServiceResponseDto {

@@ -2,7 +2,10 @@ import { IServiceResponseDto } from "src/common/application/services"
 
 export interface OrderPayResponseDto extends IServiceResponseDto {
         id: string,
-        orderState: string,
+        orderState: {
+            state:string
+            date:Date
+        }[],
         orderCreatedDate: Date,
         orderTimeCreated: string,
         totalAmount: number,
@@ -34,9 +37,6 @@ export interface OrderPayResponseDto extends IServiceResponseDto {
             currency: string,
             paymentMethod: string
         },
-        orderCourier: {
-            courierName: string,
-            courierImage: string,
-        },
-        orderUserId: string
+        orderCupon?: string,
+        orderUserId: string,
 }

@@ -6,39 +6,40 @@ import { OrmUserEntity } from "../../entities/orm-entities/orm-user-entity";
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { OrmUserMapper } from "../../mapper/orm-mapper/orm-user-mapper";
-import { OrmDirectionEntity } from "../../entities/orm-entities/orm-direction-entity";
 import { OrmDirectionUserEntity } from "../../entities/orm-entities/orm-direction-user-entity";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { OrmUserQueryRepository } from "./orm-user-query-repository";
 import { OrmWalletEntity } from "../../entities/orm-entities/orm-wallet-entity";
 import { UserId } from "src/user/domain/value-object/user-id";
-import { UserDirection } from "src/user/domain/value-object/user-direction";
+import { UserDirection } from "src/user/domain/entities/directions/direction.entity";
 
 
 
 export class OrmUserCommandRepository extends Repository<OrmUserEntity> implements ICommandUserRepository{
 
     private mapper:IMapper <User,OrmUserEntity>
-    private readonly ormDirectionRepository: Repository<OrmDirectionEntity>;
     private readonly ormDirectionUserRepository: Repository<OrmDirectionUserEntity>;
     private readonly ormWalletRepository: Repository<OrmWalletEntity>;
 
     constructor(dataSource:DataSource){
         super(OrmUserEntity, dataSource.createEntityManager())
         this.mapper=new OrmUserMapper(new UuidGen(),new OrmUserQueryRepository(dataSource))
-        this.ormDirectionRepository=dataSource.getRepository(OrmDirectionEntity)
         this.ormDirectionUserRepository=dataSource.getRepository(OrmDirectionUserEntity)
         this.ormWalletRepository=dataSource.getRepository(OrmWalletEntity)
     }
     async deleteUserDirection(idUser:UserId,direction:UserDirection): Promise<Result<UserId>> {
         try {
-            let ormDirection=await this.ormDirectionRepository.findOneBy({lat:direction.Lat,lng:direction.Lng})
+            let ormDirection=await this.ormDirectionUserRepository.findOneBy(
+                {
+                    id:direction.getId().Value
+                }
+            )
 
             if (!ormDirection)
                 return Result.fail(new PersistenceException('Update user unsucssessfully'))
 
             let resultDelete = await this.ormDirectionUserRepository.delete({
-                direction_id:ormDirection.id,
+                id:ormDirection.id,
                 user_id:idUser.Value
             })
                     
@@ -55,12 +56,9 @@ export class OrmUserCommandRepository extends Repository<OrmUserEntity> implemen
     try {
         let ormModel=await this.mapper.fromDomaintoPersistence(user)
 
-        let resultUpdate = await this.upsert(ormModel,['id'])
-        
-        for (const directionUser of ormModel.direcction){
-            await this.ormDirectionRepository.upsert(directionUser.direction,['id'])
-            await this.ormDirectionUserRepository.upsert(directionUser,['direction_id','user_id'])
-        }
+        await this.ormDirectionUserRepository.delete({user_id:ormModel.id})
+
+        let resultUpdate = await this.save(ormModel)
     
         if (!resultUpdate)
             return Result.fail(new PersistenceException('Update user unsucssessfully'))

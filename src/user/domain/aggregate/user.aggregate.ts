@@ -4,7 +4,6 @@ import { UserName } from "../value-object/user-name";
 import { UserPhone } from "../value-object/user-phone";
 import { UserRegistered } from '../domain-events/user-registered';
 import { UserImage } from "../value-object/user-image";
-import { UserDirection } from '../value-object/user-direction';
 import { UserDirectionAdded } from "../domain-events/user-direction-added";
 import { UserDirectionDeleted } from "../domain-events/user-direction-deleted";
 import { DomainExceptionNotHandled } from "src/common/domain/domain-exception-not-handled/domain-exception-not-handled";
@@ -18,6 +17,14 @@ import { Wallet } from "../entities/wallet/wallet.entity";
 import { InvalidUserDirectionQuantityException } from "../domain-exceptions/invalid-user-direction-quantity-exception";
 import { UserBalanceAmountAdded } from "../domain-events/user-balance-amount-added";
 import { UserBalanceAmountDecremented } from "../domain-events/user-balance-amount-decremented";
+import { Ballance } from "../entities/wallet/value-objects/balance";
+import { UserDirection } from "../entities/directions/direction.entity"
+import { UserCoupon } from "../entities/coupon/user-coupon.entity";
+import { UserCouponAplied } from "../domain-events/user-coupon-aplied";
+import { CuponId } from "src/cupon/domain/value-object/cupon-id";
+import { CuponState } from "../entities/coupon/value-objects/cupon-state";
+import { DirectionId } from "../entities/directions/value-objects/direction-id";
+
 
 export class User extends AggregateRoot <UserId>{
     protected when(event: DomainEvent): void {
@@ -36,13 +43,18 @@ export class User extends AggregateRoot <UserId>{
                 break;
             }
             case 'UserDirectionDeleted':{
-                const userDirectionDeleted: UserDirectionAdded = event as UserDirectionAdded
-                this.UserDirections.filter(userDirection=>!userDirection.equals(userDirectionDeleted.userDirection))
+                const userDirectionDeleted: UserDirectionDeleted = event as UserDirectionDeleted
+                this.userDirections = this.userDirections.filter(
+                    userDirection => !userDirection.getId().equals(userDirectionDeleted.directionId)
+                )
                 break;
             }
             case 'UserDirectionUpdated':{
                 const userDirectionUpdated: UserDirectionUpdated = event as UserDirectionUpdated
-                this.userDirections=userDirectionUpdated.userDirection
+                this.userDirections = this.userDirections.filter(direction =>
+                    !direction.equals(userDirectionUpdated.userDirection)
+                )
+                this.userDirections.unshift(userDirectionUpdated.userDirection)
                 break;
             }
             case 'UserImageUpdated':{
@@ -70,6 +82,15 @@ export class User extends AggregateRoot <UserId>{
                 this.wallet= userBalanceAmountDecremented.userWallet
                 break;
             }
+            case 'UserCouponAplied':{                    
+                const userCouponAplied: UserCouponAplied = event as UserCouponAplied
+                const index = this.userCoupon.findIndex(c => c.equals(userCouponAplied.userCoupon))
+                if (index !== -1)
+                    this.userCoupon.splice(index, 1, userCouponAplied.userCoupon)
+                else
+                    this.userCoupon.push(userCouponAplied.userCoupon)
+                break;
+            }
             default: { throw new DomainExceptionNotHandled(JSON.stringify(event)) }
         }
     }
@@ -92,6 +113,7 @@ export class User extends AggregateRoot <UserId>{
         private userRole:UserRole,
         private userDirections:UserDirection[],
         private wallet:Wallet,
+        private userCoupon:UserCoupon[],
         private userImage?:UserImage,
     ){
         super(userId)
@@ -104,6 +126,7 @@ export class User extends AggregateRoot <UserId>{
         userRole:UserRole,
         userDirections:UserDirection[],
         wallet:Wallet,
+        userCoupon:UserCoupon[],
         userImage?:UserImage,
     ):User{
         const user = new User(
@@ -113,7 +136,8 @@ export class User extends AggregateRoot <UserId>{
             userRole,
             userDirections,
             wallet,
-            userImage,
+            userCoupon,
+            userImage
         )
         user.apply(
             UserRegistered.create(
@@ -121,7 +145,8 @@ export class User extends AggregateRoot <UserId>{
                 userName,
                 userPhone,
                 userImage,
-                wallet
+                wallet,
+                userCoupon
             )
         )
         return user
@@ -133,6 +158,7 @@ export class User extends AggregateRoot <UserId>{
         userRole:UserRole,
         userDirection:UserDirection[],
         wallet:Wallet,
+        userCoupon:UserCoupon[],
         userImage?:UserImage,
     ):User{
         const user = new User(
@@ -142,6 +168,7 @@ export class User extends AggregateRoot <UserId>{
             userRole,
             userDirection,
             wallet,
+            userCoupon,
             userImage
         )
         user.validateState()
@@ -156,7 +183,8 @@ export class User extends AggregateRoot <UserId>{
         )
         this.validateState()  
     }
-    deleteDirection(direction:UserDirection):void{
+
+    deleteDirection(direction:DirectionId):void{
         this.apply(
             UserDirectionDeleted.create(
                 this.getId(),
@@ -164,6 +192,7 @@ export class User extends AggregateRoot <UserId>{
             )
         )    
     }
+
     updateImage(userImage:UserImage):void{
         this.apply(
             UserImageUpdated.create(
@@ -173,20 +202,20 @@ export class User extends AggregateRoot <UserId>{
         )
     }
 
-    addWalletBalance(wallet:Wallet):void{
+    addWalletBalance(ballance:Ballance):void{
         this.apply(
             UserBalanceAmountAdded.create(
                 this.getId(),
-                wallet
+                this.wallet.addAmountToBalance(ballance)
             )
         );
     };
 
-    decreaseWalletBalance(wallet:Wallet):void{
+    decreaseWalletBalance(ballance:Ballance):void{
         this.apply(
             UserBalanceAmountDecremented.create(
                 this.getId(),
-                wallet
+                this.wallet.reduceAmountToBalance(ballance)
             )
         );
     };
@@ -207,18 +236,47 @@ export class User extends AggregateRoot <UserId>{
             )
         )
     }
-    updateDirection(direction:UserDirection[]):void{
+    updateDirection(direction:UserDirection):void{
         this.apply(
             UserDirectionUpdated.create(
                 this.getId(),
                 direction
             )
         )    
-    }    
+    }
+
+    aplyCoupon(coupon:CuponId){
+
+        let cupontoaply=this.userCoupon.find(c=>c.getId().equals(coupon))
+
+        if (!cupontoaply)
+            this.apply(
+                UserCouponAplied.create(
+                    this.getId(),
+                    UserCoupon.create(
+                        coupon,
+                        CuponState.create('used')
+                    )
+                )
+            )
+        else
+        this.apply(
+            UserCouponAplied.create(
+                this.getId(),
+                cupontoaply.aplyCoupon()
+            )
+        )
+    }
+
+    verifyCouponById(coupon:CuponId):boolean{
+        return this.userCoupon.some(c => c.getId().equals(coupon));
+    }
+    
     get UserName():UserName {return this.userName}
     get UserPhone():UserPhone {return this.userPhone}
     get UserImage():UserImage {return this.userImage}
     get UserDirections():UserDirection[] {return this.userDirections}
     get UserRole():UserRole{ return this.userRole}
     get Wallet():Wallet{return this.wallet}
+    get UserCoupon():UserCoupon[]{return this.userCoupon}
 }

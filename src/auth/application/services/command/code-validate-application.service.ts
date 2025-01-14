@@ -34,14 +34,14 @@ export class CodeValidateApplicationService extends IApplicationService
         const result = await this.queryAccountRepository.findAccountByEmail( data.email )
 
         if ( !result.isSuccess() ) 
-            return Result.fail(new UserNotFoundApplicationException())
+            return Result.fail(new UserNotFoundApplicationException(data.userId))
 
         const account=result.getValue 
 
         const resultuser= await this.queryUserRepository.findUserById(UserId.create(account.id))
 
         if ( !resultuser.isSuccess() ) 
-            return Result.fail(new UserNotFoundApplicationException())
+            return Result.fail(new UserNotFoundApplicationException(data.userId))
 
         const user=resultuser.getValue 
 

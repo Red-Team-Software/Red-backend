@@ -15,12 +15,16 @@ import { FileUploaderResponseDTO } from "src/common/application/file-uploader/dt
 import { TypeFile } from "src/common/application/file-uploader/enums/type-file.enum";
 import { ErrorUploadingPaymentMethodImageApplicationException } from "../application-exception/error-uploading-payment-method-image-application-service-exception";
 import { PaymentMethodImage } from "src/payment-methods/domain/value-objects/payment-method-image";
+import { ErrorPaymentNameAlreadyApplicationException } from "../application-exception/error-payment-name-already-exist-application-exception";
+import { NotFoundPaymentMethodApplicationException } from "../application-exception/not-found-payment-method-application.exception";
+import { IPaymentMethodQueryRepository } from "../query-repository/orm-query-repository.interface";
 
 
 export class CreatePaymentMethodApplicationService extends IApplicationService<CreatePaymentMethodRequestDto,CreatePaymentMethodResponseDto>{
 
     constructor(
         private readonly paymentMethodRepository: IPaymentMethodRepository,
+        private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository,
         private readonly eventPublisher: IEventPublisher,
         private readonly idGen: IIdGen<string>,
         private readonly fileUploader:IFileUploader
@@ -29,14 +33,24 @@ export class CreatePaymentMethodApplicationService extends IApplicationService<C
     }
 
     async execute(data: CreatePaymentMethodRequestDto): Promise<Result<CreatePaymentMethodResponseDto>> {
+
+        let paymentExistanceResponse=await this.paymentMethodQueryRepository.verifyMethodRegisteredByName(
+            PaymentMethodName.create(data.name)
+        )
+
+        if (paymentExistanceResponse.getError)
+            return Result.fail(new NotFoundPaymentMethodApplicationException())
+
+        if (paymentExistanceResponse.getValue)
+            return Result.fail(new ErrorPaymentNameAlreadyApplicationException(data.name))
+
+        let uploaded:FileUploaderResponseDTO
+        let idImage=await this.idGen.genId()
         
-
-        let uploaded:FileUploaderResponseDTO;
-
-        let idImage=await this.idGen.genId();
         let imageuploaded=await this.fileUploader.uploadFile(data.image,TypeFile.image,idImage);
-            
-        if(!imageuploaded.isSuccess()) return Result.fail(new ErrorUploadingPaymentMethodImageApplicationException());
+        
+        if(!imageuploaded.isSuccess()) 
+            return Result.fail(new ErrorUploadingPaymentMethodImageApplicationException());
 
         uploaded = imageuploaded.getValue;
 
@@ -49,7 +63,10 @@ export class CreatePaymentMethodApplicationService extends IApplicationService<C
 
         let response = await this.paymentMethodRepository.savePaymentMethod(method);
 
-        if(response.isFailure()) return Result.fail(new ErrorSavingPaymentMethodApplicationException());
+        if(response.isFailure()) 
+            return Result.fail(new ErrorSavingPaymentMethodApplicationException());
+
+        this.eventPublisher.publish(method.pullDomainEvents())
         
         let responseDto: CreatePaymentMethodResponseDto = {
             paymentMethodId: method.getId().paymentMethodId,

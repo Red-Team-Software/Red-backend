@@ -1,24 +1,20 @@
 import { Entity, ManyToOne, JoinColumn, PrimaryColumn, Column } from "typeorm";
-import { OrmDirectionEntity } from "./orm-direction-entity";
 import { OrmUserEntity } from "./orm-user-entity";
+import { IUserDirection } from "src/user/application/model/user.direction.interface";
 
 
 @Entity('direction_user')
-export class OrmDirectionUserEntity {
+export class OrmDirectionUserEntity implements IUserDirection {
+
+    @PrimaryColumn('uuid')
+    id: string;
 
     @ManyToOne(() => OrmUserEntity , (user) => user.direcction)
     @JoinColumn({ name: 'user_id' })
     user: OrmUserEntity;
-
-    @ManyToOne(() => OrmDirectionEntity, (direction) => direction.accounts, {eager:true})
-    @JoinColumn({ name: 'direction_id' })
-    direction: OrmDirectionEntity;
     
     @PrimaryColumn('uuid')
     user_id: string;
-
-    @PrimaryColumn('uuid')
-    direction_id: string;
 
     @Column('bool')
     isFavorite:boolean
@@ -26,19 +22,26 @@ export class OrmDirectionUserEntity {
     @Column('varchar')
     name:string
 
+    @Column( 'numeric') 
+    lat: number;
+    @Column( 'numeric') 
+    lng: number;
+
     static create(
         user_id:string,
-        direction_id:string,
+        id:string,
         isFavorite:boolean,
         name:string,
-        direction:OrmDirectionEntity
+        lat:number,
+        lng:number
     ): OrmDirectionUserEntity {
         const userdirection = new OrmDirectionUserEntity();
         userdirection.user_id = user_id;
-        userdirection.direction_id = direction_id;
+        userdirection.id = id;
         userdirection.isFavorite = isFavorite;
         userdirection.name=name
-        userdirection.direction=direction
+        userdirection.lat=lat
+        userdirection.lng=lng
         return userdirection;
     }
 }

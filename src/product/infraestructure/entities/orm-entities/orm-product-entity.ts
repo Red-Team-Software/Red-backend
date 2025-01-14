@@ -1,9 +1,9 @@
 import { Column, Entity, ManyToMany, OneToMany, PrimaryColumn } from "typeorm";
 import { IProduct } from "../../model-entity/orm-model-entity/product-interface";
 import { OrmProductImage } from "./orm-product-image";
-import { OrmOrderProductEntity } from "src/order/infraestructure/entities/orm-order-product-entity";
 import { OrmPromotionEntity } from "src/promotion/infraestructure/entities/orm-entities/orm-promotion-entity";
 import { OrmCategoryEntity } from "src/category/infraestructure/entities/orm-entities/orm-category-entity";
+import { OrmOrderProductEntity } from "src/order/infraestructure/entities/orm-entities/orm-order-product-entity";
 
 @Entity('product')
 export class OrmProductEntity implements IProduct{
