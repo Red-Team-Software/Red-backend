@@ -39,6 +39,10 @@ implements ISycnchronizeService<ProductUpdatedInfraestructureRequestDTO,void>{
         }
         await this.productModel.updateOne({id:product.id},product)
 
+        await this.bundleModel.updateMany(
+            { 'products.productId': product.id },
+            { $set: { 'products.$': product } }
+        );
         return Result.success(undefined)
     }   
 }

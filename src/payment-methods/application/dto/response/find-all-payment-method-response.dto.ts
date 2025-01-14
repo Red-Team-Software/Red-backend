@@ -4,5 +4,5 @@ export interface FindAllPaymentMethodResponseDTO extends IServiceResponseDto {
     id:string,
     name:string,
     state:string,
-    imageUrl:string
+    image:string
 }

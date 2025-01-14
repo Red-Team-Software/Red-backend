@@ -24,7 +24,7 @@ export class FindAllPaymentMethodApplicationService extends IApplicationService<
             id: method.paymentMethodId,
             name: method.paymentMethodName,
             state: method.paymentMethodState,
-            imageUrl: method.paymentMethodImage
+            image: method.paymentMethodImage
         }));
 
         return Result.success(responseDto);
