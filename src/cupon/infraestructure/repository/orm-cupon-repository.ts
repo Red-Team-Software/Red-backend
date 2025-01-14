@@ -4,19 +4,15 @@ import { ICuponRepository } from "src/cupon/domain/repository/cupon.interface.re
 import { Result } from "src/common/utils/result-handler/result";
 import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
 import { CuponId } from "src/cupon/domain/value-object/cupon-id";
-import { CuponCode } from "src/cupon/domain/value-object/cupon-code";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
-import { OrmCuponMapper } from "../mapper/orm-cupon-mapper";
-import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { NotFoundException, PersistenceException } from "src/common/infraestructure/infraestructure-exception";
-import { CuponName } from "src/cupon/domain/value-object/cupon-name";
+
 
 export class OrmCuponRepository extends Repository<OrmCuponEntity> implements ICuponRepository {
     private mapper: IMapper<Cupon, OrmCuponEntity>;
 
     constructor(dataSource: DataSource) {
         super(OrmCuponEntity, dataSource.createEntityManager());
-        this.mapper = new OrmCuponMapper();
     }
 
 

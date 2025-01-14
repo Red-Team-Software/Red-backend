@@ -34,18 +34,15 @@ export class OrmUserEntity implements IUser{
     @JoinColumn()
     wallet: OrmWalletEntity;
 
-    @OneToMany(() => OrmCuponUserEntity, (cuponUser) => cuponUser.user, { cascade: true } )
-    user_cupons?: OrmCuponUserEntity[]
-
     static create ( 
         id:string,
         name:string,
         phone:string,
         userRole:UserRoles,
         wallet:OrmWalletEntity,
+        cupons: OrmCuponUserEntity[],
         direction: OrmDirectionUserEntity[],
         image?:string,
-        cupons?:OrmCuponUserEntity[]
     ): OrmUserEntity
     {
         const user = new OrmUserEntity()
@@ -57,7 +54,6 @@ export class OrmUserEntity implements IUser{
         user.cupons=cupons
         user.direcction=direction
         image ? user.image=image : user.image=null
-        cupons? user.user_cupons=cupons : user.user_cupons=null
         return user
     }
 }

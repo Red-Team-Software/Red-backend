@@ -1,53 +1,19 @@
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
 import { OrmCuponEntity } from "../orm-entities/orm-cupon-entity";
-import { OrmCuponUserEntity } from "../orm-entities/orm-cupon-user-entity";
 import { CuponId } from "src/cupon/domain/value-object/cupon-id";
 import { CuponName } from "src/cupon/domain/value-object/cupon-name";
 import { CuponCode } from "src/cupon/domain/value-object/cupon-code";
 import { CuponDiscount } from "src/cupon/domain/value-object/cupon-discount";
 import { CuponState } from "src/cupon/domain/value-object/cupon-state";
-import { CuponUser } from "src/cupon/domain/entities/cuponUser/cuponUser.entity";
-import { CuponUserId } from "src/cupon/domain/entities/cuponUser/value-objects/cuponUserId";
-import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
-import { UserId } from "src/user/domain/value-object/user-id";
-import { NotFoundException } from "@nestjs/common";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
-import { CuponUserStateEnum } from "src/cupon/domain/entities/cuponUser/value-objects/cupon-state-enum";
 
 export class OrmCuponMapper implements IMapper<Cupon, OrmCuponEntity> {
     constructor(
-        private readonly idGen: IIdGen<string>,
-        private readonly ormUserQueryRepository: IQueryUserRepository
+        private readonly idGen: IIdGen<string>
     ) {}
 
     async fromPersistencetoDomain(infraEntity: OrmCuponEntity): Promise<Cupon> {
-        const users: CuponUser[] = [];
-
-        const ormUsers: OrmCuponUserEntity[] = infraEntity.cupon_users || [];
-
-        for (let cuponUser of ormUsers) {
-            const userId = UserId.create(cuponUser.user_id);
-            const cuponId = CuponId.create(cuponUser.cupon_id);
-
-            // Validar si el usuario existe en el sistema
-            const userResponse = await this.ormUserQueryRepository.findUserById(userId);
-            if (!userResponse.isSuccess()) {
-                throw new NotFoundException(`User with ID ${cuponUser.user_id} not found`);
-            }
-
-            // Crear entidad CuponUser
-            users.push(
-                CuponUser.create(
-                    CuponUserId.create(userId.Value, cuponId.Value),
-                    userId,
-                    cuponId,
-                    CuponDiscount.create(cuponUser.discount),
-                    CuponUserStateEnum.create(cuponUser.state)
-                )
-            );
-        }
-
         // Inicializar el agregado Cupon
         return Cupon.initializeAggregate(
             CuponId.create(infraEntity.id),

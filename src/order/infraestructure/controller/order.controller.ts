@@ -103,6 +103,7 @@ import { Mongoose } from "mongoose";
 import { OrderCourierPositionDto } from "../dto/order-courier-position-entry.dto";
 import { FindOrderCourierPositionRequestDto } from "src/order/application/dto/request/find-order-courier-position-request-dto";
 import { FindOrderCourierPositionApplicationService } from "src/order/application/service/query/find-order-courier-position-application.service";
+import { OrmCuponMapper } from "src/cupon/infraestructure/mapper/orm-cupon-mapper";
 
 
 @ApiBearerAuth()
@@ -113,7 +114,6 @@ export class OrderController {
 
     //*Mappers
     private readonly orderMapper: IMapper<Order,OrmOrderEntity>;
-    private readonly cuponMapper: IMapper<Cupon,OrmCuponEntity>
 
     //*Singeltons
     private readonly stripeSingleton: StripeSingelton;
@@ -220,12 +220,11 @@ export class OrderController {
             this.ormUserQueryRepository
         );
 
-        this.cuponMapper=new OrmCuponMapper(this.idGen,this.ormUserQueryRepository)
         //*Repositories
 
         this.orderQueryRepository = new OrderQueryRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
         this.orderRepository = new OrmOrderRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
-        this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance(),this.cuponMapper);
+        this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
 
         this.initializeQueues();
 

@@ -17,7 +17,7 @@ IApplicationService<FindCuponByIdApplicationRequestDTO, FindCuponByIdApplication
     async execute(data: FindCuponByIdApplicationRequestDTO): Promise<Result<FindCuponByIdApplicationResponseDTO>> {
         const cuponId = CuponId.create(data.id);
 
-        const response = await this.queryCuponRepository.findCuponById({...data});
+        const response = await this.queryCuponRepository.findCuponById(cuponId);
 
         if (!response.isSuccess()) {
             return Result.fail(new NotFoundCuponApplicationException());

@@ -9,13 +9,17 @@ import { UseCuponApplicationRequestDTO } from '../../dto/request/use-cupon-appli
 import { UseCuponApplicationResponseDTO } from '../../dto/response/use-cupon-application-responsedto';
 import { CuponCode } from 'src/cupon/domain/value-object/cupon-code';
 import { ICommandCuponRepository } from '../../../domain/repository/command-cupon-repository';
+import { IQueryUserRepository } from 'src/user/application/repository/user.query.repository.interface';
+import { UserNotFoundApplicationException } from 'src/auth/application/application-exception/user-not-found-application-exception';
+import { CuponUserInvalidUseApplicationException } from '../../application-exception/cupon-user-invalid-use-application-exception';
 
 export class MarkCuponAsUsedApplicationService extends IApplicationService<
     UseCuponApplicationRequestDTO,UseCuponApplicationResponseDTO
 > {
     constructor(
         private readonly queryCuponRepository: IQueryCuponRepository,
-        private readonly commandCuponRepository: ICommandCuponRepository
+        private readonly commandCuponRepository: ICommandCuponRepository,
+        private readonly queryUserRepository: IQueryUserRepository
     ) {
         super();
     }
@@ -23,41 +27,36 @@ export class MarkCuponAsUsedApplicationService extends IApplicationService<
     async execute(data: UseCuponApplicationRequestDTO): Promise<Result<UseCuponApplicationResponseDTO>> {
         const { userId, cuponId } = data;
 
-        const cupon = await this.queryCuponRepository.findCuponById({userId:data.userId ,id:data.cuponId});
+        const cupon = await this.queryCuponRepository.findCuponById(CuponId.create(data.cuponId));
         
         if(!cupon.isSuccess()){
             return Result.fail(new NotFoundCuponApplicationException())
         }
         // 1. Verificar si el cupon y usuario existen
-        const cuponUserResult = await this.queryCuponRepository.findCuponUserByUserIdAndCuponId(
-            UserId.create(userId),
-            cupon.getValue.getId()
-            );
+        
+        const userResponse= await this.queryUserRepository.findUserById(UserId.create(userId));
 
-        if (!cuponUserResult.isSuccess()) {
-            return Result.fail(new NotFoundCuponApplicationException());
+        if(!userResponse.isSuccess()){
+            return Result.fail(new UserNotFoundApplicationException(userId))
         }
 
-        const cuponUser = cuponUserResult.getValue;
+        const user=userResponse.getValue
 
         // 2. Verificar si el cupon ya fue usado
-        if (cuponUser.isCuponUsed()) {
-            return Result.fail(new CuponAlreadyUsedException());
+        if(!user.verifyCouponById(cupon.getValue.getId())){
+            return Result.fail(new CuponUserInvalidUseApplicationException())
         }
 
+        
         // 3. Marcar el cupon como usado
-        cuponUser.markAsUsed();
-        const saveResult = await this.commandCuponRepository.registerCuponUser(cuponUser);
 
-        if (!saveResult.isSuccess()) {
-            return Result.fail(saveResult.getError);
-        }
+        user.aplyCoupon(cupon.getValue.getId())
 
         const responseDto: UseCuponApplicationResponseDTO = {
             userId: data.userId,
             cuponId: cupon.getValue.getId().Value,
             discount: cupon.getValue.CuponDiscount.Value,
-            status: 'USED',
+            status: 'USED'
         };
     
         return Result.success(responseDto);

@@ -4,7 +4,6 @@ import { CuponCode } from "../value-object/cupon-code";
 import { CuponName } from "../value-object/cupon-name";
 import { CuponDiscount } from "../value-object/cupon-discount";
 import { CuponState } from "../value-object/cupon-state";
-import { CuponUser } from "../entities/cuponUser/cuponUser.entity";
 
 export class CuponCreated extends DomainEvent {
     serialize(): string {
@@ -13,8 +12,7 @@ export class CuponCreated extends DomainEvent {
             cuponName: this.cuponName.Value,
             cuponCode: this.cuponCode.Value,
             cuponDiscount: this.cuponDiscount.Value,
-            cuponState: this.cuponState.Value,
-            cuponUsers:  this.users
+            cuponState: this.cuponState.Value
         };
 
         return JSON.stringify(data);
@@ -25,16 +23,14 @@ export class CuponCreated extends DomainEvent {
         cuponName: CuponName,
         cuponCode: CuponCode,
         cuponDiscount: CuponDiscount,
-        cuponState: CuponState,
-        users: CuponUser[]
+        cuponState: CuponState
     ) {
         return new CuponCreated(
             cuponId,
             cuponName,
             cuponCode,
             cuponDiscount,
-            cuponState,
-            users
+            cuponState
         );
     }
 
@@ -43,8 +39,7 @@ export class CuponCreated extends DomainEvent {
         public cuponName: CuponName,
         public cuponCode: CuponCode,
         public cuponDiscount: CuponDiscount,
-        public cuponState: CuponState,
-        public users: CuponUser[]
+        public cuponState: CuponState
     ) {
         super();
     }

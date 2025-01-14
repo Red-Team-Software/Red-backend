@@ -12,37 +12,16 @@ import { CuponCode } from "src/cupon/domain/value-object/cupon-code";
 import { CuponName } from "src/cupon/domain/value-object/cupon-name";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { OrmCuponMapper } from "../mapper/orm-cupon-mapper";
+import { FindCuponByIdApplicationRequestDTO } from "src/cupon/application/dto/request/find-cupon-by-id-application-requestdto";
+import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 
 export class OrmCuponQueryRepository extends Repository<OrmCuponEntity> implements IQueryCuponRepository {
     private mapper: IMapper<Cupon, OrmCuponEntity>;
 
-    constructor(dataSource: DataSource, mapper: IMapper<Cupon, OrmCuponEntity>) {
+    constructor(dataSource: DataSource) {
         super(OrmCuponEntity, dataSource.createEntityManager());
-        this.mapper = new OrmCuponMapper();  // Asumiendo que tienes un mapper específico para cupones
+        this.mapper = new OrmCuponMapper(new UuidGen);  // Asumiendo que tienes un mapper específico para cupones
     }
-
-    async findCuponUserByUserIdAndCuponId(userId: UserId, cuponId: CuponId): Promise<Result<CuponUser>> {
-        try {
-            const ormCuponUser = await this.manager.findOne(OrmCuponUserEntity, {
-                where: { user_id: userId.Value, cupon_id: cuponId.Value },
-            });
-
-            if (!ormCuponUser) {
-                return Result.fail(new NotFoundCuponApplicationException());
-            }
-
-            const cuponUser = CuponUser.create(
-                CuponUserId.create(ormCuponUser.user_id, ormCuponUser.cupon_id),
-                UserId.create(ormCuponUser.user_id),
-                CuponId.create(ormCuponUser.cupon_id),
-                CuponDiscount.create(ormCuponUser.discount),
-                CuponUserStateEnum.create(ormCuponUser.state)
-            );
-
-            return Result.success(cuponUser);
-        } catch (error) {
-            return Result.fail(new NotFoundCuponApplicationException());}
-        }
 
     async findAllCupons(criteria: FindAllCuponsApplicationRequestDTO): Promise<Result<Cupon[]>> {
         try {
@@ -62,7 +41,7 @@ export class OrmCuponQueryRepository extends Repository<OrmCuponEntity> implemen
         }
     }
 
-    async findCuponById(criteria: FindCuponByIdApplicationRequestDTO): Promise<Result<Cupon>> {
+    async findCuponById(cuponId:CuponId): Promise<Result<Cupon>> {
         try {
             const ormCupon = await this.findOneBy({ id: cuponId.Value });
             

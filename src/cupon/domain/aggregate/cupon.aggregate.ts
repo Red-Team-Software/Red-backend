@@ -69,7 +69,7 @@ export class Cupon extends AggregateRoot<CuponId> {
             cuponState
         )
         cupon.apply(
-            CuponRegistered.create(
+            CuponCreated.create(
                 cuponId,
                 cuponName,
                 cuponCode,
@@ -125,5 +125,5 @@ export class Cupon extends AggregateRoot<CuponId> {
     get CuponState(): CuponState {
         return this.cuponState;
     }
-    
+
 }
