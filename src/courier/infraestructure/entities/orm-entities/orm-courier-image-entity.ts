@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm"
-import { ICourierImage } from "../model-entity/orm-model-entity/courier-image-interface"
+import { ICourierImage } from "../../model-entity/orm-model-entity/courier-image-interface"
 import { OrmCourierEntity } from "./orm-courier-entity"
 
 

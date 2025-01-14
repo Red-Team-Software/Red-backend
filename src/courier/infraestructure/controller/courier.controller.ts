@@ -11,7 +11,6 @@ import { CourierRepository } from "../repository/orm-repository/orm-courier-repo
 import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton"
 import { IMapper } from "src/common/application/mappers/mapper.interface"
 import { Courier } from "src/courier/domain/aggregate/courier"
-import { OrmCourierEntity } from "../entities/orm-courier-entity"
 import { OrmCourierMapper } from "../mapper/orm-courier-mapper/orm-courier-mapper"
 import { ExceptionDecorator } from "src/common/application/aspects/exeption-decorator/exception-decorator"
 import { RegisterCourierApplicationService } from "src/courier/application/services/register-courier-application.service"
@@ -45,6 +44,7 @@ import { BcryptEncryptor } from "src/common/infraestructure/encryptor/bcrypt-enc
 import { IEncryptor } from "src/common/application/encryptor/encryptor.interface"
 import { LogInCourierInfraestructureRequestDTO } from "../dto/log-in-courier-infraestructure-request-dto"
 import { LogInCourierApplicationService } from "src/courier/application/services/log-in-courier-application.service"
+import { OrmCourierEntity } from "../entities/orm-entities/orm-courier-entity"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -113,6 +113,8 @@ export class CourierController {
 
 
     }
+
+
 
     @Post('register')
     @UseInterceptors(FileInterceptor('image'))  

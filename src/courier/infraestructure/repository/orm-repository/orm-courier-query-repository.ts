@@ -1,5 +1,4 @@
 import { DataSource, Repository } from "typeorm";
-import { OrmCourierEntity } from "../../entities/orm-courier-entity";
 import { ICourierQueryRepository } from "src/courier/application/repository/query-repository/courier-query-repository-interface";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { Courier } from "src/courier/domain/aggregate/courier";
@@ -10,6 +9,7 @@ import { NotFoundException } from "src/common/infraestructure/infraestructure-ex
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { OrmCourierMapper } from "../../mapper/orm-courier-mapper/orm-courier-mapper";
 import { ICourierModel } from "src/courier/application/model/courier-model-interface";
+import { OrmCourierEntity } from "../../entities/orm-entities/orm-courier-entity";
 
 
 
