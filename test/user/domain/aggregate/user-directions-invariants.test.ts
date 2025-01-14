@@ -1,7 +1,10 @@
 import * as assert from 'assert';
 import { UuidGen } from 'src/common/infraestructure/id-gen/uuid-gen';
+import { CuponId } from 'src/cupon/domain/value-object/cupon-id';
 import { User } from 'src/user/domain/aggregate/user.aggregate';
 import { InvalidUserDirectionQuantityException } from 'src/user/domain/domain-exceptions/invalid-user-direction-quantity-exception';
+import { UserCoupon } from 'src/user/domain/entities/coupon/user-coupon.entity';
+import { CuponState } from 'src/user/domain/entities/coupon/value-objects/cupon-state';
 import { UserDirection } from 'src/user/domain/entities/directions/direction.entity';
 import { DirectionFavorite } from 'src/user/domain/entities/directions/value-objects/direction-favorite';
 import { DirectionId } from 'src/user/domain/entities/directions/value-objects/direction-id';import { DirectionLat } from 'src/user/domain/entities/directions/value-objects/direction-lat';
@@ -78,7 +81,11 @@ describe("User Aggregate Invariants", () => {
             Wallet.create(
               WalletId.create('fd5235de-9533-4660-8b00-67448de3b767'),
               Ballance.create(45,'usd')
-            )
+            ),
+              [UserCoupon.create(
+                CuponId.create('fd5235de-9533-4660-8b00-67448de3b767'),
+                CuponState.create('USED')
+              )],
           )
           user.addDirection(
             UserDirection.create(
