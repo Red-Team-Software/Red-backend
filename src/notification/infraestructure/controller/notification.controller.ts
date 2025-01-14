@@ -99,101 +99,7 @@ export class NotificationController {
         this.querySessionRepository= new OrmTokenQueryRepository(PgDatabaseSingleton.getInstance());
         this.auditRepository=new OrmAuditRepository(PgDatabaseSingleton.getInstance())
 
-        this.subscriber.buildQueue({
-            name:'ProductEvents',
-            pattern: 'ProductRegistered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'BundleEvents',
-            pattern: 'BundleRegistered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'OrderEvents',
-            pattern: 'OrderRegistered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'OrderEvents/CancelOrder',
-            pattern: 'OrderStatusCancelled',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'OrderEvents/CourierAssignedToDeliver',
-            pattern: 'CourierAssignedToDeliver',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'OrderEvents/OrderStatusDelivered',
-            pattern: 'OrderStatusDelivered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        });
-
-        this.subscriber.buildQueue({
-            name:'CuponEvents',
-            pattern: 'CuponRegistered',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        })
-
-        this.subscriber.buildQueue({
-            name:'UserEvents',
-            pattern: 'UserBalanceAmountAdded',
-            exchange:{
-                name:'DomainEvent',
-                type:'direct',
-                options:{
-                    durable:false,
-                }
-            }
-        })
+        this.initializeQueues()
 
         this.subscriber.consume<IUserWalletBalanceAdded>(
             { name: 'UserEvents'}, 
@@ -202,8 +108,6 @@ export class NotificationController {
                 return
             }
         );
-
-        this.initializeQueues()
 
         this.subscriber.consume<ICreateProduct>(
             { name: 'ProductEvents/ProductRegistered'}, 
@@ -257,7 +161,7 @@ export class NotificationController {
             }
         );
 
-        this.subscriber.consume<CourierAssignedToDeliver>(
+        this.subscriber.consume<IDeliveringOrder>(
             { name: 'OrderEvents/CourierAssignedToDeliver'}, 
             (data):Promise<void>=>{
                 this.sendPushOrderDelivering(data)
@@ -291,32 +195,7 @@ export class NotificationController {
             code:entry.cuponCode,
             state:entry.cuponState
         }
-        service.execute(data)
-
-        this.subscriber.consume<ICancelOrder>(
-            { name: 'OrderEvents/CancelOrder'}, 
-            (data):Promise<void>=>{
-                this.sendPushOrderCancelled(data)
-                this.sendEmailOrderCancelled(data)
-                return
-            }
-        );
-
-        this.subscriber.consume<IDeliveredOrder>(
-            { name: 'OrderEvents/OrderStatusDelivered'}, 
-            (data):Promise<void>=>{
-                this.sendPushOrderDelivered(data)
-                return
-            }
-        );
-
-        this.subscriber.consume<CourierAssignedToDeliver>(
-            { name: 'OrderEvents/OrderStatusDelivering'}, 
-            (data):Promise<void>=>{
-                this.sendPushOrderDelivering(data)
-                return
-            }
-        );
+        service.execute(data);
 
     }
 
@@ -346,7 +225,7 @@ export class NotificationController {
         service.execute(data);
     };
 
-    async sendPushOrderDelivering(entry:CourierAssignedToDeliver){
+    async sendPushOrderDelivering(entry:IDeliveringOrder){
         let service= new ExceptionDecorator(
             new LoggerDecorator(
                 new OrderDeliveringPushNotificationApplicationService(
@@ -357,17 +236,17 @@ export class NotificationController {
         )
         
         const tokensResponse=await this.querySessionRepository.findSessionLastSessionByUserId(
-            UserId.create(entry.orderUserId.userId)
+            UserId.create(entry.orderUserId)
         )
 
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;
 
         let data: OrderDeliveringPushNotificationApplicationRequestDTO={
-            userId:entry.orderUserId.userId,
+            userId:entry.orderUserId,
             tokens:[tokensResponse.getValue.push_token],
-            orderState:entry.orderState.orderState,
-            orderId:entry.orderId.orderId
+            orderState:entry.orderState,
+            orderId:entry.orderId
         }
         service.execute(data);
     }

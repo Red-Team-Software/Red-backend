@@ -42,10 +42,9 @@ export class AssignCourierApplicationService extends IApplicationService<AssignC
         if (!courierRes.isSuccess()) 
             return Result.fail(new NotFoundCourierApplicationException());
 
-        if (!newOrder.OrderCourierId) return Result.fail(
-            new ErrorOrderAlreadyHaveCourierAssignedApplicationException()
-        );
-        
+        if (newOrder.OrderCourierId) 
+        return Result.fail(new ErrorOrderAlreadyHaveCourierAssignedApplicationException());
+
         newOrder.assignCourierToDeliver(
             OrderCourierId.create(data.courierId),
             OrderState.create('delivering')
