@@ -19,6 +19,11 @@ import { DirectionId } from 'src/user/domain/entities/directions/value-objects/d
 import { DirectionLat } from 'src/user/domain/entities/directions/value-objects/direction-lat';
 import { DirectionLng } from 'src/user/domain/entities/directions/value-objects/direction-lng';
 import { DirectionName } from 'src/user/domain/entities/directions/value-objects/direction-name';
+import { UserCoupon } from "src/user/domain/entities/coupon/user-coupon.entity"
+import { CuponId } from "src/cupon/domain/value-object/cupon-id"
+import { CuponState } from "src/user/domain/entities/coupon/value-objects/cupon-state"
+import { OrmCuponEntity } from "src/cupon/infraestructure/orm-entities/orm-cupon-entity"
+import { OrmCuponUserEntity } from "../../entities/orm-entities/orm-coupon-user-entity"
 
 
 export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
@@ -31,6 +36,7 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
     async fromDomaintoPersistence(domainEntity: User): Promise<OrmUserEntity> {
 
         let ormDirectionUserEntities:OrmDirectionUserEntity[]=[]
+        let ormUserCupon:OrmCuponUserEntity[]=[]
 
         let ormWallet=OrmWalletEntity.create(
             domainEntity.Wallet.getId().Value,
@@ -40,29 +46,41 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
             : 0
         )
 
+        if(domainEntity.UserDirections)
+            for (const direction of domainEntity.UserDirections){
+                ormDirectionUserEntities.push(
+                    OrmDirectionUserEntity.create(
+                        domainEntity.getId().Value,
+                        direction.getId().Value,
+                        direction.DirectionFavorite.Value,
+                        direction.DirectionName.Value,
+                        direction.DirectionLat.Value,
+                        direction.DirectionLng.Value
+                    )
+                )
+            }
+
+        if (domainEntity.UserCoupon)
+            for (const coupon of domainEntity.UserCoupon){
+                ormUserCupon.push(OrmCuponUserEntity.create(
+                    domainEntity.getId().Value,
+                    coupon.getId().Value,
+                    coupon.CuponState.Value
+                ))
+            }
+
         let data= OrmUserEntity.create(
             domainEntity.getId().Value,
             domainEntity.UserName.Value,
             domainEntity.UserPhone.Value,
             domainEntity.UserRole.Value as UserRoles,
             ormWallet,
+            ormUserCupon ? ormUserCupon : [],
+            ormDirectionUserEntities ? ormDirectionUserEntities : [],
             domainEntity.UserImage ? domainEntity.UserImage.Value : undefined,
         )
 
-        for (const direction of domainEntity.UserDirections){
-            ormDirectionUserEntities.push(
-                OrmDirectionUserEntity.create(
-                    domainEntity.getId().Value,
-                    direction.getId().Value,
-                    direction.DirectionFavorite.Value,
-                    direction.DirectionName.Value,
-                    direction.DirectionLat.Value,
-                    direction.DirectionLng.Value
-                )
-            )
-        }
-
-        data.direcction=ormDirectionUserEntities
+        console.log(data)
 
         return data
 
@@ -95,6 +113,13 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
                     , infraEstructure.wallet.currency,
                 )
             ),
+            infraEstructure.cupons
+            ? infraEstructure.cupons.map(c=>            
+                UserCoupon.create(
+                CuponId.create(c.cupon_id),
+                CuponState.create(c.state)
+            ))
+            : [],
             infraEstructure.image ? UserImage.create(infraEstructure.image) : undefined
         )
         return user

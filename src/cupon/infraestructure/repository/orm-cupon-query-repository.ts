@@ -5,12 +5,13 @@ import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { OrmCuponMapper } from "../mapper/orm-cupon-mapper";
 import { CuponId } from "src/cupon/domain/value-object/cupon-id";
-import { IQueryCuponRepository } from "src/cupon/domain/query-repository/query-cupon-repository";
+import { IQueryCuponRepository } from "src/cupon/application/query-repository/query-cupon-repository";
 import { FindAllCuponsApplicationRequestDTO } from "src/cupon/application/dto/request/find-all-cupons-application-RequestDTO";
 import { NotFoundCuponApplicationException
-
  } from "src/cupon/application/application-exception/not-found-cupon-application-exception";
-import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
+import { CuponCode } from "src/cupon/domain/value-object/cupon-code";
+import { CuponName } from "src/cupon/domain/value-object/cupon-name";
+import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 
 export class OrmCuponQueryRepository extends Repository<OrmCuponEntity> implements IQueryCuponRepository {
     
@@ -18,7 +19,7 @@ export class OrmCuponQueryRepository extends Repository<OrmCuponEntity> implemen
 
     constructor(dataSource: DataSource) {
         super(OrmCuponEntity, dataSource.createEntityManager());
-        this.mapper = new OrmCuponMapper(new UuidGen());  // Asumiendo que tienes un mapper específico para cupones
+        this.mapper = new OrmCuponMapper();  // Asumiendo que tienes un mapper específico para cupones
     }
 
     // Método para obtener todos los cupones
@@ -31,10 +32,6 @@ export class OrmCuponQueryRepository extends Repository<OrmCuponEntity> implemen
                     // Aquí puedes agregar filtros si los necesitas, como cupones activos, etc.
                 }
             });
-
-            if (ormCupons.length === 0) {
-                return Result.fail(new NotFoundCuponApplicationException());
-            }
 
             const cupons: Cupon[] = [];
             for (const cupon of ormCupons) {
@@ -51,10 +48,9 @@ export class OrmCuponQueryRepository extends Repository<OrmCuponEntity> implemen
     async findCuponById(cuponId: CuponId): Promise<Result<Cupon>> {
         try {
             const ormCupon = await this.findOneBy({ id: cuponId.Value });
-
-            if (!ormCupon) {
-                return Result.fail(new NotFoundCuponApplicationException());
-            }
+            
+            if (!ormCupon) 
+                return Result.fail(new NotFoundCuponApplicationException())
 
             const cupon = await this.mapper.fromPersistencetoDomain(ormCupon);
             return Result.success(cupon);
@@ -63,13 +59,36 @@ export class OrmCuponQueryRepository extends Repository<OrmCuponEntity> implemen
         }
     }
 
-    // Método para verificar si existe un cupón por código
-    async verifyCuponExistenceByCode(code: string): Promise<Result<boolean>> {
+    async findCuponByCode(cuponCode: CuponCode): Promise<Result<Cupon>> {
         try {
-            const cupon = await this.findOneBy({ code });
-            return Result.success(!!cupon);  // Retorna true si el cupón existe, false si no
+            const ormCupon = await this.findOneBy({ code: cuponCode.Value });
+
+            if (!ormCupon) {
+                return Result.fail(new NotFoundException('Find cupon by code unsuccessfully'));
+            }
+
+            const cupon = await this.mapper.fromPersistencetoDomain(ormCupon);
+            return Result.success(cupon);
         } catch (e) {
-            return Result.fail(new NotFoundCuponApplicationException());
+            return Result.fail(new NotFoundException('Find cupon by code unsuccessfully'));
+        }
+    }
+
+    async verifyCuponExistenceByCode(cuponCode: CuponCode): Promise<Result<boolean>> {
+        try {
+            const cupon = await this.existsBy({ code: cuponCode.Value });
+            return Result.success(cupon);
+        } catch (e) {
+            return Result.fail(new NotFoundException('Verify cupon by code unsuccessfully'));
+        }
+    }
+
+    async verifyCuponExistenceByName(name: CuponName): Promise<Result<boolean>> {
+        try {
+            const cupon = await this.existsBy({ name: name.Value });
+            return Result.success(cupon);
+        } catch (e) {
+            return Result.fail(new NotFoundException('Verify cupon by code unsuccessfully'));
         }
     }
 }
