@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, PrimaryColumn } from "typeorm";
-import { IOrderReport } from "../orm-model-entity/order-report-interface";
 import { OrmOrderEntity } from "./orm-order-entity";
+import { IOrderReport } from "../../model-entity/orm-model-entity/order-report-interface";
 
 
 @Entity('order_report')

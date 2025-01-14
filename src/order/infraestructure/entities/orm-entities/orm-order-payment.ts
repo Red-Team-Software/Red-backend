@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
-import { IOrderPaymentInterface } from "../orm-model-entity/order-payment-interface";
+import { IOrderPaymentInterface } from "../../model-entity/orm-model-entity/order-payment-interface";
 import { OrmOrderEntity } from "./orm-order-entity";
 
 @Entity('pay')

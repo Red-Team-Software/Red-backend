@@ -5,7 +5,7 @@ import { IGeocodification } from "src/order/domain/domain-services/interfaces/ge
 import { OrderDirection } from "src/order/domain/value_objects/order-direction";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { IQueryUserRepository } from "../../repository/user.query.repository.interface";
-import { DirectionId } from "src/user/domain/entities/directions/value-objects/Direction-id";
+import { DirectionId } from "src/user/domain/entities/directions/value-objects/direction-id";
 import { FindUserDirectionByIdApplicationResponseDTO } from "../../dto/response/find-user-direction-by-id-application-response-dto";
 import { FindUserDirectionByIdApplicationRequestDTO } from "../../dto/request/find-user-direction-by-id-application-request-dto";
 import { ErrorAddressNotFoundApplicationException } from "../../application-exeption/error-address-not-found-application-exception";
@@ -48,7 +48,7 @@ export class FindUserDirectionByIdApplicationService extends IApplicationService
             favorite: direction.DirectionFavorite.Value,
             lat: direction.DirectionLat.Value,
             long: direction.DirectionLng.Value,
-            address: address.isSuccess()
+            direction: address.isSuccess()
             ? address.getValue.Address
             : 'no direction'
         })

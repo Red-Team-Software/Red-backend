@@ -3,7 +3,7 @@ import { IUser } from "../../model-entity/orm-model-entity/user-interface";
 import { OrmAccountEntity } from "src/auth/infraestructure/orm/orm-entities/orm-account-entity";
 import { OrmDirectionUserEntity } from "./orm-direction-user-entity";
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
-import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-order-entity";
+import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-entities/orm-order-entity";
 import { OrmWalletEntity } from "./orm-wallet-entity";
 import { OrmCuponUserEntity } from "./orm-coupon-user-entity";
 

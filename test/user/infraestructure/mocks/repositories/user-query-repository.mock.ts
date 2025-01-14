@@ -6,7 +6,7 @@ import { IUserDirection } from "src/user/application/model/user.direction.interf
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { User } from "src/user/domain/aggregate/user.aggregate";
 import { UserDirection } from "src/user/domain/entities/directions/direction.entity";
-import { DirectionId } from "src/user/domain/entities/directions/value-objects/Direction-id";
+import { DirectionId } from "src/user/domain/entities/directions/value-objects/direction-id";
 import { UserId } from "src/user/domain/value-object/user-id";
 import { UserPhone } from "src/user/domain/value-object/user-phone";
 

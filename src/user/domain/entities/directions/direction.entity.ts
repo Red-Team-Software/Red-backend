@@ -1,5 +1,5 @@
 import { Entity } from "src/common/domain";
-import { DirectionId } from "./value-objects/Direction-id";
+import { DirectionId } from "./value-objects/direction-id";
 import { DirectionLng } from "./value-objects/direction-lng";
 import { DirectionName } from "./value-objects/direction-name";
 import { DirectionLat } from "./value-objects/direction-lat";

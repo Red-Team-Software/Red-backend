@@ -3,7 +3,7 @@ export type ITypeTransaction = {
     currency:string,
     price: number,
     walletId: string,
-    paymentMethod: {
+    paymentMethod?: {
         id: string,
         name: string,
     },
