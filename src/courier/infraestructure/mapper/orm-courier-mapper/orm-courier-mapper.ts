@@ -28,7 +28,9 @@ export class OrmCourierMapper implements IMapper<Courier,OrmCourierEntity>{
             domainEntity.CourierName.courierName,
             ormCourierImage,
             domainEntity.CourierDirection.Latitude,
-            domainEntity.CourierDirection.Longitude
+            domainEntity.CourierDirection.Longitude,
+            '',
+            ''
         );
         
         return ormCourier;

@@ -40,10 +40,10 @@ import { CreateOrderReportApplicationServiceResponseDto } from "src/order/applic
 import { CreateOrderReportApplicationServiceRequestDto } from "src/order/application/dto/request/create-order-report-request-dto";
 import { CreateReportEntryDto } from "../dto/create-report-entry.dto";
 import { RefundPaymentStripeConnection } from "../domain-service/refund-amount-stripe";
-import { ICourierRepository } from "src/courier/domain/repositories/courier-repository-interface";
+import { ICourierRepository } from "src/courier/application/repository/repositories-command/courier-repository-interface";
 import { OrmCourierMapper } from "src/courier/infraestructure/mapper/orm-courier-mapper/orm-courier-mapper";
 import { CourierRepository } from "src/courier/infraestructure/repository/orm-repository/orm-courier-repository";
-import { ICourierQueryRepository } from "src/courier/application/query-repository/courier-query-repository-interface";
+import { ICourierQueryRepository } from "src/courier/application/repository/query-repository/courier-query-repository-interface";
 import { CourierQueryRepository } from "src/courier/infraestructure/repository/orm-repository/orm-courier-query-repository";
 import { GetCredential } from "src/auth/infraestructure/jwt/decorator/get-credential.decorator";
 import { ICredential } from "src/auth/application/model/credential.interface";
@@ -198,8 +198,7 @@ export class OrderController {
             new OrmCourierMapper(this.idGen)
         );
         this.ormCourierQueryRepository = new CourierQueryRepository(
-            PgDatabaseSingleton.getInstance(),
-            new OrmCourierMapper(this.idGen)
+            PgDatabaseSingleton.getInstance()
         );
         this.ormUserQueryRepository = new OrmUserQueryRepository(
             PgDatabaseSingleton.getInstance()
