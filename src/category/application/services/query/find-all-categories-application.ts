@@ -28,9 +28,9 @@ export class FindAllCategoriesApplicationService extends IApplicationService<
 
     categories.forEach((category) => {
       responseDto.push( {
-        categoryId: category.getId().Value,
-        categoryName: category.Name.Value,
-        categoryImage: category.Image.Value,
+        id: category.getId().Value,
+        name: category.Name.Value,
+        image: category.Image.Value,
         //TODO QUITAR ESTO DE POR MEDIO DE {id:strin}
         products: category.Products.map((productId) => ({id:productId.Value})),
       })

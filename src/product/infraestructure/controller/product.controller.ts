@@ -255,7 +255,7 @@ export class ProductController {
             new CreateProductApplicationService(
               new RabbitMQPublisher(this.channel),
               this.ormCommandProductRepo,
-              this.ormQueryProductRepo,
+              this.odmProductQueryRepo,
               this.idGen,
               new CloudinaryService()
             ),new NestTimer(),new NestLogger(new Logger())
@@ -276,13 +276,13 @@ export class ProductController {
   ){
     if(!entry.page)
       entry.page=1
-    if(!entry.perPage)
-      entry.perPage=10
+    if(!entry.perpage)
+      entry.perpage=10
 
     const pagination:FindAllProductsApplicationRequestDTO={
       userId:credential.account.idUser,
       page:entry.page,
-      perPage:entry.perPage,
+      perPage:entry.perpage,
       ...entry
     }
 
@@ -290,7 +290,7 @@ export class ProductController {
         new LoggerDecorator(
           new PerformanceDecorator(
             new FindAllProductsApplicationService(
-              this.ormQueryProductRepo
+              this.odmProductQueryRepo
             ),new NestTimer(),new NestLogger(new Logger())
           ),new NestLogger(new Logger())
         )
@@ -307,13 +307,13 @@ export class ProductController {
   ){
     if(!entry.page)
       entry.page=1
-    if(!entry.perPage)
-      entry.perPage=10
+    if(!entry.perpage)
+      entry.perpage=10
 
     const pagination:FindAllProductsbyNameApplicationRequestDTO={
       userId:credential.account.idUser,
       page:entry.page, 
-      perPage:entry.perPage,
+      perPage:entry.perpage,
       name:entry.term
     }
 
@@ -321,7 +321,7 @@ export class ProductController {
       new LoggerDecorator(
         new PerformanceDecorator(
           new FindAllProductsAndComboApplicationService(
-            this.ormQueryProductRepo,
+            this.odmProductQueryRepo,
             this.ormBundleQueryRepo
           ),new NestTimer(),new NestLogger(new Logger())
         ),new NestLogger(new Logger())
@@ -341,7 +341,7 @@ export class ProductController {
       new LoggerDecorator(
         new PerformanceDecorator(
           new FindProductByIdApplicationService(
-            this.ormQueryProductRepo
+            this.odmProductQueryRepo
           ),new NestTimer(),new NestLogger(new Logger())
         ),new NestLogger(new Logger())
       )
@@ -365,7 +365,7 @@ export class ProductController {
                 new DeleteProductApplicationService(
                   new RabbitMQPublisher(this.channel),
                   this.ormCommandProductRepo,
-                  this.ormQueryProductRepo,
+                  this.odmProductQueryRepo,
                   new CloudinaryService()              
                 ),new NestTimer(),new NestLogger(new Logger())
               ),new NestLogger(new Logger())
@@ -403,7 +403,7 @@ export class ProductController {
               new UpdateProductApplicationService(
                 new RabbitMQPublisher(this.channel),
                 this.ormCommandProductRepo,
-                this.ormQueryProductRepo,
+                this.odmProductQueryRepo,
                 new CloudinaryService(),
                 new UuidGen()              
               ),new NestTimer(),new NestLogger(new Logger())

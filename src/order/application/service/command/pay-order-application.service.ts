@@ -295,7 +295,10 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             let responsedata: OrderPayResponseDto = {
                 id: response.getValue.getId().orderId,
-                orderState: response.getValue.OrderState.orderState,
+                orderState: [{
+                    state:response.getValue.OrderState.orderState,
+                    date:response.getValue.OrderCreatedDate.OrderCreatedDate
+                }],
                 orderCreatedDate: response.getValue.OrderCreatedDate.OrderCreatedDate,
                 orderTimeCreated: response.getValue.OrderCreatedDate.OrderCreatedDate.toTimeString().split(' ')[0],
                 totalAmount: parseFloat(response.getValue.TotalAmount.OrderAmount.toFixed(2)),

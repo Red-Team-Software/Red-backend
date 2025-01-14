@@ -36,6 +36,7 @@ export class RabbitMQPublisher extends IEventPublisher {
 				routingKey, // Utiliza el nombre del evento como routingKey  (Por ahora es vacio que me funciono)
 				Buffer.from(event.serialize())
 			);
+			console.log(event.serialize())
 		}
 	}
 	get ExchangeName():string{ return this.exchangeName}
