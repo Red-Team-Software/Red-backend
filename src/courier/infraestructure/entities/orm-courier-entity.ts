@@ -24,12 +24,20 @@ export class OrmCourierEntity implements ICourierInterface{
     @Column('float')
     longitude: number;
 
+    @Column( 'varchar', { unique: true }   ) 
+    email: string;
+
+    @Column( 'varchar' ) 
+    password: string;
+
     static create ( 
         id:string,
         name: string,
         images:OrmCourierImageEntity,
         lat: number,
-        long: number
+        long: number,
+        email: string,
+        password: string
     ): OrmCourierEntity {
         const courier = new OrmCourierEntity();
         courier.id = id;
@@ -37,6 +45,8 @@ export class OrmCourierEntity implements ICourierInterface{
         courier.image = images;
         courier.latitude = lat;
         courier.longitude = long;
+        courier.email = email;
+        courier.password = password;
         return courier;
     }
 }

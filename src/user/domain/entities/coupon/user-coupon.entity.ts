@@ -23,9 +23,13 @@ export class UserCoupon extends Entity<CuponId> {
 
     get CuponState():CuponState{return this.cuponState}
     
-    aplyCoupon(){
+    aplyCoupon(): UserCoupon {
         this.cuponState.changeUsed()
         return this
+    }
+
+    verifyCouponState(){
+        this.cuponState.verifyIsUsed();
     }
 
 }

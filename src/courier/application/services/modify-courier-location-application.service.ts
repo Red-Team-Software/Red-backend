@@ -1,8 +1,8 @@
 import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
-import { ICourierRepository } from "src/courier/domain/repositories/courier-repository-interface";
-import { ICourierQueryRepository } from "../query-repository/courier-query-repository-interface";
+import { ICourierRepository } from "src/courier/application/repository/repositories-command/courier-repository-interface";
+import { ICourierQueryRepository } from "../repository/query-repository/courier-query-repository-interface";
 import { CourierId } from '../../domain/value-objects/courier-id';
 import { NotFoundCourierApplicationException } from "../application-exceptions/not-found-courier-application.exception";
 import { ModifyCourierLocationRequestDto } from "../dto/request/modify-courier-location-request.dto";
@@ -30,11 +30,13 @@ export class ModifyCourierLocationApplicationService extends IApplicationService
 
         let courier = response.getValue;
 
+        let courierModel = await this.courierQueryRepository.findCourierByIdDetail(CourierId.create(data.courierId));
+
         let location = CourierDirection.create(data.lat, data.long);
 
         courier.updateLocation(location);
 
-        let result = await this.courierRepository.saveCourier(courier);
+        let result = await this.courierRepository.saveCourier(courier, courierModel.getValue.email, courierModel.getValue.password);
 
         if (!result.isSuccess()) 
             return Result.fail(new ErrorModifingCourierApplicationException());

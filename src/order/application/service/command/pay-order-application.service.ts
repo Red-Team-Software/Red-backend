@@ -18,7 +18,7 @@ import { Product } from 'src/product/domain/aggregate/product.aggregate';
 import { Bundle } from 'src/bundle/domain/aggregate/bundle.aggregate';
 import { OrderReport } from 'src/order/domain/entities/report/report-entity';
 import { OrderPayment } from 'src/order/domain/entities/payment/order-payment-entity';
-import { ICourierQueryRepository } from 'src/courier/application/query-repository/courier-query-repository-interface';
+import { ICourierQueryRepository } from 'src/courier/application/repository/query-repository/courier-query-repository-interface';
 import { OrderCourierId } from 'src/order/domain/value_objects/order-courier-id';
 import { OrderUserId } from 'src/order/domain/value_objects/order-user-id';
 import { IDateHandler } from 'src/common/application/date-handler/date-handler.interface';
@@ -114,18 +114,11 @@ export class PayOrderAplicationService extends IApplicationService<OrderPayAppli
 
             cupon = cuponRes.getValue;
 
-            if (cupon.CuponState.Value === 'unavaleable')
-                return Result.fail(new ErrorCuponUnavaleableApplicationException())
+            cupon.validateCouponState();
 
-            let userCupon = user.UserCoupon.find((userCupon) => userCupon.getId().Value === data.cuponId);
+            user.verifyCouponById(cupon.getId());
 
-            if (!userCupon) 
-                return Result.fail(new ErrorUserDontHaveTheCuponApplicationException());
-            
-
-            if (userCupon.CuponState.Value === 'used') 
-                return Result.fail(new ErrorCuponAlreadyUsedApplicationException());
-        
+            user.verifyApplyCouponById(cupon.getId());
 
         }
 

@@ -28,7 +28,7 @@ import { Ballance } from "src/user/domain/entities/wallet/value-objects/balance"
 import { IUserExternalAccount } from "src/auth/application/interfaces/user-external-account-interface";
 import { ErrorRegisteringAccountExternalSiteApplicationException } from "../../application-exception/error-registering-account-external-site-application-exception";
 import { IJwtGenerator } from "src/common/application/jwt-generator/jwt-generator.interface";
-import { ICourierRepository } from "src/courier/domain/repositories/courier-repository-interface";
+import { ICourierRepository } from "src/courier/application/repository/repositories-command/courier-repository-interface";
 
 
 export class RegisterUserApplicationService extends IApplicationService 

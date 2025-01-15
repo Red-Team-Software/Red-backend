@@ -37,8 +37,8 @@ export class AddUserCouponApplicationService extends IApplicationService
     }
     
     async execute(data: AddUserCouponApplicationRequestDTO): Promise<Result<AddUserCouponApplicationResponseDTO>> {
-        let userRepoResponse = await this.queryUserRepository.findUserById(UserId.create(data.userId))
 
+        let userRepoResponse = await this.queryUserRepository.findUserById(UserId.create(data.userId))
 
         if (!userRepoResponse.isSuccess())
             return Result.fail(new ErrorUpdatinngUserCuponsApplicationException(data.userId,data.idCoupon))
@@ -54,7 +54,11 @@ export class AddUserCouponApplicationService extends IApplicationService
 
         const coupon=couponresponse.getValue
 
+        console.log("antes",user.UserCoupon)
+
         user.aplyCoupon(coupon.getId())
+
+        console.log("despues",user.UserCoupon)
 
         let userResponse= await this.commandUserRepository.saveUser(user)
         

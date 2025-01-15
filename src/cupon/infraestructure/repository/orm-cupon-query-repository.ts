@@ -55,6 +55,7 @@ export class OrmCuponQueryRepository extends Repository<OrmCuponEntity> implemen
             const cupon = await this.mapper.fromPersistencetoDomain(ormCupon);
             return Result.success(cupon);
         } catch (e) {
+            console.log(e);
             return Result.fail(new NotFoundCuponApplicationException());
         }
     }
