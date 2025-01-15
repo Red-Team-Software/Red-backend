@@ -100,7 +100,7 @@ export class UpdateProfileApplicationService extends IApplicationService
                 return Result.fail(new ErrorUpdatinngUserAccountApplicationException(data.userId))
         }
 
-        return Result.success({userId:user.getId().Value})
+        return Result.success({userId:user.getId().Value, image:user.UserImage.Value})
     }
 
 }

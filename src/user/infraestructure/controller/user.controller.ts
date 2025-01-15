@@ -1,7 +1,7 @@
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 import { UpdateProfileInfraestructureRequestDTO } from "../dto/request/update-profile-infraestructure-request-dto"
-import { Controller, Inject, Patch, Body, Get, Query, Post, UseGuards, BadRequestException, Logger, Delete, Put, Param } from "@nestjs/common"
+import { Controller, Inject, Patch, Body, Get, Query, Post, UseGuards, BadRequestException, Logger, Delete, Put, Param, UseInterceptors, FileTypeValidator, ParseFilePipe, UploadedFile } from "@nestjs/common"
 import { ApiBearerAuth, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { UpdateProfileInfraestructureResponseDTO } from "../dto/response/update-profile-infraestructure-response-dto"
 import { OrmUserQueryRepository } from "../repositories/orm-repository/orm-user-query-repository"
@@ -58,6 +58,9 @@ import { UserQueues } from "../queues/user.queues"
 import { ICreateOrder } from "src/notification/infraestructure/interfaces/create-order.interface"
 import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber"
 import { Mongoose } from "mongoose"
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateProfileApplicationRequestDTO } from "src/user/application/dto/request/update-profile-application-request-dto"
+import { UpdateProfileApplicationResponseDTO } from "src/user/application/dto/response/update-profile-application-response-dto"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -175,6 +178,56 @@ export class UserController {
     })
     return response.getValue       
   }
+
+  @Patch('update/image')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiResponse({
+    status: 200,
+    description: 'User image updated',
+    type: UpdateProfileInfraestructureResponseDTO,
+  })
+  async UpdateProfileImage( 
+    @GetCredential() credential:ICredential,
+    @UploadedFile(
+          new ParseFilePipe({
+            validators: [
+              new FileTypeValidator({
+                fileType: /(jpeg|jpg|png)$/,
+              }),
+            ],
+          })
+        ) image: Express.Multer.File ) { 
+
+      let service= 
+      new ExceptionDecorator<UpdateProfileApplicationRequestDTO,UpdateProfileApplicationResponseDTO>(
+        new AuditDecorator<UpdateProfileApplicationRequestDTO,UpdateProfileApplicationResponseDTO>(
+          // new LoggerDecorator(
+            new PerformanceDecorator<UpdateProfileApplicationRequestDTO,UpdateProfileApplicationResponseDTO>(
+              new UpdateProfileApplicationService(
+                this.ormUserCommandRepo,
+                this.ormUserQueryRepo,
+                this.ormAccountCommandRepo,
+                this.ormAccountQueryRepo,
+                new RabbitMQPublisher(this.channel),
+                new CloudinaryService(),
+                this.idGen,
+                this.encryptor
+            // ), new NestLogger(new Logger())
+            ), new NestTimer(), new NestLogger(new Logger())
+          ),this.auditRepository, new DateHandler()
+        )
+    )
+
+    const buffer = image.buffer;
+
+    let response= await service.execute({
+      userId:credential.account.idUser,
+      image:buffer,
+      accountId:credential.account.id
+    })
+    return {image:response.getValue.image}   
+  }
+
 
   @Get('')
   async findUserById(@Query() entry:{id:string}){
