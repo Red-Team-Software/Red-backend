@@ -106,6 +106,11 @@ import { FindOrderCourierPositionApplicationService } from "src/order/applicatio
 import { OrderRegisteredSyncroniceService } from "../service/syncronice/order-registered-syncronice.service";
 import { OrderUpdatedSyncroniceService } from "../service/syncronice/order-updated-syncronice.service";
 import { OrderUpdatedInfraestructureRequestDTO } from "../service/dto/order-updated-infraestructure-request-dto";
+import { OdmOrderQueryRepository } from "../repositories/odm-repository/odm-order-query-repository";
+import { OdmProductQueryRepository } from "src/product/infraestructure/repositories/odm-repository/odm-product-query-repository";
+import { OdmBundleQueryRepository } from "src/bundle/infraestructure/repositories/odm-repository/odm-bundle-query-repository";
+import { OdmPaymentMethodQueryRepository } from "src/payment-methods/infraestructure/repository/odm-repository/odm-payment-method-query-repository";
+import { OdmPromotionQueryRepository } from "src/promotion/infraestructure/repositories/odm-repository/odm-promotion-query-repository";
 
 
 @ApiBearerAuth()
@@ -298,7 +303,7 @@ export class OrderController {
             new LoggerDecorator(
                 new PerformanceDecorator(
                     new RefundPaymentApplicationService(
-                        this.orderQueryRepository,
+                        new OdmOrderQueryRepository(this.mongoose),
                         this.rabbitMq,
                         new RefundPaymentStripeConnection(this.stripeSingleton),
                         this.ormUserCommandRepo,
@@ -368,11 +373,11 @@ export class OrderController {
                             ),
                             this.orderRepository,
                             this.idGen,
-                            this.ormProductRepository,
-                            this.ormBundleRepository,
+                            new OdmProductQueryRepository(this.mongoose),
+                            new OdmBundleQueryRepository(this.mongoose),
                             new DateHandler(),
-                            new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                            this.paymentMethodQueryRepository,
+                            new OdmPromotionQueryRepository(this.mongoose),
+                            new OdmPaymentMethodQueryRepository(this.mongoose),
                             this.ormCuponQueryRepo,
                             this.ormUserQueryRepository
                         ),new NestTimer(),new NestLogger(new Logger())
@@ -422,11 +427,11 @@ export class OrderController {
                             ),
                             this.orderRepository,
                             this.idGen,
-                            this.ormProductRepository,
-                            this.ormBundleRepository,
+                            new OdmProductQueryRepository(this.mongoose),
+                            new OdmBundleQueryRepository(this.mongoose),
                             new DateHandler(),
-                            new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                            this.paymentMethodQueryRepository,
+                            new OdmPromotionQueryRepository(this.mongoose),
+                            new OdmPaymentMethodQueryRepository(this.mongoose),
                             this.ormCuponQueryRepo,
                             this.ormUserQueryRepository
                         ),new NestTimer(),new NestLogger(new Logger())
@@ -489,7 +494,7 @@ export class OrderController {
             new LoggerDecorator(
                 new PerformanceDecorator(
                     new FindAllOdersApplicationService(
-                        this.orderQueryRepository,
+                        new OdmOrderQueryRepository(this.mongoose),
                         this.ormProductRepository,
                         this.ormBundleRepository,
                         this.ormCourierQueryRepository
@@ -530,7 +535,7 @@ export class OrderController {
             new LoggerDecorator(
                 new PerformanceDecorator(
                     new FindAllOdersByUserApplicationService(
-                        this.orderQueryRepository,
+                        new OdmOrderQueryRepository(this.mongoose),
                         this.ormProductRepository,
                         this.ormBundleRepository,
                         this.ormCourierQueryRepository
@@ -556,7 +561,7 @@ export class OrderController {
             new AuditDecorator(
                     new PerformanceDecorator(
                         new CancelOderApplicationService(
-                            this.orderQueryRepository,
+                            new OdmOrderQueryRepository(this.mongoose),
                             this.orderRepository,
                             this.rabbitMq
                         ),new NestTimer(),new NestLogger(new Logger())
@@ -584,7 +589,7 @@ export class OrderController {
             new AuditDecorator(
                 new PerformanceDecorator(
                     new AssignCourierApplicationService(
-                        this.orderQueryRepository,
+                        new OdmOrderQueryRepository(this.mongoose),
                         this.orderRepository,
                         this.rabbitMq,
                         this.ormCourierQueryRepository
@@ -612,7 +617,7 @@ export class OrderController {
             new AuditDecorator(
                 new PerformanceDecorator(
                     new DeliveredOderApplicationService(
-                        this.orderQueryRepository,
+                        new OdmOrderQueryRepository(this.mongoose),
                         this.orderRepository,
                         this.rabbitMq,
                         new DateHandler()
@@ -641,7 +646,7 @@ export class OrderController {
             new AuditDecorator(
                 new PerformanceDecorator(
                     new CreateReportApplicationService(
-                        this.orderQueryRepository,
+                        new OdmOrderQueryRepository(this.mongoose),
                         this.orderRepository,
                         this.rabbitMq,
                         this.idGen
@@ -669,9 +674,9 @@ export class OrderController {
             new LoggerDecorator(
                 new PerformanceDecorator(
                     new FindOrderByIdApplicationService(
-                        this.orderQueryRepository,
-                        this.ormProductRepository,
-                        this.ormBundleRepository,
+                        new OdmOrderQueryRepository(this.mongoose),
+                        new OdmProductQueryRepository(this.mongoose),
+                        new OdmBundleQueryRepository(this.mongoose),
                         this.ormCourierQueryRepository
                     ),new NestTimer(),new NestLogger(new Logger())
                 ),
