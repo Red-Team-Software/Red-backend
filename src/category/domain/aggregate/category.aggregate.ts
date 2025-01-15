@@ -18,8 +18,8 @@ export class Category extends AggregateRoot<CategoryID> {
                 const categoryCreatedEvent = event as CategoryCreated;
                 this.categoryName = categoryCreatedEvent.categoryName;
                 this.categoryImage = categoryCreatedEvent.categoryImage;
-                this.products = categoryCreatedEvent.products || []; // Manejo opcional
-                this.bundles = categoryCreatedEvent.bundles || []; // Manejo opcional
+                this.products = categoryCreatedEvent.products;
+                this.bundles = categoryCreatedEvent.bundles; 
                 break;
         }
     }
@@ -28,8 +28,8 @@ export class Category extends AggregateRoot<CategoryID> {
         id: CategoryID,
         private categoryName: CategoryName,
         private categoryImage: CategoryImage | null,
-        private products: ProductID[] = [], // Inicialización por defecto
-        private bundles: BundleId[] = [] // Inicialización por defecto
+        private products: ProductID[], // Inicialización por defecto
+        private bundles: BundleId[]
     ) {
         super(id);
     }
@@ -38,8 +38,8 @@ export class Category extends AggregateRoot<CategoryID> {
         id: CategoryID,
         name: CategoryName,
         image: CategoryImage | null,
-        productIds: ProductID[] = [], // Opcional
-        bundleIds: BundleId[] = [] // Opcional
+        productIds: ProductID[],
+        bundleIds: BundleId[]
     ): Category {
         const category = new Category(
             id,
