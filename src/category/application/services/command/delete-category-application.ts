@@ -9,15 +9,19 @@ import { IApplicationService } from "src/common/application/services";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface";
 import { ErrorDeletingImagesApplicationException } from "src/product/application/application-exepction/error-deleting-images-application-exception";
+import { IQueryCategoryRepository } from "../../query-repository/query-category-repository";
 
 export class DeleteCategoryApplication extends IApplicationService<
 DeleteCategoryApplicationRequestDTO,
 DeleteCategoryApplicationResponseDTO
 > {
-    constructor(private readonly categoryRepository: ICategoryRepository, 
+    constructor(
+        private readonly categoryRepository: ICategoryRepository, 
+        private readonly categoryqueryRepository: IQueryCategoryRepository,
         private readonly eventPublisher: IEventPublisher,
-        private readonly fileUploader: IFileUploader) 
-        {
+        private readonly fileUploader: IFileUploader
+    ) 
+    {
         super()
     }
 
@@ -25,7 +29,7 @@ DeleteCategoryApplicationResponseDTO
         const categoryId = CategoryID.create(request.id);
 
         // Verificar si la categoría existe antes de eliminarla
-        const existingCategory = await this.categoryRepository.findById(categoryId);
+        const existingCategory = await this.categoryqueryRepository.findCategoryById(categoryId);
         if (!existingCategory.isSuccess()) {
             return Result.fail(existingCategory.getError);
         }

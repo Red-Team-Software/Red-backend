@@ -54,7 +54,7 @@ import { AvailablePaymentMethodApplicationService } from "src/payment-methods/ap
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('Payment Method')
-@Controller('payment-method')
+@Controller('payment/method')
 export class PaymentMethodController {
 
     private readonly auditRepository: IAuditRepository;

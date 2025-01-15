@@ -40,7 +40,7 @@ export class OdmProduct extends Document implements IOdmProduct {
         type: [
             {
                 _id:false,
-                id: SchemaTypes.UUID,
+                id: SchemaTypes.String,
                 name:SchemaTypes.String
             }
         ], 

@@ -4,6 +4,7 @@ export interface FindAllBundlesApplicationResponseDTO extends IServiceResponseDt
     id: string
     name:string
     images: string [ ]
+    description:string
     price: number
     currency:string
     weight: number
