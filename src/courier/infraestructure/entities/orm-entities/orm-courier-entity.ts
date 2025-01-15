@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from "typeorm"
-import { ICourierInterface } from "../model-entity/orm-model-entity/courier-interface"
 import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-entities/orm-order-entity";
+import { ICourierInterface } from "../../model-entity/orm-model-entity/courier-interface";
 
 
 @Entity( 'courier' )

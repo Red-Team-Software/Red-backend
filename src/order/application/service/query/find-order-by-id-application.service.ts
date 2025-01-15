@@ -201,8 +201,8 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
                 payementMethod: order.orderPayment.payementMethod
             },
             orderDirection: {
-                lat: order.orderDirection.lat,
-                long: order.orderDirection.long
+                lat: order.orderDirection.lat.toString(),
+                long: order.orderDirection.long.toString()
             },
             products: order.products ? 
             domainProducts

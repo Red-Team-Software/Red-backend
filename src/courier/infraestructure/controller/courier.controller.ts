@@ -11,7 +11,6 @@ import { CourierRepository } from "../repository/orm-repository/orm-courier-repo
 import { PgDatabaseSingleton } from "src/common/infraestructure/database/pg-database.singleton"
 import { IMapper } from "src/common/application/mappers/mapper.interface"
 import { Courier } from "src/courier/domain/aggregate/courier"
-import { OrmCourierEntity } from "../entities/orm-courier-entity"
 import { OrmCourierMapper } from "../mapper/orm-courier-mapper/orm-courier-mapper"
 import { ExceptionDecorator } from "src/common/application/aspects/exeption-decorator/exception-decorator"
 import { RegisterCourierApplicationService } from "src/courier/application/services/register-courier-application.service"
@@ -45,6 +44,10 @@ import { BcryptEncryptor } from "src/common/infraestructure/encryptor/bcrypt-enc
 import { IEncryptor } from "src/common/application/encryptor/encryptor.interface"
 import { LogInCourierInfraestructureRequestDTO } from "../dto/log-in-courier-infraestructure-request-dto"
 import { LogInCourierApplicationService } from "src/courier/application/services/log-in-courier-application.service"
+import { OrmCourierEntity } from "../entities/orm-entities/orm-courier-entity"
+import { CourierRegisteredSyncroniceService } from "../service/syncronice/courier-registered-syncronice.service"
+import { Mongoose } from "mongoose"
+import { CourierUpdatedSyncroniceService } from "../service/syncronice/courier-updated-syncronice.service"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -81,6 +84,7 @@ export class CourierController {
 
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+        @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose,
         private jwtCourierService: JwtService
     ) {
         this.idGen= new UuidGen();
@@ -97,7 +101,7 @@ export class CourierController {
         this.subscriber.consume<ICourierRegistered>(
             { name: 'CourierSync/CourierRegistered'}, 
             (data):Promise<void>=>{
-                //this.walletRefund(data)
+                //this.syncCourierRegistered(data)
                     return
             }
         )
@@ -105,13 +109,24 @@ export class CourierController {
         this.subscriber.consume<ICourierDirectionUpdated>(
             { name: 'CourierSync/CourierDirectionUpdated'}, 
             (data):Promise<void>=>{
-                //this.walletRefund(data)
+                //this.syncCourierUpdated(data)
                 return
             }
         )
 
+    }
 
+    async syncCourierRegistered(data:ICourierRegistered){
+        let service= new CourierRegisteredSyncroniceService(
+            this.mongoose,
+            this.courierQueryRepository
+        )
+        await service.execute(data)
+    }
 
+    async syncCourierUpdated(data:ICourierDirectionUpdated){
+        let service= new CourierUpdatedSyncroniceService(this.mongoose)
+        await service.execute({...data})
     }
 
     @Post('register')
@@ -153,8 +168,8 @@ export class CourierController {
         let request: ModifyCourierLocationRequestDto = {
             userId: credential.account.idUser,
             courierId: data.courierId,
-            lat: data.lat,
-            long: data.long
+            lat: Number(data.lat),
+            long: Number(data.long)
         }
         let modifyCourierLocation = new ExceptionDecorator(
             new PerformanceDecorator(

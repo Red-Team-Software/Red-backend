@@ -1,11 +1,11 @@
 import { Result } from "src/common/utils/result-handler/result";
 import { Courier } from "src/courier/domain/aggregate/courier";
 import { ICourierRepository } from "src/courier/application/repository/repositories-command/courier-repository-interface";
-import { OrmCourierEntity } from "../../entities/orm-courier-entity";
 import { DataSource, Repository } from "typeorm";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 import { ICourierModel } from "src/courier/application/model/courier-model-interface";
+import { OrmCourierEntity } from "../../entities/orm-entities/orm-courier-entity";
 
 
 export class CourierRepository extends Repository<OrmCourierEntity> implements ICourierRepository {

@@ -18,6 +18,8 @@ export interface ICreateOrder {
 export interface Details {
     id:       string;
     quantity: number;
+    price:    number;
+    currency: string;
 }
 
 export interface OrderCourier {

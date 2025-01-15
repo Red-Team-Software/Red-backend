@@ -4,7 +4,7 @@ export class FindUserDirectionsByIdApplicationResponseDTO implements IServiceRes
     id:string
     name: string
     favorite: boolean
-    lat: number
-    long: number
+    lat: string
+    long: string
     direction:string
 }
