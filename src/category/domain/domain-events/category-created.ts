@@ -45,6 +45,7 @@ export class CategoryCreated extends DomainEvent {
             occurredOn: this.getOcurredOn,
             categoryId: this.categoryId.Value,
             categoryName: this.categoryName.Value,
+            categoryImage: this.categoryImage.Value,
             products: this.products.map(product => product.Value),
             bundles: this.bundles.map(bundle => bundle.Value)
         });

@@ -76,7 +76,7 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
                 query.name = { $regex: criteria.name, $options: 'i' }
 
             if (criteria.category && criteria.category.length > 0) 
-                query.category.name = { $in: criteria.category }
+                query.category = { $elemMatch: { name: { $in: criteria.category } } };
 
             if (criteria.price)
                 query.price = { ...query.price, $gte: criteria.price }
@@ -84,7 +84,10 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
             if (criteria.discount)
                 query.discount = { $gt: 0 };
 
-            const products = await this.model.find(query).exec()
+            const products = await this.model.find(query)
+            .skip(criteria.page)
+            .limit(criteria.perPage)
+            .exec()
 
             for (const p of products){
                 model.push(await this.trasnformtoDataModel(p))
@@ -93,6 +96,7 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
             return Result.success(model)
         
         } catch (error) {
+            console.log(error)
             return Result.fail(error.message);
         }
     }

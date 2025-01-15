@@ -98,7 +98,10 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
             if (criteria.discount)
                 query.discount = { $gt: 0 };
 
-            const bundles = await this.model.find(query).exec()
+            const bundles = await this.model.find(query)
+            .skip(criteria.page)
+            .limit(criteria.perPage)
+            .exec()
 
             for (const b of bundles){
                 model.push(await this.trasnformtoDataModel(b))
