@@ -1,12 +1,9 @@
-export interface IOdmCourierInterface {
+export interface IOdmCourier {
     id: string;
     name: string;
-    image: IOdmCourierImage
+    image: string;
+    latitude: number;
+    longitude: number;
     email: string;
     password: string;
-}
-
-export interface IOdmCourierImage{
-    id:string,
-    image:string
 }
