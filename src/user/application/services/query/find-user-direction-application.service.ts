@@ -41,8 +41,8 @@ export class FindUserDirectionApplicationService extends IApplicationService
             id: direction.getId().Value,
             name: direction.DirectionName.Value,
             favorite: direction.DirectionFavorite.Value,
-            lat: direction.DirectionLat.Value,
-            long: direction.DirectionLng.Value,
+            lat: direction.DirectionLat.Value.toString(),
+            long: direction.DirectionLng.Value.toString(),
               direction:geoReponse.isSuccess()
               ? geoReponse.getValue.Address
               : 'no direction get it'

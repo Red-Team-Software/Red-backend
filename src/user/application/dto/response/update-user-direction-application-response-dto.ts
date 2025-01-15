@@ -5,6 +5,6 @@ export interface UpdateUserDirectionsApplicationResponseDTO extends IServiceResp
     name: string;
     direction: string;
     favorite: boolean;
-    lat: number;
-    long: number; 
+    lat: string;
+    long: string; 
 }

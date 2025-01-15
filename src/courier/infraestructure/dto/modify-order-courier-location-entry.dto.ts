@@ -10,14 +10,12 @@ export class ModifyCourierLocationEntryDto {
     courierId: string;
     
     @ApiProperty( { example: '40.5515412', required: true })
-    @IsNumber()
-    @Transform(({ value }) => { return Number(value); })
-    lat: number;
+    @IsString()
+    lat: string;
 
     @ApiProperty( { example: '-10.5265', required: true })
-    @IsNumber()
-    @Transform(({ value }) => { return Number(value); })
-    long: number;
+    @IsString()
+    long: string;
 
 
 }

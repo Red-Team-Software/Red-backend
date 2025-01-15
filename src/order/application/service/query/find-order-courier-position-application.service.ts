@@ -31,10 +31,10 @@ export class FindOrderCourierPositionApplicationService extends IApplicationServ
             return Result.fail(new ErrorOrderDontHaveCourierAssignedApplicationException());
 
         let res = {
-            latActual: order.orderCourier.location.lat,
-            longActual: order.orderCourier.location.long,
-            longPuntoLlegada: order.orderDirection.long,
-            latPuntoLlegada: order.orderDirection.lat
+            latActual: order.orderCourier.location.lat.toString(),
+            longActual: order.orderCourier.location.long.toString(),
+            longPuntoLlegada: order.orderDirection.long.toString(),
+            latPuntoLlegada: order.orderDirection.lat.toString()
         }
 
         return Result.success(res);

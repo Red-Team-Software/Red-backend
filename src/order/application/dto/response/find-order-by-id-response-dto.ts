@@ -46,8 +46,8 @@ export type orderByIdResponse = {
         payementMethod: string;
     };
     orderDirection: {
-        lat: number;
-        long: number;
+        lat: string;
+        long: string;
     };
     //orderDirection: string;
     products?: productsOrderByIdResponse[];

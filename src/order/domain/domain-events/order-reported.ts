@@ -11,7 +11,7 @@ export class OrderReported extends DomainEvent {
             orderReport:
             {
                 id:this.orderReport.getId().OrderReportId,
-                description:this.orderReport.Description
+                description:this.orderReport.Description.Value
             }
         }
         

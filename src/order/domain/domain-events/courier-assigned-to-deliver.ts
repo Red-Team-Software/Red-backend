@@ -11,7 +11,7 @@ export class CourierAssignedToDeliver extends DomainEvent {
             orderId: this.orderId.orderId,
             orderState: this.orderState.orderState,
             orderUserId: this.orderUserId.userId,
-            orderCourierId: this.orderCourierId
+            orderCourierId: this.orderCourierId.OrderCourierId
         }
         
         return JSON.stringify(data);
