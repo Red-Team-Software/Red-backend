@@ -8,7 +8,6 @@ import { CuponName } from "src/cupon/domain/value-object/cupon-name";
 export interface IQueryCuponRepository {
     findAllCupons(criteria: FindAllCuponsApplicationRequestDTO): Promise<Result<Cupon[]>>;
     findCuponById(id:CuponId): Promise<Result<Cupon>>;
-    findCuponById(id: CuponId): Promise<Result<Cupon>>;
     findCuponByCode(code: CuponCode): Promise<Result<Cupon>>;
     verifyCuponExistenceByCode(code: CuponCode): Promise<Result<boolean>>;
     verifyCuponExistenceByName(name: CuponName): Promise<Result<boolean>>;

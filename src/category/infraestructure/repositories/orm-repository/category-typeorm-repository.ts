@@ -1,6 +1,6 @@
 import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
 import { DataSource, Repository } from "typeorm";
-import { OrmCategoryEntity } from "../entities/orm-entities/orm-category-entity";
+import { OrmCategoryEntity } from "../../entities/orm-entities/orm-category-entity";
 import { Category } from "src/category/domain/aggregate/category.aggregate";
 import { CategoryID } from "src/category/domain/value-object/category-id";
 import { CategoryName } from "src/category/domain/value-object/category-name";
@@ -9,8 +9,8 @@ import { Injectable } from "@nestjs/common";
 import { CategoryImage } from "src/category/domain/value-object/category-image";
 import { Result } from "src/common/utils/result-handler/result";
 import { NotFoundCategoryApplicationException } from "src/category/application/application-exception/not-found-category-application-exception";
-import { OrmCategoryMapper } from "../mapper/orm-category-mapper";
-import { OrmCategoryImage } from "../entities/orm-entities/orm-category-image.entity";
+import { OrmCategoryMapper } from "../../mapper/orm-category-mapper";
+import { OrmCategoryImage } from "../../entities/orm-entities/orm-category-image.entity";
 import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
@@ -174,17 +174,13 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
     async updateCategory(category: Category): Promise<Result<Category>> {
         const persis = await this.mapper.fromDomaintoPersistence(category);
         try {
-            // Actualiza la entidad principal (categoría)
-            const result = await this.upsert(persis, ['id']);
 
-            // Elimina las imágenes antiguas asociadas a la categoría
-            if (persis.image) {
-                await this.ormCategoryImageRepository.delete({ category: { id: category.getId().Value } });
-                await this.ormCategoryImageRepository.save(persis.image);
-            }
+            // Actualiza la entidad principal (categoría)
+            const result = await this.save(persis)
 
             return Result.success(category);
         } catch (e) {
+            console.log(e)
             return Result.fail(new PersistenceException('Update category unsuccessfully'));
         }
     }

@@ -1,9 +1,9 @@
 import { DataSource, Repository, MoreThan } from "typeorm";
-import { OrmCuponEntity } from "../orm-entities/orm-cupon-entity";
+import { OrmCuponEntity } from "../../entities/orm-entities/orm-cupon-entity";
 import { Result } from "src/common/utils/result-handler/result";
 import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
-import { OrmCuponMapper } from "../mapper/orm-cupon-mapper";
+import { OrmCuponMapper } from "../../mapper/orm-mapper/orm-cupon-mapper";
 import { CuponId } from "src/cupon/domain/value-object/cupon-id";
 import { IQueryCuponRepository } from "src/cupon/application/query-repository/query-cupon-repository";
 import { FindAllCuponsApplicationRequestDTO } from "src/cupon/application/dto/request/find-all-cupons-application-RequestDTO";
