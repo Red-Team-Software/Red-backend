@@ -17,6 +17,8 @@ import { TypeFile } from 'src/common/application/file-uploader/enums/type-file.e
 import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
 import { ErrorDeletingImagesApplicationException } from 'src/product/application/application-exepction/error-deleting-images-application-exception';
 import { ErrorUploadingImagesApplicationException } from '../../application-exception/error-uploading-images-application-exception';
+import { ErrorUpdatingProductApplicationException } from 'src/product/application/application-exepction/error-updating-product-application-exception';
+import { ErrorNameAlreadyApplicationException } from '../../application-exception/error-name-already-application-exception';
 export class UpdateCategoryApplicationService extends IApplicationService<
     UpdateCategoryApplicationRequestDTO,
     UpdateCategoryApplicationResponseDTO
@@ -47,16 +49,26 @@ export class UpdateCategoryApplicationService extends IApplicationService<
         const category = categoryResult.getValue;
 
         if (command.name) {
+
+            let search=await this.queryCategoryRepository.verifyCategoryExistenceByName(
+                CategoryName.create(command.name)
+            )
+    
+            if (!search.isSuccess())
+                return Result.fail(new ErrorUpdatingProductApplicationException())
+    
+            if (search.getValue) 
+                return Result.fail(new ErrorNameAlreadyApplicationException());
+            
             category.updateName(CategoryName.create(command.name));
         }
 
         if (command.image) {
-            let categoryImage:CategoryImage
+
             let fileResponse=await this.fileUpdater.uploadFile( command.image,TypeFile.image,await this.idGen.genId())
-            if(!fileResponse.isSuccess){
-                return Result.fail(new ErrorUploadingImagesApplicationException)
-            }
             
+            if(!fileResponse.isSuccess)
+                return Result.fail(new ErrorUploadingImagesApplicationException)
 
             let fileResponseDelete=await this.fileUpdater.deleteFile(category.Image.Value)
 

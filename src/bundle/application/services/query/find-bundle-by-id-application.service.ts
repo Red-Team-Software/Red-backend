@@ -47,7 +47,7 @@ IApplicationService<FindBundleByIdApplicationRequestDTO,FindBundleByIdApplicatio
                 name:c.name
             }))
             : [],
-            products: bundle.products
+            product: bundle.products
             ? bundle.products.map(p=>({
                 id:p.id,
                 name:p.name

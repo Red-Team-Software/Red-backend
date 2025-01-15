@@ -22,6 +22,7 @@ import { IQueryProductRepository } from "src/product/application/query-repositor
 import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate";
 import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository";
 import { BundleId } from "src/bundle/domain/value-object/bundle-id";
+import { IQueryCategoryRepository } from "../../query-repository/query-category-repository";
 
 export class CreateCategoryApplication extends IApplicationService<
     CreateCategoryApplicationRequestDTO,
@@ -30,6 +31,7 @@ export class CreateCategoryApplication extends IApplicationService<
     constructor(
         private readonly eventPublisher: IEventPublisher,
         private readonly categoryRepository: ICategoryRepository,
+        private readonly categoryqueryRepository: IQueryCategoryRepository,
         private readonly productQueryRepository: IQueryProductRepository,
         private readonly bundleQueryRepository: IQueryBundleRepository,
         private readonly idGen: IIdGen<string>,
@@ -40,7 +42,7 @@ export class CreateCategoryApplication extends IApplicationService<
 
     async execute(command: CreateCategoryApplicationRequestDTO): Promise<Result<CreateCategoryApplicationResponseDTO>> {
         // Check if category name already exists
-        const existingCategory = await this.categoryRepository.verifyCategoryExistenceByName(
+        const existingCategory = await this.categoryqueryRepository.verifyCategoryExistenceByName(
             CategoryName.create(command.name)
         )
 
