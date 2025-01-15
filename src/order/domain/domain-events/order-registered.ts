@@ -35,14 +35,16 @@ export class OrderRegistered extends DomainEvent {
             ? this.products.map(p=>({
                 id:p.ProductDetailId.productDetailId,
                 quantity:p.Quantity.Quantity,
-                price: p.Price.Price
+                price: p.Price.Price,
+                currency: p.Price.Currency
             }))
             : [],
             bundles: this.bundles 
             ? this.bundles.map(b=>({
                 id:b.BundleDetailId.BundleDetailId,
                 quantity:b.Quantity.Quantity,
-                price: b.Price.Price
+                price: b.Price.Price,
+                currency: b.Price.Currency
             }))
             :[],
             orderReceivedDate: this.orderReceivedDate

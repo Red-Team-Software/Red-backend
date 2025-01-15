@@ -1,4 +1,4 @@
-export interface ICreateOrder {
+export interface OrderRegisteredInfraestructureRequestDTO {
     orderId:           string;
     orderState:        string;
     orderCreateDate:   Date;

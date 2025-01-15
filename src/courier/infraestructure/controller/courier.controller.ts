@@ -101,7 +101,7 @@ export class CourierController {
         this.subscriber.consume<ICourierRegistered>(
             { name: 'CourierSync/CourierRegistered'}, 
             (data):Promise<void>=>{
-                this.syncCourierRegistered(data)
+                //this.syncCourierRegistered(data)
                     return
             }
         )

@@ -1,10 +1,8 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { IOdmOrderModel } from "../../model-entity/odm-model-entity/odm-order.interface"
-import { OdmProductDetail } from "./odm-product-detail-entity"
-import { OdmBundleDetail } from "./odm-bundle-detail-entity"
-import { SchemaTypes, Types } from "mongoose";
+import mongoose, { Document, SchemaTypes } from 'mongoose';
 
-@Schema()
+@Schema({ collection: 'odmorders' })
 export class OdmOrder extends Document implements IOdmOrderModel {
 
     @Prop({ type: String, unique: true, index: true, required: true }) 
@@ -31,15 +29,17 @@ export class OdmOrder extends Document implements IOdmOrderModel {
     @Prop({ type: Date, unique: false, required: false })   
     receivedDate?: Date
 
-    //! No se si hay que hacerles refencia
     @Prop({ type: String, unique: false, required: false })   
     courier_id?:string
 
     @Prop({ type: String, unique: false, required: false })   
     coupon_id?:string
 
+    @Prop({ type: String, unique: false, required: false })   
+    user_id?:string
+
     @Prop({ 
-        type: [
+        type:
             {
                 _id: false,
                 id: SchemaTypes.UUID,
@@ -47,7 +47,7 @@ export class OdmOrder extends Document implements IOdmOrderModel {
                 currency: SchemaTypes.String,
                 paymentMethod: SchemaTypes.String
             }
-        ], 
+        , 
         required: true 
     })
     order_payment: {
@@ -57,28 +57,53 @@ export class OdmOrder extends Document implements IOdmOrderModel {
         paymentMethod: string
     };
 
-    @Prop({ type: [OdmProductDetail], required: false })
-    product_details?: OdmProductDetail[];
-
-    @Prop({ type: [OdmBundleDetail], required: false })
-    bundle_details?: OdmBundleDetail[];
+    @Prop({ 
+        type: [{
+            _id: false,
+            id: SchemaTypes.UUID,
+            quantity: SchemaTypes.Number,
+            price: SchemaTypes.Number,
+            currency: SchemaTypes.String
+        }], 
+        required: false 
+    })
+    product_details?: {
+        id: string,
+        quantity: number,
+        price: number,
+        currency: string
+    }[];
 
     @Prop({ 
-        type: [
+        type: [{
+            _id: false,
+            id: SchemaTypes.UUID,
+            quantity: SchemaTypes.Number,
+            price: SchemaTypes.Number,
+            currency: SchemaTypes.String
+        }], 
+        required: false
+    })
+    bundle_details?: {
+        id: string,
+        quantity: number,
+        price: number,
+        currency: string
+    }[];
+
+    @Prop({ 
+        type: 
             {
                 _id: false,
                 id: SchemaTypes.UUID,
                 description: SchemaTypes.String
             }
-        ], required: false 
+        , required: false 
     })
     report?: {
         id: string,
         description: string
     };
-
-    // @Prop({ type: Types.ObjectId, ref: 'OrderPayment', required: false })
-    // orderPayment?: OdmOrderPayment;
 
 }
 

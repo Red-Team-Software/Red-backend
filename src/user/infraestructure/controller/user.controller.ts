@@ -122,9 +122,6 @@ export class UserController {
             return
         }
     )
-
-
-
   }
 
   @Patch('update/profile')

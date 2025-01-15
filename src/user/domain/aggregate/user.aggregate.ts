@@ -85,7 +85,6 @@ export class User extends AggregateRoot <UserId>{
             case 'UserCouponAplied':{                    
                 const userCouponAplied: UserCouponAplied = event as UserCouponAplied
                 const index = this.userCoupon.findIndex(c => c.equals(userCouponAplied.userCoupon))
-                console.log("index",userCouponAplied.userCoupon)
                 if (index !== -1)
                     this.userCoupon.splice(index, 1, userCouponAplied.userCoupon)
                 else

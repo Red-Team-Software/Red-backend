@@ -103,6 +103,9 @@ import { Mongoose } from "mongoose";
 import { OrderCourierPositionDto } from "../dto/order-courier-position-entry.dto";
 import { FindOrderCourierPositionRequestDto } from "src/order/application/dto/request/find-order-courier-position-request-dto";
 import { FindOrderCourierPositionApplicationService } from "src/order/application/service/query/find-order-courier-position-application.service";
+import { OrderRegisteredSyncroniceService } from "../service/syncronice/order-registered-syncronice.service";
+import { OrderUpdatedSyncroniceService } from "../service/syncronice/order-updated-syncronice.service";
+import { OrderUpdatedInfraestructureRequestDTO } from "../service/dto/order-updated-infraestructure-request-dto";
 
 
 @ApiBearerAuth()
@@ -235,7 +238,7 @@ export class OrderController {
         this.subscriber.consume<ICreateOrder>(
             { name: 'OrderSync/OrderRegistered'}, 
             (data):Promise<void>=>{
-                //this.walletRefund(data)
+                this.syncOrderRegistered(data)
                 return
             }
         )
@@ -243,7 +246,7 @@ export class OrderController {
         this.subscriber.consume<ICancelOrder>(
             { name: 'OrderSync/OrderStatusCancelled'}, 
             (data):Promise<void>=>{
-                //this.walletRefund(data)
+                this.syncOrderUpdated(data)
                 return
             }
         )
@@ -251,7 +254,7 @@ export class OrderController {
         this.subscriber.consume<IReportedOrder>(
             { name: 'OrderSync/OrderReported'}, 
             (data):Promise<void>=>{
-                //this.walletRefund(data)
+                this.syncOrderUpdated({...data})
                 return
             }
         )
@@ -259,7 +262,7 @@ export class OrderController {
         this.subscriber.consume<IDeliveredOrder>(
             { name: 'OrderSync/OrderStatusDelivered'}, 
             (data):Promise<void>=>{
-                //this.walletRefund(data)
+                this.syncOrderUpdated({...data})
                 return
             }
         )
@@ -267,7 +270,7 @@ export class OrderController {
         this.subscriber.consume<IDeliveringOrder>(
             { name: 'OrderSync/CourierAssignedToDeliver'}, 
             (data):Promise<void>=>{
-                //this.walletRefund(data)
+                this.syncOrderUpdated({...data})
                 return
             }
         )
@@ -275,8 +278,14 @@ export class OrderController {
     }
 
     async syncOrderRegistered(data:ICreateOrder){
-        //let service= new ProductRegisteredSyncroniceService(this.mongoose)
-        //await service.execute(data)
+        let service= new OrderRegisteredSyncroniceService(this.mongoose)
+        await service.execute({...data})
+    }
+
+    async syncOrderUpdated(data:OrderUpdatedInfraestructureRequestDTO){
+        console.log('syncOrderUpdated',data)
+        let service= new OrderUpdatedSyncroniceService(this.mongoose)
+        await service.execute({...data})
     }
 
     async walletRefund(data:ICancelOrder){
