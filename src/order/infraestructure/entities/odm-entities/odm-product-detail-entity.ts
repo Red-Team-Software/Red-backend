@@ -7,7 +7,7 @@ import { OdmProduct } from "src/product/infraestructure/entities/odm-entities/od
 export class OdmProductDetail extends Document implements IOdmProductDetails {
     
     @Prop({ type: Types.ObjectId, ref: 'OdmProduct', required: false })
-    id?: OdmProduct;
+    id: OdmProduct;
 
     @Prop({ type: Number, unique: false, required: true })   
     quantity: number

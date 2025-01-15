@@ -21,20 +21,28 @@ export class OrderRegistered extends DomainEvent {
             orderId: this.orderId.orderId,
             orderState: this.orderState.orderState,
             orderCreateDate: this.orderCreateDate.OrderCreatedDate,
-            totalAmount: this.totalAmount,
-            orderDirection: this.orderDirection,
+            totalAmount: {
+                amount: this.totalAmount.OrderAmount,
+                currency: this.totalAmount.OrderCurrency
+            },
+            orderDirection: {
+                lat: this.orderDirection.Latitude,
+                long: this.orderDirection.Longitude
+            },
             orderCourierId: this.orderCourierId? this.orderCourierId.OrderCourierId : null,
             orderUserId: this.orderUserId.userId,
             products: this.products
             ? this.products.map(p=>({
                 id:p.ProductDetailId.productDetailId,
-                quantity:p.Quantity.Quantity
+                quantity:p.Quantity.Quantity,
+                price: p.Price.Price
             }))
             : [],
             bundles: this.bundles 
             ? this.bundles.map(b=>({
                 id:b.BundleDetailId.BundleDetailId,
-                quantity:b.Quantity.Quantity
+                quantity:b.Quantity.Quantity,
+                price: b.Price.Price
             }))
             :[],
             orderReceivedDate: this.orderReceivedDate
@@ -46,7 +54,12 @@ export class OrderRegistered extends DomainEvent {
                 description:this.orderReport.Description
             }
             : null,
-            orderPayment: this.orderPayment,
+            orderPayment: {
+                paymentId: this.orderPayment.getId().Value,
+                paymentMethod: this.orderPayment.PaymentMethods.Value,
+                paymentAmount: this.orderPayment.PaymentAmount.Value,
+                paymentCurrency: this.orderPayment.PaymentCurrency.Value
+            },
             orderCupon: this.orderCupon ? this.orderCupon.cuponId : null
         }
         

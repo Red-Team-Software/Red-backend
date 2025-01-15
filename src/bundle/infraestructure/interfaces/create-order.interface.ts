@@ -16,6 +16,7 @@ export interface ICreateOrder {
 export interface Bundle {
     id:       string;
     quantity: number;
+    price:    number;
 }
 
 export interface OrderCourier {
