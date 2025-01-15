@@ -109,7 +109,7 @@ export class CourierController {
         this.subscriber.consume<ICourierDirectionUpdated>(
             { name: 'CourierSync/CourierDirectionUpdated'}, 
             (data):Promise<void>=>{
-                this.syncCourierUpdated(data)
+                //this.syncCourierUpdated(data)
                 return
             }
         )
@@ -168,8 +168,8 @@ export class CourierController {
         let request: ModifyCourierLocationRequestDto = {
             userId: credential.account.idUser,
             courierId: data.courierId,
-            lat: data.lat,
-            long: data.long
+            lat: Number(data.lat),
+            long: Number(data.long)
         }
         let modifyCourierLocation = new ExceptionDecorator(
             new PerformanceDecorator(

@@ -226,7 +226,7 @@ export class UserController {
 
   let response = await service.execute({
     userId:credential.account.idUser,
-    directions:{...entry, id:entry.directionId}
+    directions:{...entry, id:entry.directionId , lat: Number(entry.lat), long: Number(entry.long)}
   })
 
   return response.getValue
@@ -279,7 +279,12 @@ export class UserController {
       )
   )
   let response = await service.execute({
-    userId:credential.account.idUser,directions:entry
+    userId:credential.account.idUser,
+    directions:{
+      ...entry,
+      lat: Number(entry.lat),
+      long: Number(entry.long)
+    }
   })
   return response.getValue
   }
