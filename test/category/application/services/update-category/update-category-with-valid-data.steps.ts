@@ -61,7 +61,7 @@ When(
       }
     }
   );
-
+  
 
 Then(
     'The category should be updated with id {string}, name {string}, image {string}, products {string}, bundles {string}',

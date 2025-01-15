@@ -15,8 +15,6 @@ export class OrmCuponRepository extends Repository<OrmCuponEntity> implements IC
         super(OrmCuponEntity, dataSource.createEntityManager());
     }
 
-
-
     async createCupon(cupon: Cupon): Promise<Result<Cupon>> {
         try {
             const entry = await this.mapper.fromDomaintoPersistence(cupon);

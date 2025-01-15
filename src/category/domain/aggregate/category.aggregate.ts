@@ -1,5 +1,3 @@
-// src/category/domain/aggregate/category.ts
-
 import { AggregateRoot } from 'src/common/domain/aggregate-root/aggregate-root';
 import { CategoryID } from '../value-object/category-id';
 import { CategoryName } from '../value-object/category-name';
@@ -11,99 +9,123 @@ import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
 import { CategoryDeleted } from '../domain-events/category-deleted';
 import { CategoryUpdatedName } from '../domain-events/update-category-name';
 import { CategoryUpdatedImage } from '../domain-events/update-category-image';
-import { CategoryUpdatedProducts } from '../domain-events/update-category-products';
+import { CategoryUpdatedProductsDomainEvent } from '../domain-events/update-category-products';
 import { CategoryUpdatedBundles } from '../domain-events/category-update-bundles';
-
 export class Category extends AggregateRoot<CategoryID> {
-    private categoryName: CategoryName;
-    private categoryImage: CategoryImage | null; // Opcional para manejar categorías sin imagen
-    private products: ProductID[] = []; // Lista de productos de la categoría
-    private bundles: BundleId[] = []; // Lista de bundles de la categoría
-
-    private constructor(
-        id: CategoryID,
-        name: CategoryName,
-        categoryImage: CategoryImage | null,
-        products?: ProductID[],
-        bundles?: BundleId[]
-    ) {
-        super(id);
-        this.categoryName = name;
-        this.categoryImage = categoryImage || null;
-        this.products = products || []; // Si no se pasa un array de productos, lo inicializa como vacío
-        this.bundles = bundles || []; // Si no se pasa un array de bundles, lo inicializa como vacío
-    }
-
-    // Método de fábrica para crear una nueva categoría y registrar el evento de creación
-    static create(
-        id: CategoryID,
-        name: CategoryName,
-        image: CategoryImage | null,
-        productIds: ProductID[] = [], //
-        bundleIds: BundleId[] = [] 
-    ): Category {
-        const category = new Category(id, name, image, productIds, bundleIds);
-        category.apply(CategoryCreated.create(id, name, image, productIds, bundleIds)); 
-        return category;
-    }
-
-    // Método para inicializar una categoría existente (sin registrar evento)
-    static initializeAggregate(
-        id: CategoryID,
-        name: CategoryName,
-        image: CategoryImage | null,
-        products: ProductID[] = [],
-        bundles: BundleId[] = [] 
-    ): Category {
-        const category = new Category(id, name, image, products, bundles);
-        category.validateState();
-        return category;
-    }
-
-    // Método `when` para manejar los eventos de dominio
     protected when(event: DomainEvent): void {
         switch (event.getEventName) {
             case 'CategoryCreated':
                 const categoryCreatedEvent = event as CategoryCreated;
                 this.categoryName = categoryCreatedEvent.categoryName;
                 this.categoryImage = categoryCreatedEvent.categoryImage;
-                this.products = categoryCreatedEvent.products 
-                this.bundles = categoryCreatedEvent.bundles
+                this.products = categoryCreatedEvent.products;
+                this.bundles = categoryCreatedEvent.bundles; 
+                break;
         }
     }
 
-    // Validación del estado de la categoría
+    private constructor(
+        id: CategoryID,
+        private categoryName: CategoryName,
+        private categoryImage: CategoryImage | null,
+        private products: ProductID[], // Inicialización por defecto
+        private bundles: BundleId[]
+    ) {
+        super(id);
+    }
+
+    static create(
+        id: CategoryID,
+        name: CategoryName,
+        image: CategoryImage | null,
+        productIds: ProductID[],
+        bundleIds: BundleId[]
+    ): Category {
+        const category = new Category(
+            id,
+            name,
+            image,
+            productIds,
+            bundleIds
+        );
+        category.apply(
+            CategoryCreated.create(
+                id,
+                name,
+                image,
+                productIds,
+                bundleIds
+            )
+        );
+        category.validateState();
+        return category;
+    }
+
+    static initializeAggregate(
+        id: CategoryID,
+        name: CategoryName,
+        image: CategoryImage | null,
+        productIds: ProductID[] = [], // Opcional
+        bundleIds: BundleId[] = [] // Opcional
+    ): Category {
+        const category = new Category(
+            id,
+            name,
+            image,
+            productIds,
+            bundleIds
+        );
+        category.validateState();
+        return category;
+    }
+
     protected validateState(): void {
         if (!this.getId() || !this.categoryName) {
             throw new Error("Invalid category state: ID and name must be defined");
         }
     }
 
-    delete(id:CategoryID):void{
+    delete(): void {
         this.apply(
-            CategoryDeleted.create(id)
-        )
+            CategoryDeleted.create(this.Id)
+        );
     }
 
-    // Métodos de actualización
     public updateName(name: CategoryName): void {
-        this.categoryName = name;
-        this.apply(CategoryUpdatedName.create(this.getId(), name));
+        this.apply(
+            CategoryUpdatedName.create(
+                this.getId(),
+                name
+            )
+        );
     }
 
-    public updateImage(image: CategoryImage | null): void {
-        this.categoryImage = image;
+    public updateImage(image: CategoryImage): void {
         this.apply(CategoryUpdatedImage.create(this.getId(), image));
     }
 
-    public updateProducts(products: ProductID[]): void {
-        this.products = products;
-        this.apply(CategoryUpdatedProducts.create(this.getId(), products));
+    public updateProducts(products?: ProductID[]): void {
+        this.products = products || []; // Si no se proporciona, se inicializa como vacío
+        this.apply(CategoryUpdatedProductsDomainEvent.create(this.getId(), this.products));
     }
 
-    public updateBundles(bundles: BundleId[]): void {
-        this.bundles = bundles;
-        this.apply(CategoryUpdatedBundles.create(this.getId(), bundles));
+    public updateBundles(bundles?: BundleId[]): void {
+        this.bundles = bundles || []; // Si no se proporciona, se inicializa como vacío
+        this.apply(CategoryUpdatedBundles.create(this.getId(), this.bundles));
+    }
+
+    public addProduct(product: ProductID): void {
+        if (!this.products.some(existingProduct => existingProduct.Value === product.Value)) {
+            this.products.push(product);
+            this.apply(CategoryUpdatedProductsDomainEvent.create(this.getId(), this.products));
+        }
+    }
+
+    public addBundle(bundle: BundleId): void {
+        if (!this.bundles.some(existingBundle => existingBundle.Value === bundle.Value)) {
+            this.bundles.push(bundle);
+            this.apply(CategoryUpdatedBundles.create(this.getId(), this.bundles));
+        }
     }
 
     // Métodos `get` para acceder a los campos de la categoría
@@ -121,5 +143,9 @@ export class Category extends AggregateRoot<CategoryID> {
 
     get Bundles(): BundleId[] {
         return this.bundles;
+    }
+
+    get Id(): CategoryID {
+        return this.getId();
     }
 }

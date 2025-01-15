@@ -107,7 +107,7 @@ export class OrmCategoryQueryRepository extends Repository<OrmCategoryEntity> im
             return Result.fail(new NotFoundException('Error fetching categories by product ID.'));
         }
     }
-    async verifyCategoryExistenceByName(categoryName: CategoryName): Promise<Result<boolean>> {
+    async findCategoryByName(categoryName: CategoryName): Promise<Result<boolean>> {
         try{
             let response=await this.existsBy({name:categoryName.Value})
             return Result.success(response)

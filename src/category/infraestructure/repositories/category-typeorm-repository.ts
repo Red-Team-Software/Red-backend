@@ -1,4 +1,4 @@
-import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
+import { ICategoryCommandRepository } from "src/category/domain/repository/category-command-repository.interface";
 import { DataSource, Repository } from "typeorm";
 import { OrmCategoryEntity } from "../entities/orm-entities/orm-category-entity";
 import { Category } from "src/category/domain/aggregate/category.aggregate";
@@ -17,7 +17,7 @@ import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate";
 
-export class OrmCategoryRepository extends Repository<OrmCategoryEntity> implements ICategoryRepository {
+export class OrmCategoryCommandRepository extends Repository<OrmCategoryEntity> implements ICategoryCommandRepository {
     private mapper: IMapper<Category, OrmCategoryEntity>;
     private readonly ormCategoryImageRepository: Repository<OrmCategoryImage>;
 
@@ -46,23 +46,6 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
         }
     }
 
-    async findCategoryByBundleId(bundle: Bundle): Promise<Result<Category>> {
-        try {
-            const categoryEntity = await this.createQueryBuilder("category")
-                .leftJoin("category.bundles", "bundle")
-                .where("bundle.id = :bundleId", { bundleId: bundle.getId().Value })
-                .getOne();
-
-            if (!categoryEntity) {
-                return Result.fail(new NotFoundCategoryApplicationException());
-            }
-
-            const category = await this.mapper.fromPersistencetoDomain(categoryEntity);
-            return Result.success(category);
-        } catch (error) {
-            return Result.fail(new PersistenceException("Failed to find category by bundle ID."));
-        }
-    }
 
     async agregateProductToCategory(category: Category, product: Product): Promise<Result<boolean>> {
         try {
@@ -83,23 +66,7 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
         }
     }
 
-    async findCategoryByProductId(product: Product): Promise<Result<Category>> {
-        try {
-            const categoryEntity = await this.createQueryBuilder("category")
-                .leftJoin("category.products", "product")
-                .where("product.id = :productId", { productId: product.getId().Value })
-                .getOne();
 
-            if (!categoryEntity) {
-                return Result.fail(new NotFoundCategoryApplicationException());
-            }
-
-            const category = await this.mapper.fromPersistencetoDomain(categoryEntity);
-            return Result.success(category);
-        } catch (error) {
-            return Result.fail(new PersistenceException("Failed to find category by product ID."));
-        }
-    }
 
     async createCategory(category: Category): Promise<Result<Category>> {
         try {
@@ -112,25 +79,6 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
             return Result.fail(new PersistenceException('Create category unsuccessfully'));
         }
     }
-    
-    async findById(id: CategoryID): Promise<Result<Category>> {
-        try {
-            const categoryEntity = await this.findOne({
-                where: { id: id.Value },
-                relations: ['image', 'products'],
-            });
-    
-            if (!categoryEntity) {
-                return Result.fail(new NotFoundCategoryApplicationException()); // Manejo del caso en que no se encuentra la categoría
-            }
-    
-            const category = await this.mapper.fromPersistencetoDomain(categoryEntity);
-            return Result.success(category); // Envolvemos la categoría en `Result.success`
-        } catch (error) {
-            return Result.fail(new PersistenceException('Find category by ID unsuccessfully')); // Manejo de errores
-        }
-    }
-    
 
     async verifyCategoryExistenceByName(name: CategoryName): Promise<Result<boolean>> {
         try {
@@ -153,23 +101,6 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
         }
     }
     
-    async findAll(): Promise<Result<Category[]>> {
-        try {
-            const ormCategories = await this.find();
-
-            if (!ormCategories || ormCategories.length === 0) {
-                return Result.fail(new NotFoundCategoryApplicationException());
-            }
-
-            const categories = await Promise.all(
-                ormCategories.map((ormCategory) => this.mapper.fromPersistencetoDomain(ormCategory))
-            );
-
-            return Result.success(categories);
-        } catch (e) {
-            return Result.fail(new NotFoundCategoryApplicationException());
-        }
-    }
 
     async updateCategory(category: Category): Promise<Result<Category>> {
         const persis = await this.mapper.fromDomaintoPersistence(category);

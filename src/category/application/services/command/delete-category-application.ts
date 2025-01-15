@@ -1,5 +1,5 @@
 
-import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
+import { ICategoryCommandRepository } from "src/category/domain/repository/category-command-repository.interface";
 import { DeleteCategoryApplicationRequestDTO } from "../../dto/request/delete-category-application-request.dto";
 import { DeleteCategoryApplicationResponseDTO } from "../../dto/response/delete-category-application-response.dto";
 import { CategoryID } from "src/category/domain/value-object/category-id";
@@ -9,12 +9,15 @@ import { IApplicationService } from "src/common/application/services";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface";
 import { ErrorDeletingImagesApplicationException } from "src/product/application/application-exepction/error-deleting-images-application-exception";
+import { IQueryCategoryRepository } from "../../query-repository/query-category-repository";
 
 export class DeleteCategoryApplication extends IApplicationService<
 DeleteCategoryApplicationRequestDTO,
 DeleteCategoryApplicationResponseDTO
 > {
-    constructor(private readonly categoryRepository: ICategoryRepository, 
+    constructor(
+        private readonly commandCategoryRepository: ICategoryCommandRepository, 
+        private readonly queryCategoryRepository: IQueryCategoryRepository,
         private readonly eventPublisher: IEventPublisher,
         private readonly fileUploader: IFileUploader) 
         {
@@ -25,11 +28,11 @@ DeleteCategoryApplicationResponseDTO
         const categoryId = CategoryID.create(request.id);
 
         // Verificar si la categoría existe antes de eliminarla
-        const existingCategory = await this.categoryRepository.findById(categoryId);
+        const existingCategory = await this.queryCategoryRepository.findCategoryById(categoryId);
         if (!existingCategory.isSuccess()) {
             return Result.fail(existingCategory.getError);
         }
-        existingCategory.getValue.delete(existingCategory.getValue.getId()) //crear el evento del dominio
+        existingCategory.getValue.delete() //crear el evento del dominio
 
         let image=existingCategory.getValue.Image
         if(image){
@@ -38,7 +41,7 @@ DeleteCategoryApplicationResponseDTO
                 return Result.fail(new ErrorDeletingImagesApplicationException())
         }
 
-        let categoryDeleteResponse= await this.categoryRepository.deleteCategoryById(categoryId);
+        let categoryDeleteResponse= await this.commandCategoryRepository.deleteCategoryById(categoryId);
 
         if (!categoryDeleteResponse.isSuccess()){
             return Result.fail(categoryDeleteResponse.getError)

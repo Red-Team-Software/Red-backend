@@ -2,6 +2,6 @@ import { ApplicationException } from "src/common/application/application-exeptio
 
 export class ErrorDTOUpdatingCategoryApplicationException extends ApplicationException{
     constructor() {
-        super('Error during updating of category, at least one od the parameters caducityDate ,currency, description, images, measurement , name , price, stock, weigth must be filled')
+        super('Error during updating of category, at least one od the parameters name ,products, image or bundles must be filled')
     }
 }
