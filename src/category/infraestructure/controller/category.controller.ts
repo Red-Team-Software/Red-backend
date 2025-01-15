@@ -50,6 +50,12 @@ import { OdmProductQueryRepository } from 'src/product/infraestructure/repositor
 import { OdmCategoryQueryRepository } from '../repositories/odm-repository/odm-query-category-repository';
 import { OdmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/odm-repository/odm-bundle-query-repository';
 import { OrmCategoryRepository } from '../repositories/category-typeorm-repository';
+import { ICategoryBundleUpdated } from '../interfaces/category-bundle-update.interface';
+import { CategoryUpdatedInfraestructureRequestDTO } from '../services/dto/request/category-updated-infraestructure-request-dto';
+import { CategoryUpdatedSyncroniceService } from '../services/syncronice/category-updated-syncronice.service';
+import { ICategoryNameUpdated } from '../interfaces/category-name-update.interface';
+import { ICategoryImageUpdated } from '../interfaces/category-image-update.interface';
+import { ICategoryProductUpdated } from '../interfaces/category-product-update.interface';
 
 @Controller('category')
 @ApiBearerAuth()
@@ -113,6 +119,37 @@ export class CategoryController {
         }
     )
 
+    this.subscriber.consume<ICategoryBundleUpdated>(
+      { name: 'CategorySync/CategoryUpdatedBundles' },
+      (data):Promise<void>=>{
+        this.syncCategoryUpdated({...data})
+        return
+      }
+    )
+
+    this.subscriber.consume<ICategoryImageUpdated>(
+      { name: 'CategorySync/CategoryUpdatedImage' },
+      (data):Promise<void>=>{
+        this.syncCategoryUpdated({...data})
+        return
+      }
+    )
+
+    this.subscriber.consume<ICategoryNameUpdated>(
+      { name: 'CategorySync/CategoryUpdatedName'},
+      (data):Promise<void>=>{
+        this.syncCategoryUpdated({...data})
+        return
+      }
+    )
+
+    this.subscriber.consume<ICategoryProductUpdated>(
+      { name: 'CategorySync/CategoryUpdatedProducts'},
+      (data):Promise<void>=>{
+        this.syncCategoryUpdated({...data})
+        return
+      }
+    )
   }
 
   async syncCategoryRegistered(data:ICategoryCreated){
@@ -120,15 +157,10 @@ export class CategoryController {
     await service.execute(data)
   }
 
-  // async syncCategoryDeleted(data:IBundleDeleted){
-  //   let service= new BundleDeletedSyncroniceService(this.mongoose)
-  //   await service.execute(data)
-  // }
-
-  // async syncCategoryUpdated(data:BundleUpdatedInfraestructureRequestDTO){
-  //   let service= new BundleUpdatedSyncroniceService(this.mongoose)
-  //   await service.execute({...data})
-  // }
+  async syncCategoryUpdated(data:CategoryUpdatedInfraestructureRequestDTO){
+    let service= new CategoryUpdatedSyncroniceService(this.mongoose)
+    await service.execute({...data})
+  }
 
   @Post('create')
   @UseInterceptors(FileInterceptor('image'))
@@ -293,7 +325,7 @@ export class CategoryController {
           new UpdateCategoryApplicationService(
             new RabbitMQPublisher(this.channel),
             this.ormCommandCategoryRepo,
-            this.ormQueryCategoryRepo,
+            this.odmQueryCategoryRepo,
             new CloudinaryService(),
             new UuidGen(),
           ),

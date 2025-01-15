@@ -76,7 +76,7 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
                 query.name = { $regex: criteria.name, $options: 'i' }
 
             if (criteria.category && criteria.category.length > 0) 
-                query.category = { $elemMatch: { name: { $in: criteria.category } } };
+                query.category = { $elemMatch: { name: { $in: criteria.category.map((c: string) => new RegExp(c, 'i')) } } };
 
             if (criteria.price)
                 query.price = { ...query.price, $gte: criteria.price }

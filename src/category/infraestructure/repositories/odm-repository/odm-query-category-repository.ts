@@ -27,6 +27,13 @@ export class OdmCategoryQueryRepository implements IQueryCategoryRepository {
     private readonly categorymodel: Model<OdmCategory>
     private readonly mapper:OdmCategoryMapper
 
+    constructor(mongoose: Mongoose) {
+        this.bundlemodel = mongoose.model<OdmBundle>('odmbundle', OdmBundleSchema)
+        this.productmodel = mongoose.model<OdmProduct>('odmproduct', OdmProductSchema)
+        this.categorymodel= mongoose.model<OdmCategory>('odmcategory', OdmProductCategorySchema)
+        this.mapper= new OdmCategoryMapper()
+    }
+
 
     async trasnformtodatamodel(odm:OdmCategory):Promise<ICategory>{
 
@@ -64,12 +71,7 @@ export class OdmCategoryQueryRepository implements IQueryCategoryRepository {
         }
     }
 
-    constructor(mongoose: Mongoose) {
-        this.bundlemodel = mongoose.model<OdmBundle>('odmbundle', OdmBundleSchema)
-        this.productmodel = mongoose.model<OdmProduct>('odmproduct', OdmProductSchema)
-        this.categorymodel= mongoose.model<OdmCategory>('odmcategory', OdmProductCategorySchema)
-        this.mapper= new OdmCategoryMapper()
-    }
+
 
     async findAllCategories(criteria: FindAllCategoriesApplicationRequestDTO): Promise<Result<Category[]>> {
         try {
@@ -80,8 +82,6 @@ export class OdmCategoryQueryRepository implements IQueryCategoryRepository {
             .limit(criteria.perPage)
             .exec()
 
-            console.log(odm)
-
             for (const o of odm){
                 model.push(await this.mapper.fromPersistencetoDomain(o))
             }
@@ -89,7 +89,6 @@ export class OdmCategoryQueryRepository implements IQueryCategoryRepository {
             return Result.success(model)
         
         } catch (error) {
-            console.log(error)
             return Result.fail(error.message);
         }
     }
@@ -155,14 +154,12 @@ export class OdmCategoryQueryRepository implements IQueryCategoryRepository {
     }
     async verifyCategoryExistenceByName(categoryName: CategoryName): Promise<Result<boolean>> {
         try{
-            console.log(categoryName)
             let odm=await this.categorymodel.findOne({name:categoryName.Value}) 
             if(!odm)
                 return Result.success(false)
             return Result.success(true)
         }
         catch(e){
-            console.log(e)
             return Result.fail( new NotFoundException('Find category unsucssessfully'))
         }
     }

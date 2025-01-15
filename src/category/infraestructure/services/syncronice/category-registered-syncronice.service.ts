@@ -28,6 +28,8 @@ implements ISycnchronizeService<CategoryRegistredInfraestructureRequestDTO,void>
           let odmProduct = await this.productmodel.findOne({ id: productId });
           if (odmProduct) {
             odmProducts.push(odmProduct);
+            odmProduct.category.push({id:event.categoryId,name:event.categoryName})
+            odmProduct.save()
           }
         }
 
@@ -35,10 +37,11 @@ implements ISycnchronizeService<CategoryRegistredInfraestructureRequestDTO,void>
             let odmBundle = await this.bundlemodel.findOne({ id: bundleId });
             if (odmBundle) {
               odmBundles.push(odmBundle);
+              odmBundle.category.push({id:event.categoryId,name:event.categoryName})
+              odmBundle.save()
             }
-          }
+        }
 
-          console.log(odmBundles)
         const category = new this.categorymodel({
             id: event.categoryId,
             name: event.categoryName,
@@ -56,9 +59,7 @@ implements ISycnchronizeService<CategoryRegistredInfraestructureRequestDTO,void>
             }))
             : [],
         })
-        console.log(category)
-        let pepep=await this.categorymodel.create(category)
-        console.log(pepep)
+        await this.categorymodel.create(category)
         return Result.success(undefined)
     }   
 }

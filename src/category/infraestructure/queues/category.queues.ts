@@ -3,6 +3,6 @@ export const CategoryQueues = [
     { name: 'CategorySync/CategoryDeleted', pattern: 'CategoryDeleted' },
     { name: 'CategorySync/CategoryUpdatedBundles', pattern: 'CategoryUpdatedBundles' },
     { name: 'CategorySync/CategoryUpdatedImage', pattern: 'CategoryUpdatedImage' },
-    { name: 'CategorySync/PromotionUpdatedName', pattern: 'PromotionUpdatedName' },
+    { name: 'CategorySync/CategoryUpdatedName', pattern: 'CategoryUpdatedName' },
     { name: 'CategorySync/CategoryUpdatedProducts', pattern: 'CategoryUpdatedProducts' },
 ]

@@ -90,10 +90,10 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
                 query.name = { $regex: criteria.name, $options: 'i' }
 
             if (criteria.category) 
-                query.category = { $elemMatch: { name: { $in: criteria.category } } };
+                query.category = { $elemMatch: { name: { $in: criteria.category.map((c: string) => new RegExp(c, 'i')) } } };
 
             if (criteria.price)
-                query.price = { ...query.price, $gte: criteria.price }
+                query.price = { ...query.price, $lte: criteria.price }
 
             if (criteria.discount)
                 query.discount = { $gt: 0 };
@@ -139,7 +139,6 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
             return Result.success(await this.odmMapper.fromPersistencetoDomain(odm))
         }
         catch(e){
-            console.log(e)
             return Result.fail( new NotFoundException('Find bundle unsucssessfully'))
         }
     }
