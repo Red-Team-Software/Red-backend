@@ -1,13 +1,13 @@
 import { Body, Controller, Get, Param, Post, Query, Logger, Inject, UseGuards } from '@nestjs/common';
 import { ICuponRepository } from 'src/cupon/domain/repository/cupon.interface.repository';
-import { OrmCuponRepository } from '../repository/orm-cupon-repository';
+import { OrmCuponRepository } from '../repository/orm-repository/orm-cupon-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateCuponApplicationService } from 'src/cupon/application/services/command/create-cupon-application-service';
 import { ExceptionDecorator } from 'src/common/application/aspects/exeption-decorator/exception-decorator';
 import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
 import { UuidGen } from 'src/common/infraestructure/id-gen/uuid-gen';
 import { IQueryCuponRepository } from 'src/cupon/application/query-repository/query-cupon-repository';
-import { OrmCuponQueryRepository } from '../repository/orm-cupon-query-repository';
+import { OrmCuponQueryRepository } from '../repository/orm-repository/orm-cupon-query-repository';
 import { FindCuponByIdApplicationService } from 'src/cupon/application/services/query/find-cupon-by-id-application-service';
 import { FindAllCuponsInfraestructureRequestDTO } from '../dto-request/find-all-cupons-infraestructure-request';
 import { PaginationRequestDTO } from 'src/common/application/services/dto/request/pagination-request-dto';

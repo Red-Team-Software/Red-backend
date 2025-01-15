@@ -1,11 +1,11 @@
 import { DataSource, Repository } from 'typeorm';
-import { OrmCategoryEntity } from '../entities/orm-entities/orm-category-entity';
+import { OrmCategoryEntity } from '../../entities/orm-entities/orm-category-entity';
 import { Result } from 'src/common/utils/result-handler/result';
 import { Category } from 'src/category/domain/aggregate/category.aggregate';
 import { IMapper } from 'src/common/application/mappers/mapper.interface';
-import { OrmCategoryMapper } from '../mapper/orm-category-mapper';
+import { OrmCategoryMapper } from '../../mapper/orm-category-mapper';
 import { UuidGen } from 'src/common/infraestructure/id-gen/uuid-gen';
-import { OrmCategoryImage } from '../entities/orm-entities/orm-category-image.entity';
+import { OrmCategoryImage } from '../../entities/orm-entities/orm-category-image.entity';
 import { IQueryCategoryRepository } from 'src/category/application/query-repository/query-category-repository';
 import { NotFoundException } from 'src/common/infraestructure/infraestructure-exception';
 import { FindAllCategoriesApplicationRequestDTO } from 'src/category/application/dto/request/find-all-categories-request.dto';
