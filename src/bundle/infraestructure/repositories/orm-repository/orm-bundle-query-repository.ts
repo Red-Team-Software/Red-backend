@@ -70,6 +70,8 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
                 .leftJoinAndSelect('bundle.promotions','promotion')
                 .leftJoinAndSelect('bundle.products','products')
                 .leftJoinAndSelect('bundle.categories','categories')
+                .take(criteria.perPage)
+                .skip(criteria.page)
 
                 if (criteria.category) 
                     query.andWhere('LOWER(categories.name) LIKE ANY(:categoryNames)', { categoryNames: criteria.category.map(name => `%${name.toLowerCase()}%`) })

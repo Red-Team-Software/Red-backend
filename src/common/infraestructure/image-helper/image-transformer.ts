@@ -6,7 +6,8 @@ export class ImageTransformer
 
     async base64ToFile ( base64: string ): Promise<Express.Multer.File>
     {
-        const arr = base64.split( ',' )
+        try{        
+            const arr = base64.split( ',' )
         const bstr = atob( arr[ arr.length - 1 ] )
         let n = bstr.length
         const u8arr = new Uint8Array( n )
@@ -30,6 +31,9 @@ export class ImageTransformer
             stream: Readable.from(u8arr), 
         };
         return multerFile
+        }catch(e){
+            console.log(e)
+        } 
     }
 
     async base64ToVideo ( base64: string ): Promise<File>

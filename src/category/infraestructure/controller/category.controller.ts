@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Patch, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ICategoryRepository } from 'src/category/domain/repository/category-repository.interface';
-import { OrmCategoryRepository } from '../repositories/category-typeorm-repository';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateCategoryInfrastructureRequestDTO } from '../dto-request/create-category-infrastructure-request.dto';
 import { ExceptionDecorator } from 'src/common/application/aspects/exeption-decorator/exception-decorator';
@@ -42,6 +41,21 @@ import { IQueryBundleRepository } from 'src/bundle/application/query-repository/
 import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
 import { OrmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository';
 import { OrmProductQueryRepository } from 'src/product/infraestructure/repositories/orm-repository/orm-product-query-repository';
+import { CategoryQueues } from '../queues/category.queues';
+import { RabbitMQSubscriber } from 'src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber';
+import { ICategoryCreated } from '../interfaces/category-created.interface';
+import { CategoryRegisteredSyncroniceService } from '../services/syncronice/category-registered-syncronice.service';
+import { Mongoose } from 'mongoose';
+import { OdmProductQueryRepository } from 'src/product/infraestructure/repositories/odm-repository/odm-product-query-repository';
+import { OdmCategoryQueryRepository } from '../repositories/odm-repository/odm-query-category-repository';
+import { OdmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/odm-repository/odm-bundle-query-repository';
+import { OrmCategoryRepository } from '../repositories/category-typeorm-repository';
+import { ICategoryBundleUpdated } from '../interfaces/category-bundle-update.interface';
+import { CategoryUpdatedInfraestructureRequestDTO } from '../services/dto/request/category-updated-infraestructure-request-dto';
+import { CategoryUpdatedSyncroniceService } from '../services/syncronice/category-updated-syncronice.service';
+import { ICategoryNameUpdated } from '../interfaces/category-name-update.interface';
+import { ICategoryImageUpdated } from '../interfaces/category-image-update.interface';
+import { ICategoryProductUpdated } from '../interfaces/category-product-update.interface';
 
 @Controller('category')
 @ApiBearerAuth()
@@ -49,21 +63,103 @@ import { OrmProductQueryRepository } from 'src/product/infraestructure/repositor
 @ApiTags("Category")
 export class CategoryController {
 
-  private readonly ormCategoryRepo: ICategoryRepository
+  private readonly ormCommandCategoryRepo: ICategoryRepository
   private readonly idGen: IIdGen<string>
   private readonly ormCategoryQueryRepo: IQueryCategoryRepository
   private readonly ormQueryCategoryRepo: IQueryCategoryRepository
   private readonly ormQueryBundleRepo:IQueryBundleRepository
   private readonly ormQueryProductRepo:IQueryProductRepository
+  private readonly subscriber:RabbitMQSubscriber
+  private readonly odmQueryProductRepo:IQueryProductRepository
+  private readonly odmQueryCategoryRepo: IQueryCategoryRepository
+  private readonly odmQueryBundleRepo:IQueryBundleRepository
   
+
+
+    private initializeQueues():void{        
+      CategoryQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+    }
+    
+    private buildQueue(name: string, pattern: string) {
+        this.subscriber.buildQueue({
+              name,
+              pattern,
+              exchange: {
+                name: 'DomainEvent',
+                type: 'direct',
+                options: {
+                  durable: false,
+                },
+         },
+      })
+    }
+    
   constructor(
-    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+    @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose
+
   ) {
     this.idGen = new UuidGen();
-    this.ormCategoryRepo = new OrmCategoryRepository(PgDatabaseSingleton.getInstance())
+    this.ormCommandCategoryRepo = new OrmCategoryRepository(PgDatabaseSingleton.getInstance())
     this.ormCategoryQueryRepo = new OrmCategoryQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryBundleRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryProductRepo=new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
+    this.odmQueryProductRepo = new OdmProductQueryRepository(mongoose)
+    this.odmQueryCategoryRepo= new OdmCategoryQueryRepository(mongoose)
+    this.odmQueryBundleRepo= new OdmBundleQueryRepository(mongoose)
+    this.subscriber= new RabbitMQSubscriber(this.channel)
+
+    this.initializeQueues()
+
+    this.subscriber.consume<ICategoryCreated>(
+        { name: 'CategorySync/CategoryCreated'}, 
+        (data):Promise<void>=>{
+          this.syncCategoryRegistered(data)
+          return
+        }
+    )
+
+    this.subscriber.consume<ICategoryBundleUpdated>(
+      { name: 'CategorySync/CategoryUpdatedBundles' },
+      (data):Promise<void>=>{
+        this.syncCategoryUpdated({...data})
+        return
+      }
+    )
+
+    this.subscriber.consume<ICategoryImageUpdated>(
+      { name: 'CategorySync/CategoryUpdatedImage' },
+      (data):Promise<void>=>{
+        this.syncCategoryUpdated({...data})
+        return
+      }
+    )
+
+    this.subscriber.consume<ICategoryNameUpdated>(
+      { name: 'CategorySync/CategoryUpdatedName'},
+      (data):Promise<void>=>{
+        this.syncCategoryUpdated({...data})
+        return
+      }
+    )
+
+    this.subscriber.consume<ICategoryProductUpdated>(
+      { name: 'CategorySync/CategoryUpdatedProducts'},
+      (data):Promise<void>=>{
+        this.syncCategoryUpdated({...data})
+        return
+      }
+    )
+  }
+
+  async syncCategoryRegistered(data:ICategoryCreated){
+    let service= new CategoryRegisteredSyncroniceService(this.mongoose)
+    await service.execute(data)
+  }
+
+  async syncCategoryUpdated(data:CategoryUpdatedInfraestructureRequestDTO){
+    let service= new CategoryUpdatedSyncroniceService(this.mongoose)
+    await service.execute({...data})
   }
 
   @Post('create')
@@ -88,9 +184,10 @@ export class CategoryController {
     let service = new ExceptionDecorator(
       new CreateCategoryApplication(
         new RabbitMQPublisher(this.channel),
-        this.ormCategoryRepo,
-        this.ormQueryProductRepo,
-        this.ormQueryBundleRepo,
+        this.ormCommandCategoryRepo,
+        this.odmQueryCategoryRepo,
+        this.odmQueryProductRepo,
+        this.odmQueryBundleRepo,
         this.idGen,
         new CloudinaryService()
       )
@@ -112,7 +209,7 @@ export class CategoryController {
 
     let service = new ExceptionDecorator(
       new LoggerDecorator(
-        new FindAllCategoriesApplicationService(this.ormCategoryQueryRepo),
+        new FindAllCategoriesApplicationService(this.odmQueryCategoryRepo),
         new NestLogger(new Logger())
       )
     );
@@ -132,7 +229,7 @@ export class CategoryController {
     let service= new ExceptionDecorator(
       new LoggerDecorator(
           new FindCategoryByProductIdApplicationService(
-            this.ormCategoryQueryRepo
+            this.odmQueryCategoryRepo
           )
         ,new NestLogger(new Logger())
       )
@@ -150,7 +247,7 @@ export class CategoryController {
   let service = new ExceptionDecorator(
     new LoggerDecorator(
       new FindCategoryByBundleIdApplicationService(
-        this.ormCategoryQueryRepo
+        this.odmQueryCategoryRepo
       ),
       new NestLogger(new Logger())
     )
@@ -170,7 +267,7 @@ export class CategoryController {
       new LoggerDecorator(
         new PerformanceDecorator(
           new FindCategoryByIdApplicationService(
-            this.ormCategoryQueryRepo
+            this.odmQueryCategoryRepo
           ),new NestTimer(),new NestLogger(new Logger())
         ),new NestLogger(new Logger())
       )
@@ -189,7 +286,12 @@ export class CategoryController {
       new SecurityDecorator(
         new LoggerDecorator(
           new PerformanceDecorator(
-            new DeleteCategoryApplication(this.ormCategoryRepo,new RabbitMQPublisher(this.channel),new CloudinaryService()),
+            new DeleteCategoryApplication(
+              this.ormCommandCategoryRepo,
+              this.odmQueryCategoryRepo,
+              new RabbitMQPublisher(this.channel),
+              new CloudinaryService()
+            ),
             new NestTimer(),new NestLogger(new Logger())
           ),new NestLogger(new Logger())
         ),credential,[UserRoles.ADMIN])
@@ -222,8 +324,8 @@ export class CategoryController {
         new PerformanceDecorator(
           new UpdateCategoryApplicationService(
             new RabbitMQPublisher(this.channel),
-            this.ormCategoryRepo,
-            this.ormQueryCategoryRepo,
+            this.ormCommandCategoryRepo,
+            this.odmQueryCategoryRepo,
             new CloudinaryService(),
             new UuidGen(),
           ),

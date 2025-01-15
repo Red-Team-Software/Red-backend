@@ -60,8 +60,8 @@ import { UserWalletBalanceAddedPushNotificationApplicationRequestDTO } from "src
 import { UpdateUserWalletBalancePushNotificationApplicationService } from "src/notification/application/services/command/update-user-wallet-balance-push-notification-application.service";
 import { CourierAssignedToDeliver } from "src/order/domain/domain-events/courier-assigned-to-deliver";
 
-@ApiTags('Notification')
-@Controller('notification')
+@ApiTags('Notifications')
+@Controller('notifications')
 export class NotificationController {
 
     private readonly subscriber:RabbitMQSubscriber;

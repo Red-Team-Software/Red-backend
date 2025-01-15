@@ -6,14 +6,14 @@ export class CategoryUpdatedImage extends DomainEvent {
     serialize(): string {
         let data = {  
             categoryId: this.categoryId.Value,
-            categoryImage: this.categoryImage?.Value || null,
+            categoryImage: this.categoryImage.Value,
         };
         return JSON.stringify(data);
     }
 
     static create(
         categoryId: CategoryID,
-        categoryImage: CategoryImage | null
+        categoryImage: CategoryImage
     ): CategoryUpdatedImage {
         return new CategoryUpdatedImage(
             categoryId,
@@ -23,7 +23,7 @@ export class CategoryUpdatedImage extends DomainEvent {
 
     constructor(
         public categoryId: CategoryID,
-        public categoryImage: CategoryImage | null
+        public categoryImage: CategoryImage
     ) {
         super();
     }
