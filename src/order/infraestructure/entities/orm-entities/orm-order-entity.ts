@@ -56,7 +56,7 @@ export class OrmOrderEntity implements IOrderInterface {
     @JoinColumn()
     order_report?: OrmOrderReportEntity;
 
-    @OneToOne( () => OrmCourierEntity, (courier) => courier.orders, { nullable: true, eager: true} )
+    @ManyToOne( () => OrmCourierEntity, (courier) => courier.orders, { nullable: true, eager: true} )
     @JoinColumn({ name: 'courier_id' })
     order_courier?: OrmCourierEntity | null;
 
