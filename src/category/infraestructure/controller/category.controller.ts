@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Patch, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ICategoryCommandRepository } from 'src/category/domain/repository/category-command-repository.interface';
-import { OrmCategoryCommandRepository } from '../repositories/category-typeorm-repository';
+import { ICategoryRepository } from 'src/category/domain/repository/category-repository.interface';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateCategoryInfrastructureRequestDTO } from '../dto-request/create-category-infrastructure-request.dto';
 import { ExceptionDecorator } from 'src/common/application/aspects/exeption-decorator/exception-decorator';
@@ -16,7 +15,7 @@ import { PaginationRequestDTO } from 'src/common/application/services/dto/reques
 import { RabbitMQPublisher } from 'src/common/infraestructure/events/publishers/rabbit-mq-publisher';
 import { Channel } from 'amqplib';
 import { IQueryCategoryRepository } from 'src/category/application/query-repository/query-category-repository';
-import { OrmCategoryQueryRepository } from '../repositories/orm-category-query-repository';
+import { OrmCategoryQueryRepository } from '../repositories/orm-repository/orm-category-query-repository';
 import { FindAllCategoriesInfraestructureRequestDTO } from '../dto-request/find-all-categories-infraestructure-request-dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { DeleteCategoryApplication } from 'src/category/application/services/command/delete-category-application';
@@ -34,7 +33,7 @@ import { FindCategoryByBundleIdApplicationService } from 'src/category/applicati
 import { FindCategoryByBundleIdInfraestructureRequestDTO } from '../dto-request/find-category-by-bundle-id-infrastructure-request.dto';
 import { SecurityDecorator } from 'src/common/application/aspects/security-decorator/security-decorator';
 import { UserRoles } from 'src/user/domain/value-object/enum/user.roles';
-import { DeleteCategoryByIdInfraestructureRequestDTO } from '../dto-request/delete-category-infraestructure-request-dto';
+import { DeleteCategoryByIdInfraestructureRequestDTO } from '../dto-request/delte-category-infraestructure-request-dto';
 import { UpdateCategoryApplicationService } from 'src/category/application/services/command/update-category-application';
 import { ByIdDTO } from 'src/common/infraestructure/dto/entry/by-id.dto';
 import { UpdateCategoryInfraestructureRequestDTO } from '../dto-request/update-category-infraestructure-request-dto';
@@ -42,14 +41,21 @@ import { IQueryBundleRepository } from 'src/bundle/application/query-repository/
 import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
 import { OrmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository';
 import { OrmProductQueryRepository } from 'src/product/infraestructure/repositories/orm-repository/orm-product-query-repository';
-import { AddProductToCategoryInfraestructureRequestDTO } from '../dto-request/add-product-to-category-infraestructure-request.dto';
-import { AddBundleToCategoryInfraestructureRequestDTO } from '../dto-request/add-bundle-to-category-infraestructure-request.dto';
-import { AddProductToCategoryApplicationService } from 'src/category/application/services/command/add-product-to-category-application-service';
-import { AddBundleToCategoryApplicationService } from 'src/category/application/services/command/add-bundle-to-category-application-service';
-import { DateHandler } from 'src/common/infraestructure/date-handler/date-handler';
-import { IAuditRepository } from 'src/common/application/repositories/audit.repository';
-import { AuditDecorator } from 'src/common/application/aspects/audit-decorator/audit-decorator';
-import { OrmAuditRepository } from 'src/common/infraestructure/repository/orm-repository/orm-audit.repository';
+import { CategoryQueues } from '../queues/category.queues';
+import { RabbitMQSubscriber } from 'src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber';
+import { ICategoryCreated } from '../interfaces/category-created.interface';
+import { CategoryRegisteredSyncroniceService } from '../services/syncronice/category-registered-syncronice.service';
+import { Mongoose } from 'mongoose';
+import { OdmProductQueryRepository } from 'src/product/infraestructure/repositories/odm-repository/odm-product-query-repository';
+import { OdmCategoryQueryRepository } from '../repositories/odm-repository/odm-query-category-repository';
+import { OdmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/odm-repository/odm-bundle-query-repository';
+import { OrmCategoryRepository } from '../repositories/orm-repository/category-typeorm-repository';
+import { ICategoryBundleUpdated } from '../interfaces/category-bundle-update.interface';
+import { CategoryUpdatedInfraestructureRequestDTO } from '../services/dto/request/category-updated-infraestructure-request-dto';
+import { CategoryUpdatedSyncroniceService } from '../services/syncronice/category-updated-syncronice.service';
+import { ICategoryNameUpdated } from '../interfaces/category-name-update.interface';
+import { ICategoryImageUpdated } from '../interfaces/category-image-update.interface';
+import { ICategoryProductUpdated } from '../interfaces/category-product-update.interface';
 
 @Controller('category')
 @ApiBearerAuth()
@@ -57,23 +63,104 @@ import { OrmAuditRepository } from 'src/common/infraestructure/repository/orm-re
 @ApiTags("Category")
 export class CategoryController {
 
-  private readonly ormCategoryCommandRepo: ICategoryCommandRepository
+  private readonly ormCommandCategoryRepo: ICategoryRepository
   private readonly idGen: IIdGen<string>
   private readonly ormCategoryQueryRepo: IQueryCategoryRepository
+  private readonly ormQueryCategoryRepo: IQueryCategoryRepository
   private readonly ormQueryBundleRepo:IQueryBundleRepository
   private readonly ormQueryProductRepo:IQueryProductRepository
-  private readonly auditRepository: IAuditRepository
+  private readonly subscriber:RabbitMQSubscriber
+  private readonly odmQueryProductRepo:IQueryProductRepository
+  private readonly odmQueryCategoryRepo: IQueryCategoryRepository
+  private readonly odmQueryBundleRepo:IQueryBundleRepository
   
+
+
+    private initializeQueues():void{        
+      CategoryQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+    }
+    
+    private buildQueue(name: string, pattern: string) {
+        this.subscriber.buildQueue({
+              name,
+              pattern,
+              exchange: {
+                name: 'DomainEvent',
+                type: 'direct',
+                options: {
+                  durable: false,
+                },
+         },
+      })
+    }
+    
   constructor(
-    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+    @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose
+
   ) {
     this.idGen = new UuidGen();
-    this.ormCategoryCommandRepo = new OrmCategoryCommandRepository(PgDatabaseSingleton.getInstance())
+    this.ormCommandCategoryRepo = new OrmCategoryRepository(PgDatabaseSingleton.getInstance())
     this.ormCategoryQueryRepo = new OrmCategoryQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryBundleRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryProductRepo=new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
-    this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance())
+    this.odmQueryProductRepo = new OdmProductQueryRepository(mongoose)
+    this.odmQueryCategoryRepo= new OdmCategoryQueryRepository(mongoose)
+    this.odmQueryBundleRepo= new OdmBundleQueryRepository(mongoose)
+    this.subscriber= new RabbitMQSubscriber(this.channel)
 
+    this.initializeQueues()
+
+    this.subscriber.consume<ICategoryCreated>(
+        { name: 'CategorySync/CategoryCreated'}, 
+        (data):Promise<void>=>{
+          this.syncCategoryRegistered(data)
+          return
+        }
+    )
+
+    this.subscriber.consume<ICategoryBundleUpdated>(
+      { name: 'CategorySync/CategoryUpdatedBundles' },
+      (data):Promise<void>=>{
+        this.syncCategoryUpdated({...data})
+        return
+      }
+    )
+
+    this.subscriber.consume<ICategoryImageUpdated>(
+      { name: 'CategorySync/CategoryUpdatedImage' },
+      (data):Promise<void>=>{
+        this.syncCategoryUpdated({...data})
+        return
+      }
+    )
+
+    this.subscriber.consume<ICategoryNameUpdated>(
+      { name: 'CategorySync/CategoryUpdatedName'},
+      (data):Promise<void>=>{
+        this.syncCategoryUpdated({...data})
+        return
+      }
+    )
+
+    this.subscriber.consume<ICategoryProductUpdated>(
+      { name: 'CategorySync/CategoryUpdatedProducts'},
+      (data):Promise<void>=>{
+        this.syncCategoryUpdated({...data})
+        return
+      }
+    )
+  }
+
+  async syncCategoryRegistered(data:ICategoryCreated){
+    let service= new CategoryRegisteredSyncroniceService(this.mongoose)
+    await service.execute(data)
+  }
+
+  async syncCategoryUpdated(data:CategoryUpdatedInfraestructureRequestDTO){
+    console.log('data de afuera',data)
+    let service= new CategoryUpdatedSyncroniceService(this.mongoose)
+    await service.execute({...data})
   }
 
   @Post('create')
@@ -91,7 +178,6 @@ export class CategoryController {
       })
     ) image: Express.Multer.File
   ) {
-    console.log('Incoming request body:', entry);
 
     if(!entry.bundles) entry.bundles=[]
     if(!entry.products) entry.products=[]
@@ -99,10 +185,10 @@ export class CategoryController {
     let service = new ExceptionDecorator(
       new CreateCategoryApplication(
         new RabbitMQPublisher(this.channel),
-        this.ormCategoryCommandRepo,
-        this.ormCategoryQueryRepo,
-        this.ormQueryProductRepo,
-        this.ormQueryBundleRepo,
+        this.ormCommandCategoryRepo,
+        this.odmQueryCategoryRepo,
+        this.odmQueryProductRepo,
+        this.odmQueryBundleRepo,
         this.idGen,
         new CloudinaryService()
       )
@@ -124,7 +210,7 @@ export class CategoryController {
 
     let service = new ExceptionDecorator(
       new LoggerDecorator(
-        new FindAllCategoriesApplicationService(this.ormCategoryQueryRepo),
+        new FindAllCategoriesApplicationService(this.odmQueryCategoryRepo),
         new NestLogger(new Logger())
       )
     );
@@ -144,7 +230,7 @@ export class CategoryController {
     let service= new ExceptionDecorator(
       new LoggerDecorator(
           new FindCategoryByProductIdApplicationService(
-            this.ormCategoryQueryRepo
+            this.odmQueryCategoryRepo
           )
         ,new NestLogger(new Logger())
       )
@@ -162,7 +248,7 @@ export class CategoryController {
   let service = new ExceptionDecorator(
     new LoggerDecorator(
       new FindCategoryByBundleIdApplicationService(
-        this.ormCategoryQueryRepo
+        this.odmQueryCategoryRepo
       ),
       new NestLogger(new Logger())
     )
@@ -173,7 +259,7 @@ export class CategoryController {
 }
 
   @Get(':id')
-  async getCategoryById(
+  async getProductById(
     @GetCredential() credential:ICredential,
     @Param() entry:FindCategoryByIdInfraestructureRequestDTO
   ){
@@ -182,7 +268,7 @@ export class CategoryController {
       new LoggerDecorator(
         new PerformanceDecorator(
           new FindCategoryByIdApplicationService(
-            this.ormCategoryQueryRepo
+            this.odmQueryCategoryRepo
           ),new NestTimer(),new NestLogger(new Logger())
         ),new NestLogger(new Logger())
       )
@@ -198,15 +284,18 @@ export class CategoryController {
     @Param() entry:DeleteCategoryByIdInfraestructureRequestDTO) {
     
     let service = new ExceptionDecorator(
-      new AuditDecorator(
-        new SecurityDecorator(
-          new LoggerDecorator(
-            new PerformanceDecorator(
-              new DeleteCategoryApplication(this.ormCategoryCommandRepo,this.ormCategoryQueryRepo, new RabbitMQPublisher(this.channel),new CloudinaryService()),
-              new NestTimer(),new NestLogger(new Logger())
-            ),new NestLogger(new Logger())
-          ),credential,[UserRoles.ADMIN]), this.auditRepository, new DateHandler()
-        )
+      new SecurityDecorator(
+        new LoggerDecorator(
+          new PerformanceDecorator(
+            new DeleteCategoryApplication(
+              this.ormCommandCategoryRepo,
+              this.odmQueryCategoryRepo,
+              new RabbitMQPublisher(this.channel),
+              new CloudinaryService()
+            ),
+            new NestTimer(),new NestLogger(new Logger())
+          ),new NestLogger(new Logger())
+        ),credential,[UserRoles.ADMIN])
       )
 
     const response = await service.execute({ userId:credential.account.idUser,...entry });
@@ -236,11 +325,10 @@ export class CategoryController {
         new PerformanceDecorator(
           new UpdateCategoryApplicationService(
             new RabbitMQPublisher(this.channel),
-            this.ormCategoryCommandRepo,
-            this.ormCategoryQueryRepo,
-            this.ormQueryProductRepo,
+            this.ormCommandCategoryRepo,
+            this.odmQueryCategoryRepo,
             new CloudinaryService(),
-            new UuidGen()
+            new UuidGen(),
           ),
           new NestTimer(),
           new NestLogger(new Logger()),
@@ -256,75 +344,9 @@ export class CategoryController {
       ...entry,
       userId: credential.account.idUser,
       categoryId: entryId.id,
-      image: buffer
+      image: buffer,
     });
     
-    return response.getValue;
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Patch('add-product/:id')
-  async addProductToCategory(
-    @GetCredential() credential: ICredential,
-    @Param() entryId: ByIdDTO,
-    @Body() entry: AddProductToCategoryInfraestructureRequestDTO,
-  ) {
-    let service = new ExceptionDecorator(
-      new SecurityDecorator(
-        new PerformanceDecorator(
-          new AddProductToCategoryApplicationService(
-            this.ormCategoryCommandRepo,
-            this.ormCategoryQueryRepo,
-            this.ormQueryProductRepo,
-            new RabbitMQPublisher(this.channel),
-          ),
-          new NestTimer(),
-          new NestLogger(new Logger()),
-        ),
-        credential,
-        [UserRoles.ADMIN],
-      ),
-    );
-
-    const response = await service.execute({
-      userId: credential.account.idUser,
-      categoryId: entryId.id,
-      productId: entry.productId,
-    });
-
-    return response.getValue;
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Patch('add-bundle/:id')
-  async addBundleToCategory(
-    @GetCredential() credential: ICredential,
-    @Param() entryId: ByIdDTO,
-    @Body() entry: AddBundleToCategoryInfraestructureRequestDTO,
-  ) {
-    let service = new ExceptionDecorator(
-      new SecurityDecorator(
-        new PerformanceDecorator(
-          new AddBundleToCategoryApplicationService(
-            this.ormCategoryCommandRepo,
-            this.ormCategoryQueryRepo,
-            this.ormQueryBundleRepo,
-            new RabbitMQPublisher(this.channel),
-          ),
-          new NestTimer(),
-          new NestLogger(new Logger()),
-        ),
-        credential,
-        [UserRoles.ADMIN],
-      ),
-    );
-
-    const response = await service.execute({
-      userId: credential.account.idUser,
-      categoryId: entryId.id,
-      bundleId: entry.bundleId,
-    });
-
     return response.getValue;
   }
 

@@ -31,9 +31,10 @@ export class FindAllCategoriesApplicationService extends IApplicationService<
         id: category.getId().Value,
         name: category.Name.Value,
         image: category.Image.Value,
-        //TODO QUITAR ESTO DE POR MEDIO DE {id:strin}
         products: category.Products.map((productId) => ({id:productId.Value})),
-        bundles: category.Bundles.map((bundleId)=> ({id:bundleId.Value}))
+        bundles: category.Bundles
+        ? category.Bundles.map(b=>({id:b.Value}))
+        : [],
       })
     });
 

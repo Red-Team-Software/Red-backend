@@ -1,6 +1,6 @@
 import { IApplicationService} from 'src/common/application/services';
 import { Result } from 'src/common/utils/result-handler/result';
-import { ICourierQueryRepository } from 'src/courier/application/query-repository/courier-query-repository-interface';
+import { ICourierQueryRepository } from 'src/courier/application/repository/query-repository/courier-query-repository-interface';
 import { OrderId } from 'src/order/domain/value_objects/order-id';
 import { IQueryOrderRepository } from '../../query-repository/order-query-repository-interface';
 import { bundlesOrderByIdResponse, courierOrderByIdResponse, FindOrderByIdResponseDto, orderByIdResponse, productsOrderByIdResponse } from '../../dto/response/find-order-by-id-response-dto';
@@ -31,10 +31,10 @@ export class FindOrderCourierPositionApplicationService extends IApplicationServ
             return Result.fail(new ErrorOrderDontHaveCourierAssignedApplicationException());
 
         let res = {
-            latActual: order.orderCourier.location.lat,
-            longActual: order.orderCourier.location.long,
-            longPuntoLlegada: order.orderDirection.long,
-            latPuntoLlegada: order.orderDirection.lat
+            latActual: order.orderCourier.location.lat.toString(),
+            longActual: order.orderCourier.location.long.toString(),
+            longPuntoLlegada: order.orderDirection.long.toString(),
+            latPuntoLlegada: order.orderDirection.lat.toString()
         }
 
         return Result.success(res);

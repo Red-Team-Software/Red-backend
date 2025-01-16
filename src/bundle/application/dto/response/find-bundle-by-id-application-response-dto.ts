@@ -17,7 +17,7 @@ export interface FindBundleByIdApplicationResponseDTO {
         id: string
         name:string
     }[]
-    products:{
+    product:{
         id: string
         name:string
     }[]

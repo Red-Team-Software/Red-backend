@@ -100,7 +100,6 @@ describe("User Aggregate Invariants", () => {
     catch (error) {
       caughtError = error
     }
-    console.log(caughtError)
     assert.ok(
       caughtError instanceof InvalidUserDirectionQuantityException,
       `Expected InvalidUserDirectionQuantityException but got ${caughtError}`

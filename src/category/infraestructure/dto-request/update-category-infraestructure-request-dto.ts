@@ -9,52 +9,30 @@ export class UpdateCategoryInfraestructureRequestDTO {
     @MinLength(3)
     @IsOptional()
     name: string;
-    
-    @ApiProperty({
-        required: false,
-        default: ['123e4567-e89b-12d3-a456-426614174000']
-    })
-    @IsArray()
-    @ArrayNotEmpty()
+
+    @ApiProperty({ required: false, default: 'Esta es una categoría de verduras frescas.' })
+    @IsString()
+    @MinLength(3)
     @IsOptional()
-    @Transform(({ value }) => {
-        if (!value) return [];
-        if (typeof value === 'string') {
-            try {
-                // Si es un JSON array, parsearlo
-                const parsed = JSON.parse(value);
-                if (Array.isArray(parsed)) return parsed;
-                throw new Error("Invalid JSON");
-            } catch {
-                // Si no es JSON válido, asumir que es un único UUID
-                return [value];
-            }
-        }
-        return value; // Si ya es un array, devolverlo como está
-    })
-    products: string[];
+    description?: string;
 
     @ApiProperty({
         required: false,
-        default: ['123e4567-e89b-12d3-a456-426614174001']
+        default: ['123e4567-e89b-12d3-a456-426614174000'],
+        type: [String],
+        description: "Array de IDs de productos asociados a la categoría",
     })
     @IsArray()
-    @ArrayNotEmpty()
     @IsOptional()
-    @Transform(({ value }) => {
-        if (!value) return [];
-        if (typeof value === 'string') {
-            try {
-                // Si es un JSON array, parsearlo
-                const parsed = JSON.parse(value);
-                if (Array.isArray(parsed)) return parsed;
-                throw new Error("Invalid JSON");
-            } catch {
-                // Si no es JSON válido, asumir que es un único UUID
-                return [value];
-            }
-        }
-        return value; // Si ya es un array, devolverlo como está
+    products?: string[];
+
+    @ApiProperty({
+        required: false,
+        default: ['123e4567-e89b-12d3-a456-426614174001'],
+        type: [String],
+        description: "Array de IDs de bundles asociados a la categoría",
     })
-    bundles: string[];
+    @IsArray()
+    @IsOptional()
+    bundles?: string[];
 }

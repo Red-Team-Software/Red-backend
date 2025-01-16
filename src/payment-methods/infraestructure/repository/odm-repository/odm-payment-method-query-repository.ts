@@ -64,7 +64,8 @@ export class OdmPaymentMethodQueryRepository implements IPaymentMethodQueryRepos
         try{
             let PaymentMethod = await this.model.find()
             .skip(pagination.page)
-            .limit(pagination.perPage);
+            .limit(pagination.perPage)
+            .exec();
             
             if(!PaymentMethod) 
                 return Result.fail(new NotFoundException('Payment method not found'));
@@ -81,10 +82,13 @@ export class OdmPaymentMethodQueryRepository implements IPaymentMethodQueryRepos
 
     async verifyMethodRegisteredByName(name: PaymentMethodName): Promise<Result<boolean>> {
         try {
-            const paymentMethod = await this.model.findOne({ name: name.paymentMethodName });
+            const paymentMethod = await this.model.findOne({ name: name.paymentMethodName })
+            .exec();
+
             if (!paymentMethod) {
                 return Result.success(false);
             }
+
             return Result.success(true);
         } catch (error) {
             return Result.fail(new NotFoundException('Error verifying payment method registration'));
@@ -93,7 +97,8 @@ export class OdmPaymentMethodQueryRepository implements IPaymentMethodQueryRepos
 
     async findMethodByIdDetail(id: PaymentMethodId): Promise<Result<IPaymentMethodModel>> {
         try{
-            let PaymentMethod = await this.model.findOne({id: id.paymentMethodId});
+            let PaymentMethod = await this.model.findOne({id: id.paymentMethodId})
+            .exec();
             
             if(!PaymentMethod) 
                 return Result.fail(new NotFoundException('Payment method not found'));
@@ -106,7 +111,8 @@ export class OdmPaymentMethodQueryRepository implements IPaymentMethodQueryRepos
 
     async findMethodByNameDetail(name: PaymentMethodName): Promise<Result<IPaymentMethodModel>> {
         try{
-            let PaymentMethod = await this.model.findOne({name: name.paymentMethodName});
+            let PaymentMethod = await this.model.findOne({name: name.paymentMethodName})
+            .exec();
             
             if(!PaymentMethod) 
                 return Result.fail(new NotFoundException('Payment method not found'));
@@ -121,7 +127,8 @@ export class OdmPaymentMethodQueryRepository implements IPaymentMethodQueryRepos
         try{
             let PaymentMethod = await this.model.find()
             .skip(pagination.page)
-            .limit(pagination.perPage);
+            .limit(pagination.perPage)
+            .exec();
             
             if(!PaymentMethod) 
                 return Result.fail(new NotFoundException('Payment method not found'));

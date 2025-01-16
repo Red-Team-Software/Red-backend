@@ -1,7 +1,7 @@
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface"
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen"
 import { UpdateProfileInfraestructureRequestDTO } from "../dto/request/update-profile-infraestructure-request-dto"
-import { Controller, Inject, Patch, Body, Get, Query, Post, UseGuards, BadRequestException, Logger, Delete, Put, Param } from "@nestjs/common"
+import { Controller, Inject, Patch, Body, Get, Query, Post, UseGuards, BadRequestException, Logger, Delete, Put, Param, UseInterceptors, FileTypeValidator, ParseFilePipe, UploadedFile } from "@nestjs/common"
 import { ApiBearerAuth, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { UpdateProfileInfraestructureResponseDTO } from "../dto/response/update-profile-infraestructure-response-dto"
 import { OrmUserQueryRepository } from "../repositories/orm-repository/orm-user-query-repository"
@@ -53,7 +53,14 @@ import { ByIdDTO } from "src/common/infraestructure/dto/entry/by-id.dto"
 import { AddUserCouponInfraestructureRequestDTO } from "../dto/request/add-user-coupon-application-request-dto"
 import { AddUserCouponApplicationService } from "src/user/application/services/command/add-user-coupon-application.service"
 import { IQueryCuponRepository } from "src/cupon/application/query-repository/query-cupon-repository"
-import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-cupon-query-repository"
+import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-repository/orm-cupon-query-repository"
+import { UserQueues } from "../queues/user.queues"
+import { ICreateOrder } from "src/notification/infraestructure/interfaces/create-order.interface"
+import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber"
+import { Mongoose } from "mongoose"
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateProfileApplicationRequestDTO } from "src/user/application/dto/request/update-profile-application-request-dto"
+import { UpdateProfileApplicationResponseDTO } from "src/user/application/dto/response/update-profile-application-response-dto"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -72,11 +79,29 @@ export class UserController {
   private readonly geocodification: IGeocodification
   private readonly hereMapsSingelton: HereMapsSingelton;
   private readonly ormCuponQueryRepo: IQueryCuponRepository;
+  private readonly subscriber: RabbitMQSubscriber;
   
-
+    private initializeQueues():void{        
+      UserQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+        }
+        
+    private buildQueue(name: string, pattern: string) {
+      this.subscriber.buildQueue({
+        name,
+        pattern,
+        exchange: {
+          name: 'DomainEvent',
+          type: 'direct',
+          options: {
+            durable: false,
+          },
+        },
+      })
+    }
   
   constructor(
-    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+    @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose,
   ) {
     this.idGen= new UuidGen()
     this.ormUserQueryRepo=new OrmUserQueryRepository(PgDatabaseSingleton.getInstance())
@@ -89,7 +114,17 @@ export class UserController {
     this.hereMapsSingelton= HereMapsSingelton.getInstance()
     this.geocodification= new GeocodificationOpenStreeMapsDomainService()
     this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
-
+    this.subscriber= new RabbitMQSubscriber(this.channel);
+    
+    this.initializeQueues();
+        
+    this.subscriber.consume<ICreateOrder>(
+      { name: 'ApplyCoupon/OrderRegistered'}, 
+        (data):Promise<void>=>{
+            this.aplyCoupon(data)
+            return
+        }
+    )
   }
 
   @Patch('update/profile')
@@ -140,6 +175,56 @@ export class UserController {
     })
     return response.getValue       
   }
+
+  @Patch('update/image')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiResponse({
+    status: 200,
+    description: 'User image updated',
+    type: UpdateProfileInfraestructureResponseDTO,
+  })
+  async UpdateProfileImage( 
+    @GetCredential() credential:ICredential,
+    @UploadedFile(
+          new ParseFilePipe({
+            validators: [
+              new FileTypeValidator({
+                fileType: /(jpeg|jpg|png)$/,
+              }),
+            ],
+          })
+        ) image: Express.Multer.File ) { 
+
+      let service= 
+      new ExceptionDecorator<UpdateProfileApplicationRequestDTO,UpdateProfileApplicationResponseDTO>(
+        new AuditDecorator<UpdateProfileApplicationRequestDTO,UpdateProfileApplicationResponseDTO>(
+          // new LoggerDecorator(
+            new PerformanceDecorator<UpdateProfileApplicationRequestDTO,UpdateProfileApplicationResponseDTO>(
+              new UpdateProfileApplicationService(
+                this.ormUserCommandRepo,
+                this.ormUserQueryRepo,
+                this.ormAccountCommandRepo,
+                this.ormAccountQueryRepo,
+                new RabbitMQPublisher(this.channel),
+                new CloudinaryService(),
+                this.idGen,
+                this.encryptor
+            // ), new NestLogger(new Logger())
+            ), new NestTimer(), new NestLogger(new Logger())
+          ),this.auditRepository, new DateHandler()
+        )
+    )
+
+    const buffer = image.buffer;
+
+    let response= await service.execute({
+      userId:credential.account.idUser,
+      image:buffer,
+      accountId:credential.account.id
+    })
+    return {image:response.getValue.image}   
+  }
+
 
   @Get('')
   async findUserById(@Query() entry:{id:string}){
@@ -194,7 +279,7 @@ export class UserController {
 
   let response = await service.execute({
     userId:credential.account.idUser,
-    directions:{...entry, id:entry.directionId}
+    directions:{...entry, id:entry.directionId , lat: Number(entry.lat), long: Number(entry.long)}
   })
 
   return response.getValue
@@ -247,7 +332,12 @@ export class UserController {
       )
   )
   let response = await service.execute({
-    userId:credential.account.idUser,directions:entry
+    userId:credential.account.idUser,
+    directions:{
+      ...entry,
+      lat: Number(entry.lat),
+      long: Number(entry.long)
+    }
   })
   return response.getValue
   }
@@ -278,15 +368,12 @@ export class UserController {
   let response = await service.execute({userId:credential.account.idUser,directions:{id:entry.id}})
   return response.getValue
   }
-  @Put('aply/coupon')
-  @ApiResponse({
-    status: 200,
-    description: 'Aply a coupon to the user',
-    type: AddUserDirectionsInfraestructureRequestDTO,
-  })
-  async aplyCoupon(
-    @GetCredential() credential:ICredential ,
-    @Body() entry:AddUserCouponInfraestructureRequestDTO){
+  
+  
+  async aplyCoupon(entry:ICreateOrder){
+
+    if (!entry.orderCupon || entry.orderCupon.length === 0)
+      return
 
     let service= new ExceptionDecorator(
       new AuditDecorator(  
@@ -302,7 +389,7 @@ export class UserController {
         ),this.auditRepository, new DateHandler()
       )
   )
-  let response = await service.execute({userId:credential.account.idUser,idCoupon:entry.id})
+  let response = await service.execute({userId: entry.orderUserId,idCoupon:entry.orderCupon})
   return response.getValue
   }
 }

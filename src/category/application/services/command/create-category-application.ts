@@ -2,7 +2,7 @@
 
 import { CreateCategoryApplicationRequestDTO } from "../../dto/request/create-category-application-request.dto";
 import { CreateCategoryApplicationResponseDTO } from "../../dto/response/create-category-application-response.dto";
-import { ICategoryCommandRepository } from "src/category/domain/repository/category-command-repository.interface";
+import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
 import { Category } from "src/category/domain/aggregate/category.aggregate";
 import { CategoryID } from "src/category/domain/value-object/category-id";
 import { CategoryName } from "src/category/domain/value-object/category-name";
@@ -30,8 +30,8 @@ export class CreateCategoryApplication extends IApplicationService<
 > {
     constructor(
         private readonly eventPublisher: IEventPublisher,
-        private readonly categoryCommandRepository: ICategoryCommandRepository,
-        private readonly categoryQueryRepository: IQueryCategoryRepository,
+        private readonly categoryRepository: ICategoryRepository,
+        private readonly categoryqueryRepository: IQueryCategoryRepository,
         private readonly productQueryRepository: IQueryProductRepository,
         private readonly bundleQueryRepository: IQueryBundleRepository,
         private readonly idGen: IIdGen<string>,
@@ -42,7 +42,7 @@ export class CreateCategoryApplication extends IApplicationService<
 
     async execute(command: CreateCategoryApplicationRequestDTO): Promise<Result<CreateCategoryApplicationResponseDTO>> {
         // Check if category name already exists
-        const existingCategory = await this.categoryQueryRepository.findCategoryByName(
+        const existingCategory = await this.categoryqueryRepository.verifyCategoryExistenceByName(
             CategoryName.create(command.name)
         )
 
@@ -55,21 +55,20 @@ export class CreateCategoryApplication extends IApplicationService<
         const products:Product[]=[]
 
         const bundles:Bundle[]=[]
-        if(command.products){
-            for (const productId of command.products) {
-                const productResult = await this.productQueryRepository.findProductById(ProductID.create(productId));
-                if (!productResult.isSuccess()) 
-                    return Result.fail(productResult.getError)
-                products.push(productResult.getValue)
-            }}
-        
-        if(command.bundles){
+
+        for (const productId of command.products) {
+            const productResult = await this.productQueryRepository.findProductById(ProductID.create(productId));
+            if (!productResult.isSuccess()) 
+                return Result.fail(productResult.getError)
+            products.push(productResult.getValue)
+        }
+
         for (const bundleId of command.bundles) {
             const bundleResult=await this.bundleQueryRepository.findBundleById(BundleId.create(bundleId))
             if(!bundleResult.isSuccess())
                 return Result.fail(bundleResult.getError)
             bundles.push(bundleResult.getValue)
-        }}
+        }
 
 
         // Handle image upload
@@ -101,7 +100,7 @@ export class CreateCategoryApplication extends IApplicationService<
 
 
         // Save category to repository
-        const saveResult = await this.categoryCommandRepository.createCategory(category);
+        const saveResult = await this.categoryRepository.createCategory(category);
         if (!saveResult.isSuccess()) {
             return Result.fail(new ErrorCreatingCategoryApplicationException());
         }

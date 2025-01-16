@@ -61,6 +61,9 @@ import { DeleteCardToUserApplicationService } from "src/user/application/service
 import { DeleteCardApplicationRequestDTO } from "src/user/application/dto/request/wallet/delete-card-application-request-dto"
 import { CalculateBallanceService } from "src/user/domain/domain-services/services/calculate-ballance.service"
 import { ConvertDollars } from "../domain-services/convert-dollars.service"
+import { Mongoose } from "mongoose"
+import { OdmPaymentMethodQueryRepository } from "src/payment-methods/infraestructure/repository/odm-repository/odm-payment-method-query-repository"
+import { PaymentMethodName } from "src/payment-methods/domain/value-objects/payment-method-name"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -76,10 +79,12 @@ export class PaymentWalletController {
     private readonly userExternalSite: IUserExternalAccount;
     private readonly transactionQueryRepository: IQueryTransactionRepository<ITransaction>;
     private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
+    private readonly paymentMethodOdmQueryRepository: IPaymentMethodQueryRepository;
     private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>
 
     constructor(
-        @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel
+        @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+        @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose,
     ) {
         this.idGen= new UuidGen();
         this.ormUserQueryRepo=new OrmUserQueryRepository(PgDatabaseSingleton.getInstance());
@@ -93,6 +98,7 @@ export class PaymentWalletController {
                     new OrmPaymentMethodMapper()
                 );
         this.TransactionCommandRepository = new OrmTransactionCommandRepository(PgDatabaseSingleton.getInstance());
+        this.paymentMethodOdmQueryRepository = new OdmPaymentMethodQueryRepository(this.mongoose);
     }
 
     @Post('recharge/pago-movil')
@@ -127,13 +133,23 @@ export class PaymentWalletController {
             )
         );
 
+        let paymentId: string;
+
+        if (!entry.paymentId) {
+        let payment = await this.paymentMethodOdmQueryRepository.findMethodByNameDetail(
+            PaymentMethodName.create("pago movil"));
+
+            paymentId = payment.getValue.paymentMethodId;
+        }
 
         let data: AddBalancePagoMovilApplicationRequestDTO = {
             userId: credential.account.idUser,
             amount: entry.amount,
             currency: 'bsf',
             date: new Date(),
-            paymentId: entry.paymentId
+            paymentId: entry.paymentId 
+            ? entry.paymentId 
+            : paymentId
         }
 
         let response = await service.execute(data);
@@ -175,13 +191,23 @@ export class PaymentWalletController {
             )
         );
 
+        let paymentId: string;
+
+        if (!entry.paymentId) {
+            let payment = await this.paymentMethodOdmQueryRepository.findMethodByNameDetail(
+                PaymentMethodName.create("zelle"));
+
+            paymentId = payment.getValue.paymentMethodId;
+        }
 
         let data: AddBalancePagoMovilApplicationRequestDTO = {
             userId: credential.account.idUser,
             amount: entry.amount,
             currency: 'usd',
             date: new Date(),
-            paymentId: entry.paymentId
+            paymentId: entry.paymentId 
+            ? entry.paymentId
+            : paymentId
         }
 
         let response = await service.execute(data);

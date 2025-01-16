@@ -22,7 +22,7 @@ import { DirectionName } from 'src/user/domain/entities/directions/value-objects
 import { UserCoupon } from "src/user/domain/entities/coupon/user-coupon.entity"
 import { CuponId } from "src/cupon/domain/value-object/cupon-id"
 import { CuponState } from "src/user/domain/entities/coupon/value-objects/cupon-state"
-import { OrmCuponEntity } from "src/cupon/infraestructure/orm-entities/orm-cupon-entity"
+import { OrmCuponEntity } from "src/cupon/infraestructure/entities/orm-entities/orm-cupon-entity"
 import { OrmCuponUserEntity } from "../../entities/orm-entities/orm-coupon-user-entity"
 
 
@@ -79,9 +79,6 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
             ormDirectionUserEntities ? ormDirectionUserEntities : [],
             domainEntity.UserImage ? domainEntity.UserImage.Value : undefined,
         )
-
-        console.log(data)
-
         return data
 
     }

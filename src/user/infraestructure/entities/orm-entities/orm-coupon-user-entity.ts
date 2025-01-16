@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-user-entity";
-import { OrmCuponEntity } from "src/cupon/infraestructure/orm-entities/orm-cupon-entity";
+import { OrmCuponEntity } from "src/cupon/infraestructure/entities/orm-entities/orm-cupon-entity";
 import { CuponUserStateEnum } from "src/user/domain/entities/coupon/value-objects/enum/cupon-user-state.enum";
 
 @Entity('cupon_user')

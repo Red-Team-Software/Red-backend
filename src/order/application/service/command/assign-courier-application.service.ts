@@ -2,7 +2,7 @@ import { IEventPublisher } from "src/common/application/events/event-publisher/e
 import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
 import { NotFoundCourierApplicationException } from "src/courier/application/application-exceptions/not-found-courier-application.exception";
-import { ICourierQueryRepository } from "src/courier/application/query-repository/courier-query-repository-interface";
+import { ICourierQueryRepository } from "src/courier/application/repository/query-repository/courier-query-repository-interface";
 import { CourierId } from "src/courier/domain/value-objects/courier-id";
 import { ICommandOrderRepository } from "src/order/domain/command-repository/order-command-repository-interface";
 import { OrderCourierId } from "src/order/domain/value_objects/order-courier-id";

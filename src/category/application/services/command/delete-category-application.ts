@@ -1,5 +1,5 @@
 
-import { ICategoryCommandRepository } from "src/category/domain/repository/category-command-repository.interface";
+import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
 import { DeleteCategoryApplicationRequestDTO } from "../../dto/request/delete-category-application-request.dto";
 import { DeleteCategoryApplicationResponseDTO } from "../../dto/response/delete-category-application-response.dto";
 import { CategoryID } from "src/category/domain/value-object/category-id";
@@ -16,11 +16,12 @@ DeleteCategoryApplicationRequestDTO,
 DeleteCategoryApplicationResponseDTO
 > {
     constructor(
-        private readonly commandCategoryRepository: ICategoryCommandRepository, 
-        private readonly queryCategoryRepository: IQueryCategoryRepository,
+        private readonly categoryRepository: ICategoryRepository, 
+        private readonly categoryqueryRepository: IQueryCategoryRepository,
         private readonly eventPublisher: IEventPublisher,
-        private readonly fileUploader: IFileUploader) 
-        {
+        private readonly fileUploader: IFileUploader
+    ) 
+    {
         super()
     }
 
@@ -28,11 +29,11 @@ DeleteCategoryApplicationResponseDTO
         const categoryId = CategoryID.create(request.id);
 
         // Verificar si la categoría existe antes de eliminarla
-        const existingCategory = await this.queryCategoryRepository.findCategoryById(categoryId);
+        const existingCategory = await this.categoryqueryRepository.findCategoryById(categoryId);
         if (!existingCategory.isSuccess()) {
             return Result.fail(existingCategory.getError);
         }
-        existingCategory.getValue.delete() //crear el evento del dominio
+        existingCategory.getValue.delete(existingCategory.getValue.getId()) //crear el evento del dominio
 
         let image=existingCategory.getValue.Image
         if(image){
@@ -41,7 +42,7 @@ DeleteCategoryApplicationResponseDTO
                 return Result.fail(new ErrorDeletingImagesApplicationException())
         }
 
-        let categoryDeleteResponse= await this.commandCategoryRepository.deleteCategoryById(categoryId);
+        let categoryDeleteResponse= await this.categoryRepository.deleteCategoryById(categoryId);
 
         if (!categoryDeleteResponse.isSuccess()){
             return Result.fail(categoryDeleteResponse.getError)

@@ -61,8 +61,8 @@ export class AddUserDirectionApplicationService extends IApplicationService
                 name: direction.DirectionName.Value,
                 direction: data.directions.direction,
                 favorite: direction.DirectionFavorite.Value,
-                lat: direction.DirectionLat.Value,
-                long: direction.DirectionLng.Value
+                lat: direction.DirectionLat.Value.toString(),
+                long: direction.DirectionLng.Value.toString()
             }
         )
     }

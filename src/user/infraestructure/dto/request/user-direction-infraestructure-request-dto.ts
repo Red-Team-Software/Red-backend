@@ -19,10 +19,10 @@ export class UserDirectionsInfraestructureRequestDTO {
     favorite:boolean
     
     @ApiProperty( { required: true, default:38.8951 })
-    @IsNumber()
-    lat:number
+    @IsString()
+    lat:string
 
     @ApiProperty( { required: true, default:-77.0364 })
-    @IsNumber()
-    long:number
+    @IsString()
+    long:string
 }

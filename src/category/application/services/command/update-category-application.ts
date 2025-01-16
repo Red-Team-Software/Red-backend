@@ -1,7 +1,7 @@
 import { IApplicationService } from 'src/common/application/services';
 import { IEventPublisher } from 'src/common/application/events/event-publisher/event-publisher.abstract';
 import { Result } from 'src/common/utils/result-handler/result';
-import { ICategoryCommandRepository } from 'src/category/domain/repository/category-command-repository.interface';
+import { ICategoryRepository } from 'src/category/domain/repository/category-repository.interface';
 import { IQueryCategoryRepository } from 'src/category/application/query-repository/query-category-repository';
 import { UpdateCategoryApplicationRequestDTO } from '../../dto/request/update-category-application-request-dto';
 import { UpdateCategoryApplicationResponseDTO } from '../../dto/response/update-category-application-response-dt';
@@ -17,8 +17,7 @@ import { TypeFile } from 'src/common/application/file-uploader/enums/type-file.e
 import { IIdGen } from 'src/common/application/id-gen/id-gen.interface';
 import { ErrorDeletingImagesApplicationException } from 'src/product/application/application-exepction/error-deleting-images-application-exception';
 import { ErrorUploadingImagesApplicationException } from '../../application-exception/error-uploading-images-application-exception';
-import { IQueryProductRepository } from 'src/product/application/query-repository/query-product-repository';
-import { NotFoundProductApplicationException } from 'src/product/application/application-exepction/not-found-product-application-exception';
+import { ErrorUpdatingProductApplicationException } from 'src/product/application/application-exepction/error-updating-product-application-exception';
 import { ErrorNameAlreadyApplicationException } from '../../application-exception/error-name-already-application-exception';
 export class UpdateCategoryApplicationService extends IApplicationService<
     UpdateCategoryApplicationRequestDTO,
@@ -26,9 +25,8 @@ export class UpdateCategoryApplicationService extends IApplicationService<
 > {
     constructor(
         private readonly eventPublisher: IEventPublisher,
-        private readonly commandCategoryRepository: ICategoryCommandRepository,
+        private readonly commandCategoryRepository: ICategoryRepository,
         private readonly queryCategoryRepository: IQueryCategoryRepository,
-        private readonly queryProductRepository: IQueryProductRepository,
         private readonly fileUpdater:IFileUploader,
         private readonly idGen:IIdGen<string>
     ) {
@@ -37,7 +35,7 @@ export class UpdateCategoryApplicationService extends IApplicationService<
 
     async execute(command: UpdateCategoryApplicationRequestDTO): Promise<Result<UpdateCategoryApplicationResponseDTO>> {
         if (!command.name && !command.image && !command.products && !command.bundles) {
-            return Result.fail(new ErrorDTOUpdatingCategoryApplicationException());
+            return Result.fail(new ErrorDTOUpdatingCategoryApplicationException);
         }
 
         const categoryResult = await this.queryCategoryRepository.findCategoryById(
@@ -47,28 +45,30 @@ export class UpdateCategoryApplicationService extends IApplicationService<
         if (!categoryResult.isSuccess()) {
             return Result.fail(new NotFoundCategoryApplicationException());
         }
-        
+
         const category = categoryResult.getValue;
 
         if (command.name) {
-            const newName= CategoryName.create(command.name)
-            let response=await this.queryCategoryRepository.findCategoryByName(newName)
-            if(!response.isSuccess()){
-                return Result.fail(new ErrorNameAlreadyApplicationException())
-            }
-            if(response.getValue){
-                return Result.fail(new ErrorNameAlreadyApplicationException())
-            }
-            category.updateName(newName);
-        }
-        
-        if (command.image) {
-            let categoryImage:CategoryImage
-            let fileResponse=await this.fileUpdater.uploadFile( command.image,TypeFile.image,await this.idGen.genId())
-            if(!fileResponse.isSuccess){
-                return Result.fail(new ErrorUploadingImagesApplicationException())
-            }
+
+            let search=await this.queryCategoryRepository.verifyCategoryExistenceByName(
+                CategoryName.create(command.name)
+            )
+    
+            if (!search.isSuccess())
+                return Result.fail(new ErrorUpdatingProductApplicationException())
+    
+            if (search.getValue) 
+                return Result.fail(new ErrorNameAlreadyApplicationException());
             
+            category.updateName(CategoryName.create(command.name));
+        }
+
+        if (command.image) {
+
+            let fileResponse=await this.fileUpdater.uploadFile( command.image,TypeFile.image,await this.idGen.genId())
+            
+            if(!fileResponse.isSuccess)
+                return Result.fail(new ErrorUploadingImagesApplicationException)
 
             let fileResponseDelete=await this.fileUpdater.deleteFile(category.Image.Value)
 
@@ -78,17 +78,9 @@ export class UpdateCategoryApplicationService extends IApplicationService<
             category.updateImage(CategoryImage.create(fileResponse.getValue.url));
 
         }
-        
+
         if (command.products) {
             const productIds = command.products.map(id => ProductID.create(id));
-            productIds.forEach(async product => {
-                let productResult= await this.queryProductRepository.findProductById(product)
-                if(!productResult.isSuccess()){
-                    return Result.fail(new NotFoundProductApplicationException())
-                }
-            }); 
-
-            
             category.updateProducts(productIds);
         }
 
@@ -96,13 +88,13 @@ export class UpdateCategoryApplicationService extends IApplicationService<
             const bundleIds = command.bundles.map(id => BundleId.create(id));
             category.updateBundles(bundleIds);
         }
-        
+
         const updateResult = await this.commandCategoryRepository.updateCategory(category);
-        
+
         if (!updateResult.isSuccess()) {
             return Result.fail(updateResult.getError);
         }
-        
+
         await this.eventPublisher.publish(category.pullDomainEvents());
 
         return Result.success({

@@ -54,7 +54,7 @@ import { AvailablePaymentMethodApplicationService } from "src/payment-methods/ap
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('Payment Method')
-@Controller('payment-method')
+@Controller('payment/method')
 export class PaymentMethodController {
 
     private readonly auditRepository: IAuditRepository;
@@ -217,6 +217,9 @@ export class PaymentMethodController {
             userId: credential.account.idUser,
             ...data
         }
+
+        if (!values.page) values.page = 1;
+        if (!values.perPage) values.perPage = 10;
         
         let getAllPaymentMethodService = new ExceptionDecorator(
             new LoggerDecorator(

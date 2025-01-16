@@ -94,7 +94,7 @@ export class OrderQueryRepository extends Repository<OrmOrderEntity> implements 
         ? {
             courierId: ormOrder.order_courier.id,
             courierName: ormOrder.order_courier.name,
-            courierImage: ormOrder.order_courier.image.image,
+            courierImage: ormOrder.order_courier.image,
             location: {
                 lat: ormOrder.order_courier.latitude,
                 long: ormOrder.order_courier.longitude

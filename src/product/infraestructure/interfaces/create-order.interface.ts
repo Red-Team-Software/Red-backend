@@ -6,7 +6,7 @@ export interface ICreateOrder {
     totalAmount:       TotalAmount;
     orderDirection:    OrderDirection;
     orderCourierId:    string;
-    orderCuponId:      string;
+    orderCupon:      string;
     orderUserId:       string;
     products:          Details[];
     bundles:           Details[];
@@ -18,6 +18,8 @@ export interface ICreateOrder {
 export interface Details {
     id:       string;
     quantity: number;
+    price:    number;
+    currency: string;
 }
 
 export interface OrderCourier {

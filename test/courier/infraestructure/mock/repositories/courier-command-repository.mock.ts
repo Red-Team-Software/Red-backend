@@ -1,6 +1,6 @@
 import { Result } from "src/common/utils/result-handler/result";
 import { Courier } from "src/courier/domain/aggregate/courier";
-import { ICourierRepository } from "src/courier/domain/repositories/courier-repository-interface";
+import { ICourierRepository } from "src/courier/application/repository/repositories-command/courier-repository-interface";
 
 
 export class CourierRepositoryMock implements ICourierRepository{

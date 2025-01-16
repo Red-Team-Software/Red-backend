@@ -38,6 +38,7 @@ export type orderByIdResponse = {
     }[]
     orderTimeCreated: string;
     totalAmount: number;
+    subTotal: number;
     orderReceivedDate?: Date;
     orderPayment?: {
         paymetAmount: number;
@@ -45,8 +46,8 @@ export type orderByIdResponse = {
         payementMethod: string;
     };
     orderDirection: {
-        lat: number;
-        long: number;
+        lat: string;
+        long: string;
     };
     //orderDirection: string;
     products?: productsOrderByIdResponse[];
