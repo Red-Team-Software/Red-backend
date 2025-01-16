@@ -1,19 +1,21 @@
 import { DataSource, Repository } from "typeorm";
-import { OrmCuponEntity } from "../../entities/orm-entities/orm-cupon-entity";
-import { ICuponRepository } from "src/cupon/domain/repository/cupon.interface.repository";
+import { OrmCuponEntity } from "../orm-entities/orm-cupon-entity";
 import { Result } from "src/common/utils/result-handler/result";
 import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
 import { CuponId } from "src/cupon/domain/value-object/cupon-id";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { NotFoundException, PersistenceException } from "src/common/infraestructure/infraestructure-exception";
+import { ICommandCuponRepository } from "src/cupon/domain/repository/command-cupon-repository";
 
-
-export class OrmCuponRepository extends Repository<OrmCuponEntity> implements ICuponRepository {
-    private mapper: IMapper<Cupon, OrmCuponEntity>;
-
-    constructor(dataSource: DataSource) {
+export class OrmCuponCommandRepository extends Repository<OrmCuponEntity> implements ICommandCuponRepository {
+    
+    private readonly mapper: IMapper<Cupon,OrmCuponEntity>;
+    
+    constructor(dataSource: DataSource, mapper: IMapper<Cupon, OrmCuponEntity>) {
         super(OrmCuponEntity, dataSource.createEntityManager());
+        this.mapper = mapper
     }
+
 
     async createCupon(cupon: Cupon): Promise<Result<Cupon>> {
         try {
@@ -37,25 +39,12 @@ export class OrmCuponRepository extends Repository<OrmCuponEntity> implements IC
     async updateCupon(cupon: Cupon): Promise<Result<Cupon>> {
         try {
             const persis = await this.mapper.fromDomaintoPersistence(cupon);
-            await this.save(persis);
+            await this.manager.save(persis);
             return Result.success(cupon);
         } catch (e) {
             return Result.fail(new PersistenceException('Update cupon unsuccessfully'));
         }
     }
 
-    async findCuponById(id: CuponId): Promise<Result<Cupon>> {
-        try {
-            const ormCupon = await this.findOneBy({ id: id.Value });
 
-            if (!ormCupon) {
-                return Result.fail(new NotFoundException('Find cupon unsuccessfully'));
-            }
-
-            const cupon = await this.mapper.fromPersistencetoDomain(ormCupon);
-            return Result.success(cupon);
-        } catch (e) {
-            return Result.fail(new NotFoundException('Find cupon unsuccessfully'));
-        }
-    }
 }

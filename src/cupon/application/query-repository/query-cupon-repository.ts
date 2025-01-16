@@ -4,10 +4,11 @@ import { FindAllCuponsApplicationRequestDTO } from "src/cupon/application/dto/re
 import { CuponId } from "../../domain/value-object/cupon-id";
 import { CuponCode } from "src/cupon/domain/value-object/cupon-code";
 import { CuponName } from "src/cupon/domain/value-object/cupon-name";
+import { FindCuponByIdApplicationRequestDTO } from "../dto/request/find-cupon-by-id-application-requestdto";
 
 export interface IQueryCuponRepository {
     findAllCupons(criteria: FindAllCuponsApplicationRequestDTO): Promise<Result<Cupon[]>>;
-    findCuponById(id:CuponId): Promise<Result<Cupon>>;
+    findCuponById(cuponId:CuponId): Promise<Result<Cupon>>;
     findCuponByCode(code: CuponCode): Promise<Result<Cupon>>;
     verifyCuponExistenceByCode(code: CuponCode): Promise<Result<boolean>>;
     verifyCuponExistenceByName(name: CuponName): Promise<Result<boolean>>;

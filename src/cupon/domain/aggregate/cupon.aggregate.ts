@@ -4,16 +4,27 @@ import { CuponName } from "../value-object/cupon-name";
 import { CuponCode } from "../value-object/cupon-code";
 import { CuponDiscount } from "../value-object/cupon-discount";
 import { CuponState } from "../value-object/cupon-state";
-import { CuponRegistered } from "../domain-events/cupon-created";
+import { CuponCreated } from "../domain-events/cupon-created";
 import { CuponDeleted } from "../domain-events/cupon-delete";
 import { CuponStateChanged } from "../domain-events/cupon-state-change";
 import { InvalidCuponException } from "../domain-exceptions/invalid-cupon-exception";
 
 export class Cupon extends AggregateRoot<CuponId> {
+
+    private constructor(
+        cuponId: CuponId,
+        private cuponName: CuponName,
+        private cuponCode: CuponCode,
+        private cuponDiscount: CuponDiscount,
+        private cuponState: CuponState
+    ) {
+        super(cuponId);
+    }
+    
     protected when(event: DomainEvent): void {
         switch (event.getEventName) {
             case "CuponCreated":
-                const cuponCreated: CuponRegistered = event as CuponRegistered;
+                const cuponCreated: CuponCreated = event as CuponCreated;
                 this.cuponName = cuponCreated.cuponName;
                 this.cuponCode = cuponCreated.cuponCode;
                 this.cuponDiscount = cuponCreated.cuponDiscount;
@@ -41,15 +52,7 @@ export class Cupon extends AggregateRoot<CuponId> {
             throw new InvalidCuponException()
     }
 
-    private constructor(
-        cuponId: CuponId,
-        private cuponName: CuponName,
-        private cuponCode: CuponCode,
-        private cuponDiscount: CuponDiscount,
-        private cuponState: CuponState
-    ) {
-        super(cuponId);
-    }
+    
 
     static registerCupon(
         cuponId: CuponId,
@@ -66,7 +69,7 @@ export class Cupon extends AggregateRoot<CuponId> {
             cuponState
         )
         cupon.apply(
-            CuponRegistered.create(
+            CuponCreated.create(
                 cuponId,
                 cuponName,
                 cuponCode,
@@ -126,4 +129,5 @@ export class Cupon extends AggregateRoot<CuponId> {
     get CuponState(): CuponState {
         return this.cuponState;
     }
+
 }

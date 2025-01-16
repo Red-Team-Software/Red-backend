@@ -202,7 +202,7 @@ export class OrderController {
         this.TransactionCommandRepository = new OrmTransactionCommandRepository(PgDatabaseSingleton.getInstance());
         this.ormProductRepository = new OrmProductQueryRepository(PgDatabaseSingleton.getInstance());
         this.ormBundleRepository = new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance());
-        this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
+        
         this.ormCourierRepository = new CourierRepository(
             PgDatabaseSingleton.getInstance(),
             new OrmCourierMapper(this.idGen)
@@ -231,8 +231,10 @@ export class OrderController {
         );
 
         //*Repositories
+
         this.orderQueryRepository = new OrderQueryRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
         this.orderRepository = new OrmOrderRepository(PgDatabaseSingleton.getInstance(),this.orderMapper);
+        this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
 
         this.initializeQueues();
 
