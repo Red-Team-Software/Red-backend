@@ -158,6 +158,7 @@ export class CategoryController {
   }
 
   async syncCategoryUpdated(data:CategoryUpdatedInfraestructureRequestDTO){
+    console.log('data de afuera',data)
     let service= new CategoryUpdatedSyncroniceService(this.mongoose)
     await service.execute({...data})
   }

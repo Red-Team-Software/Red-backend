@@ -25,7 +25,7 @@ export class OdmCategory extends Document implements IOdmCategory {
         unique: false,
         required: false 
     })   
-    products: {
+    products?: {
         id:string,
         name:string
     }[]
@@ -41,7 +41,7 @@ export class OdmCategory extends Document implements IOdmCategory {
         unique: false,
         required: false 
     })   
-    bundles: {
+    bundles?: {
         id:string,
         name:string
     }[]

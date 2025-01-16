@@ -13,6 +13,7 @@ import { CategoryUpdatedName } from '../domain-events/update-category-name';
 import { CategoryUpdatedImage } from '../domain-events/update-category-image';
 import { CategoryUpdatedProducts } from '../domain-events/update-category-products';
 import { CategoryUpdatedBundles } from '../domain-events/category-update-bundles';
+import { ProductAddedToCategory } from '../domain-events/product-added-to-category';
 
 export class Category extends AggregateRoot<CategoryID> {
     private categoryName: CategoryName;
@@ -69,6 +70,27 @@ export class Category extends AggregateRoot<CategoryID> {
                 this.categoryImage = categoryCreatedEvent.categoryImage;
                 this.products = categoryCreatedEvent.products 
                 this.bundles = categoryCreatedEvent.bundles
+                break;
+            case 'CategoryUpdatedName':
+                const categoryUpdatedNameEvent = event as CategoryUpdatedName;
+                this.categoryName = categoryUpdatedNameEvent.categoryName;
+                break;
+            case "CategoryUpdatedProducts":
+                const categoryUpdatedProductsEvent = event as CategoryUpdatedProducts;
+                this.products = categoryUpdatedProductsEvent.products;
+                break;
+            case "CategoryUpdatedBundles":
+                const categoryUpdatedBundlesEvent = event as CategoryUpdatedBundles;
+                this.bundles = categoryUpdatedBundlesEvent.bundles;
+                break;
+            case 'CategoryUpdatedImage':
+                const categoryUpdatedImageEvent = event as CategoryUpdatedImage;
+                this.categoryImage = categoryUpdatedImageEvent.categoryImage;
+                break;
+            case 'ProductAddedToCategory':
+                const productAddedEvent = event as ProductAddedToCategory;
+                this.products.push(productAddedEvent.productId);
+                break;
         }
     }
 
@@ -87,22 +109,18 @@ export class Category extends AggregateRoot<CategoryID> {
 
     // Métodos de actualización
     public updateName(name: CategoryName): void {
-        this.categoryName = name;
         this.apply(CategoryUpdatedName.create(this.getId(), name));
     }
 
     public updateImage(image: CategoryImage | null): void {
-        this.categoryImage = image;
         this.apply(CategoryUpdatedImage.create(this.getId(), image));
     }
 
     public updateProducts(products: ProductID[]): void {
-        this.products = products;
         this.apply(CategoryUpdatedProducts.create(this.getId(), products));
     }
 
     public updateBundles(bundles: BundleId[]): void {
-        this.bundles = bundles;
         this.apply(CategoryUpdatedBundles.create(this.getId(), bundles));
     }
 
