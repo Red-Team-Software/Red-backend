@@ -32,10 +32,11 @@ implements ISycnchronizeService<PromotionUpdatedInfraestructureRequestDTO,void>{
                 if(b)
                     odmBundles.push(b)
             }
-            promotion.bundles=odmBundles.map(b=>({
+            let b = odmBundles.map(b=>({
                 id:b.id,
                 name:b.name
             }))
+            await this.promotionModel.updateOne({ id: promotion.id }, {$set: {bundles: b}});
         }
         if (event.products){
             const odmProduct:OdmProduct[]=[]
@@ -44,20 +45,20 @@ implements ISycnchronizeService<PromotionUpdatedInfraestructureRequestDTO,void>{
                 if(b)
                     odmProduct.push(b)
             }
-            promotion.products=odmProduct.map(b=>({
+            let p = odmProduct.map(b=>({
                 id:b.id,
                 name:b.name
-            }))        
+            }))
+            await this.promotionModel.updateOne({ id: promotion.id }, {$set: {products: p}});        
         }
         if (event.promotionDescription)
-            promotion.description=event.promotionDescription
+            await this.promotionModel.updateOne({ id: promotion.id }, {$set: {description: event.promotionDescription}});
         if (event.promotionDiscount)
-            promotion.discount=event.promotionDiscount
+            await this.promotionModel.updateOne({ id: promotion.id }, {$set: {discount: event.promotionDiscount}});
         if (event.promotionName)
-            promotion.name=event.promotionName
+            await this.promotionModel.updateOne({ id: promotion.id }, {$set: {name: event.promotionName}});
         if (event.promotionState)
-            promotion.state=event.promotionState
-        await this.promotionModel.updateOne({id:promotion.id},promotion)
+            await this.promotionModel.updateOne({ id: promotion.id }, {$set: {state: event.promotionState}});
 
         return Result.success(undefined)
     }   

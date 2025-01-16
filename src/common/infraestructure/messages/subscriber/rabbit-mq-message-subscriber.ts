@@ -1,11 +1,11 @@
 import { Inject } from "@nestjs/common";
 import { Channel } from "amqplib";
-import { AMQPExchange } from "../../model/rabbitmq/amqp-exchange";
-import { AMQPQueue } from '../../model/rabbitmq/amqp-queue';
+import { AMQPExchange } from "../../events/model/rabbitmq/amqp-exchange";
+import { AMQPQueue } from '../../events/model/rabbitmq/amqp-queue';
 import { IEventSubscriber } from "src/common/application/events/event-subscriber/event-subscriber.interface";
 
-export class RabbitMQSubscriber {
-	private readonly exchangeName = "DomainEvent"; // Nombre del exchange
+export class RabbitMQMessageSubscriber {
+	private readonly exchangeName = "Messages"; // Nombre del exchange
 
 	constructor(
 		@Inject("RABBITMQ_CONNECTION") private readonly channel: Channel

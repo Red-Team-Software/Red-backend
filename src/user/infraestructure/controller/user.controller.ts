@@ -61,6 +61,7 @@ import { Mongoose } from "mongoose"
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateProfileApplicationRequestDTO } from "src/user/application/dto/request/update-profile-application-request-dto"
 import { UpdateProfileApplicationResponseDTO } from "src/user/application/dto/response/update-profile-application-response-dto"
+import { OdmCuponQueryRepository } from "src/cupon/infraestructure/repository/odm-repository/odm-query-coupon-repository"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -113,7 +114,7 @@ export class UserController {
     this.encryptor= new BcryptEncryptor()
     this.hereMapsSingelton= HereMapsSingelton.getInstance()
     this.geocodification= new GeocodificationOpenStreeMapsDomainService()
-    this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
+    this.ormCuponQueryRepo = new OdmCuponQueryRepository(mongoose);
     this.subscriber= new RabbitMQSubscriber(this.channel);
     
     this.initializeQueues();

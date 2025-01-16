@@ -26,8 +26,8 @@ export class CourierRegisteredSyncroniceService implements ISycnchronizeService<
             id: event.courierId,
             name: event.courierName,
             image: event.courierImage,
-            email: response.getValue.email,
-            password: response.getValue.password,
+            email: event.email,
+            password: event.password,
             latitude: event.courierDirection.lat,
             longitude: event.courierDirection.long
         })

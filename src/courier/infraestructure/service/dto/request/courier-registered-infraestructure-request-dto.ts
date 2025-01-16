@@ -6,4 +6,6 @@ export interface CourierRegistredInfraestructureRequestDTO {
         lat: number;
         long: number;
     }
+    email:             string;
+    password:          string;
 }
