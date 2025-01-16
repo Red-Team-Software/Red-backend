@@ -6,9 +6,6 @@ import { PromotionId } from "src/promotion/domain/value-object/promotion-id"
 import { FindPromotionByIdApplicationRequestDTO } from "../../dto/request/find-promotion-by-id-application-request-dto"
 import { FindPromotionbyIdApplicationResponseDTO } from "../../dto/response/find-promotion-by-id-application-response-dto"
 
-
-
-
 export class FindPromotionByIdApplicationService extends 
 IApplicationService<FindPromotionByIdApplicationRequestDTO,FindPromotionbyIdApplicationResponseDTO>{
     constructor(

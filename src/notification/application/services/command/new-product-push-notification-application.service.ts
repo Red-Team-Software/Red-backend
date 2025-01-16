@@ -4,7 +4,6 @@ import { IApplicationService } from "src/common/application/services"
 import { Result } from "src/common/utils/result-handler/result"
 import { NewProductPushNotificationApplicationRequestDTO } from "../../dto/request/new-product-push-notification-application-request-dto"
 import { NewProductPushNotificationApplicationResponseDTO } from "../../dto/response/new-product-push-notification-application-response-dto"
-import { ErrorSendingPushProductApplicationException } from "../../application-exception/error-sending-push-product-application-exception"
 
 
 export class NewProductsPushNotificationApplicationService extends IApplicationService<NewProductPushNotificationApplicationRequestDTO,NewProductPushNotificationApplicationResponseDTO>{

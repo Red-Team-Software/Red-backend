@@ -4,7 +4,6 @@ import { DeleteCategoryApplicationRequestDTO } from "../../dto/request/delete-ca
 import { DeleteCategoryApplicationResponseDTO } from "../../dto/response/delete-category-application-response.dto";
 import { CategoryID } from "src/category/domain/value-object/category-id";
 import { Result } from "src/common/utils/result-handler/result";
-import { NotFoundCategoryApplicationException } from "../../application-exception/not-found-category-application-exception";
 import { IApplicationService } from "src/common/application/services";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IFileUploader } from "src/common/application/file-uploader/file-uploader.interface";

@@ -3,7 +3,6 @@ import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
 import { ICommandOrderRepository } from "src/order/domain/command-repository/order-command-repository-interface";
 import { OrderId } from "src/order/domain/value_objects/order-id";
-import { OrderState } from "src/order/domain/value_objects/order-state";
 import { ErrorModifiyingOrderStateApplicationException } from "../../application-exception/error-modifying-order-status-application.exception";
 import { NotFoundOrderApplicationException } from "../../application-exception/not-found-order-application.exception";
 import { CancelOrderApplicationServiceRequestDto } from "../../dto/request/cancel-order-request-dto";

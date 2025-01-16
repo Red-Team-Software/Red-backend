@@ -2,7 +2,6 @@ import { PushNotifierRequestDto } from "src/common/application/notification-hand
 import { IPushNotifier } from "src/common/application/notification-handler/notification-interface";
 import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
-import { ErrorSendingPushProductApplicationException } from "../../application-exception/error-sending-push-product-application-exception";
 import { NewBundlePushNotificationApplicationRequestDTO } from "../../dto/request/new-bundle-push-notification-application-request-dto";
 import { NewProductPushNotificationApplicationResponseDTO } from "../../dto/response/new-product-push-notification-application-response-dto";
 

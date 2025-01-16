@@ -11,7 +11,6 @@ import { IEncryptor } from 'src/common/application/encryptor/encryptor.interface
 import { IDateHandler } from "src/common/application/date-handler/date-handler.interface";
 import { User } from "src/user/domain/aggregate/user.aggregate";
 import { UserId } from "src/user/domain/value-object/user-id";
-import { UserEmail } from "src/user/domain/value-object/user-email";
 import { UserName } from "src/user/domain/value-object/user-name";
 import { UserPhone } from "src/user/domain/value-object/user-phone";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
@@ -28,7 +27,6 @@ import { Ballance } from "src/user/domain/entities/wallet/value-objects/balance"
 import { IUserExternalAccount } from "src/auth/application/interfaces/user-external-account-interface";
 import { ErrorRegisteringAccountExternalSiteApplicationException } from "../../application-exception/error-registering-account-external-site-application-exception";
 import { IJwtGenerator } from "src/common/application/jwt-generator/jwt-generator.interface";
-import { ICourierRepository } from "src/courier/application/repository/repositories-command/courier-repository-interface";
 import { IMessagesPublisher } from "src/common/application/messages/messages-publisher/messages-publisher.interface";
 import { AccountRegistered } from "../../messages/account-registered";
 

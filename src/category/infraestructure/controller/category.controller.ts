@@ -56,7 +56,6 @@ import { CategoryUpdatedSyncroniceService } from '../services/syncronice/categor
 import { ICategoryNameUpdated } from '../interfaces/category-name-update.interface';
 import { ICategoryImageUpdated } from '../interfaces/category-image-update.interface';
 import { ICategoryProductUpdated } from '../interfaces/category-product-update.interface';
-import { envs } from 'src/config/envs/envs';
 
 @Controller('category')
 @ApiBearerAuth()

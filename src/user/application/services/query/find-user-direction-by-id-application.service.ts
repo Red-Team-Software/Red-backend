@@ -1,4 +1,3 @@
-import { UserNotFoundApplicationException } from "src/auth/application/application-exception/user-not-found-application-exception";
 import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
 import { IGeocodification } from "src/order/domain/domain-services/interfaces/geocodification-interface";

@@ -10,7 +10,6 @@ import { GetAllTransactionsApplicationResponseDTO } from "src/user/application/d
 import { ITransaction } from "src/user/application/model/transaction-interface";
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { IQueryTransactionRepository } from "src/user/application/repository/wallet-transaction/transaction-query-repository.interface";
-import { ICommandTransactionRepository } from "src/user/application/repository/wallet-transaction/transaction.command.repository.interface";
 import { ITypeTransaction } from "src/user/application/types/transaction-type";
 import { UserId } from "src/user/domain/value-object/user-id";
 
