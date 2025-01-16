@@ -48,6 +48,10 @@ import { OrmCourierEntity } from "../entities/orm-entities/orm-courier-entity"
 import { CourierRegisteredSyncroniceService } from "../service/syncronice/courier-registered-syncronice.service"
 import { Mongoose } from "mongoose"
 import { CourierUpdatedSyncroniceService } from "../service/syncronice/courier-updated-syncronice.service"
+import { RabbitMQMessagePublisher } from "src/common/infraestructure/messages/publisher/rabbit-mq-message-publisher"
+import { RabbitMQMessageSubscriber } from "src/common/infraestructure/messages/subscriber/rabbit-mq-message-subscriber"
+import { IMessagesPublisher } from "src/common/application/messages/messages-publisher/messages-publisher.interface"
+import { CourierMessageQueues } from "../queues/courier-message-queues"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -63,6 +67,8 @@ export class CourierController {
         private readonly ormMapper: IMapper<Courier,OrmCourierEntity>;
         private readonly jwtGen:IJwtGenerator<string>;
         private readonly encryptor: IEncryptor;
+        private readonly messageSuscriber:RabbitMQMessageSubscriber
+        private readonly messagePubliser:IMessagesPublisher
         
         private initializeQueues():void{        
             CourierQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
@@ -82,6 +88,24 @@ export class CourierController {
             })
         }
 
+        private initializeMessageQueues():void{        
+            CourierMessageQueues.forEach(queue => this.buildMessageQueue(queue.name, queue.pattern))
+        }
+        
+        private buildMessageQueue(name: string, pattern: string) {
+            this.messageSuscriber.buildQueue({
+                name,
+                pattern,
+                exchange: {
+                    name: 'Messages',
+                    type: 'direct',
+                    options: {
+                        durable: false,
+                    },
+            },
+            })
+        }
+
     constructor(
         @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
         @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose,
@@ -95,13 +119,17 @@ export class CourierController {
         this.subscriber= new RabbitMQSubscriber(this.channel);
         this.jwtGen= new JwtCourierGenerator(jwtCourierService)
         this.encryptor= new BcryptEncryptor()
+        this.messagePubliser= new RabbitMQMessagePublisher(this.channel)
+        this.messageSuscriber= new RabbitMQMessageSubscriber(this.channel)
 
         this.initializeQueues();
 
-        this.subscriber.consume<ICourierRegistered>(
-            { name: 'CourierSync/CourierRegistered'}, 
+        this.initializeMessageQueues();
+
+        this.messageSuscriber.consume<ICourierRegistered>(
+            { name: 'CourierSync/CourierAccountRegistered'}, 
             (data):Promise<void>=>{
-                //this.syncCourierRegistered(data)
+                this.syncCourierRegistered(data)
                     return
             }
         )
@@ -109,7 +137,7 @@ export class CourierController {
         this.subscriber.consume<ICourierDirectionUpdated>(
             { name: 'CourierSync/CourierDirectionUpdated'}, 
             (data):Promise<void>=>{
-                //this.syncCourierUpdated(data)
+                this.syncCourierUpdated(data)
                 return
             }
         )
@@ -150,7 +178,8 @@ export class CourierController {
                     this.idGen,
                     new CloudinaryService(),
                     this.jwtGen,
-                    this.encryptor
+                    this.encryptor,
+                    this.messagePubliser
                 ),this.auditRepository,new DateHandler()
             )
         );

@@ -17,6 +17,8 @@ import { ErrorCreatingCourierApplicationException } from '../application-excepti
 import { CourierDirection } from 'src/courier/domain/value-objects/courier-direction';
 import { IJwtGenerator } from 'src/common/application/jwt-generator/jwt-generator.interface';
 import { IEncryptor } from 'src/common/application/encryptor/encryptor.interface';
+import { IMessagesPublisher } from 'src/common/application/messages/messages-publisher/messages-publisher.interface';
+import { CourierAccountRegistered } from '../messages/courier-account-registered';
 
 export class RegisterCourierApplicationService extends IApplicationService<CreateCourierApplicationServiceRequestDto,CreateCourierApplicationServiceResponseDto>{
     
@@ -27,6 +29,7 @@ export class RegisterCourierApplicationService extends IApplicationService<Creat
         private readonly fileUploader:IFileUploader,
         private readonly jwtGen:IJwtGenerator<string>,
         private readonly encryptor:IEncryptor,
+        private readonly messagePublisher:IMessagesPublisher
     ){
         super();
     }
@@ -66,6 +69,18 @@ export class RegisterCourierApplicationService extends IApplicationService<Creat
         }
 
         this.eventPublisher.publish(courier.pullDomainEvents());
+
+        this.messagePublisher.publish([
+            CourierAccountRegistered.create(
+                id,
+                data.name,
+                uploaded.url,
+                data.lat,
+                data.long,
+                data.email,
+                data.password
+            )
+        ])
 
         return Result.success(response);
     }
