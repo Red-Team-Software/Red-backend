@@ -3,7 +3,7 @@ import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
 import { ICommandCuponRepository } from "src/cupon/domain/repository/command-cupon-repository";
 import { CuponId } from "src/cupon/domain/value-object/cupon-id";
 
-export class CuponCommandRepositoryMock implements ICommandCuponRepository {
+export class CouponCommandRepositoryMock implements ICommandCuponRepository {
 
     constructor(private cupones: Cupon[] = []) {}
 

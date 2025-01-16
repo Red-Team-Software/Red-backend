@@ -46,12 +46,11 @@ export class MarkCuponAsUsedApplicationService extends IApplicationService<
         if(!user.verifyCouponById(cupon.getValue.getId())){
             return Result.fail(new CuponUserInvalidUseApplicationException())
         }
-
         
         // 3. Marcar el cupon como usado
 
         user.aplyCoupon(cupon.getValue.getId())
-
+        console.log(user)
         const responseDto: UseCuponApplicationResponseDTO = {
             userId: data.userId,
             cuponId: cupon.getValue.getId().Value,

@@ -7,7 +7,7 @@ import { CuponCode } from "src/cupon/domain/value-object/cupon-code";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { FindAllCuponsApplicationRequestDTO } from "src/cupon/application/dto/request/find-all-cupons-application-RequestDTO";
 
-export class CuponQueryRepositoryMock implements IQueryCuponRepository {
+export class CouponQueryRepositoryMock implements IQueryCuponRepository {
 
     constructor(private cupones: Cupon[] = []) {}
 
@@ -39,6 +39,9 @@ export class CuponQueryRepositoryMock implements IQueryCuponRepository {
 
     async verifyCuponExistenceByName(name: CuponName): Promise<Result<boolean>> {
         const cupon = this.cupones.find((c) => c.CuponName.equals(name));
-        return Result.success(cupon != null);
+        if(!cupon){
+            return Result.success(false);
+        }
+        return Result.success(true);
     }
 }
