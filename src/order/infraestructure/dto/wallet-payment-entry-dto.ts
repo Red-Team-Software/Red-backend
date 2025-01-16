@@ -16,7 +16,8 @@ export class WalletPaymentEntryDto {
     description: 'The currency in which the payment is made, only use USD, EUR or BSF',
   })
   @IsString()
-  currency: string;
+  @IsOptional()
+  currency?: string;
 
   @ApiProperty({ example: 'card', description: 'The method of payment used' })
   @IsString()
