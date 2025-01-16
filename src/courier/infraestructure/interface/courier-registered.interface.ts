@@ -3,6 +3,8 @@ export interface ICourierRegistered {
     courierName:        string;
     courierImage:       string;
     courierDirection:   ICourierDirection;
+    email:              string;
+    password:           string;
 }
 
 interface ICourierDirection {
