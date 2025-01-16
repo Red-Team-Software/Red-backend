@@ -64,13 +64,6 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
                     discount:p.discount
                 }))
                 : [],
-                // odm.promotions
-                // ? odm.promotions.map(promotion=>({
-                //     id:promotion.id,
-                //     name:promotion.name,
-                //     discount:Number(promotion.discount)
-                // }))
-                // : []
                 products: odm.products
                 ? odm.products.map(p=>({
                     id:p.id,

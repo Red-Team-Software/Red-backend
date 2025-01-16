@@ -17,9 +17,9 @@ export interface UserUpdatedInfraestructureRequestDTO {
 
     userDirection?: {
         id: string;
-        name: string;
-        favorite: boolean;
-        lat: number;
-        lng: number;
+        name?: string;
+        favorite?: boolean;
+        lat?: number;
+        lng?: number;
     }
 }

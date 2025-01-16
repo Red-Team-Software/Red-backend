@@ -45,8 +45,7 @@ implements ISycnchronizeService<UserUpdatedInfraestructureRequestDTO,void>{
                     }
                 }
                 await user.save()
-            }
-            
+            }            
 
         return Result.success(undefined)
     }   

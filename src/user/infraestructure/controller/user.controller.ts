@@ -75,6 +75,8 @@ import { IUserDirectionUpdated } from "../interfaces/user-direction-updated.inte
 import { IUserImageUpdated } from "../interfaces/user-image-updated.interface"
 import { IUserNameUpdated } from "../interfaces/user-name-updated.interface"
 import { IUserPhoneUpdated } from "../interfaces/user-phone-updated.interface"
+import { OdmUserQueryRepository } from '../repositories/odm-repository/odm-user-query-repository';
+import { OdmAccountQueryRepository } from "src/auth/infraestructure/repositories/odm-repository/odm-account-query-repository"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -94,6 +96,10 @@ export class UserController {
   private readonly hereMapsSingelton: HereMapsSingelton;
   private readonly ormCuponQueryRepo: IQueryCuponRepository;
   private readonly subscriber: RabbitMQSubscriber;
+  private readonly odmUserQueryRepository:IQueryUserRepository
+  private readonly odmAccountQueryRepo:IQueryAccountRepository<IAccount>
+  private readonly odmCuponQueryRepo: IQueryCuponRepository;
+
   
     private initializeQueues():void{        
       UserQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
@@ -129,6 +135,9 @@ export class UserController {
     this.geocodification= new GeocodificationOpenStreeMapsDomainService()
     this.ormCuponQueryRepo = new OdmCuponQueryRepository(mongoose);
     this.subscriber= new RabbitMQSubscriber(this.channel);
+    this.odmAccountQueryRepo= new OdmAccountQueryRepository(mongoose)
+    this.odmUserQueryRepository= new OdmUserQueryRepository(mongoose),
+    this.odmCuponQueryRepo= new OdmCuponQueryRepository(mongoose)
     
     this.initializeQueues();
         
@@ -172,13 +181,13 @@ export class UserController {
           }
       )
 
-    // this.subscriber.consume<IUserDirectionDeleted>(
-    //   { name: 'UserSync/UserDirectionDeleted'},
-    //   (data):Promise<void>=>{
-    //           this.userupdatedsync({...data,})
-    //           return
-    //       }
-    //   )
+    this.subscriber.consume<IUserDirectionDeleted>(
+      { name: 'UserSync/UserDirectionDeleted'},
+      (data):Promise<void>=>{
+              this.userupdatedsync({...data,userDirection:{id:data.userDirection.id}})
+              return
+          }
+      )
 
       this.subscriber.consume<IUserDirectionUpdated>(
         { name: 'UserSync/UserDirectionUpdated'},
@@ -259,7 +268,7 @@ export class UserController {
             new PerformanceDecorator(
               new UpdateProfileApplicationService(
                 this.ormUserCommandRepo,
-                this.ormUserQueryRepo,
+                this.odmUserQueryRepository,
                 this.ormAccountCommandRepo,
                 this.ormAccountQueryRepo,
                 new RabbitMQPublisher(this.channel),
@@ -305,7 +314,7 @@ export class UserController {
             new PerformanceDecorator<UpdateProfileApplicationRequestDTO,UpdateProfileApplicationResponseDTO>(
               new UpdateProfileApplicationService(
                 this.ormUserCommandRepo,
-                this.ormUserQueryRepo,
+                this.odmUserQueryRepository,
                 this.ormAccountCommandRepo,
                 this.ormAccountQueryRepo,
                 new RabbitMQPublisher(this.channel),
@@ -342,7 +351,7 @@ export class UserController {
         new LoggerDecorator(
           new PerformanceDecorator(
             new FindUserDirectionApplicationService (
-              this.ormUserQueryRepo,
+              this.odmUserQueryRepository,
               this.geocodification
             ), new NestTimer(), new NestLogger(new Logger())
           ), new NestLogger(new Logger())
@@ -484,7 +493,7 @@ export class UserController {
           new PerformanceDecorator(
             new AddUserCouponApplicationService (
               this.ormUserCommandRepo,
-              this.ormUserQueryRepo,
+              this.odmUserQueryRepository,
               this.ormCuponQueryRepo,
               new RabbitMQPublisher(this.channel)
             ), new NestTimer(), new NestLogger(new Logger())
