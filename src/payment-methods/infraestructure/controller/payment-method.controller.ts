@@ -217,6 +217,8 @@ export class PaymentMethodController {
             userId: credential.account.idUser,
             ...data
         }
+        if (!values.page) values.page = 1;
+        if (!values.perPage) values.perPage = 10;
         
         let getAllPaymentMethodService = new ExceptionDecorator(
             new LoggerDecorator(
