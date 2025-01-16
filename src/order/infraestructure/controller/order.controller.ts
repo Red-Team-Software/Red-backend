@@ -112,6 +112,8 @@ import { OdmBundleQueryRepository } from "src/bundle/infraestructure/repositorie
 import { OdmPaymentMethodQueryRepository } from "src/payment-methods/infraestructure/repository/odm-repository/odm-payment-method-query-repository";
 import { OdmPromotionQueryRepository } from "src/promotion/infraestructure/repositories/odm-repository/odm-promotion-query-repository";
 import { PaymentMethodName } from "src/payment-methods/domain/value-objects/payment-method-name";
+import { OdmCuponQueryRepository } from "src/cupon/infraestructure/repository/odm-repository/odm-query-coupon-repository";
+import { OdmCourierQueryRepository } from "src/courier/infraestructure/repository/odm-repository/odm-courier-query-repository";
 
 
 @ApiBearerAuth()
@@ -394,7 +396,7 @@ export class OrderController {
                             new DateHandler(),
                             new OdmPromotionQueryRepository(this.mongoose),
                             new OdmPaymentMethodQueryRepository(this.mongoose),
-                            this.ormCuponQueryRepo,
+                            new OdmCuponQueryRepository(this.mongoose),
                             this.ormUserQueryRepository
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
@@ -460,7 +462,7 @@ export class OrderController {
                             new DateHandler(),
                             new OdmPromotionQueryRepository(this.mongoose),
                             new OdmPaymentMethodQueryRepository(this.mongoose),
-                            this.ormCuponQueryRepo,
+                            new OdmCuponQueryRepository(this.mongoose),
                             this.ormUserQueryRepository
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
@@ -523,9 +525,9 @@ export class OrderController {
                 new PerformanceDecorator(
                     new FindAllOdersApplicationService(
                         new OdmOrderQueryRepository(this.mongoose),
-                        this.ormProductRepository,
-                        this.ormBundleRepository,
-                        this.ormCourierQueryRepository
+                        new OdmProductQueryRepository(this.mongoose),
+                        new OdmBundleQueryRepository(this.mongoose),
+                        new OdmCourierQueryRepository(this.mongoose)
                     ),new NestTimer(),new NestLogger(new Logger())
                 ),
                 new NestLogger(new Logger())
@@ -564,9 +566,9 @@ export class OrderController {
                 new PerformanceDecorator(
                     new FindAllOdersByUserApplicationService(
                         new OdmOrderQueryRepository(this.mongoose),
-                        this.ormProductRepository,
-                        this.ormBundleRepository,
-                        this.ormCourierQueryRepository
+                        new OdmProductQueryRepository(this.mongoose),
+                        new OdmBundleQueryRepository(this.mongoose),
+                        new OdmCourierQueryRepository(this.mongoose)
                     ), new NestTimer(), new NestLogger(new Logger())
                 ),new NestLogger(new Logger())
             )
@@ -620,7 +622,7 @@ export class OrderController {
                         new OdmOrderQueryRepository(this.mongoose),
                         this.orderRepository,
                         this.rabbitMq,
-                        this.ormCourierQueryRepository
+                        new OdmCourierQueryRepository(this.mongoose),
                     ),new NestTimer(),new NestLogger(new Logger())
                 ),this.auditRepository,new DateHandler()
             )
@@ -705,7 +707,7 @@ export class OrderController {
                         new OdmOrderQueryRepository(this.mongoose),
                         new OdmProductQueryRepository(this.mongoose),
                         new OdmBundleQueryRepository(this.mongoose),
-                        this.ormCourierQueryRepository
+                        new OdmCourierQueryRepository(this.mongoose),
                     ),new NestTimer(),new NestLogger(new Logger())
                 ),
                 new NestLogger(new Logger())
@@ -730,7 +732,7 @@ export class OrderController {
             new LoggerDecorator(
                     new PerformanceDecorator(
                         new FindOrderCourierPositionApplicationService(
-                            this.orderQueryRepository
+                            new OdmOrderQueryRepository(this.mongoose),
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
                     new NestLogger(new Logger())
