@@ -34,5 +34,6 @@ export class UpdateWalletBalancePagoMovilInfraestructureRequestDTO{
         description: 'The payment Method Id to know if it is active or inactive',
     })
     @IsString()
-    paymentId: string;
+    @IsOptional()
+    paymentId?: string;
 }

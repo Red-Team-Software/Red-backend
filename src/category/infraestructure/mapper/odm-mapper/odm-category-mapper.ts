@@ -16,7 +16,7 @@ export class OdmCategoryMapper implements IMapper<Category, OdmCategory> {
     }
 
     async fromPersistencetoDomain(infraEntity: OdmCategory): Promise<Category> {
-        const category = Category.create(
+        const category = Category.initializeAggregate(
             CategoryID.create(infraEntity.id),
             CategoryName.create(infraEntity.name),
             CategoryImage.create(infraEntity.image),

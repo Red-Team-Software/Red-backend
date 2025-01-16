@@ -2,11 +2,11 @@ export interface IOdmCategory {
     id: string;
     name: string;
     image: string; 
-    products: {
+    products?: {
       id:string
       name:string
     }[];
-    bundles: {
+    bundles?: {
       id:string
       name:string
     }[];

@@ -42,7 +42,7 @@ export class OdmOrder extends Document implements IOdmOrderModel {
         type:
             {
                 _id: false,
-                id: SchemaTypes.UUID,
+                id: SchemaTypes.String,
                 amount: SchemaTypes.Number,
                 currency: SchemaTypes.String,
                 paymentMethod: SchemaTypes.String
@@ -60,7 +60,7 @@ export class OdmOrder extends Document implements IOdmOrderModel {
     @Prop({ 
         type: [{
             _id: false,
-            id: SchemaTypes.UUID,
+            id: SchemaTypes.String,
             quantity: SchemaTypes.Number,
             price: SchemaTypes.Number,
             currency: SchemaTypes.String
@@ -77,7 +77,7 @@ export class OdmOrder extends Document implements IOdmOrderModel {
     @Prop({ 
         type: [{
             _id: false,
-            id: SchemaTypes.UUID,
+            id: SchemaTypes.String,
             quantity: SchemaTypes.Number,
             price: SchemaTypes.Number,
             currency: SchemaTypes.String
@@ -95,7 +95,7 @@ export class OdmOrder extends Document implements IOdmOrderModel {
         type: 
             {
                 _id: false,
-                id: SchemaTypes.UUID,
+                id: SchemaTypes.String,
                 description: SchemaTypes.String
             }
         , required: false 
