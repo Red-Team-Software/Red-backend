@@ -1,5 +1,5 @@
 import { DataSource, Repository } from "typeorm";
-import { OrmCuponEntity } from "../orm-entities/orm-cupon-entity";
+import { OrmCuponEntity } from "../entities/orm-entities/orm-cupon-entity";
 import { Result } from "src/common/utils/result-handler/result";
 import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
 import { CuponId } from "src/cupon/domain/value-object/cupon-id";
