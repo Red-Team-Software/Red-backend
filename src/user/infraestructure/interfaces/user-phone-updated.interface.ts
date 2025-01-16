@@ -1,4 +1,4 @@
-export interface IPhoneUpdated{
+export interface IUserPhoneUpdated{
     userId: string;
     userPhone: string;
 }

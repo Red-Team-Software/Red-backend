@@ -95,7 +95,7 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
                 query.category = { $elemMatch: { name: { $in: criteria.category.map((c: string) => new RegExp(c, 'i')) } } };
 
             if (criteria.price)
-                query.price = { ...query.price, $gte: criteria.price }
+                query.price = { ...query.price, $lt: criteria.price }
                 
 
 

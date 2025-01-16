@@ -14,4 +14,12 @@ export interface UserUpdatedInfraestructureRequestDTO {
         state: string;
     }[];
     userImage?: string;
+
+    userDirection?: {
+        id: string;
+        name: string;
+        favorite: boolean;
+        lat: number;
+        lng: number;
+    }
 }

@@ -79,8 +79,8 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
                 query.category = { $elemMatch: { name: { $in: criteria.category.map((c: string) => new RegExp(c, 'i')) } } };
 
             if (criteria.price)
-                query.price = { ...query.price, $gte: criteria.price }
-
+                query.price = { ...query.price, $lt: criteria.price }
+            
             const products = await this.model.find(query)
             .skip(criteria.page)
             .limit(criteria.perPage)

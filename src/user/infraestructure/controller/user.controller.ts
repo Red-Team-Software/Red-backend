@@ -64,6 +64,17 @@ import { UpdateProfileApplicationResponseDTO } from "src/user/application/dto/re
 import { OdmCuponQueryRepository } from "src/cupon/infraestructure/repository/odm-repository/odm-query-coupon-repository"
 import { IUserRegistered } from "../interfaces/user-registered.interface"
 import { UserRegisteredSyncroniceService } from "../services/syncronice/user-registered-syncronice.service"
+import { UserUpdatedInfraestructureRequestDTO } from "../services/dto/request/user-updated-infraestructure-request-dto"
+import { UserUpdatedSyncroniceService } from "../services/syncronice/user-updated-syncronice.service"
+import { IUserBalanceAmountAdded } from "../interfaces/user-balance-amount-added.interface"
+import { IUserBalanceAmountDecremented } from "../interfaces/user-balance-amount-decremented.interface"
+import { IUserCouponAplied } from "../interfaces/user-coupon-aplied.interface"
+import { IUserDirectionAdded } from "../interfaces/user-direction-added.interface"
+import { IUserDirectionDeleted } from "../interfaces/user-direction-deleted.interface"
+import { IUserDirectionUpdated } from "../interfaces/user-direction-updated.interface"
+import { IUserImageUpdated } from "../interfaces/user-image-updated.interface"
+import { IUserNameUpdated } from "../interfaces/user-name-updated.interface"
+import { IUserPhoneUpdated } from "../interfaces/user-phone-updated.interface"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -129,6 +140,77 @@ export class UserController {
         }
     )
 
+    this.subscriber.consume<IUserBalanceAmountAdded>(
+      { name: 'UserSync/UserBalanceAmountAdded'},
+      (data):Promise<void>=>{
+            this.userupdatedsync(data)
+            return
+        }
+    )
+
+    this.subscriber.consume<IUserBalanceAmountDecremented>(
+      { name: 'UserSync/UserBalanceAmountDecremented'},
+      (data):Promise<void>=>{
+            this.userupdatedsync(data)
+            return
+        }
+    )
+
+    this.subscriber.consume<IUserCouponAplied>(
+    { name: 'UserSync/UserCouponAplied'},
+      (data):Promise<void>=>{
+            this.userupdatedsync({...data,coupons:[{...data.coupons}]})
+            return
+        }
+    )
+
+    this.subscriber.consume<IUserDirectionAdded>(
+      { name: 'UserSync/UserDirectionAdded'},
+      (data):Promise<void>=>{
+              this.userupdatedsync({...data})
+              return
+          }
+      )
+
+    // this.subscriber.consume<IUserDirectionDeleted>(
+    //   { name: 'UserSync/UserDirectionDeleted'},
+    //   (data):Promise<void>=>{
+    //           this.userupdatedsync({...data,})
+    //           return
+    //       }
+    //   )
+
+      this.subscriber.consume<IUserDirectionUpdated>(
+        { name: 'UserSync/UserDirectionUpdated'},
+        (data):Promise<void>=>{
+                this.userupdatedsync({...data})
+                return
+            }
+        )
+      this.subscriber.consume<IUserImageUpdated>(
+        { name: 'UserSync/UserImageUpdated'},
+        (data):Promise<void>=>{
+                this.userupdatedsync({...data})
+                return
+            }
+        )
+
+        this.subscriber.consume<IUserNameUpdated>(
+          { name: 'UserSync/UserNameUpdated' },
+          (data):Promise<void>=>{
+                  this.userupdatedsync({...data})
+                  return
+              }
+          )
+
+          this.subscriber.consume<IUserPhoneUpdated>(
+            { name: 'UserSync/UserPhoneUpdated'},
+            (data):Promise<void>=>{
+                    this.userupdatedsync({...data})
+                    return
+                }
+            )
+
     this.subscriber.consume<IUserRegistered>(
       { name: 'UserSync/UserRegistered'},
       (data):Promise<void>=>{
@@ -140,6 +222,11 @@ export class UserController {
 
   async userregisteredsync(data:IUserRegistered){
     let service=new UserRegisteredSyncroniceService(this.mongoose)
+    await service.execute(data)
+  }
+
+  async userupdatedsync(data:UserUpdatedInfraestructureRequestDTO){
+    let service=new UserUpdatedSyncroniceService(this.mongoose)
     await service.execute(data)
   }
 
