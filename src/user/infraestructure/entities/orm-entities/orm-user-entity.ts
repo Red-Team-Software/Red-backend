@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
 import { IUser } from "../../model-entity/orm-model-entity/user-interface";
-import { OrmAccountEntity } from "src/auth/infraestructure/orm/orm-entities/orm-account-entity";
+import { OrmAccountEntity } from "src/auth/infraestructure/account/orm-entities/orm-account-entity";
 import { OrmDirectionUserEntity } from "./orm-direction-user-entity";
 import { UserRoles } from "src/user/domain/value-object/enum/user.roles";
 import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-entities/orm-order-entity";

@@ -1,5 +1,5 @@
 import { IQueryAccountRepository } from "src/auth/application/repository/query-account-repository.interface"
-import { OrmAccountEntity } from "../../orm/orm-entities/orm-account-entity"
+import { OrmAccountEntity } from "../../account/orm-entities/orm-account-entity"
 import { DataSource, Repository } from "typeorm"
 import { IAccount } from "src/auth/application/model/account.interface"
 import { Result } from "src/common/utils/result-handler/result"

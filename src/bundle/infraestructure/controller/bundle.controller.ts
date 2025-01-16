@@ -131,7 +131,7 @@ export class BundleController {
         this.syncBundleRegistered(data)
         return
       }
-  )
+    )
 
     this.subscriber.consume<IBundleUpdatedCaducityDate>(
       { name: 'BundleSync/BundleUpdatedCaducityDate'}, 
