@@ -9,9 +9,9 @@ import { Order } from 'src/order/domain/aggregate/order';
 import { OrderId } from 'src/order/domain/value_objects/order-id';
 import { NotFoundException } from 'src/common/infraestructure/infraestructure-exception';
 import { OdmOrderMapper } from '../../mappers/odm-mapper/odm-order-mapper';
-import { OdmProduct } from 'src/product/infraestructure/entities/odm-entities/odm-product-entity';
-import { OdmBundle } from 'src/bundle/infraestructure/entities/odm-entities/odm-bundle-entity';
-import { OdmCourier } from 'src/courier/infraestructure/entities/odm-entities/odm-courier-entity';
+import { OdmProduct, OdmProductSchema } from 'src/product/infraestructure/entities/odm-entities/odm-product-entity';
+import { OdmBundle, OdmBundleSchema } from 'src/bundle/infraestructure/entities/odm-entities/odm-bundle-entity';
+import { OdmCourier, OdmCourierSchema } from 'src/courier/infraestructure/entities/odm-entities/odm-courier-entity';
 
 export class OdmOrderQueryRepository implements IQueryOrderRepository {
 
@@ -20,6 +20,14 @@ export class OdmOrderQueryRepository implements IQueryOrderRepository {
     private readonly bundleModel: Model<OdmBundle>;
     private readonly courierModel: Model<OdmCourier>;
     private readonly odmOrderMapper: OdmOrderMapper;
+
+    constructor( mongoose: Mongoose ) { 
+        this.orderModel = mongoose.model<OdmOrder>('OdmOrder', OdmOrderSchema);
+        this.productModel = mongoose.model<OdmProduct>('OdmProduct', OdmProductSchema);
+        this.bundleModel = mongoose.model<OdmBundle>('OdmBundle', OdmBundleSchema);
+        this.courierModel = mongoose.model<OdmCourier>('OdmCourier', OdmCourierSchema);
+        this.odmOrderMapper = new OdmOrderMapper()
+    }
 
     async transformToDataModel(odmOrder: OdmOrder): Promise<IOrderModel> {
 
@@ -34,7 +42,7 @@ export class OdmOrderQueryRepository implements IQueryOrderRepository {
         for (const product of productDetail){
             let p = await this.productModel.findOne({
                 id: product.id
-            }).exec();
+            });
             let productResponse = {
                 id: p.id,
                 name: p.name ,
@@ -111,10 +119,7 @@ export class OdmOrderQueryRepository implements IQueryOrderRepository {
     }
 
 
-    constructor( mongoose: Mongoose ) { 
-        this.orderModel = mongoose.model<OdmOrder>('OdmOrder', OdmOrderSchema);
-        this.odmOrderMapper = new OdmOrderMapper()
-    }
+    
 
     async findAllOrders(data: FindAllOrdersApplicationServiceRequestDto): Promise<Result<Order[]>> {
         try{
@@ -137,6 +142,7 @@ export class OdmOrderQueryRepository implements IQueryOrderRepository {
             return Result.success(orders);
 
         }catch(e){
+            console.log(e)
             return Result.fail( new NotFoundException('Orders not found'));
         };
     }
@@ -226,6 +232,7 @@ export class OdmOrderQueryRepository implements IQueryOrderRepository {
 
             return Result.success(orders);
         }catch(e){
+            console.log(e)
             return Result.fail( new NotFoundException('Orders not found'));
         };
     }

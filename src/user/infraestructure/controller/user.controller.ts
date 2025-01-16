@@ -53,7 +53,7 @@ import { ByIdDTO } from "src/common/infraestructure/dto/entry/by-id.dto"
 import { AddUserCouponInfraestructureRequestDTO } from "../dto/request/add-user-coupon-application-request-dto"
 import { AddUserCouponApplicationService } from "src/user/application/services/command/add-user-coupon-application.service"
 import { IQueryCuponRepository } from "src/cupon/application/query-repository/query-cupon-repository"
-import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-cupon-query-repository"
+import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-repository/orm-cupon-query-repository"
 import { UserQueues } from "../queues/user.queues"
 import { ICreateOrder } from "src/notification/infraestructure/interfaces/create-order.interface"
 import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber"
@@ -61,6 +61,7 @@ import { Mongoose } from "mongoose"
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateProfileApplicationRequestDTO } from "src/user/application/dto/request/update-profile-application-request-dto"
 import { UpdateProfileApplicationResponseDTO } from "src/user/application/dto/response/update-profile-application-response-dto"
+import { OdmCuponQueryRepository } from "src/cupon/infraestructure/repository/odm-repository/odm-query-coupon-repository"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -113,7 +114,7 @@ export class UserController {
     this.encryptor= new BcryptEncryptor()
     this.hereMapsSingelton= HereMapsSingelton.getInstance()
     this.geocodification= new GeocodificationOpenStreeMapsDomainService()
-    this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
+    this.ormCuponQueryRepo = new OdmCuponQueryRepository(mongoose);
     this.subscriber= new RabbitMQSubscriber(this.channel);
     
     this.initializeQueues();

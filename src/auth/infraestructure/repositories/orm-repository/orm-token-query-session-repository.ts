@@ -3,8 +3,8 @@ import { IQueryTokenSessionRepository } from "src/auth/application/repository/qu
 import { NotFoundException, PersistenceException } from "src/common/infraestructure/infraestructure-exception"
 import { Result } from "src/common/utils/result-handler/result"
 import { Repository, DataSource } from "typeorm"
-import { OrmAccountEntity } from "../../orm/orm-entities/orm-account-entity"
-import { OrmSessionEntity } from "../../orm/orm-entities/orm-session-entity"
+import { OrmAccountEntity } from "../../account/orm-entities/orm-account-entity"
+import { OrmSessionEntity } from "../../account/orm-entities/orm-session-entity"
 import { UserId } from "src/user/domain/value-object/user-id"
 import { OrmUserEntity } from "src/user/infraestructure/entities/orm-entities/orm-user-entity"
 

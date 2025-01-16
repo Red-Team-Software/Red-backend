@@ -76,7 +76,7 @@ import { RabbitMQSubscriber } from "src/common/infraestructure/events/subscriber
 import { ICancelOrder } from "src/notification/infraestructure/interfaces/cancel-order.interface";
 import { RefundPaymentApplicationServiceRequestDto } from "src/order/application/dto/request/refund-payment-request-dto";
 import { IQueryCuponRepository } from "src/cupon/application/query-repository/query-cupon-repository";
-import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-cupon-query-repository";
+import { OrmCuponQueryRepository } from "src/cupon/infraestructure/repository/orm-repository/orm-cupon-query-repository";
 import { AssignCourierDto } from "../dto/delivering-order-entry.dto";
 import { AssignCourierApplicationServiceRequestDto } from "src/order/application/dto/request/assign-courier-request-dto";
 import { AuditDecorator } from "src/common/application/aspects/audit-decorator/audit-decorator";
@@ -106,6 +106,14 @@ import { FindOrderCourierPositionApplicationService } from "src/order/applicatio
 import { OrderRegisteredSyncroniceService } from "../service/syncronice/order-registered-syncronice.service";
 import { OrderUpdatedSyncroniceService } from "../service/syncronice/order-updated-syncronice.service";
 import { OrderUpdatedInfraestructureRequestDTO } from "../service/dto/order-updated-infraestructure-request-dto";
+import { OdmOrderQueryRepository } from "../repositories/odm-repository/odm-order-query-repository";
+import { OdmProductQueryRepository } from "src/product/infraestructure/repositories/odm-repository/odm-product-query-repository";
+import { OdmBundleQueryRepository } from "src/bundle/infraestructure/repositories/odm-repository/odm-bundle-query-repository";
+import { OdmPaymentMethodQueryRepository } from "src/payment-methods/infraestructure/repository/odm-repository/odm-payment-method-query-repository";
+import { OdmPromotionQueryRepository } from "src/promotion/infraestructure/repositories/odm-repository/odm-promotion-query-repository";
+import { PaymentMethodName } from "src/payment-methods/domain/value-objects/payment-method-name";
+import { OdmCuponQueryRepository } from "src/cupon/infraestructure/repository/odm-repository/odm-query-coupon-repository";
+import { OdmCourierQueryRepository } from "src/courier/infraestructure/repository/odm-repository/odm-courier-query-repository";
 
 
 @ApiBearerAuth()
@@ -136,6 +144,7 @@ export class OrderController {
     private readonly ormUserCommandRepo:ICommandUserRepository;
     private readonly ormUserQueryRepository: IQueryUserRepository;
     private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
+    private readonly paymentMethodOdmQueryRepository: IPaymentMethodQueryRepository;
     private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>;
     private readonly ormCuponQueryRepo: IQueryCuponRepository;
     private readonly auditRepository: IAuditRepository
@@ -211,6 +220,8 @@ export class OrderController {
             new OrmPaymentMethodMapper()
         )
         this.ormUserCommandRepo=new OrmUserCommandRepository(PgDatabaseSingleton.getInstance())
+
+        this.paymentMethodOdmQueryRepository = new OdmPaymentMethodQueryRepository(this.mongoose);
 
         //*Mappers
         this.orderMapper = new OrmOrderMapper(
@@ -298,7 +309,7 @@ export class OrderController {
             new LoggerDecorator(
                 new PerformanceDecorator(
                     new RefundPaymentApplicationService(
-                        this.orderQueryRepository,
+                        new OdmOrderQueryRepository(this.mongoose),
                         this.rabbitMq,
                         new RefundPaymentStripeConnection(this.stripeSingleton),
                         this.ormUserCommandRepo,
@@ -322,9 +333,21 @@ export class OrderController {
         @GetCredential() credential:ICredential,
         @Body() data: PaymentEntryDto
     ) {
+
+        let paymentId: string;
+        
+        if (!data.paymentId) {
+            let payment = await this.paymentMethodOdmQueryRepository.findMethodByNameDetail(
+                PaymentMethodName.create("stripe"));
+        
+                paymentId = payment.getValue.paymentMethodId;
+        }
+
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: credential.account.idUser,
-            paymentId: data.paymentId,
+            paymentId: data.paymentId 
+            ? data.paymentId
+            : paymentId,
             currency: data.currency.toLowerCase(),
             paymentMethod: data.paymentMethod,
             directionId: data.idUserDirection,
@@ -368,12 +391,12 @@ export class OrderController {
                             ),
                             this.orderRepository,
                             this.idGen,
-                            this.ormProductRepository,
-                            this.ormBundleRepository,
+                            new OdmProductQueryRepository(this.mongoose),
+                            new OdmBundleQueryRepository(this.mongoose),
                             new DateHandler(),
-                            new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                            this.paymentMethodQueryRepository,
-                            this.ormCuponQueryRepo,
+                            new OdmPromotionQueryRepository(this.mongoose),
+                            new OdmPaymentMethodQueryRepository(this.mongoose),
+                            new OdmCuponQueryRepository(this.mongoose),
                             this.ormUserQueryRepository
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
@@ -393,9 +416,21 @@ export class OrderController {
         @GetCredential() credential:ICredential,
         @Body() data: WalletPaymentEntryDto
     ) {
+
+        let paymentId: string;
+        
+        if (!data.paymentId) {
+            let payment = await this.paymentMethodOdmQueryRepository.findMethodByNameDetail(
+                PaymentMethodName.create("wallet"));
+        
+                paymentId = payment.getValue.paymentMethodId;
+        }
+
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: credential.account.idUser,
-            paymentId: data.paymentId,
+            paymentId: data.paymentId
+            ? data.paymentId
+            : paymentId,
             currency: data.currency.toLowerCase(),
             paymentMethod: data.paymentMethod,
             directionId: data.idUserDirection,
@@ -422,12 +457,12 @@ export class OrderController {
                             ),
                             this.orderRepository,
                             this.idGen,
-                            this.ormProductRepository,
-                            this.ormBundleRepository,
+                            new OdmProductQueryRepository(this.mongoose),
+                            new OdmBundleQueryRepository(this.mongoose),
                             new DateHandler(),
-                            new OrmPromotionQueryRepository(PgDatabaseSingleton.getInstance()),
-                            this.paymentMethodQueryRepository,
-                            this.ormCuponQueryRepo,
+                            new OdmPromotionQueryRepository(this.mongoose),
+                            new OdmPaymentMethodQueryRepository(this.mongoose),
+                            new OdmCuponQueryRepository(this.mongoose),
                             this.ormUserQueryRepository
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
@@ -489,10 +524,10 @@ export class OrderController {
             new LoggerDecorator(
                 new PerformanceDecorator(
                     new FindAllOdersApplicationService(
-                        this.orderQueryRepository,
-                        this.ormProductRepository,
-                        this.ormBundleRepository,
-                        this.ormCourierQueryRepository
+                        new OdmOrderQueryRepository(this.mongoose),
+                        new OdmProductQueryRepository(this.mongoose),
+                        new OdmBundleQueryRepository(this.mongoose),
+                        new OdmCourierQueryRepository(this.mongoose)
                     ),new NestTimer(),new NestLogger(new Logger())
                 ),
                 new NestLogger(new Logger())
@@ -530,10 +565,10 @@ export class OrderController {
             new LoggerDecorator(
                 new PerformanceDecorator(
                     new FindAllOdersByUserApplicationService(
-                        this.orderQueryRepository,
-                        this.ormProductRepository,
-                        this.ormBundleRepository,
-                        this.ormCourierQueryRepository
+                        new OdmOrderQueryRepository(this.mongoose),
+                        new OdmProductQueryRepository(this.mongoose),
+                        new OdmBundleQueryRepository(this.mongoose),
+                        new OdmCourierQueryRepository(this.mongoose)
                     ), new NestTimer(), new NestLogger(new Logger())
                 ),new NestLogger(new Logger())
             )
@@ -556,7 +591,7 @@ export class OrderController {
             new AuditDecorator(
                     new PerformanceDecorator(
                         new CancelOderApplicationService(
-                            this.orderQueryRepository,
+                            new OdmOrderQueryRepository(this.mongoose),
                             this.orderRepository,
                             this.rabbitMq
                         ),new NestTimer(),new NestLogger(new Logger())
@@ -584,10 +619,10 @@ export class OrderController {
             new AuditDecorator(
                 new PerformanceDecorator(
                     new AssignCourierApplicationService(
-                        this.orderQueryRepository,
+                        new OdmOrderQueryRepository(this.mongoose),
                         this.orderRepository,
                         this.rabbitMq,
-                        this.ormCourierQueryRepository
+                        new OdmCourierQueryRepository(this.mongoose),
                     ),new NestTimer(),new NestLogger(new Logger())
                 ),this.auditRepository,new DateHandler()
             )
@@ -612,7 +647,7 @@ export class OrderController {
             new AuditDecorator(
                 new PerformanceDecorator(
                     new DeliveredOderApplicationService(
-                        this.orderQueryRepository,
+                        new OdmOrderQueryRepository(this.mongoose),
                         this.orderRepository,
                         this.rabbitMq,
                         new DateHandler()
@@ -641,7 +676,7 @@ export class OrderController {
             new AuditDecorator(
                 new PerformanceDecorator(
                     new CreateReportApplicationService(
-                        this.orderQueryRepository,
+                        new OdmOrderQueryRepository(this.mongoose),
                         this.orderRepository,
                         this.rabbitMq,
                         this.idGen
@@ -669,10 +704,10 @@ export class OrderController {
             new LoggerDecorator(
                 new PerformanceDecorator(
                     new FindOrderByIdApplicationService(
-                        this.orderQueryRepository,
-                        this.ormProductRepository,
-                        this.ormBundleRepository,
-                        this.ormCourierQueryRepository
+                        new OdmOrderQueryRepository(this.mongoose),
+                        new OdmProductQueryRepository(this.mongoose),
+                        new OdmBundleQueryRepository(this.mongoose),
+                        new OdmCourierQueryRepository(this.mongoose),
                     ),new NestTimer(),new NestLogger(new Logger())
                 ),
                 new NestLogger(new Logger())
@@ -697,7 +732,7 @@ export class OrderController {
             new LoggerDecorator(
                     new PerformanceDecorator(
                         new FindOrderCourierPositionApplicationService(
-                            this.orderQueryRepository
+                            new OdmOrderQueryRepository(this.mongoose),
                         ),new NestTimer(),new NestLogger(new Logger())
                     ),
                     new NestLogger(new Logger())

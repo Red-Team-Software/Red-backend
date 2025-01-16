@@ -19,31 +19,30 @@ implements ISycnchronizeService<ProductUpdatedInfraestructureRequestDTO,void>{
     async execute(event: ProductUpdatedInfraestructureRequestDTO): Promise<Result<void>> {
         let product= await this.productModel.findOne({id:event.productId})
         if (event.productCaducityDate)
-            product.caducityDate=event.productCaducityDate
+            await this.productModel.updateOne({ id: product.id }, {$set: {caducityDate: event.productCaducityDate}})
         if (event.productDescription)
-            product.description=event.productDescription
-        if (event.productImages){
-            product.image=event.productImages
-        }
+            await this.productModel.updateOne({ id: product.id }, {$set: {description: event.productDescription}})
+        if (event.productImages)
+            await this.productModel.updateOne({ id: product.id }, {$set: {image: event.productImages}})
         if (event.productName)
-            product.name=event.productName
-        if (event.productPrice){
-            product.price=event.productPrice.price
-            product.currency=event.productPrice.currency
-        }
-        if (event.productStock){
-            console.log("stock",event.productStock)
-            product.stock=event.productStock}
-        if (event.productWeigth){
-            product.weigth=event.productWeigth.weigth
-            product.measurament=event.productWeigth.measure
-        }
-        await this.productModel.updateOne({id:product.id},product)
+            await this.productModel.updateOne({ id: product.id }, {$set: {name: event.productName}})
+        if (event.productPrice)
+            await this.productModel.updateOne({ id: product.id }, {$set: {price: event.productPrice.price,
+                currency:event.productPrice.currency
+            }})
+        if (event.productStock)
+            await this.productModel.updateOne({ id: product.id }, {$set: {stock: event.productStock}})
+        if (event.productWeigth)
+            await this.productModel.updateOne({ id: product.id }, {$set: {weigth: event.productWeigth.weigth,
+                measurament:event.productWeigth.measure
+            }})
+        
 
         await this.bundleModel.updateMany(
             { 'products.productId': product.id },
             { $set: { 'products.$': product } }
         );
+        
         return Result.success(undefined)
     }   
 }

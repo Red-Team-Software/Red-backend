@@ -15,7 +15,7 @@ import { PaginationRequestDTO } from 'src/common/application/services/dto/reques
 import { RabbitMQPublisher } from 'src/common/infraestructure/events/publishers/rabbit-mq-publisher';
 import { Channel } from 'amqplib';
 import { IQueryCategoryRepository } from 'src/category/application/query-repository/query-category-repository';
-import { OrmCategoryQueryRepository } from '../repositories/orm-category-query-repository';
+import { OrmCategoryQueryRepository } from '../repositories/orm-repository/orm-category-query-repository';
 import { FindAllCategoriesInfraestructureRequestDTO } from '../dto-request/find-all-categories-infraestructure-request-dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { DeleteCategoryApplication } from 'src/category/application/services/command/delete-category-application';
@@ -49,13 +49,14 @@ import { Mongoose } from 'mongoose';
 import { OdmProductQueryRepository } from 'src/product/infraestructure/repositories/odm-repository/odm-product-query-repository';
 import { OdmCategoryQueryRepository } from '../repositories/odm-repository/odm-query-category-repository';
 import { OdmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/odm-repository/odm-bundle-query-repository';
-import { OrmCategoryRepository } from '../repositories/category-typeorm-repository';
+import { OrmCategoryRepository } from '../repositories/orm-repository/category-typeorm-repository';
 import { ICategoryBundleUpdated } from '../interfaces/category-bundle-update.interface';
 import { CategoryUpdatedInfraestructureRequestDTO } from '../services/dto/request/category-updated-infraestructure-request-dto';
 import { CategoryUpdatedSyncroniceService } from '../services/syncronice/category-updated-syncronice.service';
 import { ICategoryNameUpdated } from '../interfaces/category-name-update.interface';
 import { ICategoryImageUpdated } from '../interfaces/category-image-update.interface';
 import { ICategoryProductUpdated } from '../interfaces/category-product-update.interface';
+import { envs } from 'src/config/envs/envs';
 
 @Controller('category')
 @ApiBearerAuth()
@@ -155,11 +156,15 @@ export class CategoryController {
   async syncCategoryRegistered(data:ICategoryCreated){
     let service= new CategoryRegisteredSyncroniceService(this.mongoose)
     await service.execute(data)
+    console.log('llamo a create')
   }
 
   async syncCategoryUpdated(data:CategoryUpdatedInfraestructureRequestDTO){
+    console.log('data de afuera',data)
     let service= new CategoryUpdatedSyncroniceService(this.mongoose)
-    await service.execute({...data})
+    let response=await service.execute({...data})
+    console.log(response)
+
   }
 
   @Post('create')
@@ -303,12 +308,12 @@ export class CategoryController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('update/:id')
-  @UseInterceptors(FilesInterceptor('images'))  
+  @UseInterceptors(FileInterceptor('image'))  
   async updateCategory(
     @GetCredential() credential: ICredential,
     @Param() entryId: ByIdDTO,
     @Body() entry: UpdateCategoryInfraestructureRequestDTO,
-    @UploadedFiles(
+    @UploadedFile(
       new ParseFilePipe({
         validators: [
           new FileTypeValidator({
@@ -348,5 +353,4 @@ export class CategoryController {
     
     return response.getValue;
   }
-
 }
