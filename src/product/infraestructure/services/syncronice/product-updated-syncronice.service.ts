@@ -27,13 +27,9 @@ implements ISycnchronizeService<ProductUpdatedInfraestructureRequestDTO,void>{
         if (event.productImages){
             await this.productModel.updateOne({ id: product.id }, {$set: {image: event.productImages}});
         }
-        if (event.productName){
+        if (event.productName)
             await this.productModel.updateOne({ id: product.id }, {$set: {name: event.productName}});
-            /*await this.bundleModel.updateMany(
-                { 'products.productId': product.id },
-                { $set: { 'products.name': product } }
-            );*/
-        }
+
         if (event.productPrice){
             await this.productModel.updateOne({ id: product.id }, {$set: {price: event.productPrice.price}});
             await this.productModel.updateOne({ id: product.id }, {$set: {currency: event.productPrice.currency}});
@@ -54,14 +50,11 @@ implements ISycnchronizeService<ProductUpdatedInfraestructureRequestDTO,void>{
         }
 
         //await this.productModel.updateOne({id:product.id},product)
-
         
         await this.bundleModel.updateMany(
             { 'products.productId': product.id },
             { $set: { 'products.$': product } }
         );
-
-        
         return Result.success(undefined)
     }   
 }
