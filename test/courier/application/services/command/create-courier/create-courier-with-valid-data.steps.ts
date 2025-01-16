@@ -7,6 +7,7 @@ import { FileUploaderMock } from "test/common/mocks/infraestructure/file-uploade
 import { IdGeneratorMock } from "test/common/mocks/infraestructure/id-generator.mock";
 import { CryptoMock } from "test/common/mocks/infraestructure/crypto.mock";
 import { IdTokenGeneratorMock } from "test/common/mocks/infraestructure/id-token-generator.mock";
+import { MessagePublisherMock } from "test/common/mocks/infraestructure/message-publisher.mock";
 
 let caughtError:any
 
@@ -18,7 +19,8 @@ When('Trying to create a courier with name {string}', async (name:string) => {
     new IdGeneratorMock(),
     new FileUploaderMock(),
     new IdTokenGeneratorMock(),
-    new CryptoMock()
+    new CryptoMock(),
+    new MessagePublisherMock([])
     )
 
     try {

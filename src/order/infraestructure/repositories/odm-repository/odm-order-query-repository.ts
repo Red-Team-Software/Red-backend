@@ -1,5 +1,4 @@
 import { Model, Mongoose } from 'mongoose';
-import { ICourierModel } from 'src/courier/application/model/courier-model-interface';
 import { bundlesOrderRes, IOrderModel, productsOrderRes } from 'src/order/application/model/order.model.interface';
 import { IQueryOrderRepository } from 'src/order/application/query-repository/order-query-repository-interface';
 import { OdmOrder, OdmOrderSchema } from '../../entities/odm-entities/odm-order-entity';
@@ -245,20 +244,18 @@ export class OdmOrderQueryRepository implements IQueryOrderRepository {
                 for(let odmOrder of odmOrders){
                     if(data.state.toLowerCase() === "active" && (odmOrder.state == "ongoing" ||
                         odmOrder.state == "waiting" || odmOrder.state == "delivering")) {
-                            let o = await this.transformToDataModel(odmOrder);
-                            orders.push( o );
+                            orders.push( await this.transformToDataModel(odmOrder));
                     } 
                     
                     if(data.state.toLowerCase() === "past" && (odmOrder.state === "cancelled" ||
                         odmOrder.state === "delivered")) {
-                            let o = await this.transformToDataModel(odmOrder);
-                            orders.push( o );
+                            orders.push( await this.transformToDataModel(odmOrder));
                     }
                 };
-            }
+            } 
             if (!data.state){
                 let o = odmOrders.map(async (ormOrder) => await this.transformToDataModel(ormOrder));
-    
+
                 orders = await Promise.all(o);
             }
 

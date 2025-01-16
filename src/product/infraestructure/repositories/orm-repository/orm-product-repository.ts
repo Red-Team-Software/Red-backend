@@ -3,12 +3,11 @@ import { OrmProductEntity } from "../../entities/orm-entities/orm-product-entity
 import { Result } from "src/common/utils/result-handler/result";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { ProductID } from "src/product/domain/value-object/product-id";
-import { ProductName } from "src/product/domain/value-object/product-name";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { OrmProductMapper } from "../../mapper/orm-mapper/orm-product-mapper";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { OrmProductImage } from "../../entities/orm-entities/orm-product-image";
-import { NotFoundException, PersistenceException } from "src/common/infraestructure/infraestructure-exception";
+import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 import { ICommandProductRepository } from "src/product/domain/repository/product.command.repositry.interface";
 
 

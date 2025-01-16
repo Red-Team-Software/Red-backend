@@ -30,7 +30,6 @@ import { ICredential } from "src/auth/application/model/credential.interface";
 import { GetCredential } from "src/auth/infraestructure/jwt/decorator/get-credential.decorator";
 import { ICommandTokenSessionRepository } from "src/auth/application/repository/command-token-session-repository.interface";
 import { ISession } from "src/auth/application/model/session.interface";
-import { PersistenceException } from "src/common/infraestructure/infraestructure-exception";
 import { IQueryAccountRepository } from "src/auth/application/repository/query-account-repository.interface";
 import { IAccount } from "src/auth/application/model/account.interface";
 import { IQueryTokenSessionRepository } from "src/auth/application/repository/query-token-session-repository.interface";
@@ -58,7 +57,6 @@ import { OrderDeliveringPushNotificationApplicationService } from "src/notificat
 import { IUserWalletBalanceAdded } from "../interfaces/user-wallet-balance-updated";
 import { UserWalletBalanceAddedPushNotificationApplicationRequestDTO } from "src/notification/application/dto/request/user-wallet-balance-added-push-notification-application-request-dto";
 import { UpdateUserWalletBalancePushNotificationApplicationService } from "src/notification/application/services/command/update-user-wallet-balance-push-notification-application.service";
-import { CourierAssignedToDeliver } from "src/order/domain/domain-events/courier-assigned-to-deliver";
 
 @ApiTags('Notifications')
 @Controller('notifications')
@@ -182,7 +180,7 @@ export class NotificationController {
             )
         )
 
-        const tokensResponse=await this.querySessionRepository.findAllTokenSessions();
+        const tokensResponse=await this.querySessionRepository.findAllLastTokenSessions();
 
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;
@@ -367,7 +365,7 @@ export class NotificationController {
 
     async sendPushToCreatedProduct(entry:ICreateProduct):Promise<void> {
 
-        const tokens=await this.querySessionRepository.findAllTokenSessions();
+        const tokens=await this.querySessionRepository.findAllLastTokenSessions();
 
         if (!tokens.isSuccess())
             throw tokens.getError;
@@ -432,7 +430,7 @@ export class NotificationController {
 
     async sendPushToCreatedBundle(entry:ICreateBundle){
 
-        const tokensResponse=await this.querySessionRepository.findAllTokenSessions();
+        const tokensResponse=await this.querySessionRepository.findAllLastTokenSessions();
 
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;
