@@ -182,7 +182,7 @@ export class NotificationController {
             )
         )
 
-        const tokensResponse=await this.querySessionRepository.findAllTokenSessions();
+        const tokensResponse=await this.querySessionRepository.findAllLastTokenSessions();
 
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;
@@ -367,7 +367,7 @@ export class NotificationController {
 
     async sendPushToCreatedProduct(entry:ICreateProduct):Promise<void> {
 
-        const tokens=await this.querySessionRepository.findAllTokenSessions();
+        const tokens=await this.querySessionRepository.findAllLastTokenSessions();
 
         if (!tokens.isSuccess())
             throw tokens.getError;
@@ -432,7 +432,7 @@ export class NotificationController {
 
     async sendPushToCreatedBundle(entry:ICreateBundle){
 
-        const tokensResponse=await this.querySessionRepository.findAllTokenSessions();
+        const tokensResponse=await this.querySessionRepository.findAllLastTokenSessions();
 
         if (!tokensResponse.isSuccess())
             throw tokensResponse.getError;
