@@ -344,8 +344,8 @@ export class OrderController {
             paymentId: data.paymentId 
             ? data.paymentId
             : paymentId,
-            currency: data.currency
-            ? data.currency.toLowerCase()
+            currency: data.currency ?
+            data.currency.toLowerCase()
             : 'usd',
             paymentMethod: data.paymentMethod,
             directionId: data.idUserDirection,
@@ -429,7 +429,9 @@ export class OrderController {
             paymentId: data.paymentId
             ? data.paymentId
             : paymentId,
-            currency: data.currency.toLowerCase(),
+            currency: data.currency ?
+            data.currency.toLowerCase()
+            : 'usd',
             paymentMethod: data.paymentMethod,
             directionId: data.idUserDirection,
             products: data.products,
