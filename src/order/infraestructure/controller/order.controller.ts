@@ -111,6 +111,7 @@ import { OdmProductQueryRepository } from "src/product/infraestructure/repositor
 import { OdmBundleQueryRepository } from "src/bundle/infraestructure/repositories/odm-repository/odm-bundle-query-repository";
 import { OdmPaymentMethodQueryRepository } from "src/payment-methods/infraestructure/repository/odm-repository/odm-payment-method-query-repository";
 import { OdmPromotionQueryRepository } from "src/promotion/infraestructure/repositories/odm-repository/odm-promotion-query-repository";
+import { PaymentMethodName } from "src/payment-methods/domain/value-objects/payment-method-name";
 
 
 @ApiBearerAuth()
@@ -141,6 +142,7 @@ export class OrderController {
     private readonly ormUserCommandRepo:ICommandUserRepository;
     private readonly ormUserQueryRepository: IQueryUserRepository;
     private readonly paymentMethodQueryRepository: IPaymentMethodQueryRepository;
+    private readonly paymentMethodOdmQueryRepository: IPaymentMethodQueryRepository;
     private TransactionCommandRepository: ICommandTransactionRepository<ITransaction>;
     private readonly ormCuponQueryRepo: IQueryCuponRepository;
     private readonly auditRepository: IAuditRepository
@@ -216,6 +218,8 @@ export class OrderController {
             new OrmPaymentMethodMapper()
         )
         this.ormUserCommandRepo=new OrmUserCommandRepository(PgDatabaseSingleton.getInstance())
+
+        this.paymentMethodOdmQueryRepository = new OdmPaymentMethodQueryRepository(this.mongoose);
 
         //*Mappers
         this.orderMapper = new OrmOrderMapper(
@@ -327,9 +331,21 @@ export class OrderController {
         @GetCredential() credential:ICredential,
         @Body() data: PaymentEntryDto
     ) {
+
+        let paymentId: string;
+        
+        if (!data.paymentId) {
+            let payment = await this.paymentMethodOdmQueryRepository.findMethodByNameDetail(
+                PaymentMethodName.create("stripe"));
+        
+                paymentId = payment.getValue.paymentMethodId;
+        }
+
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: credential.account.idUser,
-            paymentId: data.paymentId,
+            paymentId: data.paymentId 
+            ? data.paymentId
+            : paymentId,
             currency: data.currency.toLowerCase(),
             paymentMethod: data.paymentMethod,
             directionId: data.idUserDirection,
@@ -398,9 +414,21 @@ export class OrderController {
         @GetCredential() credential:ICredential,
         @Body() data: WalletPaymentEntryDto
     ) {
+
+        let paymentId: string;
+        
+        if (!data.paymentId) {
+            let payment = await this.paymentMethodOdmQueryRepository.findMethodByNameDetail(
+                PaymentMethodName.create("wallet"));
+        
+                paymentId = payment.getValue.paymentMethodId;
+        }
+
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: credential.account.idUser,
-            paymentId: data.paymentId,
+            paymentId: data.paymentId
+            ? data.paymentId
+            : paymentId,
             currency: data.currency.toLowerCase(),
             paymentMethod: data.paymentMethod,
             directionId: data.idUserDirection,

@@ -21,9 +21,9 @@ export class OrderDeliveringPushNotificationApplicationService extends IApplicat
             sendDTO.push({
                 token: token,
                 notification: { 
-                    title: `Orden en camino`, 
-                    body: `Tu orden con el numero #[${data.orderId}] ha sido recibida por el repartidor y va en camino.`
-                },
+                    title: `Order on the way`, 
+                    body: `Your order with the number #[${data.orderId}] has been received by the courier and is on its way.`
+                }, 
                 data:{
                     route: `/order/${data.orderId}`
                 }
