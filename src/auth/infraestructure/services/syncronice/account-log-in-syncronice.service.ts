@@ -16,8 +16,9 @@ ISycnchronizeService<AccountLogInInfraestructureRequestDTO,void>{
     
     async execute(event: AccountLogInInfraestructureRequestDTO): Promise<Result<void>> {
 
-        const account = this.model.findOne({id:event.id})
-        await this.model.create(account)
+        const account = await this.model.findOne({id:event.id})
+        account.sessions.push(event.session)
+        await account.save()
         return Result.success(undefined)
     }   
 }

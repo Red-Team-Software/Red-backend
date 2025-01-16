@@ -146,7 +146,8 @@ export class User extends AggregateRoot <UserId>{
                 userPhone,
                 userImage,
                 wallet,
-                userCoupon
+                userCoupon,
+                userRole
             )
         )
         return user

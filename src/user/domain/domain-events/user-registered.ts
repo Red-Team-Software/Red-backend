@@ -1,11 +1,11 @@
 import { DomainEvent } from '../../../common/domain/domain-event/domain-event';
 import { UserCoupon } from '../entities/coupon/user-coupon.entity';
 import { Wallet } from '../entities/wallet/wallet.entity';
-import { UserEmail } from '../value-object/user-email';
 import { UserId } from '../value-object/user-id';
 import { UserImage } from '../value-object/user-image';
 import { UserName } from '../value-object/user-name';
 import { UserPhone } from '../value-object/user-phone';
+import { UserRole } from '../value-object/user-role';
 
 export class UserRegistered extends DomainEvent {
     serialize(): string {
@@ -26,7 +26,8 @@ export class UserRegistered extends DomainEvent {
                 state:c.CuponState.Value
             }))
             : [],
-            userImage: this.userImage ? this.userImage.Value : undefined       
+            userImage: this.userImage ? this.userImage.Value : undefined,
+            userRole: this.userRole.Value       
         }
         return JSON.stringify(data)
     }
@@ -36,7 +37,8 @@ export class UserRegistered extends DomainEvent {
         userPhone:UserPhone,
         userImage:UserImage,
         wallet:Wallet,
-        userCoupon:UserCoupon[]
+        userCoupon:UserCoupon[],
+        userRole:UserRole
     ){
         return new UserRegistered(
             userId,
@@ -44,7 +46,8 @@ export class UserRegistered extends DomainEvent {
             userPhone,
             userImage,
             wallet,
-            userCoupon
+            userCoupon,
+            userRole
         )
     }
     constructor(
@@ -53,7 +56,9 @@ export class UserRegistered extends DomainEvent {
         public userPhone:UserPhone,
         public userImage:UserImage,
         public Wallet:Wallet,
-        public userCoupon:UserCoupon[]
+        public userCoupon:UserCoupon[],
+        public userRole:UserRole,
+
     ){
         super()
     }

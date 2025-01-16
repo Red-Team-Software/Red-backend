@@ -70,6 +70,8 @@ import { AuthQueues } from "../queues/auth.queues"
 import { IAccountRegistered } from "../interface/account-registered.interface"
 import { AccountRegisteredSyncroniceService } from "../services/syncronice/account-registered-syncronice.service"
 import mongoose, { Mongoose } from "mongoose"
+import { IAccountLogIn } from "../interface/account-log-in.interface"
+import { AccountLogInSyncroniceService } from "../services/syncronice/account-log-in-syncronice.service"
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -140,7 +142,7 @@ export class AuthController {
       }
     )
     
-    this.messageSuscriber.consume<IAccountRegistered>(
+    this.messageSuscriber.consume<IAccountLogIn>(
       { name: 'Messages/SessionRegistered' },
       (data):Promise<void>=>{
         this.syncAccountLogIn(data)
@@ -154,9 +156,9 @@ export class AuthController {
     await service.execute(data)    
   }
 
-  async syncAccountLogIn(data:IAccountRegistered){
-    let service = new AccountRegisteredSyncroniceService(mongoose)
-    await service.execute(data)    
+  async syncAccountLogIn(data:IAccountLogIn){
+    let service = new AccountLogInSyncroniceService(mongoose)
+    await service.execute({...data})    
   }
 
   @Post('register')

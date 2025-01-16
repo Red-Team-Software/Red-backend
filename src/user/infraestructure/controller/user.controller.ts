@@ -61,6 +61,8 @@ import { Mongoose } from "mongoose"
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateProfileApplicationRequestDTO } from "src/user/application/dto/request/update-profile-application-request-dto"
 import { UpdateProfileApplicationResponseDTO } from "src/user/application/dto/response/update-profile-application-response-dto"
+import { IUserRegistered } from "../interfaces/user-registered.interface"
+import { UserRegisteredSyncroniceService } from "../services/syncronice/user-registered-syncronice.service"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -125,6 +127,19 @@ export class UserController {
             return
         }
     )
+
+    this.subscriber.consume<IUserRegistered>(
+      { name: 'UserSync/UserRegistered'},
+      (data):Promise<void>=>{
+            this.userregisteredsync(data)
+            return
+        }
+    )
+  }
+
+  async userregisteredsync(data:IUserRegistered){
+    let service=new UserRegisteredSyncroniceService(this.mongoose)
+    await service.execute(data)
   }
 
   @Patch('update/profile')
