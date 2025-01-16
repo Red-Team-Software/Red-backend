@@ -4,7 +4,6 @@ import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
 import { NewCuponPushNotificationApplicationRequestDTO } from "../../dto/request/new-cupon-push-notification-application-request-dto";
 import { NewCuponPushNotificationApplicationResponseDTO } from "../../dto/response/new-cupon-push-notification-application-response-dto";
-import { ErrorSendingPushCuponApplicationException } from "../../application-exception/error-sending-push-cupon-application-exception";
 
 
 

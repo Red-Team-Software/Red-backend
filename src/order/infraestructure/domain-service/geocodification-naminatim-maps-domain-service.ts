@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from "src/common/infraestructure/infraestructure-exception";
+import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { Result } from "src/common/utils/result-handler/result";
 import { IGeocodification } from "src/order/domain/domain-services/interfaces/geocodification-interface";
 import { OrderDirection } from "src/order/domain/value_objects/order-direction";

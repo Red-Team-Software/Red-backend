@@ -1,5 +1,4 @@
 import { Model, Mongoose } from 'mongoose';
-import { ICourierModel } from 'src/courier/application/model/courier-model-interface';
 import { bundlesOrderRes, IOrderModel, productsOrderRes } from 'src/order/application/model/order.model.interface';
 import { IQueryOrderRepository } from 'src/order/application/query-repository/order-query-repository-interface';
 import { OdmOrder, OdmOrderSchema } from '../../entities/odm-entities/odm-order-entity';

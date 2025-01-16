@@ -5,6 +5,10 @@ import { UserId } from "src/user/domain/value-object/user-id"
 
 
 export class OrmTokenQueryRepository implements IQueryTokenSessionRepository<ISession>{
+  
+  findAllLastTokenSessions(): Promise<Result<string[]>> {
+    throw new Error("Method not implemented.")
+  }
 
   findSessionById(id: string): Promise<Result<ISession>> {
     throw new Error("Method not implemented.")

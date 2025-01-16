@@ -1,4 +1,4 @@
-import { DataSource, MoreThan, Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { OrmProductEntity } from "../../entities/orm-entities/orm-product-entity";
 import { Result } from "src/common/utils/result-handler/result";
 import { Product } from "src/product/domain/aggregate/product.aggregate";

@@ -12,7 +12,7 @@ export class EventPublisherMock extends IEventPublisher {
 			if (subscribers) {
 				await Promise.all(
 					subscribers.map(async (subscriber) => {
-						return subscriber.on(event);
+						return subscriber.consume
 					})
 				);
 			}

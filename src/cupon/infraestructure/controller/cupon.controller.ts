@@ -31,6 +31,7 @@ import { ICuponDeleted } from '../interfaces/cupon-delete.interface';
 import { CouponDeletedSyncroniceService } from '../service/syncronice/coupon-deleted-syncronice.service';
 import { ICuponChangeState } from '../interfaces/cupon-state-change.interface';
 import { CouponStateUpdatedSyncroniceService } from '../service/syncronice/coupon-state-updated-syncronice.service';
+import { OdmCuponQueryRepository } from '../repository/odm-repository/odm-query-coupon-repository';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -68,7 +69,7 @@ export class CuponController {
   ) {
     this.idGen = new UuidGen();
     this.ormCuponRepo = new OrmCuponRepository(PgDatabaseSingleton.getInstance());
-    this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
+    this.ormCuponQueryRepo = new OdmCuponQueryRepository(mongoose);
     this.subscriber= new RabbitMQSubscriber(this.channel);
 
     this.initializeQueues();
