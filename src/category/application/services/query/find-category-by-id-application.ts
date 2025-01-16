@@ -5,10 +5,8 @@ import { IQueryCategoryRepository } from "src/category/application/query-reposit
 import { Result } from "src/common/utils/result-handler/result";
 import { NotFoundCategoryApplicationException } from "../../application-exception/not-found-category-application-exception";
 import { CategoryID } from "src/category/domain/value-object/category-id";
-export class FindCategoryByIdApplicationService extends IApplicationService<
-  FindCategoryByIdApplicationRequestDTO,
-  FindCategoryByIdApplicationResponseDTO
-> {
+export class FindCategoryByIdApplicationService extends IApplicationService< FindCategoryByIdApplicationRequestDTO,
+  FindCategoryByIdApplicationResponseDTO> {
   constructor(
     private readonly queryCategoryRepository: IQueryCategoryRepository
   ) {
@@ -25,7 +23,7 @@ export class FindCategoryByIdApplicationService extends IApplicationService<
 
     const category = response.getValue;
     const result:FindCategoryByIdApplicationResponseDTO={
-      id:category.Id.Value,
+      id:category.getId().Value,
       name:category.Name.Value,
       image:category.Image.Value || null,
       products:category.Products.map(product=>product.Value),

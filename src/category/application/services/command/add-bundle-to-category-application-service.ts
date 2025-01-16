@@ -45,9 +45,9 @@ export class AddBundleToCategoryApplicationService extends IApplicationService<
 
     const category = categoryResult.getValue;
     const bundleId = BundleId.create(command.bundleId);
-
-    category.addBundle(bundleId);
-
+    let bundles=category.Bundles
+    bundles.push(bundleId)
+    category.updateBundles(bundles)
     const updateResult = await this.commandCategoryRepository.updateCategory(category);
 
     if (!updateResult.isSuccess()) {

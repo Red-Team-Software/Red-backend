@@ -47,7 +47,9 @@ export class AddProductToCategoryApplicationService extends IApplicationService<
     const category = categoryResult.getValue;
     const productId = ProductID.create(command.productId);
 
-    category.addProduct(productId);
+    let products=category.Products
+    products.push(productId)
+    category.updateProducts(products)
 
     const updateResult = await this.commandCategoryRepository.updateCategory(category);
 

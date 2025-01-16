@@ -1,5 +1,5 @@
 
-import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
+import { ICategoryCommandRepository } from "src/category/domain/repository/category-command-repository.interface";
 import { DeleteCategoryApplicationRequestDTO } from "../../dto/request/delete-category-application-request.dto";
 import { DeleteCategoryApplicationResponseDTO } from "../../dto/response/delete-category-application-response.dto";
 import { CategoryID } from "src/category/domain/value-object/category-id";
@@ -16,7 +16,7 @@ DeleteCategoryApplicationRequestDTO,
 DeleteCategoryApplicationResponseDTO
 > {
     constructor(
-        private readonly categoryRepository: ICategoryRepository, 
+        private readonly categoryRepository: ICategoryCommandRepository, 
         private readonly categoryqueryRepository: IQueryCategoryRepository,
         private readonly eventPublisher: IEventPublisher,
         private readonly fileUploader: IFileUploader
