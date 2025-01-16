@@ -28,7 +28,7 @@ export class SaveCardToUserApplicationService extends IApplicationService<SaveCa
         
         const user = userResponse.getValue;
 
-        let userAccount = await this.accountRepository.findAccountById(user.getId().Value);
+        let userAccount = await this.accountRepository.findAccountByUserId(user.getId().Value);
 
         if ( !userAccount.isSuccess() ) 
             return Result.fail(new UserNotFoundApplicationException(data.userId));
