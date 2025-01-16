@@ -14,7 +14,7 @@ export class UpdateCategoryInfraestructureRequestDTO {
     @IsString()
     @MinLength(3)
     @IsOptional()
-    description: string;
+    description?: string;
 
     @ApiProperty({
         required: false,
@@ -23,9 +23,8 @@ export class UpdateCategoryInfraestructureRequestDTO {
         description: "Array de IDs de productos asociados a la categoría",
     })
     @IsArray()
-    @ArrayNotEmpty()
     @IsOptional()
-    products: string[];
+    products?: string[];
 
     @ApiProperty({
         required: false,
@@ -34,7 +33,6 @@ export class UpdateCategoryInfraestructureRequestDTO {
         description: "Array de IDs de bundles asociados a la categoría",
     })
     @IsArray()
-    @ArrayNotEmpty()
     @IsOptional()
-    bundles: string[];
+    bundles?: string[];
 }

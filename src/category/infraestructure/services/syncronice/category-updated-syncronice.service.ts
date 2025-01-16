@@ -22,8 +22,6 @@ implements ISycnchronizeService<CategoryUpdatedInfraestructureRequestDTO, void> 
 
     async execute(event: CategoryUpdatedInfraestructureRequestDTO): Promise<Result<void>> {
 
-        console.log(event);
-
         // Buscar la categoría por su ID
         let category = await this.categorymodel.findOne({ id: event.categoryId });
 
@@ -33,8 +31,11 @@ implements ISycnchronizeService<CategoryUpdatedInfraestructureRequestDTO, void> 
         }
 
         // Actualizar los campos de la categoría si están presentes en el evento
-        if (event.categoryName) category.name = event.categoryName;
-        if (event.categoryImage) category.image = event.categoryImage;
+        if (event.categoryName) 
+            await this.categorymodel.updateOne({ id: category.id }, {$set: {name: event.categoryName}});
+
+        if (event.categoryImage) 
+            await this.categorymodel.updateOne({ id: category.id }, {$set: {image: event.categoryImage}});
 
         // Actualizar productos asociados a la categoría
         if (event.products) {
@@ -49,10 +50,10 @@ implements ISycnchronizeService<CategoryUpdatedInfraestructureRequestDTO, void> 
                     odmProducts.push(odmProduct);
                 }
             }
-            category.products = odmProducts;
+            await this.categorymodel.updateOne({ id: category.id }, {$set: {products: odmProducts}});
         }
-
         // Actualizar bundles asociados a la categoría
+        
         if (event.bundles) {
             const odmBundles: OdmBundle[] = [];
             for (const bundleid of event.bundles) {
@@ -65,22 +66,9 @@ implements ISycnchronizeService<CategoryUpdatedInfraestructureRequestDTO, void> 
                     odmBundles.push(odmBundle);
                 }
             }
-            category.bundles = odmBundles;
+            await this.categorymodel.updateOne({ id: category.id }, {$set: {bundles: odmBundles}});
         }
 
-        console.log(category);
-
-        // Excluir los campos `_id` y `__v` del objeto de actualización
-        const updateData = {
-            name: category.name,
-            image: category.image,
-            products: category.products,
-            bundles: category.bundles
-        };
-
-        // Realizar la actualización usando `$set`
-        await this.categorymodel.updateOne({ id: category.id }, { $set: updateData });
-        
         return Result.success(undefined);
     }   
 }

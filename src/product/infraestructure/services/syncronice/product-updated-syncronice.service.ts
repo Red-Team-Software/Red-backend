@@ -31,8 +31,9 @@ implements ISycnchronizeService<ProductUpdatedInfraestructureRequestDTO,void>{
             product.price=event.productPrice.price
             product.currency=event.productPrice.currency
         }
-        if (event.productStock)
-            product.stock=event.productStock
+        if (event.productStock){
+            console.log("stock",event.productStock)
+            product.stock=event.productStock}
         if (event.productWeigth){
             product.weigth=event.productWeigth.weigth
             product.measurament=event.productWeigth.measure

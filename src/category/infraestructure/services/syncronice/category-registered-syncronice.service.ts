@@ -21,7 +21,7 @@ implements ISycnchronizeService<CategoryRegistredInfraestructureRequestDTO,void>
     
     async execute(event: CategoryRegistredInfraestructureRequestDTO): Promise<Result<void>> {
 
-        const odmProducts: OdmProduct[]=[];
+        try{const odmProducts: OdmProduct[]=[];
         const odmBundles:OdmBundle[]=[]
 
         for (const productId of event.products) {
@@ -60,6 +60,8 @@ implements ISycnchronizeService<CategoryRegistredInfraestructureRequestDTO,void>
             : [],
         })
         await this.categorymodel.create(category)
-        return Result.success(undefined)
+        return Result.success(undefined)}catch(e){
+          console.log("error")
+        }
     }   
 }

@@ -1,5 +1,4 @@
 import { DataSource, Repository } from "typeorm";
-import { OrmCourierEntity } from "../../entities/orm-courier-entity";
 import { ICourierQueryRepository } from "src/courier/application/repository/query-repository/courier-query-repository-interface";
 import { IMapper } from "src/common/application/mappers/mapper.interface";
 import { Courier } from "src/courier/domain/aggregate/courier";
@@ -10,6 +9,7 @@ import { NotFoundException } from "src/common/infraestructure/infraestructure-ex
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { OrmCourierMapper } from "../../mapper/orm-courier-mapper/orm-courier-mapper";
 import { ICourierModel } from "src/courier/application/model/courier-model-interface";
+import { OrmCourierEntity } from "../../entities/orm-entities/orm-courier-entity";
 
 
 
@@ -28,7 +28,7 @@ export class CourierQueryRepository extends Repository<OrmCourierEntity> impleme
         return{
             courierId: orm.id,
             courierName: orm.name,
-            courierImage: orm.image.image,
+            courierImage: orm.image,
             courierDirection:{
                 lat: orm.latitude,
                 long: orm.longitude,
@@ -42,8 +42,7 @@ export class CourierQueryRepository extends Repository<OrmCourierEntity> impleme
     async findCourierById(courierId: CourierId): Promise<Result<Courier>> {
         try{
             let ormCourier = await this.findOne({
-                where: { id: courierId.courierId },
-                relations: ['image'],
+                where: { id: courierId.courierId }
             });
 
             if (!ormCourier) return Result.fail( new NotFoundException('Courier not found') );
@@ -59,8 +58,7 @@ export class CourierQueryRepository extends Repository<OrmCourierEntity> impleme
     async findCourierByName(courierName: CourierName): Promise<Result<Courier>> {
         try{
             let ormCourier = await this.findOne({
-                where: { name: courierName.courierName },
-                relations: ['image'],
+                where: { name: courierName.courierName }
             });
 
             if (!ormCourier) return Result.fail( new NotFoundException('Courier not found') );
@@ -76,9 +74,7 @@ export class CourierQueryRepository extends Repository<OrmCourierEntity> impleme
     
     async findAllCouriers(): Promise<Result<Courier[]>> {
         try{
-            let ormCourier = await this.find({
-                relations: ['image'],
-            });
+            let ormCourier = await this.find({});
 
             if (!ormCourier) return Result.fail( new NotFoundException('Courier not found') );
 
@@ -98,8 +94,7 @@ export class CourierQueryRepository extends Repository<OrmCourierEntity> impleme
     async findCourierByIdDetail(courierId: CourierId): Promise<Result<ICourierModel>> {
         try{
             let ormCourier = await this.findOne({
-                where: { id: courierId.courierId },
-                relations: ['image'],
+                where: { id: courierId.courierId }
             });
 
             if (!ormCourier) return Result.fail( new NotFoundException('Courier not found') );
@@ -115,8 +110,7 @@ export class CourierQueryRepository extends Repository<OrmCourierEntity> impleme
     async findCourierByEmailDetail(email: string): Promise<Result<ICourierModel>> {
         try{
             let ormCourier = await this.findOne({
-                where: { email: email },
-                relations: ['image'],
+                where: { email: email }
             });
 
             if (!ormCourier) return Result.fail( new NotFoundException('Courier not found') );

@@ -220,6 +220,10 @@ export class PaymentMethodController {
         if (!values.page) values.page = 1;
         if (!values.perPage) values.perPage = 10;
         
+
+        if (!values.page) values.page = 1;
+        if (!values.perPage) values.perPage = 10;
+        
         let getAllPaymentMethodService = new ExceptionDecorator(
             new LoggerDecorator(
                 new PerformanceDecorator(

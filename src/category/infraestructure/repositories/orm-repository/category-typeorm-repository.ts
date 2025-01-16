@@ -172,11 +172,13 @@ export class OrmCategoryRepository extends Repository<OrmCategoryEntity> impleme
     }
 
     async updateCategory(category: Category): Promise<Result<Category>> {
-        const persis = await this.mapper.fromDomaintoPersistence(category);
         try {
+            const persis = await this.mapper.fromDomaintoPersistence(category);
 
             // Actualiza la entidad principal (categoría)
             const result = await this.save(persis)
+
+            console.log(result)
 
             return Result.success(category);
         } catch (e) {

@@ -4,51 +4,40 @@ export interface ICreateOrder {
     orderCreateDate:   Date;
     totalAmount:       TotalAmount;
     orderDirection:    OrderDirection;
-    orderCourier:      OrderCourier;
+    orderCourier:      string;
     orderUserId:       string;
     products:          Details[];
     bundles:           Details[];
-    orderReceivedDate: null;
-    orderReport:       null;
+    orderReceivedDate: Date;
+    orderReport:       Report;
     orderPayment:      OrderPayment;
-    orderCupon:      string;
+    orderCupon:        string;
 }
 
 export interface Details {
     id:       string;
     quantity: number;
+    price:    number;
+    currency: string;
 }
-
-export interface OrderCourier {
-    id: string;
-}
-
 export interface OrderDirection {
-    long: number;
     lat:  number;
+    long: number;
 }
 
 export interface OrderPayment {
-    id:              OrderCourier;
-    orderPaymentId:  OrderCourier;
-    paymentMethod:   PaymentMethod;
-    paymentAmount:   PaymentAmount;
-    paymentCurrency: PaymentCurrency;
-}
-
-export interface PaymentAmount {
-    amount: number;
-}
-
-export interface PaymentCurrency {
-    currency: string;
-}
-
-export interface PaymentMethod {
-    method: string;
+    paymentId:  string;
+    paymentMethod:   string;
+    paymentAmount:   number;
+    paymentCurrency: string;
 }
 
 export interface TotalAmount {
-    currency: string;
     amount:   number;
+    currency: string;
+}
+
+export interface Report {
+    id:   number;
+    description: string;
 }

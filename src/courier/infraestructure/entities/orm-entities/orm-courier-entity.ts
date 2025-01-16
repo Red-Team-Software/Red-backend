@@ -1,7 +1,6 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from "typeorm"
-import { OrmCourierImageEntity } from "./orm-courier-image-entity"
-import { ICourierInterface } from "../model-entity/orm-model-entity/courier-interface"
 import { OrmOrderEntity } from "src/order/infraestructure/entities/orm-entities/orm-order-entity";
+import { ICourierInterface } from "../../model-entity/orm-model-entity/courier-interface";
 
 
 @Entity( 'courier' )
@@ -11,9 +10,8 @@ export class OrmCourierEntity implements ICourierInterface{
     @Column( 'varchar', { unique: true }   ) 
     name: string;
 
-    @OneToOne( () => OrmCourierImageEntity,   image => image.courier,{ cascade: true, eager: true } ) 
-    @JoinColumn()
-    image: OrmCourierImageEntity;
+    @Column("varchar")
+    image: string;
 
     @OneToMany( () => OrmOrderEntity, orders => orders.order_courier, {nullable: true} )
     orders?: OrmOrderEntity[];
@@ -33,7 +31,7 @@ export class OrmCourierEntity implements ICourierInterface{
     static create ( 
         id:string,
         name: string,
-        images:OrmCourierImageEntity,
+        images:string,
         lat: number,
         long: number,
         email: string,

@@ -79,9 +79,6 @@ export class OrmUserMapper implements IMapper <User,OrmUserEntity>{
             ormDirectionUserEntities ? ormDirectionUserEntities : [],
             domainEntity.UserImage ? domainEntity.UserImage.Value : undefined,
         )
-
-        console.log(data)
-
         return data
 
     }
