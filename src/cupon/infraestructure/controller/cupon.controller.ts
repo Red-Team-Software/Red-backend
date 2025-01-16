@@ -20,19 +20,26 @@ import { Channel } from 'amqplib';
 import { JwtAuthGuard } from 'src/auth/infraestructure/jwt/guards/jwt-auth.guard';
 import { ICredential } from 'src/auth/application/model/credential.interface';
 import { GetCredential } from 'src/auth/infraestructure/jwt/decorator/get-credential.decorator';
-import { IMapper } from 'src/common/application/mappers/mapper.interface';
-import { Cupon } from 'src/cupon/domain/aggregate/cupon.aggregate';
-import { OrmCuponEntity } from '../entities/orm-entities/orm-cupon-entity';
 import { FindCuponByCodeApplicationService } from 'src/cupon/application/services/query/find-cupon-by-code-application-service';
 import { ICommandCuponRepository } from 'src/cupon/domain/repository/command-cupon-repository';
 import { NotificationQueues } from 'src/notification/infraestructure/queues/notification.queues';
-import { RabbitMQSubscriber } from 'src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber';
 import { ICreateOrder } from 'src/product/infraestructure/interfaces/create-order.interface';
 import { MarkCuponAsUsedApplicationService } from 'src/cupon/application/services/command/mark-cupon-used-application-service';
 import { RegisterCuponToUserInfraestructureRequestDTO } from '../dto-request/register-cupon-to-user-infraestructure-dto';
 import { ByIdDTO } from 'src/common/infraestructure/dto/entry/by-id.dto';
+import { Mongoose } from 'mongoose';
+import { RabbitMQSubscriber } from 'src/common/infraestructure/events/subscriber/rabbitmq/rabbit-mq-subscriber';
+import { CouponQueues } from '../queues/coupon.queues';
+import { ICuponRegistered } from '../interfaces/cupon-created.interface';
+import { CouponRegisteredSyncroniceService } from '../service/syncronice/coupon-registered-syncronice.service';
+import { ICuponDeleted } from '../interfaces/cupon-delete.interface';
+import { CouponDeletedSyncroniceService } from '../service/syncronice/coupon-deleted-syncronice.service';
+import { ICuponChangeState } from '../interfaces/cupon-state-change.interface';
+import { CouponStateUpdatedSyncroniceService } from '../service/syncronice/coupon-state-updated-syncronice.service';
+import { IMapper } from 'src/common/application/mappers/mapper.interface';
+import { Cupon } from 'src/cupon/domain/aggregate/cupon.aggregate';
+import { OrmCuponEntity } from '../entities/orm-entities/orm-cupon-entity';
 import { IQueryUserRepository } from 'src/user/application/repository/user.query.repository.interface';
-import { OrmUserQueryRepository } from 'src/user/infraestructure/repositories/orm-repository/orm-user-query-repository';
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -48,55 +55,79 @@ export class CuponController {
   private readonly cuponMapper: IMapper<Cupon, OrmCuponEntity>;
   private readonly ormUserQueryRepo: IQueryUserRepository;
 
-  constructor(@Inject("RABBITMQ_CONNECTION") private readonly channel: Channel) {
+  private initializeQueues():void{        
+      CouponQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+  }
+                  
+  private buildQueue(name: string, pattern: string) {
+      this.subscriber.buildQueue({
+          name,
+          pattern,
+          exchange: {
+              name: 'DomainEvent',
+              type: 'direct',
+              options: {
+                  durable: false,
+              },
+          },
+      })
+  }
+
+
+  constructor(
+    @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+    @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose
+  ) {
     this.idGen = new UuidGen();
     this.subscriber=new RabbitMQSubscriber(this.channel);
     this.ormCuponCommandRepo = new OrmCuponCommandRepository(PgDatabaseSingleton.getInstance(),this.cuponMapper);
     this.ormCuponQueryRepo = new OrmCuponQueryRepository(PgDatabaseSingleton.getInstance());
-    this.ormUserQueryRepo=new OrmUserQueryRepository(PgDatabaseSingleton.getInstance())
-    this.subscriber.buildQueue({
-      name:'OrderEvents',
-      pattern: 'OrderRegistered',
-      exchange:{
-          name:'DomainEvent',
-          type:'direct',
-          options:{
-              durable:false,
-          }
+    this.subscriber= new RabbitMQSubscriber(this.channel);
+
+    this.initializeQueues();
+          
+    this.subscriber.consume<ICuponRegistered>(
+      { name: 'CouponSync/CuponRegistered'}, 
+      (data):Promise<void>=>{
+          this.syncCouponRegistered(data)
+          return
       }
-  });
+    )
 
-  this.initializeQueues();
+    this.subscriber.consume<ICuponDeleted>(
+      { name: 'CouponSync/CuponDeleted'}, 
+      (data):Promise<void>=>{
+          this.syncCouponDeleted(data)
+          return
+      }
+    )
 
-  this.subscriber.consume<ICreateOrder>(
-              { name: 'OrderEvents/OrderRegistered'}, 
-              (data):Promise<void>=>{
-                if(data.orderCupon){
-                  this.MarkCuponAsRegistered(data)
-                }
-                  return
-              }
-          )
+    this.subscriber.consume<ICuponChangeState>(
+      { name: 'CouponSync/CuponStateChanged'}, 
+      (data):Promise<void>=>{
+          this.syncCouponUpdated(data)
+          return
+      }
+    )
+  
   }
 
-      private initializeQueues():void{        
-          NotificationQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
-      }
-  
-      private buildQueue(name: string, pattern: string) {
-          this.subscriber.buildQueue({
-            name,
-            pattern,
-            exchange: {
-              name: 'DomainEvent',
-              type: 'direct',
-              options: {
-                durable: false,
-              },
-            },
-          })
-      }
-      
+  async syncCouponRegistered(data:ICuponRegistered){
+      let service= new CouponRegisteredSyncroniceService(this.mongoose)
+      await service.execute({...data})
+  }
+
+  async syncCouponDeleted(data:ICuponDeleted){
+    let service= new CouponDeletedSyncroniceService(this.mongoose)
+    await service.execute({...data})
+  }
+
+  async syncCouponUpdated(data:ICuponChangeState){
+    let service= new CouponStateUpdatedSyncroniceService(this.mongoose)
+    await service.execute({...data})
+  }
+
+  /*
   async MarkCuponAsRegistered(data:ICreateOrder){
     let service= new ExceptionDecorator(
       new LoggerDecorator(
@@ -108,7 +139,7 @@ export class CuponController {
     let response= await service.execute({userId:data.orderUserId,cuponId:data.orderCupon});
 
   }
-
+  */
 
   @Post('create')
   async createCupon(

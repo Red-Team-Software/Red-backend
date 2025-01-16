@@ -55,6 +55,7 @@ implements ISycnchronizeService<ProductUpdatedInfraestructureRequestDTO,void>{
             { 'products.productId': product.id },
             { $set: { 'products.$': product } }
         );
+        
         return Result.success(undefined)
     }   
 }

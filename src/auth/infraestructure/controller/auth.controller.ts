@@ -61,6 +61,15 @@ import { NestTimer } from "src/common/infraestructure/timer/nets-timer"
 import { IUserExternalAccount } from "src/auth/application/interfaces/user-external-account-interface"
 import { UserStripeAccount } from "../external-account/user-stripe-account"
 import { StripeSingelton } from "src/common/infraestructure/stripe/stripe-singelton"
+import { envs } from "src/config/envs/envs"
+import { IMessagesSubscriber } from "src/common/application/messages/messages-susbcriber/messages-subscriber.interface"
+import { IMessagesPublisher } from "src/common/application/messages/messages-publisher/messages-publisher.interface"
+import { RabbitMQMessagePublisher } from "src/common/infraestructure/messages/publisher/rabbit-mq-message-publisher"
+import { RabbitMQMessageSubscriber } from "src/common/infraestructure/messages/subscriber/rabbit-mq-message-subscriber"
+import { AuthQueues } from "../queues/auth.queues"
+import { IAccountRegistered } from "../interface/account-registered.interface"
+import { AccountRegisteredSyncroniceService } from "../services/syncronice/account-registered-syncronice.service"
+import mongoose, { Mongoose } from "mongoose"
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -79,9 +88,30 @@ export class AuthController {
   private readonly eventPublisher:IEventPublisher
   private readonly codeGenerator:ICodeGenerator<string>
   private readonly saveUserExternalApi: IUserExternalAccount
+  private readonly messageSuscriber:RabbitMQMessageSubscriber
+  private readonly messagePubliser:IMessagesPublisher
+
+  private initializeQueues():void{        
+    AuthQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
+  }
+  
+  private buildQueue(name: string, pattern: string) {
+      this.messageSuscriber.buildQueue({
+            name,
+            pattern,
+            exchange: {
+              name: 'Messages',
+              type: 'direct',
+              options: {
+                durable: false,
+              },
+       },
+    })
+  }
   
   constructor(
     @Inject("RABBITMQ_CONNECTION") private readonly channel: Channel,
+    @Inject("MONGO_CONNECTION") private readonly mongoose: Mongoose,
     private jwtAuthService: JwtService
   ) {
     this.idGen= new UuidGen()
@@ -97,6 +127,23 @@ export class AuthController {
     this.eventPublisher= new RabbitMQPublisher(this.channel)
     this.codeGenerator= new CodeGenerator()
     this.saveUserExternalApi= new UserStripeAccount(StripeSingelton.getInstance())
+    this.messagePubliser= new RabbitMQMessagePublisher(this.channel)
+    this.messageSuscriber= new RabbitMQMessageSubscriber(this.channel)
+
+    this.initializeQueues()
+
+    this.messageSuscriber.consume<IAccountRegistered>(
+      { name: 'Messages/AccountRegistered' },
+      (data):Promise<void>=>{
+        this.syncAccountRegistered(data)
+        return
+      }
+    )    
+  }
+
+  async syncAccountRegistered(data:IAccountRegistered){
+    let service = new AccountRegisteredSyncroniceService(mongoose)
+    await service.execute(data)    
   }
 
   @Post('register')
@@ -121,7 +168,8 @@ export class AuthController {
                 this.dateHandler,
                 this.eventPublisher,
                 this.saveUserExternalApi,
-                this.jwtGen
+                this.jwtGen,
+                this.messagePubliser
               ),new NestTimer(),new NestLogger(new Logger())
             // ),new NestLogger(new Logger())
           ),this.auditRepository,this.dateHandler)

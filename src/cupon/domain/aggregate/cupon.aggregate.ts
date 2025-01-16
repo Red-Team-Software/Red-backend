@@ -33,7 +33,7 @@ export class Cupon extends AggregateRoot<CuponId> {
 
             case "CuponStateChange":
                 const stateChanged: CuponStateChanged = event as CuponStateChanged;
-                this.cuponState = stateChanged.newState;
+                this.cuponState = stateChanged.cuponState;
                 break;
 
             case "CuponDelete":

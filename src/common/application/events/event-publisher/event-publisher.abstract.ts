@@ -2,17 +2,17 @@ import { DomainEvent } from "src/common/domain/domain-event/domain-event";
 import { IEventSubscriber } from "../event-subscriber/event-subscriber.interface";
 
 export abstract class IEventPublisher {
-	protected subscribers: Map<string, IEventSubscriber<DomainEvent>[]>;
+	protected subscribers: Map<string, IEventSubscriber[]>;
 
 	constructor() {
-		this.subscribers = new Map<string, IEventSubscriber<DomainEvent>[]>();
+		this.subscribers = new Map<string, IEventSubscriber[]>();
 	}
 
 	abstract publish(events: DomainEvent[]): Promise<void>;
 
 	private includes(
 		event: string,
-		subscriber: IEventSubscriber<DomainEvent>
+		subscriber: IEventSubscriber
 	): boolean {
 		if (!this.subscribers.has(event)) return false;
 		return this.subscribers.get(event).includes(subscriber);
@@ -20,13 +20,13 @@ export abstract class IEventPublisher {
 
 	subscribe<T extends DomainEvent,Entry extends string,Exit>(
 		event: string,
-		subscribers: IEventSubscriber<DomainEvent>[],
+		subscribers: IEventSubscriber[],
 		mapper: (json: Record<Entry,Exit>) => T
 	): void {
 		this.subscribers.set(event, subscribers);
 	}
 
-	unSubscribe(event: string, subscriber: IEventSubscriber<DomainEvent>): void {
+	unSubscribe(event: string, subscriber: IEventSubscriber): void {
 		if (this.includes(event, subscriber))
 			this.subscribers.set(
 				event,

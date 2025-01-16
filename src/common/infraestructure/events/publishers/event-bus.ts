@@ -12,7 +12,7 @@ export class EventBus extends IEventPublisher {
 			if (subscribers) {
 				await Promise.all(
 					subscribers.map(async (subscriber) => {
-						return subscriber.on(event);
+						subscriber.consume
 					})
 				);
 			}

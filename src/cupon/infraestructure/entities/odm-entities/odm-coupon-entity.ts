@@ -14,10 +14,10 @@ export class OdmCoupon extends Document implements IOdmCoupon {
     @Prop({ type: String, unique: true, required: true })   
     code: string
 
-    @Prop({ type: Number, unique: true, required: true })  
+    @Prop({ type: Number, unique: false, required: true })  
     discount: number
 
-    @Prop({ type: String, unique: true, required: true })  
+    @Prop({ type: String, unique: false, required: true })  
     state: string
     
 }

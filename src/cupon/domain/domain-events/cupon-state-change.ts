@@ -6,19 +6,19 @@ export class CuponStateChanged extends DomainEvent {
     serialize(): string {
         const data = {
             cuponId: this.cuponId.Value,
-            newState: this.newState.Value,
+            cuponState: this.cuponState.Value,
         };
 
         return JSON.stringify(data);
     }
 
-    static create(cuponId: CuponId, newState: CuponState) {
-        return new CuponStateChanged(cuponId, newState);
+    static create(cuponId: CuponId, cuponState: CuponState) {
+        return new CuponStateChanged(cuponId, cuponState);
     }
 
     constructor(
         public cuponId: CuponId,
-        public newState: CuponState
+        public cuponState: CuponState
     ) {
         super();
     }

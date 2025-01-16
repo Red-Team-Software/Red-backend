@@ -56,6 +56,7 @@ import { CategoryUpdatedSyncroniceService } from '../services/syncronice/categor
 import { ICategoryNameUpdated } from '../interfaces/category-name-update.interface';
 import { ICategoryImageUpdated } from '../interfaces/category-image-update.interface';
 import { ICategoryProductUpdated } from '../interfaces/category-product-update.interface';
+import { envs } from 'src/config/envs/envs';
 
 @Controller('category')
 @ApiBearerAuth()
@@ -155,12 +156,15 @@ export class CategoryController {
   async syncCategoryRegistered(data:ICategoryCreated){
     let service= new CategoryRegisteredSyncroniceService(this.mongoose)
     await service.execute(data)
+    console.log('llamo a create')
   }
 
   async syncCategoryUpdated(data:CategoryUpdatedInfraestructureRequestDTO){
     console.log('data de afuera',data)
     let service= new CategoryUpdatedSyncroniceService(this.mongoose)
-    await service.execute({...data})
+    let response=await service.execute({...data})
+    console.log(response)
+
   }
 
   @Post('create')
@@ -349,5 +353,4 @@ export class CategoryController {
     
     return response.getValue;
   }
-
 }

@@ -1,5 +1,5 @@
-import { DomainEvent } from "src/common/domain/domain-event/domain-event";
+import { IQueue } from "../../queue/queue.interface";
 
-export interface IEventSubscriber<T extends DomainEvent> {
-    on(event: T): Promise<void>;
+export interface IEventSubscriber{
+    consume<T,>( queue: IQueue, callback: (entry:T) => Promise<void> ):void
 }
