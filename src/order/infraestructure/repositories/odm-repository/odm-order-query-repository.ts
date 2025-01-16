@@ -200,9 +200,22 @@ export class OdmOrderQueryRepository implements IQueryOrderRepository {
 
             let orders: IOrderModel[] = [];
 
-            for (const odmOrder of odmOrders) {
-                let order = await this.transformToDataModel(odmOrder);
-                orders.push(order);
+            if (data.state){
+                for(let odmOrder of odmOrders){
+                    if(data.state === "active" && (odmOrder.state == "ongoing" ||
+                        odmOrder.state == "waiting" || odmOrder.state == "delivering")) {
+                            orders.push( await this.transformToDataModel(odmOrder));
+                    } 
+                    
+                    if(data.state === "past" && (odmOrder.state === "cancelled" ||
+                        odmOrder.state === "delivered")) {
+                            orders.push( await this.transformToDataModel(odmOrder));
+                    }
+                };
+            } else {
+                let o = odmOrders.map(async (ormOrder) => await this.transformToDataModel(ormOrder));
+
+                orders = await Promise.all(o);
             }
 
             return Result.success(orders);
@@ -224,9 +237,22 @@ export class OdmOrderQueryRepository implements IQueryOrderRepository {
 
             let orders: IOrderModel[] = [];
 
-            for (const odmOrder of odmOrders) {
-                let order = await this.transformToDataModel(odmOrder);
-                orders.push(order);
+            if (data.state){
+                for(let odmOrder of odmOrders){
+                    if(data.state === "active" && (odmOrder.state == "ongoing" ||
+                        odmOrder.state == "waiting" || odmOrder.state == "delivering")) {
+                            orders.push( await this.transformToDataModel(odmOrder));
+                    } 
+                    
+                    if(data.state === "past" && (odmOrder.state === "cancelled" ||
+                        odmOrder.state === "delivered")) {
+                            orders.push( await this.transformToDataModel(odmOrder));
+                    }
+                };
+            } else {
+                let o = odmOrders.map(async (ormOrder) => await this.transformToDataModel(ormOrder));
+
+                orders = await Promise.all(o);
             }
 
             return Result.success(orders);
