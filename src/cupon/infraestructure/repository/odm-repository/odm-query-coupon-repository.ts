@@ -10,7 +10,7 @@ import { OdmCuponMapper } from "../../mapper/odm-mapper/orm-cupon-mapper";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { CuponId } from "src/cupon/domain/value-object/cupon-id";
 
-export class OrmCuponQueryRepository implements IQueryCuponRepository {
+export class OdmCuponQueryRepository implements IQueryCuponRepository {
 
     private readonly couponmodel: Model<OdmCoupon>;
     private readonly mapper: OdmCuponMapper

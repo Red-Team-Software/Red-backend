@@ -52,6 +52,7 @@ import { RabbitMQMessagePublisher } from "src/common/infraestructure/messages/pu
 import { RabbitMQMessageSubscriber } from "src/common/infraestructure/messages/subscriber/rabbit-mq-message-subscriber"
 import { IMessagesPublisher } from "src/common/application/messages/messages-publisher/messages-publisher.interface"
 import { CourierMessageQueues } from "../queues/courier-message-queues"
+import { OdmCourierQueryRepository } from "../repository/odm-repository/odm-courier-query-repository"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -114,7 +115,7 @@ export class CourierController {
         this.idGen= new UuidGen();
         this.ormMapper = new OrmCourierMapper(this.idGen);
         this.courierRepository= new CourierRepository( PgDatabaseSingleton.getInstance(),this.ormMapper );
-        this.courierQueryRepository= new CourierQueryRepository( PgDatabaseSingleton.getInstance());
+        this.courierQueryRepository= new OdmCourierQueryRepository( mongoose);
         this.auditRepository= new OrmAuditRepository(PgDatabaseSingleton.getInstance());
         this.subscriber= new RabbitMQSubscriber(this.channel);
         this.jwtGen= new JwtCourierGenerator(jwtCourierService)
