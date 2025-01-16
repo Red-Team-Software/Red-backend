@@ -138,10 +138,23 @@ export class AuthController {
         this.syncAccountRegistered(data)
         return
       }
-    )    
+    )
+    
+    this.messageSuscriber.consume<IAccountRegistered>(
+      { name: 'Messages/SessionRegistered' },
+      (data):Promise<void>=>{
+        this.syncAccountLogIn(data)
+        return
+      }
+    )
   }
 
   async syncAccountRegistered(data:IAccountRegistered){
+    let service = new AccountRegisteredSyncroniceService(mongoose)
+    await service.execute(data)    
+  }
+
+  async syncAccountLogIn(data:IAccountRegistered){
     let service = new AccountRegisteredSyncroniceService(mongoose)
     await service.execute(data)    
   }
@@ -199,7 +212,8 @@ export class AuthController {
                   this.encryptor,
                   this.idGen,
                   this.jwtGen,
-                  this.dateHandler
+                  this.dateHandler,
+                  this.messagePubliser
                 ), new NestTimer(), new NestLogger(new Logger())
               // ),new NestLogger(new Logger())
           ),this.auditRepository,this.dateHandler
