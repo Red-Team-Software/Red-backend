@@ -1,6 +1,5 @@
 import { IApplicationService } from "src/common/application/services";
 import { IEncryptor } from "src/common/application/encryptor/encryptor.interface";
-import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { IJwtGenerator } from "src/common/application/jwt-generator/jwt-generator.interface";
 import { Result } from "src/common/utils/result-handler/result";
 import { LogInCourierApplicationRequestDTO } from "../dto/request/log-in-courier-application-request-dto";

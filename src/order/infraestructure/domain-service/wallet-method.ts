@@ -13,7 +13,6 @@ import { IQueryUserRepository } from "src/user/application/repository/user.query
 import { InsufficientFundsInWalletException } from "src/order/domain/exception/domain-services/insufficient-funds-in-wallet-exception";
 import { ICommandUserRepository } from "src/user/domain/repository/user.command.repository.interface";
 import { Ballance } from "src/user/domain/entities/wallet/value-objects/balance";
-import { Wallet } from "src/user/domain/entities/wallet/wallet.entity";
 import { ICommandTransactionRepository } from "src/user/application/repository/wallet-transaction/transaction.command.repository.interface";
 import { ITransaction } from "src/user/application/model/transaction-interface";
 

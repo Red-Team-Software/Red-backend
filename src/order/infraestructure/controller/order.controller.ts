@@ -5,7 +5,6 @@ import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { UuidGen } from "src/common/infraestructure/id-gen/uuid-gen";
 import { ExceptionDecorator } from "src/common/application/aspects/exeption-decorator/exception-decorator";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
-import { IApplicationService } from "src/common/application/services";
 import { OrderPayApplicationServiceRequestDto } from "src/order/application/dto/request/order-pay-request-dto";
 import { LoggerDecorator } from "src/common/application/aspects/logger-decorator/logger-decorator";
 import { ICalculateShippingFee } from "src/order/domain/domain-services/interfaces/calculate-shippping-fee.interface";
@@ -33,10 +32,8 @@ import { IGeocodification } from "src/order/domain/domain-services/interfaces/ge
 import { GeocodificationHereMapsDomainService } from "../domain-service/geocodification-here-maps-domain-service";
 import { OrmProductQueryRepository } from "src/product/infraestructure/repositories/orm-repository/orm-product-query-repository";
 import { CancelOrderApplicationServiceRequestDto } from "src/order/application/dto/request/cancel-order-request-dto";
-import { CancelOrderApplicationServiceResponseDto } from "src/order/application/dto/response/cancel-order-response-dto";
 import { CancelOrderDto } from "../dto/cancel-order-entry.dto";
 import { StripePayOrderMethod } from "../domain-service/pay-order-stripe-method";
-import { CreateOrderReportApplicationServiceResponseDto } from "src/order/application/dto/response/create-order-report-response.dto";
 import { CreateOrderReportApplicationServiceRequestDto } from "src/order/application/dto/request/create-order-report-request-dto";
 import { CreateReportEntryDto } from "../dto/create-report-entry.dto";
 import { RefundPaymentStripeConnection } from "../domain-service/refund-amount-stripe";
@@ -55,7 +52,6 @@ import { FindOrderByIdRequestDto } from "src/order/application/dto/request/find-
 import { IQueryProductRepository } from "src/product/application/query-repository/query-product-repository";
 import { IQueryBundleRepository } from "src/bundle/application/query-repository/query-bundle-repository";
 import { OrmBundleQueryRepository } from "src/bundle/infraestructure/repositories/orm-repository/orm-bundle-query-repository";
-import { OrmPromotionQueryRepository } from "src/promotion/infraestructure/repositories/orm-repository/orm-promotion-query-repository";
 import { FindAllOrdersByUserInfraestructureEntryDto } from "../dto/find-all-orders-by-user-ifraestructure-request-dto";
 import { PerformanceDecorator } from "src/common/application/aspects/performance-decorator/performance-decorator";
 import { NestTimer } from "src/common/infraestructure/timer/nets-timer";
@@ -524,10 +520,7 @@ export class OrderController {
             new LoggerDecorator(
                 new PerformanceDecorator(
                     new FindAllOdersApplicationService(
-                        new OdmOrderQueryRepository(this.mongoose),
-                        new OdmProductQueryRepository(this.mongoose),
-                        new OdmBundleQueryRepository(this.mongoose),
-                        new OdmCourierQueryRepository(this.mongoose)
+                        new OdmOrderQueryRepository(this.mongoose)
                     ),new NestTimer(),new NestLogger(new Logger())
                 ),
                 new NestLogger(new Logger())
@@ -565,10 +558,7 @@ export class OrderController {
             new LoggerDecorator(
                 new PerformanceDecorator(
                     new FindAllOdersByUserApplicationService(
-                        new OdmOrderQueryRepository(this.mongoose),
-                        new OdmProductQueryRepository(this.mongoose),
-                        new OdmBundleQueryRepository(this.mongoose),
-                        new OdmCourierQueryRepository(this.mongoose)
+                        new OdmOrderQueryRepository(this.mongoose)
                     ), new NestTimer(), new NestLogger(new Logger())
                 ),new NestLogger(new Logger())
             )
@@ -705,9 +695,6 @@ export class OrderController {
                 new PerformanceDecorator(
                     new FindOrderByIdApplicationService(
                         new OdmOrderQueryRepository(this.mongoose),
-                        new OdmProductQueryRepository(this.mongoose),
-                        new OdmBundleQueryRepository(this.mongoose),
-                        new OdmCourierQueryRepository(this.mongoose),
                     ),new NestTimer(),new NestLogger(new Logger())
                 ),
                 new NestLogger(new Logger())

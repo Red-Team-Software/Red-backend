@@ -5,8 +5,6 @@ import { ForgetPasswordApplicationResponseDTO } from "../../dto/response/forget-
 import { Result } from "src/common/utils/result-handler/result";
 import { IQueryAccountRepository } from "../../repository/query-account-repository.interface";
 import { IEncryptor } from "src/common/application/encryptor/encryptor.interface";
-import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
-import { IJwtGenerator } from "src/common/application/jwt-generator/jwt-generator.interface";
 import { IAccount } from "../../model/account.interface";
 import { ICommandAccountRepository } from "../../repository/command-account-repository.interface";
 import { UserNotFoundApplicationException } from "../../application-exception/user-not-found-application-exception";

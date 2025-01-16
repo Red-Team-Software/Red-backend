@@ -1,13 +1,9 @@
 import { UserNotFoundApplicationException } from "src/auth/application/application-exception/user-not-found-application-exception";
 import { IUserExternalAccount } from "src/auth/application/interfaces/user-external-account-interface";
-import { IAccount } from "src/auth/application/model/account.interface";
-import { IQueryAccountRepository } from "src/auth/application/repository/query-account-repository.interface";
 import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
 import { ErrorSaveCardApplicationException } from "src/user/application/application-exeption/error-save-card-application-exception";
 import { DeleteCardApplicationRequestDTO } from "src/user/application/dto/request/wallet/delete-card-application-request-dto";
-import { SaveCardApplicationRequestDTO } from "src/user/application/dto/request/wallet/save-card-application-request-dto";
-import { SaveCardApplicationResponseDTO } from "src/user/application/dto/response/wallet/save-card-application-response-dto";
 import { IQueryUserRepository } from "src/user/application/repository/user.query.repository.interface";
 import { UserId } from "src/user/domain/value-object/user-id";
 

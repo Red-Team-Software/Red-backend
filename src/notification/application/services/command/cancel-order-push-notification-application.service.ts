@@ -4,7 +4,6 @@ import { CancelOrderPushNotificationApplicationResponseDTO } from "../../dto/res
 import { Result } from "src/common/utils/result-handler/result";
 import { IApplicationService } from "src/common/application/services";
 import { PushNotifierRequestDto } from "src/common/application/notification-handler/dto/request/push-notifier-request-dto";
-import { ErrorSendingPushOrderCancelledApplicationException } from "../../application-exception/error-sending-push-order-cancelled-application-exception";
 
 
 export class CancelledOrderPushNotificationApplicationService extends IApplicationService<CancelOrderPushNotificationApplicationRequestDTO,CancelOrderPushNotificationApplicationResponseDTO>{

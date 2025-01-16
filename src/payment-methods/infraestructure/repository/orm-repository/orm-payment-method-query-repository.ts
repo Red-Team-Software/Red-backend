@@ -8,7 +8,6 @@ import { PaymentMethodId } from "src/payment-methods/domain/value-objects/paymen
 import { PaymentMethodName } from "src/payment-methods/domain/value-objects/payment-method-name";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { FindAllPaymentMethodRequestDto } from "src/payment-methods/application/dto/request/find-all-payment-method-request.dto";
-import { Transform } from 'class-transformer';
 import { IPaymentMethodModel } from "src/payment-methods/application/model/payment-method-model";
 
 

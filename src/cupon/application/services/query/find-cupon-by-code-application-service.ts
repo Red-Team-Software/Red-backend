@@ -1,6 +1,5 @@
 import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
-import { ICuponRepository } from "src/cupon/domain/repository/cupon.interface.repository";
 import { FindCuponByCodeApplicationRequestDTO } from "../../dto/request/find-cupon-by-code-application-requestdto";
 import { FindCuponByCodeApplicationResponseDTO } from "../../dto/response/find-cupon-by-code-application-responsedto";
 import { NotFoundCuponApplicationException } from "src/cupon/application/application-exception/not-found-cupon-application-exception";

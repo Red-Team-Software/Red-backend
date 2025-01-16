@@ -1,7 +1,6 @@
 import { Result } from "src/common/utils/result-handler/result";
 import { OdmPromotionEntity, OdmPromotionSchema } from "../../entities/odm-entities/odm-promotion-entity";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
-import { OdmBundle, OdmBundleSchema } from "src/bundle/infraestructure/entities/odm-entities/odm-bundle-entity";
 import { Model, Mongoose } from "mongoose";
 import { IQueryPromotionRepository } from "src/promotion/application/query-repository/promotion.query.repository.interface";
 import { FindAllPromotionApplicationRequestDTO } from "src/promotion/application/dto/request/find-all-promotion-application-request-dto";
