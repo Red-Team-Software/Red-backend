@@ -80,8 +80,6 @@ implements ISycnchronizeService<CategoryUpdatedInfraestructureRequestDTO, void> 
 
         // Realizar la actualización usando `$set`
         await this.categorymodel.updateOne({ id: category.id }, { $set: updateData });
-
-        console.log(`Categoría con id ${category.id} actualizada exitosamente.`);
         
         return Result.success(undefined);
     }   

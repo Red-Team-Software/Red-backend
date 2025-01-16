@@ -29,6 +29,8 @@ import { IUserExternalAccount } from "src/auth/application/interfaces/user-exter
 import { ErrorRegisteringAccountExternalSiteApplicationException } from "../../application-exception/error-registering-account-external-site-application-exception";
 import { IJwtGenerator } from "src/common/application/jwt-generator/jwt-generator.interface";
 import { ICourierRepository } from "src/courier/application/repository/repositories-command/courier-repository-interface";
+import { IMessagesPublisher } from "src/common/application/messages/messages-publisher/messages-publisher.interface";
+import { AccountRegistered } from "../../messages/account-registered";
 
 
 export class RegisterUserApplicationService extends IApplicationService 
@@ -44,7 +46,8 @@ export class RegisterUserApplicationService extends IApplicationService
         private readonly dateHandler:IDateHandler,
         private readonly eventPublisher:IEventPublisher,
         private readonly userExternalSite: IUserExternalAccount,
-        private readonly jwtGen:IJwtGenerator<string>
+        private readonly jwtGen:IJwtGenerator<string>,
+        private readonly messagePublisher:IMessagesPublisher
     ){
         super()
     }
@@ -127,6 +130,21 @@ export class RegisterUserApplicationService extends IApplicationService
             return Result.fail(new ErrorRegisteringAccountApplicationException())
         
         this.eventPublisher.publish(user.pullDomainEvents())
+
+        this.messagePublisher.publish([
+            AccountRegistered.create(
+                account.sessions,
+                account.id,
+                account.email,
+                account.password,
+                account.created_at,
+                account.isConfirmed,
+                null,
+                null,
+                account.id,
+                account.idStripe
+            )
+        ])
         
         return Result.success({id, token:jwt})
     }
