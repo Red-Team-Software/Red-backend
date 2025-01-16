@@ -11,11 +11,11 @@ export class CreateCategoryInfrastructureRequestDTO {
     @IsArray()
     @IsOptional()
     @IsUUID('4', { each: true })
-    products: string[]; 
+    products?: string[]; 
 
     @ApiProperty({ example: '["2c6c1571-deae-4a8a-a359-7fc8cc37a78b","de23a438-b272-42fc-b316-c8f2165ac0af"]' })
     @IsArray()
     @IsOptional()
     @IsUUID('4', { each: true })
-    bundles: string[]; 
+    bundles?: string[]; 
 }
