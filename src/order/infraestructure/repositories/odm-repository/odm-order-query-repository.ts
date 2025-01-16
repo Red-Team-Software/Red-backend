@@ -203,19 +203,22 @@ export class OdmOrderQueryRepository implements IQueryOrderRepository {
 
             if (data.state){
                 for(let odmOrder of odmOrders){
-                    if(data.state === "active" && (odmOrder.state == "ongoing" ||
+                    if(data.state.toLowerCase() === "active" && (odmOrder.state == "ongoing" ||
                         odmOrder.state == "waiting" || odmOrder.state == "delivering")) {
-                            orders.push( await this.transformToDataModel(odmOrder));
+                            let o = await this.transformToDataModel(odmOrder);
+                            orders.push( o );
                     } 
                     
-                    if(data.state === "past" && (odmOrder.state === "cancelled" ||
+                    if(data.state.toLowerCase() === "past" && (odmOrder.state === "cancelled" ||
                         odmOrder.state === "delivered")) {
-                            orders.push( await this.transformToDataModel(odmOrder));
+                            let o = await this.transformToDataModel(odmOrder);
+                            orders.push( o );
                     }
                 };
-            } else {
+            }
+            if (!data.state){
                 let o = odmOrders.map(async (ormOrder) => await this.transformToDataModel(ormOrder));
-
+    
                 orders = await Promise.all(o);
             }
 
@@ -240,19 +243,22 @@ export class OdmOrderQueryRepository implements IQueryOrderRepository {
 
             if (data.state){
                 for(let odmOrder of odmOrders){
-                    if(data.state === "active" && (odmOrder.state == "ongoing" ||
+                    if(data.state.toLowerCase() === "active" && (odmOrder.state == "ongoing" ||
                         odmOrder.state == "waiting" || odmOrder.state == "delivering")) {
-                            orders.push( await this.transformToDataModel(odmOrder));
+                            let o = await this.transformToDataModel(odmOrder);
+                            orders.push( o );
                     } 
                     
-                    if(data.state === "past" && (odmOrder.state === "cancelled" ||
+                    if(data.state.toLowerCase() === "past" && (odmOrder.state === "cancelled" ||
                         odmOrder.state === "delivered")) {
-                            orders.push( await this.transformToDataModel(odmOrder));
+                            let o = await this.transformToDataModel(odmOrder);
+                            orders.push( o );
                     }
                 };
-            } else {
+            }
+            if (!data.state){
                 let o = odmOrders.map(async (ormOrder) => await this.transformToDataModel(ormOrder));
-
+    
                 orders = await Promise.all(o);
             }
 
