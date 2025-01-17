@@ -110,6 +110,7 @@ import { OdmPromotionQueryRepository } from "src/promotion/infraestructure/repos
 import { PaymentMethodName } from "src/payment-methods/domain/value-objects/payment-method-name";
 import { OdmCuponQueryRepository } from "src/cupon/infraestructure/repository/odm-repository/odm-query-coupon-repository";
 import { OdmCourierQueryRepository } from "src/courier/infraestructure/repository/odm-repository/odm-courier-query-repository";
+import { OrmAccountQueryRepository } from "src/auth/infraestructure/repositories/orm-repository/orm-account-query-repository";
 
 
 @ApiBearerAuth()
@@ -357,6 +358,8 @@ export class OrderController {
             cuponId: data.cuponId,
         }
 
+        console.log(data.stripePaymentMethod)
+
         let payOrderService = new ExceptionDecorator(
             new AuditDecorator(
                 new LoggerDecorator(
@@ -372,7 +375,8 @@ export class OrderController {
                                         new StripePayOrderMethod(
                                             this.stripeSingleton,
                                             this.idGen,
-                                            data.stripePaymentMethod
+                                            data.stripePaymentMethod,
+                                            new OrmAccountQueryRepository(PgDatabaseSingleton.getInstance())
                                         )
                                         ,
                                         new WalletPaymentMethod(

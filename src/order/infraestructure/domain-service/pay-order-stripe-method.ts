@@ -10,6 +10,8 @@ import { PaymentCurrency } from "src/order/domain/entities/payment/value-object/
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { IPaymentMethodService } from "src/order/domain/domain-services/interfaces/payment-method-interface";
 import { PaymentFailedException } from "src/order/domain/exception/domain-services/payment-failed-exception";
+import { IQueryAccountRepository } from "src/auth/application/repository/query-account-repository.interface";
+import { IAccount } from "src/auth/application/model/account.interface";
 
 
 export class StripePayOrderMethod implements IPaymentMethodService {    
@@ -18,29 +20,38 @@ export class StripePayOrderMethod implements IPaymentMethodService {
     constructor(
         stripe: StripeSingelton,
         private readonly idGen: IIdGen<string>,
-        private readonly stripePaymentMethod: string
+        private readonly stripePaymentMethod: string,
+        private readonly accountRepository:IQueryAccountRepository<IAccount>
     ) {
         this.stripe = stripe;
     }
 
     async createPayment(order: Order): Promise<Result<Order>> {
         try {
+            
+            let userAccount = await this.accountRepository.findAccountByUserId(order.OrderUserId.userId);
+
+            let user = userAccount.getValue;
+            
             const paymentIntent =
                 await this.stripe.stripeInstance.paymentIntents.create({
                     amount: Math.round(order.TotalAmount.OrderAmount*100),
                     currency: order.TotalAmount.OrderCurrency,
                     payment_method_types: ['card'],
                     confirmation_method: 'manual',
+                    customer: user.idStripe,
                     metadata: { orderId: order.getId().orderId },
                 });
             let paymentIntentId = paymentIntent.id;
+
+            console.log(paymentIntentId);
             
             const confirmedPaymentIntent =
                 await this.stripe.stripeInstance.paymentIntents.confirm(
                     paymentIntentId,
                     {
-                        payment_method: this.stripePaymentMethod,
-                    },
+                        payment_method: this.stripePaymentMethod
+                    }
                 );
 
             let orderPayment: OrderPayment = OrderPayment.create(
@@ -68,6 +79,7 @@ export class StripePayOrderMethod implements IPaymentMethodService {
             
             return Result.success(newOrder);
         } catch (error) {
+            console.log(error);
             return Result.fail(new PaymentFailedException());
         }
         
