@@ -43,7 +43,7 @@ export type orderByIdResponse = {
     orderPayment?: {
         paymetAmount: number;
         paymentCurrency: string;
-        payementMethod: string;
+        paymentMethod: string;
     };
     orderDirection: {
         lat: string;

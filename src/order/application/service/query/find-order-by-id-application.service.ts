@@ -80,7 +80,7 @@ export class FindOrderByIdApplicationService extends IApplicationService<FindOrd
             orderPayment: {
                 paymetAmount: order.orderPayment.paymetAmount,
                 paymentCurrency: order.orderPayment.paymentCurrency,
-                payementMethod: order.orderPayment.payementMethod
+                paymentMethod: order.orderPayment.payementMethod
             },
             orderDirection: {
                 lat: order.orderDirection.lat.toString(),
