@@ -19,9 +19,8 @@ export class CourierRegisteredSyncroniceService implements ISycnchronizeService<
     
     async execute(event: CourierRegistredInfraestructureRequestDTO): Promise<Result<void>> {
         
-        let response = await this.courierQueryRepository.findCourierByIdDetail(
-            CourierId.create(event.courierId))
-        
+        console.log("jola")
+
         const courier = new this.model({
             id: event.courierId,
             name: event.courierName,
