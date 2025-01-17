@@ -348,7 +348,9 @@ export class OrderController {
             currency: data.currency ?
             data.currency.toLowerCase()
             : 'usd',
-            paymentMethod: data.paymentMethod,
+            paymentMethod: data.paymentMethod ?
+            data.paymentMethod
+            : 'credit',
             directionId: data.idUserDirection,
             products: data.products,
             bundles: data.bundles,
@@ -435,7 +437,9 @@ export class OrderController {
             currency: data.currency ?
             data.currency.toLowerCase()
             : 'usd',
-            paymentMethod: data.paymentMethod,
+            paymentMethod: data.paymentMethod ?
+            data.paymentMethod
+            : 'wallet',
             directionId: data.idUserDirection,
             products: data.products,
             bundles: data.bundles,

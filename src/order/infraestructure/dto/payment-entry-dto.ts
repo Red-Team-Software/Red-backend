@@ -23,7 +23,8 @@ export class PaymentEntryDto {
   @ApiProperty({ example: 'credit', description: 'The method of payment used' })
   @Transform(({ value }) => value ?? 'credit')
   @IsString()
-  paymentMethod: string;
+  @IsOptional()
+  paymentMethod?: string;
 
   @ApiProperty({
     example: 'El id de la direccion que tenga el user',
