@@ -18,8 +18,7 @@ export class PaymentEntryDto {
   })
   @IsString()
   @IsOptional()
-  @Transform(({ value }) => value ?? 'usd')
-  currency: string;
+  currency?: string;
 
   @ApiProperty({ example: 'credit', description: 'The method of payment used' })
   @Transform(({ value }) => value ?? 'credit')

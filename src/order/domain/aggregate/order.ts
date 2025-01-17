@@ -19,6 +19,7 @@ import { BundleDetail } from "../entities/bundle-detail/bundle-detail-entity";
 import { OrderCourierId } from "../value_objects/order-courier-id";
 import { OrderCuponId } from "../value_objects/order-cupon-id";
 import { OrderReported } from "../domain-events/order-reported";
+import { OrderAlreadyReportedException } from "../exception/order-already-reported.exception";
 
 export class Order extends AggregateRoot<OrderId>{
     
@@ -208,6 +209,9 @@ export class Order extends AggregateRoot<OrderId>{
     }
 
     addOrderReport(orderReport: OrderReport): void {
+        if (this.orderReport)
+            throw new OrderAlreadyReportedException();
+        
         this.apply(
             OrderReported.create(
                 this.getId(),
