@@ -66,16 +66,6 @@ $ docker compose up -d
 $ pnpm dev
 ```
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
 ## License
 
 Nest is [MIT licensed](LICENSE).
@@ -246,7 +236,7 @@ NT: Hoy 08/11/2024 Ponceleon si completo su responsabilidad (3 dias despues de l
 :construction: Working
 
 
-### Modelo de dominio
+### Diagramas
 
 #### Domain model
 [![domain model construction](./public/images/construction/Diagramas-Equipo-Rojo%20-%20domain-model%20(1).svg)](https://lucid.app/lucidchart/6702d2bf-abc6-4e63-9c91-a2162adb8348/edit?invitationId=inv_e6b8aa9a-adee-4f9c-bda7-4b37490b17ca&page=_W5nKC6R8y1b#)
@@ -262,28 +252,44 @@ NT: Hoy 08/11/2024 Ponceleon si completo su responsabilidad (3 dias despues de l
 
 | Task                                     | Time required | Assigned to   | Current Status           | Finished        |
 |------------------------------------------|---------------|---------------|--------------------------|-----------------|
-| Agregar un cupón a la orden              | 2 weeks       | Daniel Ponceleon | :construction: Working |                 |
-| Agregar ID cupón a la orden (opcional)   | 2 weeks       | Gabriel De Sousa | :construction: Working |                 |
-| Test de cupón                            | 2 weeks       | Daniel Ponceleon | :construction: Working |                 |
-| Test de categoría                        | 2 weeks       | Daniel Ponceleon | :construction: Working |                 |
-| Auth de currier login                    | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
-| Añadir un curier a una orden             | 2 weeks       | Gabriel De Sousa | :construction: Working |                 |
-| Hacer test de módulo de User             | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
-| Hacer test de módulo de Producto         | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
-| Hacer test de módulo de Bundle           | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
-| Hacer test de módulo de Promoción        | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
-| Modificar producto                       | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
-| Modificar bundle                         | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
-| Modificar promoción                      | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
-| Eliminar producto                        | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
-| Eliminar bundle                          | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
-| Eliminar promoción                       | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | :construction: Working |                 |
-| Refactorizar Orden                       | 2 weeks       | Gabriel De Sousa | :construction: Working |                 |
-| Refactorizar payment method              | 2 weeks       | Gabriel De Sousa | :construction: Working |                 |
-| Refactorizar Curier                      | 2 weeks       | Gabriel De Sousa | :construction: Working |                 |
+| Agregar un cupón a la orden              | 2 weeks       | Daniel Ponceleon | done |    ✅ done             |   
+| Agregar ID cupón a la orden (opcional)   | 2 weeks       | Gabriel De Sousa | done |    ✅ done             |   
+| Test de cupón                            | 2 weeks       | Daniel Ponceleon | done |    ✅ done             |   
+| Test de categoría                        | 2 weeks       | Daniel Ponceleon | done |    ✅ done             |   
+| Auth de currier login                    | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | done |  ✅ done               |
+| Añadir un curier a una orden             | 2 weeks       | Gabriel De Sousa | done |   ✅ done            |
+| Hacer test de módulo de User             | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | done |  ✅ done         |
+| Hacer test de módulo de Producto         | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | done |   ✅ done        |
+| Hacer test de módulo de Bundle           | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | done |   ✅ done              |
+| Hacer test de módulo de Promoción        | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | done |  ✅ done               |
+| Modificar producto                       | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | done |   ✅ done              |
+| Modificar bundle                         | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | done |  ✅ done               |
+| Modificar promoción                      | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | done |  ✅ done               |
+| Eliminar producto                        | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | done |  ✅ done               |
+| Eliminar bundle                          | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | done |  ✅ done               |
+| Eliminar promoción                       | 2 weeks       | Alfredo Nicolas Fung Fink-Finowicki | done |  ✅ done               |
+| Refactorizar Orden                       | 2 weeks       | Gabriel De Sousa | done |   ✅ done              |
+| Refactorizar payment method              | 2 weeks       | Gabriel De Sousa | done |   ✅ done              |
+| Refactorizar Curier                      | 2 weeks       | Gabriel De Sousa | done |   ✅ done              | 
 
 
 #### Leyenda
 ✅ done
 ❌ NOT done
 :construction: Working
+
+NT: Adicional se añadio CQRS en bundle, category, courier, cupon, order, payment-method, product, promotion, se incluyo el de user y auth pero no se subio en produccion
+
+### Diagramas
+
+#### Domain model
+[![domain model construction](./public/images/transition/Diagramas-Equipo-Rojo%20-%20domain-model%20(1).svg)](https://lucid.app/lucidchart/6702d2bf-abc6-4e63-9c91-a2162adb8348/edit?invitationId=inv_e6b8aa9a-adee-4f9c-bda7-4b37490b17ca&page=_W5nKC6R8y1b#)
+
+#### ORM model
+[![orm model construction](./public/images/transition/Diagramas-Equipo-Rojo%20-%20orm-model%20(1).svg)](https://lucid.app/lucidchart/6702d2bf-abc6-4e63-9c91-a2162adb8348/edit?invitationId=inv_e6b8aa9a-adee-4f9c-bda7-4b37490b17ca&page=_W5nKC6R8y1b#)
+
+#### ODM model
+[![odm model construction](./public/images/transition/Diagramas-Equipo-Rojo%20-%20odm-model.svg)](https://lucid.app/lucidchart/6702d2bf-abc6-4e63-9c91-a2162adb8348/edit?invitationId=inv_e6b8aa9a-adee-4f9c-bda7-4b37490b17ca&page=_W5nKC6R8y1b#)
+
+#### Hexagonal model
+[![hexagonal model construction](./public/images/transition/Diagramas-Equipo-Rojo%20-%20diagrama%20hexagonal%20back.svg)](https://lucid.app/lucidchart/6702d2bf-abc6-4e63-9c91-a2162adb8348/edit?invitationId=inv_e6b8aa9a-adee-4f9c-bda7-4b37490b17ca&page=_W5nKC6R8y1b#)
