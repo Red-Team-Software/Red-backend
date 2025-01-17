@@ -78,7 +78,7 @@ export class RegisterCourierApplicationService extends IApplicationService<Creat
                 data.lat,
                 data.long,
                 data.email,
-                data.password
+                password
             )
         ])
 

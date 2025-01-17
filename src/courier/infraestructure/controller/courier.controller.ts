@@ -49,9 +49,9 @@ import { RabbitMQMessageSubscriber } from "src/common/infraestructure/messages/s
 import { IMessagesPublisher } from "src/common/application/messages/messages-publisher/messages-publisher.interface"
 import { CourierMessageQueues } from "../queues/courier-message-queues"
 import { OdmCourierQueryRepository } from "../repository/odm-repository/odm-courier-query-repository"
+import { JwtCourierAuthGuard } from "../jwt/guards/jwt-courier-auth.guard"
+import { ICourierModel } from "src/courier/application/model/courier-model-interface"
 
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @ApiTags('Courier')
 @Controller('courier')
 export class CourierController {
@@ -154,6 +154,7 @@ export class CourierController {
         await service.execute({...data})
     }
 
+    
     @Post('register')
     @UseInterceptors(FileInterceptor('image'))  
     async createCourier(@Body() entry: RegisterCourierEntryDTO,
@@ -186,14 +187,16 @@ export class CourierController {
         return response.getValue;
     }
 
+    @ApiBearerAuth()
+    @UseGuards(JwtCourierAuthGuard)
     @Post('/update-location')
     async modifingCourierLocation(
-        @GetCredential() credential:ICredential,
+        @GetCredential() credential:ICourierModel,
         @Body() data: ModifyCourierLocationEntryDto
     ) {
         let request: ModifyCourierLocationRequestDto = {
-            userId: credential.account.idUser,
-            courierId: data.courierId,
+            userId: '',
+            courierId: credential.courierId,
             lat: Number(data.lat),
             long: Number(data.long)
         }
@@ -215,6 +218,7 @@ export class CourierController {
 
     @Post('login') 
     async loginCourier(@Body() entry: LogInCourierInfraestructureRequestDTO) {
+
 
         let service= new ExceptionDecorator(
             new AuditDecorator(

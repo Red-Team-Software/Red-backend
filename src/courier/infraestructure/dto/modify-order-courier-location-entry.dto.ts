@@ -5,9 +5,6 @@ import { Transform } from "class-transformer";
 
 export class ModifyCourierLocationEntryDto {
     
-    @ApiProperty({ example: '2128865d-15af-4e61-a6f9-062ff3881e22',description: 'courier id' })
-    @IsString()
-    courierId: string;
     
     @ApiProperty( { example: '40.5515412', required: true })
     @IsString()

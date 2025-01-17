@@ -99,6 +99,7 @@ export class OdmCourierQueryRepository implements ICourierQueryRepository {
             return Result.success(courier);
 
         }catch(e){
+            console.log(e)
             return Result.fail(new NotFoundException('Courier not found'));
         };
     }
@@ -106,7 +107,6 @@ export class OdmCourierQueryRepository implements ICourierQueryRepository {
     async findCourierByEmailDetail(email: string): Promise<Result<ICourierModel>> {
         try{
             let odmCourier = await this.model.findOne({email: email});
-
             if(!odmCourier) 
                 return Result.fail(new NotFoundException('Courier not found'));
 
