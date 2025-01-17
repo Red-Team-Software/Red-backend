@@ -30,7 +30,11 @@ export class BundleQueryRepositoryMock implements IQueryBundleRepository{
             promotion:[],
             products:b.ProductId.map(i=>({
                 id:i.Value,
-                name:''
+                name:'',
+                price: 0,
+                weight: 0,
+                images: [],
+                quantity: 0
             }))        
         }
     }

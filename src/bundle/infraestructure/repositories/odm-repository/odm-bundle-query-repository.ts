@@ -85,7 +85,7 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
 
     async findAllBundles(criteria: FindAllBundlesApplicationRequestDTO): Promise<Result<IBundleModel[]>> {
         try {
-            const query: any = {};
+            let query: any = {};
 
             let model:IBundleModel[]=[]
 
@@ -97,8 +97,24 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
 
             if (criteria.price)
                 query.price = { ...query.price, $lt: criteria.price }
-                
 
+            if (criteria.popular) {
+                // query = {
+                //     ...query,
+                //     $lookup: {
+                //         from: "orders",
+                //         localField: "id",
+                //         foreignField: "product_details.id",
+                //         as: "order_details",
+                //     },
+                //     $addFields: {
+                //         "order_details.count": { $size: "$order_details" },
+                //     },
+                //     $sort: { "order_details.count": -1 },
+                //     $limit: 10,
+                // };
+            }
+            
 
             const bundles = await this.model.find(query)
             .skip(criteria.page)
@@ -116,6 +132,7 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
             return Result.success(model)
         
         } catch (error) {
+            console.log(error)
             return Result.fail(error.message);
         }
     }
