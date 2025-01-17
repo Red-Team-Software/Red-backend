@@ -198,7 +198,12 @@ export class CategoryController {
     );
 
     const buffer = image.buffer;
-    const response = await service.execute({ userId: credential.account.idUser, ...entry, image: buffer });
+    const response = await service.execute({ 
+      userId: credential.account.idUser, 
+      name:entry.name,
+      products:entry.products,
+      bundles:entry.bundles,
+      image: buffer });
     return response.getValue
   }
 

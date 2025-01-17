@@ -70,7 +70,7 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
     async findAllProducts(criteria: FindAllProductsApplicationRequestDTO): Promise<Result<IProductModel[]>> {
         try {
             const query: any = {};
-            const model:IProductModel[]=[]
+            let model:IProductModel[]=[]
 
             if (criteria.name) 
                 query.name = { $regex: criteria.name, $options: 'i' }
@@ -79,11 +79,8 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
                 query.category = { $elemMatch: { name: { $in: criteria.category.map((c: string) => new RegExp(c, 'i')) } } };
 
             if (criteria.price)
-                query.price = { ...query.price, $gte: criteria.price }
-
-            if (criteria.discount)
-                query.discount = { $gt: 0 };
-
+                query.price = { ...query.price, $lt: criteria.price }
+            
             const products = await this.model.find(query)
             .skip(criteria.page)
             .limit(criteria.perPage)
@@ -92,6 +89,11 @@ export class OdmProductQueryRepository implements IQueryProductRepository {
             for (const p of products){
                 model.push(await this.trasnformtoDataModel(p))
             }
+
+            if (criteria.discount){
+                model=model.filter(p=>p.promotion.length!==0)
+            }
+
 
             return Result.success(model)
         

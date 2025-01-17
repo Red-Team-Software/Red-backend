@@ -138,12 +138,12 @@ export class CuponController {
     @Query() entry: FindAllCuponsInfraestructureRequestDTO) {
 
     if (!entry.page) entry.page = 1;
-    if (!entry.perPage) entry.perPage = 10;
+    if (!entry.perpage) entry.perpage = 10;
 
     const pagination: PaginationRequestDTO = { 
       userId: credential.account.idUser, 
       page: entry.page, 
-      perPage: entry.perPage 
+      perPage: entry.perpage 
     };
 
     let service = new ExceptionDecorator(

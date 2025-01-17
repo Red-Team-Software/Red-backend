@@ -14,6 +14,8 @@ import { IProductModel } from "src/product/application/model/product.model.inter
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { OdmBundleMapper } from "../../mapper/odm-mapper/odm-bundle-mapper";
 import { OdmPromotionEntity, OdmPromotionSchema } from "src/promotion/infraestructure/entities/odm-entities/odm-promotion-entity";
+import { IPromotion } from "src/promotion/application/model/promotion.interface";
+import { IOdmModelPromotion } from "src/promotion/infraestructure/model-entity/odm-model-entity/odm-promotion-interface";
 
 
 export class OdmBundleQueryRepository implements IQueryBundleRepository{
@@ -62,13 +64,6 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
                     discount:p.discount
                 }))
                 : [],
-                // odm.promotions
-                // ? odm.promotions.map(promotion=>({
-                //     id:promotion.id,
-                //     name:promotion.name,
-                //     discount:Number(promotion.discount)
-                // }))
-                // : []
                 products: odm.products
                 ? odm.products.map(p=>({
                     id:p.id,
@@ -84,7 +79,7 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
         try {
             const query: any = {};
 
-            const model:IBundleModel[]=[]
+            let model:IBundleModel[]=[]
 
             if (criteria.name) 
                 query.name = { $regex: criteria.name, $options: 'i' }
@@ -93,10 +88,9 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
                 query.category = { $elemMatch: { name: { $in: criteria.category.map((c: string) => new RegExp(c, 'i')) } } };
 
             if (criteria.price)
-                query.price = { ...query.price, $lte: criteria.price }
+                query.price = { ...query.price, $lt: criteria.price }
+                
 
-            if (criteria.discount)
-                query.discount = { $gt: 0 };
 
             const bundles = await this.model.find(query)
             .skip(criteria.page)
@@ -105,6 +99,10 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
 
             for (const b of bundles){
                 model.push(await this.trasnformtoDataModel(b))
+            }
+
+            if (criteria.discount){
+                model=model.filter(p=>p.promotion.length!==0)
             }
 
             return Result.success(model)
