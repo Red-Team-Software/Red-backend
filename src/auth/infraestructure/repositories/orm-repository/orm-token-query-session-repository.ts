@@ -27,13 +27,15 @@ export class OrmTokenQueryRepository extends Repository<OrmSessionEntity> implem
     try{
       const sessions = await this.createQueryBuilder("session")
       .select("session.push_token") 
-      .orderBy("session.created_at", "DESC") 
+      .orderBy("session.expired_at", "DESC") 
       .limit(1)
       .getMany()
-      const tokens = sessions.map(session => session.push_token) 
-      return Result.success(tokens)
+      return Result.success(sessions
+        ? sessions.map(session => session.push_token)
+        : []
+      )
       }catch(e){
-      return Result.fail( new NotFoundException('Error finding all emails'))
+      return Result.fail( new NotFoundException('Error finding all tokens'))
   }
   }
 
