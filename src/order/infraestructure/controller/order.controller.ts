@@ -376,13 +376,13 @@ export class OrderController {
                                             this.idGen,
                                             data.stripePaymentMethod
                                         )
-                                        ,
-                                        new WalletPaymentMethod(
-                                            this.idGen, 
-                                            this.ormUserQueryRepository,
-                                            this.ormUserCommandRepo,
-                                            this.TransactionCommandRepository
-                                            )
+                                        // ,
+                                        // new WalletPaymentMethod(
+                                        //     this.idGen, 
+                                        //     this.ormUserQueryRepository,
+                                        //     this.ormUserCommandRepo,
+                                        //     this.TransactionCommandRepository
+                                        //     )
                                     ]
                                 )
                                 : new WalletPaymentMethod(
