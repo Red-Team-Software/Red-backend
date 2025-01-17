@@ -1,4 +1,4 @@
-export interface AccountLogInInfraestructureRequestDTO {
+export interface IAccountLogIn  {
     id:string
     session: {
         id: string;

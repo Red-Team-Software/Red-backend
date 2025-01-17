@@ -62,6 +62,21 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateProfileApplicationRequestDTO } from "src/user/application/dto/request/update-profile-application-request-dto"
 import { UpdateProfileApplicationResponseDTO } from "src/user/application/dto/response/update-profile-application-response-dto"
 import { OdmCuponQueryRepository } from "src/cupon/infraestructure/repository/odm-repository/odm-query-coupon-repository"
+import { IUserRegistered } from "../interfaces/user-registered.interface"
+import { UserRegisteredSyncroniceService } from "../services/syncronice/user-registered-syncronice.service"
+import { UserUpdatedInfraestructureRequestDTO } from "../services/dto/request/user-updated-infraestructure-request-dto"
+import { UserUpdatedSyncroniceService } from "../services/syncronice/user-updated-syncronice.service"
+import { IUserBalanceAmountAdded } from "../interfaces/user-balance-amount-added.interface"
+import { IUserBalanceAmountDecremented } from "../interfaces/user-balance-amount-decremented.interface"
+import { IUserCouponAplied } from "../interfaces/user-coupon-aplied.interface"
+import { IUserDirectionAdded } from "../interfaces/user-direction-added.interface"
+import { IUserDirectionDeleted } from "../interfaces/user-direction-deleted.interface"
+import { IUserDirectionUpdated } from "../interfaces/user-direction-updated.interface"
+import { IUserImageUpdated } from "../interfaces/user-image-updated.interface"
+import { IUserNameUpdated } from "../interfaces/user-name-updated.interface"
+import { IUserPhoneUpdated } from "../interfaces/user-phone-updated.interface"
+import { OdmUserQueryRepository } from '../repositories/odm-repository/odm-user-query-repository';
+import { OdmAccountQueryRepository } from "src/auth/infraestructure/repositories/odm-repository/odm-account-query-repository"
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -81,6 +96,10 @@ export class UserController {
   private readonly hereMapsSingelton: HereMapsSingelton;
   private readonly ormCuponQueryRepo: IQueryCuponRepository;
   private readonly subscriber: RabbitMQSubscriber;
+  private readonly odmUserQueryRepository:IQueryUserRepository
+  private readonly odmAccountQueryRepo:IQueryAccountRepository<IAccount>
+  private readonly odmCuponQueryRepo: IQueryCuponRepository;
+
   
     private initializeQueues():void{        
       UserQueues.forEach(queue => this.buildQueue(queue.name, queue.pattern))
@@ -116,6 +135,9 @@ export class UserController {
     this.geocodification= new GeocodificationOpenStreeMapsDomainService()
     this.ormCuponQueryRepo = new OdmCuponQueryRepository(mongoose);
     this.subscriber= new RabbitMQSubscriber(this.channel);
+    this.odmAccountQueryRepo= new OdmAccountQueryRepository(mongoose)
+    this.odmUserQueryRepository= new OdmUserQueryRepository(mongoose),
+    this.odmCuponQueryRepo= new OdmCuponQueryRepository(mongoose)
     
     this.initializeQueues();
         
@@ -126,6 +148,95 @@ export class UserController {
             return
         }
     )
+
+    this.subscriber.consume<IUserBalanceAmountAdded>(
+      { name: 'UserSync/UserBalanceAmountAdded'},
+      (data):Promise<void>=>{
+            this.userupdatedsync(data)
+            return
+        }
+    )
+
+    this.subscriber.consume<IUserBalanceAmountDecremented>(
+      { name: 'UserSync/UserBalanceAmountDecremented'},
+      (data):Promise<void>=>{
+            this.userupdatedsync(data)
+            return
+        }
+    )
+
+    this.subscriber.consume<IUserCouponAplied>(
+    { name: 'UserSync/UserCouponAplied'},
+      (data):Promise<void>=>{
+            this.userupdatedsync({...data,coupons:[{...data.coupons}]})
+            return
+        }
+    )
+
+    this.subscriber.consume<IUserDirectionAdded>(
+      { name: 'UserSync/UserDirectionAdded'},
+      (data):Promise<void>=>{
+              this.userupdatedsync({...data})
+              return
+          }
+      )
+
+    this.subscriber.consume<IUserDirectionDeleted>(
+      { name: 'UserSync/UserDirectionDeleted'},
+      (data):Promise<void>=>{
+              this.userupdatedsync({userId:data.userId, userDirectionDelete:{id:data.userDirection.id}})
+              return
+          }
+      )
+
+      this.subscriber.consume<IUserDirectionUpdated>(
+        { name: 'UserSync/UserDirectionUpdated'},
+        (data):Promise<void>=>{
+                this.userupdatedsync({...data})
+                return
+            }
+        )
+      this.subscriber.consume<IUserImageUpdated>(
+        { name: 'UserSync/UserImageUpdated'},
+        (data):Promise<void>=>{
+                this.userupdatedsync({...data})
+                return
+            }
+        )
+
+        this.subscriber.consume<IUserNameUpdated>(
+          { name: 'UserSync/UserNameUpdated' },
+          (data):Promise<void>=>{
+                  this.userupdatedsync({...data})
+                  return
+              }
+          )
+
+          this.subscriber.consume<IUserPhoneUpdated>(
+            { name: 'UserSync/UserPhoneUpdated'},
+            (data):Promise<void>=>{
+                    this.userupdatedsync({...data})
+                    return
+                }
+            )
+
+    this.subscriber.consume<IUserRegistered>(
+      { name: 'UserSync/UserRegistered'},
+      (data):Promise<void>=>{
+            this.userregisteredsync(data)
+            return
+        }
+    )
+  }
+
+  async userregisteredsync(data:IUserRegistered){
+    let service=new UserRegisteredSyncroniceService(this.mongoose)
+    await service.execute(data)
+  }
+
+  async userupdatedsync(data:UserUpdatedInfraestructureRequestDTO){
+    let service=new UserUpdatedSyncroniceService(this.mongoose)
+    await service.execute(data)
   }
 
   @Patch('update/profile')

@@ -9,10 +9,10 @@ export class UserDirectionAdded extends DomainEvent {
             userId:this.userId.Value,
             userDirection:{
                 id: this.userDirection.getId().Value,
-                name: this.userDirection.DirectionName,
-                favorite: this.userDirection.DirectionFavorite,
-                lat: this.userDirection.DirectionLat,
-                lng: this.userDirection.DirectionLng    
+                name: this.userDirection.DirectionName.Value,
+                favorite: this.userDirection.DirectionFavorite.Value,
+                lat: this.userDirection.DirectionLat.Value,
+                lng: this.userDirection.DirectionLng.Value    
             }  
         }
         return JSON.stringify(data)

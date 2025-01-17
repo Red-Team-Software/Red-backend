@@ -68,6 +68,8 @@ import { AuthQueues } from "../queues/auth.queues"
 import { IAccountRegistered } from "../interface/account-registered.interface"
 import { AccountRegisteredSyncroniceService } from "../services/syncronice/account-registered-syncronice.service"
 import mongoose, { Mongoose } from "mongoose"
+import { IAccountLogIn } from "../interface/account-log-in.interface"
+import { AccountLogInSyncroniceService } from "../services/syncronice/account-log-in-syncronice.service"
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -136,12 +138,25 @@ export class AuthController {
         this.syncAccountRegistered(data)
         return
       }
-    )    
+    )
+    
+    this.messageSuscriber.consume<IAccountLogIn>(
+      { name: 'Messages/SessionRegistered' },
+      (data):Promise<void>=>{
+        this.syncAccountLogIn(data)
+        return
+      }
+    )
   }
 
   async syncAccountRegistered(data:IAccountRegistered){
     let service = new AccountRegisteredSyncroniceService(mongoose)
     await service.execute(data)    
+  }
+
+  async syncAccountLogIn(data:IAccountLogIn){
+    let service = new AccountLogInSyncroniceService(mongoose)
+    await service.execute({...data})    
   }
 
   @Post('register')
@@ -197,7 +212,8 @@ export class AuthController {
                   this.encryptor,
                   this.idGen,
                   this.jwtGen,
-                  this.dateHandler
+                  this.dateHandler,
+                  this.messagePubliser
                 ), new NestTimer(), new NestLogger(new Logger())
               // ),new NestLogger(new Logger())
           ),this.auditRepository,this.dateHandler

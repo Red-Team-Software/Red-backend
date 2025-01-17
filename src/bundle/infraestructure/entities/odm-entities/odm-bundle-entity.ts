@@ -1,8 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import mongoose, { Document, SchemaTypes } from "mongoose"
-import { OdmCategory } from "src/category/infraestructure/entities/odm-entities/odm-category.entity"
 import { IOdmBundle } from "../../model-entity/odm-model-entity/odm-bundle-interface"
-import { OdmProduct } from "src/product/infraestructure/entities/odm-entities/odm-product-entity"
 
 @Schema({ collection: 'odmbundle' })
 export class OdmBundle extends Document implements IOdmBundle {
@@ -69,15 +67,6 @@ export class OdmBundle extends Document implements IOdmBundle {
         id:string,
         name:string
     }[]
-
-    // @Prop({ type: [Object], unique: false, required: false })   
-    // category?: OdmCategory[]
-
-
-    // @Prop({ type: [Object], unique: false, required: true })   
-    // products: OdmProduct[]
-
-
 }
 
 export const OdmBundleSchema = SchemaFactory.createForClass( OdmBundle )

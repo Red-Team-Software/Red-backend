@@ -16,6 +16,8 @@ import { IQueryUserRepository } from "src/user/application/repository/user.query
 import { UserId } from "src/user/domain/value-object/user-id";
 import { ErrorRegisteringSessionApplicationException } from "../../application-exception/error-registering-session-application-exception";
 import { AccountNotFoundApplicationException } from "../../application-exception/account-not-found-application-exception";
+import { IMessagesPublisher } from "src/common/application/messages/messages-publisher/messages-publisher.interface";
+import { SessionRegistered } from "../../messages/session-registered";
 
 export class LogInUserApplicationService extends IApplicationService 
 <LogInUserApplicationRequestDTO,LogInUserApplicationResponseDTO> {
@@ -27,7 +29,8 @@ export class LogInUserApplicationService extends IApplicationService
         private readonly encryptor: IEncryptor,
         private readonly idGen:IIdGen<string>,
         private readonly jwtGen:IJwtGenerator<string>,
-        private readonly dateHandler:IDateHandler
+        private readonly dateHandler:IDateHandler,
+        private readonly messagePublisher:IMessagesPublisher
     ){
         super()
     }
@@ -56,17 +59,25 @@ export class LogInUserApplicationService extends IApplicationService
         const idSession = await this.idGen.genId() 
 
         const jwt = this.jwtGen.generateJwt( idSession )
-        
-        let sessionResponse=await this.commandTokenSessionRepository.createSession(
-        {
+
+        const session={
             expired_at: this.dateHandler.getExpiry(),
             id: idSession,
             push_token: null,
             accountId: account.id
-        })
+        }
+        
+        let sessionResponse=await this.commandTokenSessionRepository.createSession(session)
 
         if (!sessionResponse.isSuccess())
             return Result.fail(new ErrorRegisteringSessionApplicationException())
+
+        this.messagePublisher.publish([
+            SessionRegistered.create(
+                account.id,
+                session
+            )
+        ])
 
         return Result.success({
             id: user.getId().Value,
