@@ -230,8 +230,8 @@ export class UserController {
   }
 
   async userregisteredsync(data:IUserRegistered){
-    let service=new UserRegisteredSyncroniceService(this.mongoose)
-    await service.execute(data)
+    // let service=new UserRegisteredSyncroniceService(this.mongoose)
+    // await service.execute(data)
   }
 
   async userupdatedsync(data:UserUpdatedInfraestructureRequestDTO){

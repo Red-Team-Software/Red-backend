@@ -135,7 +135,7 @@ export class AuthController {
     this.messageSuscriber.consume<IAccountRegistered>(
       { name: 'Messages/AccountRegistered' },
       (data):Promise<void>=>{
-        this.syncAccountRegistered(data)
+        // this.syncAccountRegistered(data)
         return
       }
     )
@@ -143,7 +143,7 @@ export class AuthController {
     this.messageSuscriber.consume<IAccountLogIn>(
       { name: 'Messages/SessionRegistered' },
       (data):Promise<void>=>{
-        this.syncAccountLogIn(data)
+        // this.syncAccountLogIn(data)
         return
       }
     )
