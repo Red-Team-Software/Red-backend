@@ -235,8 +235,8 @@ export class UserController {
   }
 
   async userupdatedsync(data:UserUpdatedInfraestructureRequestDTO){
-    let service=new UserUpdatedSyncroniceService(this.mongoose)
-    await service.execute(data)
+    // let service=new UserUpdatedSyncroniceService(this.mongoose)
+    // await service.execute(data)
   }
 
   @Patch('update/profile')
