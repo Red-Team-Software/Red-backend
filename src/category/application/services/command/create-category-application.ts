@@ -2,7 +2,7 @@
 
 import { CreateCategoryApplicationRequestDTO } from "../../dto/request/create-category-application-request.dto";
 import { CreateCategoryApplicationResponseDTO } from "../../dto/response/create-category-application-response.dto";
-import { ICategoryRepository } from "src/category/domain/repository/category-repository.interface";
+import { ICategoryCommandRepository } from "src/category/domain/repository/category-command-repository.interface";
 import { Category } from "src/category/domain/aggregate/category.aggregate";
 import { CategoryID } from "src/category/domain/value-object/category-id";
 import { CategoryName } from "src/category/domain/value-object/category-name";
@@ -30,7 +30,7 @@ export class CreateCategoryApplication extends IApplicationService<
 > {
     constructor(
         private readonly eventPublisher: IEventPublisher,
-        private readonly categoryRepository: ICategoryRepository,
+        private readonly categoryCommandRepository: ICategoryCommandRepository,
         private readonly categoryqueryRepository: IQueryCategoryRepository,
         private readonly productQueryRepository: IQueryProductRepository,
         private readonly bundleQueryRepository: IQueryBundleRepository,
@@ -42,7 +42,7 @@ export class CreateCategoryApplication extends IApplicationService<
 
     async execute(command: CreateCategoryApplicationRequestDTO): Promise<Result<CreateCategoryApplicationResponseDTO>> {
         // Check if category name already exists
-        const existingCategory = await this.categoryqueryRepository.verifyCategoryExistenceByName(
+        const existingCategory = await this.categoryqueryRepository.findCategoryByName(
             CategoryName.create(command.name)
         )
 
@@ -100,7 +100,7 @@ export class CreateCategoryApplication extends IApplicationService<
 
 
         // Save category to repository
-        const saveResult = await this.categoryRepository.createCategory(category);
+        const saveResult = await this.categoryCommandRepository.createCategory(category);
         if (!saveResult.isSuccess()) {
             return Result.fail(new ErrorCreatingCategoryApplicationException());
         }

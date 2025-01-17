@@ -103,6 +103,18 @@ export class OdmCategoryQueryRepository implements IQueryCategoryRepository {
             return Result.fail( new NotFoundException('Find category unsucssessfully'))
         }
     }
+
+    async findCategoryByName(categoryName: CategoryName): Promise<Result<boolean>> {
+        try{
+            let odm=await this.categorymodel.findOne({name:categoryName.Value}) 
+            if(!odm)
+                return Result.fail( new NotFoundException('Find category unsucssessfully'))
+            return Result.success(true)
+        }
+        catch(e){
+            return Result.fail( new NotFoundException('Find category unsucssessfully'))
+        }
+    }
     async findCategoryByIdMoreDetail(criteria: FindCategoryByIdApplicationRequestDTO): Promise<Result<ICategory>> {
         try{
             let odm=await this.categorymodel.findOne({id:criteria.id}) 

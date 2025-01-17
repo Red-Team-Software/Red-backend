@@ -2,7 +2,7 @@ import { IApplicationService } from "src/common/application/services";
 import { Result } from "src/common/utils/result-handler/result";
 import { CreateCuponApplicationRequestDTO } from "../../dto/request/create-cupon-application-requestdto";
 import { CreateCuponApplicationResponseDTO } from "../../dto/response/create-cupon-application-responsedto";
-import { ICuponRepository } from "src/cupon/domain/repository/cupon.interface.repository";
+import { ICommandCuponRepository } from "src/cupon/domain/repository/command-cupon-repository";
 import { IIdGen } from "src/common/application/id-gen/id-gen.interface";
 import { Cupon } from "src/cupon/domain/aggregate/cupon.aggregate";
 import { CuponId } from "src/cupon/domain/value-object/cupon-id";
@@ -14,6 +14,8 @@ import { ErrorCreatingCuponApplicationException } from "../../application-except
 import { ErrorNameAlreadyApplicationException } from "../../application-exception/error-name-already-exist-cupon-application-exception";
 import { IEventPublisher } from "src/common/application/events/event-publisher/event-publisher.abstract";
 import { IQueryCuponRepository } from "../../query-repository/query-cupon-repository";
+import { ErrorCodeAlreadyExistsCuponApplicationException } from "../../application-exception/error-code-already-exists-application-exception";
+import { ICuponRepository } from "src/cupon/domain/repository/cupon.interface.repository";
 
 export class CreateCuponApplicationService extends IApplicationService<
   CreateCuponApplicationRequestDTO,
@@ -42,6 +44,11 @@ export class CreateCuponApplicationService extends IApplicationService<
 
     if (search.getValue) {
       return Result.fail(new ErrorNameAlreadyApplicationException());
+    }
+
+    let searchCode = await this.cuponQueryRepository.findCuponByCode(CuponCode.create(command.code));
+    if(searchCode.isSuccess()){
+      return Result.fail(new ErrorCodeAlreadyExistsCuponApplicationException());
     }
 
     // Generar el cupón

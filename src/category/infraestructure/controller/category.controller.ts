@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, FileTypeValidator, Get, Inject, Logger, Param, ParseFilePipe, Patch, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ICategoryRepository } from 'src/category/domain/repository/category-repository.interface';
+import { ICategoryCommandRepository } from 'src/category/domain/repository/category-command-repository.interface';
 import { PgDatabaseSingleton } from 'src/common/infraestructure/database/pg-database.singleton';
 import { CreateCategoryInfrastructureRequestDTO } from '../dto-request/create-category-infrastructure-request.dto';
 import { ExceptionDecorator } from 'src/common/application/aspects/exeption-decorator/exception-decorator';
@@ -33,7 +33,7 @@ import { FindCategoryByBundleIdApplicationService } from 'src/category/applicati
 import { FindCategoryByBundleIdInfraestructureRequestDTO } from '../dto-request/find-category-by-bundle-id-infrastructure-request.dto';
 import { SecurityDecorator } from 'src/common/application/aspects/security-decorator/security-decorator';
 import { UserRoles } from 'src/user/domain/value-object/enum/user.roles';
-import { DeleteCategoryByIdInfraestructureRequestDTO } from '../dto-request/delte-category-infraestructure-request-dto';
+import { DeleteCategoryByIdInfraestructureRequestDTO } from '../dto-request/delete-category-infraestructure-request-dto';
 import { UpdateCategoryApplicationService } from 'src/category/application/services/command/update-category-application';
 import { ByIdDTO } from 'src/common/infraestructure/dto/entry/by-id.dto';
 import { UpdateCategoryInfraestructureRequestDTO } from '../dto-request/update-category-infraestructure-request-dto';
@@ -49,7 +49,7 @@ import { Mongoose } from 'mongoose';
 import { OdmProductQueryRepository } from 'src/product/infraestructure/repositories/odm-repository/odm-product-query-repository';
 import { OdmCategoryQueryRepository } from '../repositories/odm-repository/odm-query-category-repository';
 import { OdmBundleQueryRepository } from 'src/bundle/infraestructure/repositories/odm-repository/odm-bundle-query-repository';
-import { OrmCategoryRepository } from '../repositories/orm-repository/category-typeorm-repository';
+import { OrmCategoryCommandRepository } from '../repositories/orm-repository/category-typeorm-repository';
 import { ICategoryBundleUpdated } from '../interfaces/category-bundle-update.interface';
 import { CategoryUpdatedInfraestructureRequestDTO } from '../services/dto/request/category-updated-infraestructure-request-dto';
 import { CategoryUpdatedSyncroniceService } from '../services/syncronice/category-updated-syncronice.service';
@@ -63,7 +63,7 @@ import { ICategoryProductUpdated } from '../interfaces/category-product-update.i
 @ApiTags("Category")
 export class CategoryController {
 
-  private readonly ormCommandCategoryRepo: ICategoryRepository
+  private readonly ormCommandCategoryRepo: ICategoryCommandRepository
   private readonly idGen: IIdGen<string>
   private readonly ormCategoryQueryRepo: IQueryCategoryRepository
   private readonly ormQueryCategoryRepo: IQueryCategoryRepository
@@ -100,7 +100,7 @@ export class CategoryController {
 
   ) {
     this.idGen = new UuidGen();
-    this.ormCommandCategoryRepo = new OrmCategoryRepository(PgDatabaseSingleton.getInstance())
+    this.ormCommandCategoryRepo = new OrmCategoryCommandRepository(PgDatabaseSingleton.getInstance())
     this.ormCategoryQueryRepo = new OrmCategoryQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryBundleRepo=new OrmBundleQueryRepository(PgDatabaseSingleton.getInstance())
     this.ormQueryProductRepo=new OrmProductQueryRepository(PgDatabaseSingleton.getInstance())
