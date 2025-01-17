@@ -357,8 +357,6 @@ export class OrderController {
             cuponId: data.cuponId,
         }
 
-        console.log(data.stripePaymentMethod)
-
         let payOrderService = new ExceptionDecorator(
             new AuditDecorator(
                 new LoggerDecorator(
@@ -410,7 +408,7 @@ export class OrderController {
 
         let response = await payOrderService.execute(payment);
         
-        return response.getValue;
+        return data.stripePaymentMethod;
     }
 
 
