@@ -408,7 +408,7 @@ export class OrderController {
 
         let response = await payOrderService.execute(payment);
         
-        return data.stripePaymentMethod;
+        return response.getValue;
     }
 
 
