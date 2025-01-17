@@ -184,7 +184,7 @@ export class UserController {
     this.subscriber.consume<IUserDirectionDeleted>(
       { name: 'UserSync/UserDirectionDeleted'},
       (data):Promise<void>=>{
-              this.userupdatedsync({...data,userDirection:{id:data.userDirection.id}})
+              this.userupdatedsync({userId:data.userId, userDirectionDelete:{id:data.userDirection.id}})
               return
           }
       )
@@ -268,7 +268,7 @@ export class UserController {
             new PerformanceDecorator(
               new UpdateProfileApplicationService(
                 this.ormUserCommandRepo,
-                this.odmUserQueryRepository,
+                this.ormUserQueryRepo,
                 this.ormAccountCommandRepo,
                 this.ormAccountQueryRepo,
                 new RabbitMQPublisher(this.channel),
@@ -314,7 +314,7 @@ export class UserController {
             new PerformanceDecorator<UpdateProfileApplicationRequestDTO,UpdateProfileApplicationResponseDTO>(
               new UpdateProfileApplicationService(
                 this.ormUserCommandRepo,
-                this.odmUserQueryRepository,
+                this.ormUserQueryRepo,
                 this.ormAccountCommandRepo,
                 this.ormAccountQueryRepo,
                 new RabbitMQPublisher(this.channel),
@@ -351,7 +351,7 @@ export class UserController {
         new LoggerDecorator(
           new PerformanceDecorator(
             new FindUserDirectionApplicationService (
-              this.odmUserQueryRepository,
+              this.ormUserQueryRepo,
               this.geocodification
             ), new NestTimer(), new NestLogger(new Logger())
           ), new NestLogger(new Logger())
@@ -493,7 +493,7 @@ export class UserController {
           new PerformanceDecorator(
             new AddUserCouponApplicationService (
               this.ormUserCommandRepo,
-              this.odmUserQueryRepository,
+              this.ormUserQueryRepo,
               this.ormCuponQueryRepo,
               new RabbitMQPublisher(this.channel)
             ), new NestTimer(), new NestLogger(new Logger())

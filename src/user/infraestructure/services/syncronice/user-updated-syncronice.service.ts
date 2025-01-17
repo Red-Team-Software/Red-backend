@@ -18,6 +18,8 @@ implements ISycnchronizeService<UserUpdatedInfraestructureRequestDTO,void>{
 
         let user= await this.model.findOne({id:event.userId})
 
+        console.log(event)
+
         if(event.userImage)
             await this.model.updateOne({ id: event.userId }, {$set: {image: event.userImage}})
 
@@ -45,7 +47,22 @@ implements ISycnchronizeService<UserUpdatedInfraestructureRequestDTO,void>{
                     }
                 }
                 await user.save()
-            }            
+            }
+            if (event.userDirectionDelete){
+                user.direction.filter(d=>d.id!==event.userDirectionDelete.id)  
+                await user.save()
+            }
+
+            if (event.userDirection){
+                let direction = user.direction.find(d=>d.id==event.userDirection.id);
+                if (!direction) {
+                    user.direction.push(event.userDirection)
+                } else {
+                    user.direction = user.direction.filter(d => d.id !== event.userDirection.id)
+                    user.direction.unshift(direction)
+              }
+              await user.save()
+            }
 
         return Result.success(undefined)
     }   
