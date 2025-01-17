@@ -357,7 +357,7 @@ export class OrderController {
             cuponId: data.cuponId,
         }
 
-        console.log
+        console.log(data.stripePaymentMethod)
 
         let payOrderService = new ExceptionDecorator(
             new AuditDecorator(
@@ -376,13 +376,13 @@ export class OrderController {
                                             this.idGen,
                                             data.stripePaymentMethod
                                         )
-                                        // ,
-                                        // new WalletPaymentMethod(
-                                        //     this.idGen, 
-                                        //     this.ormUserQueryRepository,
-                                        //     this.ormUserCommandRepo,
-                                        //     this.TransactionCommandRepository
-                                        //     )
+                                        ,
+                                        new WalletPaymentMethod(
+                                            this.idGen, 
+                                            this.ormUserQueryRepository,
+                                            this.ormUserCommandRepo,
+                                            this.TransactionCommandRepository
+                                            )
                                     ]
                                 )
                                 : new WalletPaymentMethod(
