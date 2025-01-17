@@ -99,24 +99,21 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
                 query.price = { ...query.price, $lt: criteria.price }
 
             if (criteria.popular) {
-                // query = {
-                //     ...query,
-                //     $lookup: {
-                //         from: "orders",
-                //         localField: "id",
-                //         foreignField: "product_details.id",
+                // query = { 
+                //     ...query, 
+                //     $lookup: { 
+                //         from: "odmorders", 
+                //         localField: "id", 
+                //         foreignField: "product_details.id", 
                 //         as: "order_details",
-                //     },
-                //     $addFields: {
-                //         "order_details.count": { $size: "$order_details" },
-                //     },
-                //     $sort: { "order_details.count": -1 },
-                //     $limit: 10,
+                //      }, 
+                //     $addFields: { "order_details.count": { $size: "$order_details" }, },
+                //     $sort: { "order_details.count": -1 }
                 // };
             }
-            
 
             const bundles = await this.model.find(query)
+            
             .skip(criteria.page)
             .limit(criteria.perPage)
             .exec()

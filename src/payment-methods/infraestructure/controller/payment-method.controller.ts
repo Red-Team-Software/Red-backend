@@ -213,16 +213,18 @@ export class PaymentMethodController {
         @GetCredential() credential:ICredential,
         @Query() data: FindAllPaymentMethodEntryDto
     ) {
+                
+        if (!data.page) data.page = 1;
+        if (!data.perpage) data.perpage = 10;
+
         let values: FindAllPaymentMethodRequestDto = {
             userId: credential.account.idUser,
-            ...data
+            page:data.page,
+            perPage:data.perpage
         }
-        if (!values.page) values.page = 1;
-        if (!values.perPage) values.perPage = 10;
-        
 
-        if (!values.page) values.page = 1;
-        if (!values.perPage) values.perPage = 10;
+
+        
         
         let getAllPaymentMethodService = new ExceptionDecorator(
             new LoggerDecorator(

@@ -124,7 +124,7 @@ export class OdmPaymentMethodQueryRepository implements IPaymentMethodQueryRepos
     }
 
     async findAllMethodsDetail(pagination: FindAllPaymentMethodRequestDto): Promise<Result<IPaymentMethodModel[]>> {
-        try{
+        try{          
             let PaymentMethod = await this.model.find()
             .skip(pagination.page)
             .limit(pagination.perPage)

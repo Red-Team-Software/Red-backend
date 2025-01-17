@@ -15,7 +15,6 @@ export class FindAllPaymentMethodApplicationService extends IApplicationService<
     }
 
     async execute(data: FindAllPaymentMethodRequestDto): Promise<Result<FindAllPaymentMethodResponseDTO[]>> {
-        
         let methods = await this.paymentMethodQueryRepository.findAllMethodsDetail(data);
         
         if(methods.isFailure()) return Result.fail( new NotFoundPaymentMethodApplicationException());
