@@ -199,11 +199,11 @@ export class CategoryController {
 
     const buffer = image.buffer;
     const response = await service.execute({ 
-      userId: credential.account.idUser, 
+      userId: credential.account.idUser,
       name:entry.name,
       products:entry.products,
-      bundles:entry.bundles,
-      image: buffer });
+      bundles:entry.bundles
+      , image: buffer });
     return response.getValue
   }
 

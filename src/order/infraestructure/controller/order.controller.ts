@@ -339,6 +339,7 @@ export class OrderController {
                 paymentId = payment.getValue.paymentMethodId;
         }
 
+
         let payment: OrderPayApplicationServiceRequestDto = {
             userId: credential.account.idUser,
             paymentId: data.paymentId 
@@ -353,6 +354,8 @@ export class OrderController {
             bundles: data.bundles,
             cuponId: data.cuponId,
         }
+
+        console.log
 
         let payOrderService = new ExceptionDecorator(
             new AuditDecorator(
