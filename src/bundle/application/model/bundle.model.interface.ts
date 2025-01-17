@@ -21,6 +21,10 @@ export interface IBundleModel{
     products:{
         id:string,
         name:string
+        price: number;
+    	weight: number;
+    	images: string[];
+    	quantity: number;
     }[]
 
 }

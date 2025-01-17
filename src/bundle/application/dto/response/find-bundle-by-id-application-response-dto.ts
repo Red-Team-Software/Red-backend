@@ -20,5 +20,9 @@ export interface FindBundleByIdApplicationResponseDTO {
     product:{
         id: string
         name:string
+        price: number;
+    	weight: number;
+    	images: string[];
+    	quantity: number;
     }[]
 }

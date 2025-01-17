@@ -9,7 +9,7 @@ import { Result } from "src/common/utils/result-handler/result";
 import { OdmBundle, OdmBundleSchema } from "../../entities/odm-entities/odm-bundle-entity";
 import { Model, Mongoose } from "mongoose";
 import { OdmProductMapper } from "src/product/infraestructure/mapper/odm-mapper/odm-product-mapper";
-import { OdmProduct } from "src/product/infraestructure/entities/odm-entities/odm-product-entity";
+import { OdmProduct, OdmProductSchema } from "src/product/infraestructure/entities/odm-entities/odm-product-entity";
 import { IProductModel } from "src/product/application/model/product.model.interface";
 import { NotFoundException } from "src/common/infraestructure/infraestructure-exception";
 import { OdmBundleMapper } from "../../mapper/odm-mapper/odm-bundle-mapper";
@@ -22,12 +22,13 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
 
     private readonly model: Model<OdmBundle>;
     private readonly promotionmodel: Model<OdmPromotionEntity>;
-    
+    private readonly productmodel: Model<OdmProduct>;
     private readonly odmMapper: OdmBundleMapper
 
     constructor( mongoose: Mongoose ) { 
         this.model = mongoose.model<OdmBundle>('odmbundle', OdmBundleSchema)
         this.promotionmodel=mongoose.model<OdmPromotionEntity>('odmpromotion',OdmPromotionSchema)
+        this.productmodel=mongoose.model<OdmProduct>('odmproduct',OdmProductSchema)
         this.odmMapper= new OdmBundleMapper()
     }
 
@@ -36,6 +37,9 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
             const promotions = await this.promotionmodel.find({
                 bundles: { $elemMatch: { id: odm.id } }
             }).exec();
+
+            const productIds = odm.products.map(product => product.id);
+            const products = await this.productmodel.find({ id: { $in: productIds } }).exec();
 
             return {
                 id:odm.id,
@@ -64,10 +68,14 @@ export class OdmBundleQueryRepository implements IQueryBundleRepository{
                     discount:p.discount
                 }))
                 : [],
-                products: odm.products
-                ? odm.products.map(p=>({
+                products: products
+                ? products.map(p=>({
                     id:p.id,
-                    name:p.name
+                    name:p.name,
+                    price: p.price,
+                    weight: p.weigth,
+                    images: p.image,
+                    quantity: p.stock
                 }))
                 : []
             }

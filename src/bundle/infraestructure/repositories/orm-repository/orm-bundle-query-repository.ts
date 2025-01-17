@@ -50,7 +50,13 @@ export class OrmBundleQueryRepository extends Repository<OrmBundleEntity> implem
             products:ormBundle.products
             ? ormBundle.products.map(product=>({
                 id:product.id,
-                name:product.name
+                name:product.name,
+                price: product.price,
+                weight: product.weigth,
+                images: product.images
+                ? product.images.map(i=>i.image)
+                : [], 
+                quantity: Number(product.stock) 
             }))
             : []
         }

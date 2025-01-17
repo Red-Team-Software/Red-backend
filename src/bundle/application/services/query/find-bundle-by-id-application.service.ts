@@ -50,7 +50,11 @@ IApplicationService<FindBundleByIdApplicationRequestDTO,FindBundleByIdApplicatio
             product: bundle.products
             ? bundle.products.map(p=>({
                 id:p.id,
-                name:p.name
+                name:p.name,
+                price: p.price,
+                weight: p.weight,
+                images: p.images,
+                quantity: p.quantity
             }))
             : []
         })
