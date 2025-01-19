@@ -5,7 +5,7 @@ import { CategoryID } from "../value-object/category-id";
 import { Product } from "src/product/domain/aggregate/product.aggregate";
 import { Bundle } from "src/bundle/domain/aggregate/bundle.aggregate";
 
-export interface ICategoryRepository {
+export interface ICategoryCommandRepository {
     deleteCategoryById(id: CategoryID): Promise<Result<CategoryID>>;
     createCategory(category: Category): Promise<Result<Category>>;
     agregateProductToCategory(category:Category,product:Product):Promise<Result<boolean>>;

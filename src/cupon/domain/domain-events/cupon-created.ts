@@ -5,14 +5,14 @@ import { CuponName } from "../value-object/cupon-name";
 import { CuponDiscount } from "../value-object/cupon-discount";
 import { CuponState } from "../value-object/cupon-state";
 
-export class CuponRegistered extends DomainEvent {
+export class CuponCreated extends DomainEvent {
     serialize(): string {
         const data = {
             cuponId: this.cuponId.Value,
             cuponName: this.cuponName.Value,
             cuponCode: this.cuponCode.Value,
             cuponDiscount: this.cuponDiscount.Value,
-            cuponState: this.cuponState.Value,
+            cuponState: this.cuponState.Value
         };
 
         return JSON.stringify(data);
@@ -25,7 +25,7 @@ export class CuponRegistered extends DomainEvent {
         cuponDiscount: CuponDiscount,
         cuponState: CuponState
     ) {
-        return new CuponRegistered(
+        return new CuponCreated(
             cuponId,
             cuponName,
             cuponCode,

@@ -11,7 +11,7 @@ import { BundleId } from 'src/bundle/domain/value-object/bundle-id';
 import { CategoryDeleted } from '../domain-events/category-deleted';
 import { CategoryUpdatedName } from '../domain-events/update-category-name';
 import { CategoryUpdatedImage } from '../domain-events/update-category-image';
-import { CategoryUpdatedProducts } from '../domain-events/update-category-products';
+import { CategoryUpdatedProductsDomainEvent } from '../domain-events/update-category-products';
 import { CategoryUpdatedBundles } from '../domain-events/category-update-bundles';
 import { ProductAddedToCategory } from '../domain-events/product-added-to-category';
 
@@ -76,7 +76,7 @@ export class Category extends AggregateRoot<CategoryID> {
                 this.categoryName = categoryUpdatedNameEvent.categoryName;
                 break;
             case "CategoryUpdatedProducts":
-                const categoryUpdatedProductsEvent = event as CategoryUpdatedProducts;
+                const categoryUpdatedProductsEvent = event as CategoryUpdatedProductsDomainEvent;
                 this.products = categoryUpdatedProductsEvent.products;
                 break;
             case "CategoryUpdatedBundles":
@@ -117,7 +117,7 @@ export class Category extends AggregateRoot<CategoryID> {
     }
 
     public updateProducts(products: ProductID[]): void {
-        this.apply(CategoryUpdatedProducts.create(this.getId(), products));
+        this.apply(CategoryUpdatedProductsDomainEvent.create(this.getId(), products));
     }
 
     public updateBundles(bundles: BundleId[]): void {
